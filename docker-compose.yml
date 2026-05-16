@@ -49,6 +49,8 @@ services:
     image: redis:7-alpine
     container_name: eec_redis_dev
     restart: unless-stopped
+    volumes:
+      - redis_data:/data
     networks: [eecnet]
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
