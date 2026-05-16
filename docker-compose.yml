@@ -31,7 +31,6 @@ services:
       STABLE_EXTENSIONS: "css,vectortiles"
     volumes:
       - geoserver_data:/opt/geoserver_data
-      - ./infra/geoserver/styles:/opt/geoserver_data/styles:ro
     ports:
       - "8080:8080"
     depends_on:
@@ -39,7 +38,7 @@ services:
         condition: service_healthy
     networks: [eecnet]
     healthcheck:
-      test: ["CMD-SHELL", "curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/geoserver/web/ | grep -q '200'"]
+      test: ["CMD-SHELL", "curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/geoserver/rest/about/version.json | grep -q '200\\|401'"]
       interval: 30s
       timeout: 10s
       retries: 10

@@ -13,4 +13,3 @@ CORS_ALLOW_CREDENTIALS = True
 
 SESSION_COOKIE_SECURE = False
 
-INSTALLED_APPS += ["django_extensions"]
