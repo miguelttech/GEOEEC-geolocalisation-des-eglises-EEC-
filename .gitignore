@@ -1,0 +1,58 @@
+# Secrets — JAMAIS dans Git
+.env
+.env.local
+.env.*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Django
+staticfiles/
+media/
+*.sqlite3
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+.npm
+
+# Docker volumes (données persistantes — jamais dans Git)
+pg_data/
+geoserver_data/
+redis_data/
+
+# Éditeurs
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Fichiers de build
+*.mo
+*.pot
