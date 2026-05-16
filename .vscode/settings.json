@@ -1,0 +1,12 @@
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter"
+  },
+  "python.linting.enabled": true,
+  "python.linting.ruffEnabled": true,
+  "files.eol": "\n",
+  "editor.rulers": [88],
+  "typescript.preferences.importModuleSpecifier": "relative"
+}

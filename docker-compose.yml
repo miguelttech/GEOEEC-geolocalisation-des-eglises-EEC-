@@ -1,0 +1,105 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: eec_db_dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks: [eecnet]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  geoserver:
+    image: docker.osgeo.org/geoserver:2.26.2
+    container_name: eec_geoserver_dev
+    restart: unless-stopped
+    environment:
+      GEOSERVER_ADMIN_USER: admin
+      GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_ADMIN_PASSWORD}
+      PROXY_BASE_URL: http://localhost:8080/geoserver
+      EXTRA_JAVA_OPTS: "-Xms512m -Xmx1g -XX:+UseG1GC"
+      INSTALL_EXTENSIONS: "true"
+      STABLE_EXTENSIONS: "css,vectortiles"
+    volumes:
+      - geoserver_data:/opt/geoserver_data
+      - ./infra/geoserver/styles:/opt/geoserver_data/styles:ro
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [eecnet]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/geoserver/web/ | grep -q '200'"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+
+  redis:
+    image: redis:7-alpine
+    container_name: eec_redis_dev
+    restart: unless-stopped
+    networks: [eecnet]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: eec_backend_dev
+    restart: unless-stopped
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks: [eecnet]
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: eec_frontend_dev
+    restart: unless-stopped
+    command: npm run dev
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+      - NEXT_PUBLIC_GEOSERVER_URL=http://localhost:8080/geoserver
+    depends_on:
+      - backend
+    networks: [eecnet]
+
+volumes:
+  pg_data:
+  geoserver_data:
+  redis_data:
+
+networks:
+  eecnet:
+    driver: bridge
