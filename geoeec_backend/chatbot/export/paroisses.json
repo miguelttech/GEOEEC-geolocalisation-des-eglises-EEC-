@@ -1,0 +1,5422 @@
+[
+    {
+        "nom": "AHALA-ECHANGEURS",
+        "quartier": "AHALA lieu dit PHARMACAM",
+        "district": "CENTRE 1",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.507461 3.808391)",
+        "communiants": 182,
+        "non_communiants": 15
+    },
+    {
+        "nom": "AKAK",
+        "quartier": "AKAK",
+        "district": "CENTRE 3",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 200,
+        "non_communiants": 230
+    },
+    {
+        "nom": "Akok Ndoe",
+        "quartier": "AKOK NDOE 2",
+        "district": "CENTRE 3 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.465623 3.85053)",
+        "communiants": 180,
+        "non_communiants": 40
+    },
+    {
+        "nom": "akombang-marché/kyé-ossi",
+        "quartier": "akomba g/kyé-ossi",
+        "district": "MVILA & NTEM",
+        "region_synodale": "CENTRE SUD 2",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 110,
+        "non_communiants": 9
+    },
+    {
+        "nom": "Akonolinga",
+        "quartier": "Ndamba",
+        "district": "CENTRE 4",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 127,
+        "non_communiants": 6
+    },
+    {
+        "nom": "Ambam",
+        "quartier": "New Bell",
+        "district": "MVILA & NTEM",
+        "region_synodale": "CENTRE SUD 2",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 116,
+        "non_communiants": 33
+    },
+    {
+        "nom": "ANNEXE DE BAHOUOC",
+        "quartier": "Noumko",
+        "district": "BANGANGTE II",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.486136 5.126122)",
+        "communiants": 125,
+        "non_communiants": 15
+    },
+    {
+        "nom": "Annexe de Fonegom",
+        "quartier": "Fonegom",
+        "district": "BANDJOUN  E",
+        "region_synodale": "KOUNG KHI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.469065 5.350292)",
+        "communiants": 30,
+        "non_communiants": 5
+    },
+    {
+        "nom": "Annexe de Fontsa-touala",
+        "quartier": "fierlah",
+        "district": "DSCHANG II",
+        "region_synodale": "MENOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.079408 5.327437)",
+        "communiants": 29,
+        "non_communiants": 37
+    },
+    {
+        "nom": "ANNEXE DE LEMGO",
+        "quartier": "DJIONE",
+        "district": "BANDJOUN  E",
+        "region_synodale": "KOUNG KHI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.445802 5.387052)",
+        "communiants": 46,
+        "non_communiants": 50
+    },
+    {
+        "nom": "Annexe de mokolo",
+        "quartier": "A mokolo",
+        "district": "KADEY",
+        "region_synodale": "EST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 9,
+        "non_communiants": 12
+    },
+    {
+        "nom": "annexe de Ngnou",
+        "quartier": "Ngnou",
+        "district": "BAMENA",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 22,
+        "non_communiants": 32
+    },
+    {
+        "nom": "Annexe de Tabe 2",
+        "quartier": "Léproserie mataba",
+        "district": "TABE II",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.808163 5.690943)",
+        "communiants": 45,
+        "non_communiants": 0
+    },
+    {
+        "nom": "AYOLO Béthanie SANGMÉLIMA",
+        "quartier": "Mekongo",
+        "district": "DJA & LOBO",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.977763 2.934073)",
+        "communiants": 630,
+        "non_communiants": 41
+    },
+    {
+        "nom": "Baboate",
+        "quartier": "Après la chefferie baboate",
+        "district": "BANKA",
+        "region_synodale": "HAUT NKAM",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.17129 5.208115)",
+        "communiants": 60,
+        "non_communiants": 20
+    },
+    {
+        "nom": "Babouantou Tonko",
+        "quartier": "Tchala",
+        "district": "BABOUANTOU",
+        "region_synodale": "HAUT NKAM",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.293493 5.212882)",
+        "communiants": 160,
+        "non_communiants": 70
+    },
+    {
+        "nom": "Badeng",
+        "quartier": "Kajou",
+        "district": "BALENG A",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.380094 5.585738)",
+        "communiants": 98,
+        "non_communiants": 15
+    },
+    {
+        "nom": "Bafang 2 Lieushi- Mouankeu",
+        "quartier": "Mouankeu",
+        "district": "BAFANG CENTRE",
+        "region_synodale": "HAUT NKAM",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.174353 5.154398)",
+        "communiants": 704,
+        "non_communiants": 65
+    },
+    {
+        "nom": "BAFANG -DOKOVI",
+        "quartier": "NDOKOVI",
+        "district": "BAFANG CENTRE",
+        "region_synodale": "HAUT NKAM",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.176104 5.158225)",
+        "communiants": 221,
+        "non_communiants": 35
+    },
+    {
+        "nom": "Bafou Fodzong",
+        "quartier": "Bafou chefferie",
+        "district": "NKONG - NI",
+        "region_synodale": "MENOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.108568 5.484812)",
+        "communiants": 70,
+        "non_communiants": 20
+    },
+    {
+        "nom": "Bafou Fodzong",
+        "quartier": "Bafou chefferie",
+        "district": "NKONG - NI",
+        "region_synodale": "MENOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.108559 5.484707)",
+        "communiants": 70,
+        "non_communiants": 20
+    },
+    {
+        "nom": "Bafou Fodzong",
+        "quartier": "Chefferie Bafou",
+        "district": "NKONG - NI",
+        "region_synodale": "MENOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.10847 5.484757)",
+        "communiants": 70,
+        "non_communiants": 20
+    },
+    {
+        "nom": "Bafoussam Plateau",
+        "quartier": "Djeleng 3",
+        "district": "BAFOUSSAM A",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.421754 5.48165)",
+        "communiants": 1987,
+        "non_communiants": 673
+    },
+    {
+        "nom": "Baigom",
+        "quartier": "Mapouoche",
+        "district": "FOUMBOT II",
+        "region_synodale": "NOUN SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.679322 5.573988)",
+        "communiants": 270,
+        "non_communiants": 123
+    },
+    {
+        "nom": "Bakap district de Bana",
+        "quartier": "Bakap",
+        "district": "nan",
+        "region_synodale": "HAUT NKAM",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.277014 5.14086)",
+        "communiants": 83,
+        "non_communiants": 22
+    },
+    {
+        "nom": "Bakassa",
+        "quartier": "Bakassa",
+        "district": "PENKA MICHEL",
+        "region_synodale": "MENOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (12 12)",
+        "communiants": 17,
+        "non_communiants": 5
+    },
+    {
+        "nom": "Bakoko Sud",
+        "quartier": "Yatchika",
+        "district": "B. B. D I",
+        "region_synodale": "WOURI SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.803461 3.98304)",
+        "communiants": 200,
+        "non_communiants": 50
+    },
+    {
+        "nom": "Baleveng-centre",
+        "quartier": "Metsa'",
+        "district": "NKONG - NI",
+        "region_synodale": "MENOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.160247 5.496335)",
+        "communiants": 170,
+        "non_communiants": 50
+    },
+    {
+        "nom": "Baloum",
+        "quartier": "Zemya",
+        "district": "PENKA MICHEL",
+        "region_synodale": "MENOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.248367 5.398761)",
+        "communiants": 88,
+        "non_communiants": 63
+    },
+    {
+        "nom": "Baloum",
+        "quartier": "Tenke",
+        "district": "BABOUANTOU",
+        "region_synodale": "HAUT NKAM",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 20,
+        "non_communiants": 8
+    },
+    {
+        "nom": "Baloumgou",
+        "quartier": "Toukong",
+        "district": "BANGOU",
+        "region_synodale": "HAUTS PLATEAUX",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.425692 5.215975)",
+        "communiants": 98,
+        "non_communiants": 48
+    },
+    {
+        "nom": "Bambou'u",
+        "quartier": "Bamboué",
+        "district": "BANGANG B",
+        "region_synodale": "BAMBOUTOS ET NORD OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.148793 5.563031)",
+        "communiants": 309,
+        "non_communiants": 27
+    },
+    {
+        "nom": "Bamemba",
+        "quartier": "Bamemba",
+        "district": "nan",
+        "region_synodale": "BAMBOUTOS ET NORD OUEST",
+        "niveau": "Bureau National Bureau régional Bureau de district Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.167045 5.600662)",
+        "communiants": 250,
+        "non_communiants": 50
+    },
+    {
+        "nom": "Bamendjou",
+        "quartier": "Badjuba",
+        "district": "BAHOUAN / BAMENDJOU",
+        "region_synodale": "HAUTS PLATEAUX",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.329528 5.399877)",
+        "communiants": 164,
+        "non_communiants": 9
+    },
+    {
+        "nom": "Bamendou Léo",
+        "quartier": "Bamendou Léo",
+        "district": "BAMENDOU",
+        "region_synodale": "MENOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 150,
+        "non_communiants": 100
+    },
+    {
+        "nom": "Bamendou molepeu",
+        "quartier": "Molepeu",
+        "district": "PENKA MICHEL",
+        "region_synodale": "MENOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (12 12)",
+        "communiants": 100,
+        "non_communiants": 50
+    },
+    {
+        "nom": "Bamendou-chefferie",
+        "quartier": "Quartier King place",
+        "district": "BAMENDOU",
+        "region_synodale": "MENOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 110,
+        "non_communiants": 58
+    },
+    {
+        "nom": "BAMENDOU-CHEFFERIE",
+        "quartier": "King-Place",
+        "district": "BAMENDOU",
+        "region_synodale": "MENOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.196798 5.46601)",
+        "communiants": 110,
+        "non_communiants": 58
+    },
+    {
+        "nom": "BAMESSANG",
+        "quartier": "BAMESSANG",
+        "district": "BATCHAM II",
+        "region_synodale": "BAMBOUTOS ET NORD OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.71 4.0583)",
+        "communiants": 380,
+        "non_communiants": 63
+    },
+    {
+        "nom": "BANDENKOP-CENTRE",
+        "quartier": "HIALA",
+        "district": "BAPA - BADENKOP",
+        "region_synodale": "HAUTS PLATEAUX",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.332072 5.279471)",
+        "communiants": 302,
+        "non_communiants": 24
+    },
+    {
+        "nom": "BANDJA - CHEFFERIE",
+        "quartier": "MANGA",
+        "district": "BANDJA",
+        "region_synodale": "HAUT NKAM",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.229348 5.229048)",
+        "communiants": 75,
+        "non_communiants": 10
+    },
+    {
+        "nom": "Bandja centre",
+        "quartier": "Bakachieu",
+        "district": "BANDJA",
+        "region_synodale": "HAUT NKAM",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.233202 5.265985)",
+        "communiants": 167,
+        "non_communiants": 100
+    },
+    {
+        "nom": "Bandjoun Centre",
+        "quartier": "Soung",
+        "district": "BANDJOUN A",
+        "region_synodale": "KOUNG KHI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 256,
+        "non_communiants": 123
+    },
+    {
+        "nom": "BANDOUMKASSA",
+        "quartier": "FEINTE",
+        "district": "nan",
+        "region_synodale": "HAUT NKAM",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.266707 5.124102)",
+        "communiants": 12,
+        "non_communiants": 17
+    },
+    {
+        "nom": "Banefo-Mifi",
+        "quartier": "Bessa",
+        "district": "BALENG A",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.249322 5.62991)",
+        "communiants": 55,
+        "non_communiants": 15
+    },
+    {
+        "nom": "Baneghang",
+        "quartier": "Baneghang bansoa",
+        "district": "nan",
+        "region_synodale": "MENOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.30693 5.47807)",
+        "communiants": 112,
+        "non_communiants": 107
+    },
+    {
+        "nom": "Banengo 1",
+        "quartier": "Banengo",
+        "district": "BAFOUSSAM B",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.413185 5.455951)",
+        "communiants": 450,
+        "non_communiants": 300
+    },
+    {
+        "nom": "Banengo 1",
+        "quartier": "Banengo",
+        "district": "BAFOUSSAM B",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.413422 5.456063)",
+        "communiants": 457,
+        "non_communiants": 182
+    },
+    {
+        "nom": "Banengo 2",
+        "quartier": "Banengo",
+        "district": "BAFOUSSAM B",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.410657 5.460513)",
+        "communiants": 439,
+        "non_communiants": 237
+    },
+    {
+        "nom": "Banféko",
+        "quartier": "Banféko",
+        "district": "nan",
+        "region_synodale": "HAUT NKAM",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.232852 5.158274)",
+        "communiants": 17,
+        "non_communiants": 23
+    },
+    {
+        "nom": "Bangambi",
+        "quartier": "Landem",
+        "district": "BANGOURAIN",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 112,
+        "non_communiants": 2
+    },
+    {
+        "nom": "Bangang - Fokam",
+        "quartier": "Tchila",
+        "district": "BANGOUA  NORD",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.515726 5.249364)",
+        "communiants": 165,
+        "non_communiants": 160
+    },
+    {
+        "nom": "BANGANG -Centre",
+        "quartier": "Siepkou",
+        "district": "BANGANG B",
+        "region_synodale": "BAMBOUTOS ET NORD OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.170501 5.568804)",
+        "communiants": 121,
+        "non_communiants": 80
+    },
+    {
+        "nom": "Bangang Nzong",
+        "quartier": "Bazie",
+        "district": "BANGANG A",
+        "region_synodale": "BAMBOUTOS ET NORD OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.184545 5.571525)",
+        "communiants": 297,
+        "non_communiants": 56
+    },
+    {
+        "nom": "Bangopè",
+        "quartier": "Bangopè",
+        "district": "NORD MAKOMBE",
+        "region_synodale": "NKAM",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 40,
+        "non_communiants": 10
+    },
+    {
+        "nom": "Bangourain centre",
+        "quartier": "Garap",
+        "district": "BANGOURAIN",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau National Bureau Paroissial",
+        "localisation": "",
+        "communiants": 151,
+        "non_communiants": 5
+    },
+    {
+        "nom": "Banka centre",
+        "quartier": "Banka",
+        "district": "BANKA",
+        "region_synodale": "HAUT NKAM",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.19855 5.162608)",
+        "communiants": 140,
+        "non_communiants": 100
+    },
+    {
+        "nom": "Banka-Baham",
+        "quartier": "Banka",
+        "district": "BAHAM NORD",
+        "region_synodale": "HAUTS PLATEAUX",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 80,
+        "non_communiants": 10
+    },
+    {
+        "nom": "Banock",
+        "quartier": "Banock",
+        "district": "BAMENDJINDA",
+        "region_synodale": "BAMBOUTOS ET NORD OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.285537 5.621897)",
+        "communiants": 147,
+        "non_communiants": 50
+    },
+    {
+        "nom": "Banock",
+        "quartier": "Entre Small camp et king-place",
+        "district": "PENKA MICHEL",
+        "region_synodale": "MENOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.293033 5.475456)",
+        "communiants": 60,
+        "non_communiants": 43
+    },
+    {
+        "nom": "Bansoa-Chéfferie",
+        "quartier": "Bamesseu",
+        "district": "PENKA MICHEL",
+        "region_synodale": "MENOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 110,
+        "non_communiants": 166
+    },
+    {
+        "nom": "Bantoum1",
+        "quartier": "Bantoum1",
+        "district": "BANEKANE",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.647988 5.095636)",
+        "communiants": 80,
+        "non_communiants": 65
+    },
+    {
+        "nom": "Banya 1",
+        "quartier": "Bassa",
+        "district": "DISTRICT DE YABASSI-YINGUI",
+        "region_synodale": "NKAM",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 193,
+        "non_communiants": 27
+    },
+    {
+        "nom": "Bapi",
+        "quartier": "Bapi chefferie",
+        "district": "BALENG A",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.373827 5.554251)",
+        "communiants": 138,
+        "non_communiants": 60
+    },
+    {
+        "nom": "Bassamba",
+        "quartier": "Babossa",
+        "district": "BANGOULAP",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.56413 5.048455)",
+        "communiants": 160,
+        "non_communiants": 165
+    },
+    {
+        "nom": "Bassé",
+        "quartier": "Bassé aéroport",
+        "district": "BAMOUGOUM A",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.350316 5.522014)",
+        "communiants": 260,
+        "non_communiants": 105
+    },
+    {
+        "nom": "Basseu",
+        "quartier": "Basseu",
+        "district": "nan",
+        "region_synodale": "HAUT NKAM",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.220238 5.213438)",
+        "communiants": 35,
+        "non_communiants": 15
+    },
+    {
+        "nom": "Bataki",
+        "quartier": "Bataki 1",
+        "district": "BATCHAM I",
+        "region_synodale": "BAMBOUTOS ET NORD OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.18905 5.557565)",
+        "communiants": 167,
+        "non_communiants": 8
+    },
+    {
+        "nom": "Batouri -Centre",
+        "quartier": "Camp Denis",
+        "district": "KADEY",
+        "region_synodale": "EST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (1.2 1.2)",
+        "communiants": 89,
+        "non_communiants": 109
+    },
+    {
+        "nom": "Batsing'la",
+        "quartier": "Sa'ac",
+        "district": "NKONG - NI",
+        "region_synodale": "MENOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.112043 5.409494)",
+        "communiants": 66,
+        "non_communiants": 24
+    },
+    {
+        "nom": "Bekoko",
+        "quartier": "Bekoko village",
+        "district": "BOMONO",
+        "region_synodale": "MOUNGO SUD & MEME",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.654495 4.205035)",
+        "communiants": 96,
+        "non_communiants": 38
+    },
+    {
+        "nom": "BELABO",
+        "quartier": "CLIMAT DE L'EST",
+        "district": "LOM & DJEREM SUD",
+        "region_synodale": "EST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (13.292555 4.914908)",
+        "communiants": 170,
+        "non_communiants": 190
+    },
+    {
+        "nom": "Benga 2",
+        "quartier": "Ngoba",
+        "district": "DISTRICT DE M. B. N",
+        "region_synodale": "NKAM",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.080147 4.625542)",
+        "communiants": 26,
+        "non_communiants": 40
+    },
+    {
+        "nom": "BENGA I",
+        "quartier": "Benga",
+        "district": "DISTRICT DE M. B. N",
+        "region_synodale": "NKAM",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.063416 4.623662)",
+        "communiants": 20,
+        "non_communiants": 25
+    },
+    {
+        "nom": "BEPANDA OMNISPORTS",
+        "quartier": "BEPANDA",
+        "district": "B. B. D NORD",
+        "region_synodale": "WOURI CENTRE",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.721349 4.055561)",
+        "communiants": 354,
+        "non_communiants": 53
+    },
+    {
+        "nom": "Bessungkang",
+        "quartier": "Miankoum,",
+        "district": "ABO-NORD",
+        "region_synodale": "MOUNGO SUD & MEME",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.738771 4.390771)",
+        "communiants": 42,
+        "non_communiants": 30
+    },
+    {
+        "nom": "Betare-oya",
+        "quartier": "Ngadi",
+        "district": "LOM & DJEREM NORD",
+        "region_synodale": "EST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (14.0785 5.600046)",
+        "communiants": 23,
+        "non_communiants": 30
+    },
+    {
+        "nom": "Biyem-Assi",
+        "quartier": "Biyem-Assi Montée JOUVENCE",
+        "district": "CENTRE 3 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 3129,
+        "non_communiants": 1477
+    },
+    {
+        "nom": "Boadibo",
+        "quartier": "Boadibo",
+        "district": "BOMONO",
+        "region_synodale": "MOUNGO SUD & MEME",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.645793 4.231071)",
+        "communiants": 112,
+        "non_communiants": 51
+    },
+    {
+        "nom": "Bomono Ba Mbengue",
+        "quartier": "Bossei",
+        "district": "BOMONO",
+        "region_synodale": "MOUNGO SUD & MEME",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 56,
+        "non_communiants": 33
+    },
+    {
+        "nom": "Bomono Gare",
+        "quartier": "Bomono Gare village",
+        "district": "BOMONO",
+        "region_synodale": "MOUNGO SUD & MEME",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.667723 4.18338)",
+        "communiants": 112,
+        "non_communiants": 67
+    },
+    {
+        "nom": "Bonabéké",
+        "quartier": "Bonabéké",
+        "district": "DISTRICT DE YABASSI-YINGUI",
+        "region_synodale": "NKAM",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.974978 4.465979)",
+        "communiants": 82,
+        "non_communiants": 19
+    },
+    {
+        "nom": "Bonabweny",
+        "quartier": "Bonabweny",
+        "district": "DIBOMBARI CENTRE",
+        "region_synodale": "MOUNGO SUD & MEME",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.645097 4.232344)",
+        "communiants": 36,
+        "non_communiants": 17
+    },
+    {
+        "nom": "Bonadjeng",
+        "quartier": "Bonadjeng",
+        "district": "BODIMAN",
+        "region_synodale": "NKAM",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.900253 4.417198)",
+        "communiants": 9,
+        "non_communiants": 1
+    },
+    {
+        "nom": "BONAMATUMBE",
+        "quartier": "BONAMATUMBE",
+        "district": "BELE-BELE  1",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.683645 4.110536)",
+        "communiants": 46,
+        "non_communiants": 39
+    },
+    {
+        "nom": "Bonamoutongo",
+        "quartier": "Pk13",
+        "district": "B. B. D II",
+        "region_synodale": "WOURI SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.800228 4.066973)",
+        "communiants": 140,
+        "non_communiants": 22
+    },
+    {
+        "nom": "BONAMUDURU",
+        "quartier": "BONAMUDURU DEIDO",
+        "district": "BONEBELA",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.707486 4.065477)",
+        "communiants": 1592,
+        "non_communiants": 361
+    },
+    {
+        "nom": "BONAMUNDURU",
+        "quartier": "DEIDO",
+        "district": "BONEBELA",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 1960,
+        "non_communiants": 220
+    },
+    {
+        "nom": "Bonandam",
+        "quartier": "Village bonandam",
+        "district": "NJOMBE - PENJA",
+        "region_synodale": "MOUNGO CENTRE",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.672597 4.615109)",
+        "communiants": 58,
+        "non_communiants": 0
+    },
+    {
+        "nom": "BONATEKI",
+        "quartier": "BONATEKI",
+        "district": "BONEBELA",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 875,
+        "non_communiants": 220
+    },
+    {
+        "nom": "Bonkeng",
+        "quartier": "Quartier école publique",
+        "district": "LOUM",
+        "region_synodale": "MOUNGO CENTRE",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.746088 4.708745)",
+        "communiants": 54,
+        "non_communiants": 26
+    },
+    {
+        "nom": "BRIQUETERIE",
+        "quartier": "BRIQUETERIE",
+        "district": "LOM & DJEREM SUD",
+        "region_synodale": "EST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 179,
+        "non_communiants": 29
+    },
+    {
+        "nom": "Briqueterie 2",
+        "quartier": "Briqueterie",
+        "district": "CENTRE 1",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.509968 3.875006)",
+        "communiants": 800,
+        "non_communiants": 100
+    },
+    {
+        "nom": "Buea",
+        "quartier": "Lower Farms Buea",
+        "district": "SUD OUEST",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.247553 4.152109)",
+        "communiants": 349,
+        "non_communiants": 150
+    },
+    {
+        "nom": "Bwanebwa",
+        "quartier": "Village bwanebwa",
+        "district": "B.B.M DU MONGO CENTRE",
+        "region_synodale": "MOUNGO CENTRE",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.856193 4.797318)",
+        "communiants": 30,
+        "non_communiants": 15
+    },
+    {
+        "nom": "Camp militaire",
+        "quartier": "Aviation",
+        "district": "TABE I",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.747613 5.640772)",
+        "communiants": 182,
+        "non_communiants": 90
+    },
+    {
+        "nom": "Centre Urbain de Koutaba",
+        "quartier": "Le quartier administratif",
+        "district": "TABE I",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.761142 5.656068)",
+        "communiants": 250,
+        "non_communiants": 50
+    },
+    {
+        "nom": "Chila",
+        "quartier": "Feuechip- Batoufam",
+        "district": "BATOUFAM / BADREFAM",
+        "region_synodale": "KOUNG KHI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.461742 5.266215)",
+        "communiants": 152,
+        "non_communiants": 8
+    },
+    {
+        "nom": "Cité des palmiers",
+        "quartier": "Cité des palmiers",
+        "district": "B. B. D NORD",
+        "region_synodale": "WOURI CENTRE",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.763189 4.053419)",
+        "communiants": 1094,
+        "non_communiants": 330
+    },
+    {
+        "nom": "Company",
+        "quartier": "Company",
+        "district": "nan",
+        "region_synodale": "NOUN SUD",
+        "niveau": "Bureau de district Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.623702 5.507805)",
+        "communiants": 816,
+        "non_communiants": 4
+    },
+    {
+        "nom": "Demgo baham",
+        "quartier": "Dembeing",
+        "district": "BAHAM NORD",
+        "region_synodale": "HAUTS PLATEAUX",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.376112 5.343643)",
+        "communiants": 75,
+        "non_communiants": 10
+    },
+    {
+        "nom": "Demguieu-meudjieu",
+        "quartier": "Demguieu-meudjieu",
+        "district": "BANGOU",
+        "region_synodale": "HAUTS PLATEAUX",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.396892 5.210177)",
+        "communiants": 84,
+        "non_communiants": 7
+    },
+    {
+        "nom": "Denzo",
+        "quartier": "Denzo",
+        "district": "MELONG",
+        "region_synodale": "MOUNGO NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 151,
+        "non_communiants": 7
+    },
+    {
+        "nom": "Dibo",
+        "quartier": "Yabassi",
+        "district": "DISTRICT DE YABASSI-YINGUI",
+        "region_synodale": "NKAM",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.967641 4.459731)",
+        "communiants": 28,
+        "non_communiants": 5
+    },
+    {
+        "nom": "Dibom2",
+        "quartier": "Dibom2",
+        "district": "NEW-BELL C",
+        "region_synodale": "WOURI SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 1000,
+        "non_communiants": 50
+    },
+    {
+        "nom": "Dikouma",
+        "quartier": "Dikouma",
+        "district": "BALONG",
+        "region_synodale": "MOUNGO SUD & MEME",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.568565 4.401232)",
+        "communiants": 74,
+        "non_communiants": 14
+    },
+    {
+        "nom": "Dikouma -Malèndè",
+        "quartier": "Quartier 2",
+        "district": "BALONG",
+        "region_synodale": "MOUNGO SUD & MEME",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.563697 4.4861)",
+        "communiants": 40,
+        "non_communiants": 45
+    },
+    {
+        "nom": "DISSAKE-LOKO",
+        "quartier": "BONADISSAKE & BONALOKO",
+        "district": "DISTRICT DE YABASSI-YINGUI",
+        "region_synodale": "NKAM",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 56,
+        "non_communiants": 5
+    },
+    {
+        "nom": "District Abo Sud B , paroisse de Ndoulou",
+        "quartier": "Ndoulou Badou",
+        "district": "ABO-SUD \"A\"",
+        "region_synodale": "MOUNGO SUD & MEME",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.694533 4.304192)",
+        "communiants": 53,
+        "non_communiants": 29
+    },
+    {
+        "nom": "District Abo Sud B Paroisse Miang",
+        "quartier": "Miang Centre",
+        "district": "ABO-SUD \"A\"",
+        "region_synodale": "MOUNGO SUD & MEME",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.71334 4.310601)",
+        "communiants": 44,
+        "non_communiants": 21
+    },
+    {
+        "nom": "Djaa-kassap",
+        "quartier": "Djaa-tochoue",
+        "district": "BAYANGAM",
+        "region_synodale": "KOUNG KHI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.450017 5.28682)",
+        "communiants": 58,
+        "non_communiants": 36
+    },
+    {
+        "nom": "Djaa-kassap ( annexe de kassap )",
+        "quartier": "L'annexe se trouve à kassap",
+        "district": "BAYANGAM",
+        "region_synodale": "KOUNG KHI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.442993 5.327498)",
+        "communiants": 38,
+        "non_communiants": 18
+    },
+    {
+        "nom": "Djassa",
+        "quartier": "Djassa",
+        "district": "BALENG B",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.456881 5.494274)",
+        "communiants": 97,
+        "non_communiants": 120
+    },
+    {
+        "nom": "Djedem",
+        "quartier": "Lagou",
+        "district": "BATIE",
+        "region_synodale": "HAUTS PLATEAUX",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.271405 5.308815)",
+        "communiants": 123,
+        "non_communiants": 14
+    },
+    {
+        "nom": "Djiogue",
+        "quartier": "Djiogue",
+        "district": "BANDJOUN D",
+        "region_synodale": "KOUNG KHI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 80,
+        "non_communiants": 40
+    },
+    {
+        "nom": "Djiomghouo",
+        "quartier": "Kouotse",
+        "district": "BANDJOUN A",
+        "region_synodale": "KOUNG KHI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.399035 5.353793)",
+        "communiants": 352,
+        "non_communiants": 20
+    },
+    {
+        "nom": "Djoua",
+        "quartier": "Toudjoua",
+        "district": "BAMENDOU",
+        "region_synodale": "MENOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.1684 5.437923)",
+        "communiants": 80,
+        "non_communiants": 30
+    },
+    {
+        "nom": "Djut",
+        "quartier": "Djut",
+        "district": "BAMEKA",
+        "region_synodale": "HAUTS PLATEAUX",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.353295 5.418958)",
+        "communiants": 200,
+        "non_communiants": 15
+    },
+    {
+        "nom": "Doupe",
+        "quartier": "Doupe 1",
+        "district": "BALENG B",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.515986 5.516681)",
+        "communiants": 43,
+        "non_communiants": 18
+    },
+    {
+        "nom": "ECC soundop,Eboukou",
+        "quartier": "Soundop",
+        "district": "MBARA 1",
+        "region_synodale": "MOUNGO NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 98,
+        "non_communiants": 4
+    },
+    {
+        "nom": "Edea Ville",
+        "quartier": "Pongo mission française",
+        "district": "EDEA  I",
+        "region_synodale": "SANAGA MARITIME ET OCEAN",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 301,
+        "non_communiants": 30
+    },
+    {
+        "nom": "Edjogmoa",
+        "quartier": "Edjogmoa",
+        "district": "BANEKA 2",
+        "region_synodale": "MOUNGO NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.943685 4.972692)",
+        "communiants": 135,
+        "non_communiants": 17
+    },
+    {
+        "nom": "EEC  zoetele",
+        "quartier": "Newtown",
+        "district": "DJA & LOBO",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau de district Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.885429 3.260843)",
+        "communiants": 80,
+        "non_communiants": 100
+    },
+    {
+        "nom": "EEC (Elig edzoa)",
+        "quartier": "Elig-Edzoa (Yaoundé)",
+        "district": "CENTRE 3",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.527043 3.887259)",
+        "communiants": 250,
+        "non_communiants": 150
+    },
+    {
+        "nom": "EEC BAHO PETIT MONDE",
+        "quartier": "BONAMOUSSADI",
+        "district": "DOUALA NORD",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.734791 4.082851)",
+        "communiants": 100,
+        "non_communiants": 10
+    },
+    {
+        "nom": "EEC bandrefam",
+        "quartier": "Ka'ala",
+        "district": "BATOUFAM / BADREFAM",
+        "region_synodale": "KOUNG KHI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 117,
+        "non_communiants": 45
+    },
+    {
+        "nom": "EEC BANEN- NESTLÉ",
+        "quartier": "BANEN- BONABERI",
+        "district": "BELE-BELE  1",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.609024 4.105229)",
+        "communiants": 161,
+        "non_communiants": 240
+    },
+    {
+        "nom": "EEC BEPANDA OMNISPORTS",
+        "quartier": "Bepanda Omnisports",
+        "district": "B. B. D NORD",
+        "region_synodale": "WOURI CENTRE",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.721594 4.055477)",
+        "communiants": 335,
+        "non_communiants": 53
+    },
+    {
+        "nom": "EEC BESSEKE",
+        "quartier": "BESSEKE",
+        "district": "BELE-BELE  1",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.680659 4.07158)",
+        "communiants": 350,
+        "non_communiants": 25
+    },
+    {
+        "nom": "EEC BOJONGO",
+        "quartier": "BOJONGO",
+        "district": "BELE-BELE  1",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.618999 4.086429)",
+        "communiants": 238,
+        "non_communiants": 91
+    },
+    {
+        "nom": "EEC BONABÉRI",
+        "quartier": "BONABERI",
+        "district": "BELE-BELE  1",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.675769 4.075438)",
+        "communiants": 1330,
+        "non_communiants": 170
+    },
+    {
+        "nom": "EEC BONAMOUNDOURU",
+        "quartier": "BONAMUNDURU DEIDO",
+        "district": "BONEBELA",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.707654 4.065417)",
+        "communiants": 1960,
+        "non_communiants": 220
+    },
+    {
+        "nom": "EEC BONASSAMA",
+        "quartier": "BONASSAMA",
+        "district": "BELE-BELE  1",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.685229 4.072168)",
+        "communiants": 358,
+        "non_communiants": 13
+    },
+    {
+        "nom": "EEC BONATEKI",
+        "quartier": "BONATEKI DEIDO",
+        "district": "BONEBELA",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.712985 4.071345)",
+        "communiants": 875,
+        "non_communiants": 220
+    },
+    {
+        "nom": "EEC BONENDALE",
+        "quartier": "BONENDALE",
+        "district": "BELE-BELE  1",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.657447 4.117301)",
+        "communiants": 362,
+        "non_communiants": 78
+    },
+    {
+        "nom": "EEC CINQUANTENAIRE",
+        "quartier": "MAKEPE RHÔNE POULENC",
+        "district": "DOUALA NORD",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.755089 4.084298)",
+        "communiants": 2933,
+        "non_communiants": 1161
+    },
+    {
+        "nom": "EEC DE DJIONE",
+        "quartier": "DJIONE",
+        "district": "BANDJOUN  E",
+        "region_synodale": "KOUNG KHI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.445905 5.377265)",
+        "communiants": 161,
+        "non_communiants": 18
+    },
+    {
+        "nom": "EEC de Mouatong",
+        "quartier": "Quartier 4",
+        "district": "MELONG",
+        "region_synodale": "MOUNGO NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.989672 5.191097)",
+        "communiants": 236,
+        "non_communiants": 47
+    },
+    {
+        "nom": "EEC de Sambo",
+        "quartier": "Sambo1",
+        "district": "KADEY",
+        "region_synodale": "EST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (14.355007 4.429474)",
+        "communiants": 57,
+        "non_communiants": 43
+    },
+    {
+        "nom": "EEC DEIDO VALLÉE",
+        "quartier": "BONANTONE DEIDO",
+        "district": "BONEBELA",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.710372 4.058901)",
+        "communiants": 1002,
+        "non_communiants": 405
+    },
+    {
+        "nom": "EEC ESSOS",
+        "quartier": "ESSOS",
+        "district": "CENTRE 2",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.533864 3.897099)",
+        "communiants": 2000,
+        "non_communiants": 1500
+    },
+    {
+        "nom": "EEC ETOUG-EBE",
+        "quartier": "Etoug ebe carrefour beignets.",
+        "district": "CENTRE 3 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 350,
+        "non_communiants": 630
+    },
+    {
+        "nom": "EEC GRAND HANGARD",
+        "quartier": "BONABERI",
+        "district": "BELE-BELE  2",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.658358 4.08269)",
+        "communiants": 700,
+        "non_communiants": 660
+    },
+    {
+        "nom": "EEC Hôpital CEBEC de Bonaberi",
+        "quartier": "NGWELE",
+        "district": "BELE-BELE  2",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.652695 4.095383)",
+        "communiants": 243,
+        "non_communiants": 60
+    },
+    {
+        "nom": "EEC KOTTO",
+        "quartier": "KOTTO VILLAGE",
+        "district": "DOUALA NORD",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.759035 4.093451)",
+        "communiants": 157,
+        "non_communiants": 236
+    },
+    {
+        "nom": "EEC KOUOPOU",
+        "quartier": "KOUOPOU",
+        "district": "BAYANGAM",
+        "region_synodale": "KOUNG KHI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 115,
+        "non_communiants": 27
+    },
+    {
+        "nom": "EEC LOGPOM",
+        "quartier": "Logpom",
+        "district": "DOUALA NORD",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.767198 4.08356)",
+        "communiants": 247,
+        "non_communiants": 63
+    },
+    {
+        "nom": "EEC MAMBANDA 1",
+        "quartier": "BONABERI",
+        "district": "BELE-BELE  2",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.668177 4.066695)",
+        "communiants": 400,
+        "non_communiants": 250
+    },
+    {
+        "nom": "EEC MAMBANDA 2 ALPICAM",
+        "quartier": "BONABERI",
+        "district": "BELE-BELE  2",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.654641 4.068478)",
+        "communiants": 230,
+        "non_communiants": 95
+    },
+    {
+        "nom": "EEC MAMBANDA1",
+        "quartier": "BONABERI",
+        "district": "BELE-BELE  2",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 400,
+        "non_communiants": 250
+    },
+    {
+        "nom": "EEC MBELA JEDU",
+        "quartier": "BONANGANG",
+        "district": "DOUALA NORD",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.739723 4.100822)",
+        "communiants": 660,
+        "non_communiants": 460
+    },
+    {
+        "nom": "EEC MBELA JEDU",
+        "quartier": "BONANGANG",
+        "district": "DOUALA NORD",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.738771 4.100434)",
+        "communiants": 668,
+        "non_communiants": 456
+    },
+    {
+        "nom": "EEC MPANJO- Ferme",
+        "quartier": "BONAMIKANO- MPANJO- 2",
+        "district": "BELE-BELE  1",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.678072 4.090325)",
+        "communiants": 138,
+        "non_communiants": 162
+    },
+    {
+        "nom": "EEC NDOBO",
+        "quartier": "BONENDALE",
+        "district": "BELE-BELE  1",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.633396 4.107193)",
+        "communiants": 274,
+        "non_communiants": 164
+    },
+    {
+        "nom": "EEC NGWELE",
+        "quartier": "NGWELE",
+        "district": "BELE-BELE  2",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.653277 4.08683)",
+        "communiants": 85,
+        "non_communiants": 70
+    },
+    {
+        "nom": "EEC NKOMBA",
+        "quartier": "NKOMBA",
+        "district": "BELE-BELE  2",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.669191 4.076351)",
+        "communiants": 204,
+        "non_communiants": 130
+    },
+    {
+        "nom": "EEC NKOTENG",
+        "quartier": "Mbezoa",
+        "district": "HTE SANAGA",
+        "region_synodale": "CENTRE SUD 2",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 78,
+        "non_communiants": 17
+    },
+    {
+        "nom": "EEC paroisse de Nkozoa",
+        "quartier": "Nkozoa, à Yaoundé",
+        "district": "CENTRE 3",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.535074 3.966534)",
+        "communiants": 400,
+        "non_communiants": 100
+    },
+    {
+        "nom": "EEC sambo",
+        "quartier": "Sambo1",
+        "district": "KADEY",
+        "region_synodale": "EST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (14.355734 4.429459)",
+        "communiants": 57,
+        "non_communiants": 43
+    },
+    {
+        "nom": "EEC SODIKO- RURAL",
+        "quartier": "SODIKO",
+        "district": "BELE-BELE  1",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.664423 4.115518)",
+        "communiants": 107,
+        "non_communiants": 108
+    },
+    {
+        "nom": "EEC SODIKO- VILLE",
+        "quartier": "SODIKO",
+        "district": "BELE-BELE  1",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.65546 4.096737)",
+        "communiants": 681,
+        "non_communiants": 240
+    },
+    {
+        "nom": "EEC TAMDJA",
+        "quartier": "TAMDJA",
+        "district": "BAFOUSSAM B",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 1097,
+        "non_communiants": 155
+    },
+    {
+        "nom": "EEC. Zoetele",
+        "quartier": "Newtown",
+        "district": "DJA & LOBO",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.885429 3.260843)",
+        "communiants": 80,
+        "non_communiants": 100
+    },
+    {
+        "nom": "Eglise Évangélique du Cameroun Paroisse Bilingue de Kribi",
+        "quartier": "Afan-Mabé",
+        "district": "KRIBI",
+        "region_synodale": "SANAGA MARITIME ET OCEAN",
+        "niveau": "Bureau National Bureau régional Bureau de district Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.9146 2.953606)",
+        "communiants": 430,
+        "non_communiants": 70
+    },
+    {
+        "nom": "Kye-ossi",
+        "quartier": "Kye-ossi",
+        "district": "MVILA & NTEM",
+        "region_synodale": "CENTRE SUD 2",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 110,
+        "non_communiants": 27
+    },
+    {
+        "nom": "Ekorezock",
+        "quartier": "Ekorezock -Dagobert",
+        "district": "CENTRE 1 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.454956 3.884341)",
+        "communiants": 600,
+        "non_communiants": 630
+    },
+    {
+        "nom": "EKOUNOU",
+        "quartier": "Ekounou",
+        "district": "LOM & DJEREM NORD",
+        "region_synodale": "EST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (13.649402 4.574034)",
+        "communiants": 113,
+        "non_communiants": 158
+    },
+    {
+        "nom": "ELIG-EDZOA",
+        "quartier": "Elig edzoa a Yaoundé",
+        "district": "CENTRE 3",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.52686 3.887583)",
+        "communiants": 250,
+        "non_communiants": 150
+    },
+    {
+        "nom": "EMANA DALLAS",
+        "quartier": "Dalllas",
+        "district": "CENTRE 3",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.52951 3.9305)",
+        "communiants": 467,
+        "non_communiants": 256
+    },
+    {
+        "nom": "EMANA-BUEA",
+        "quartier": "EMANA BILLICK",
+        "district": "CENTRE 3",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 202,
+        "non_communiants": 308
+    },
+    {
+        "nom": "Enia",
+        "quartier": "Enia",
+        "district": "LOM & DJEREM NORD",
+        "region_synodale": "EST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (13.706073 4.583615)",
+        "communiants": 135,
+        "non_communiants": 67
+    },
+    {
+        "nom": "Eseka",
+        "quartier": "Camp fonctionnaire",
+        "district": "CENTRE 2 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 53,
+        "non_communiants": 0
+    },
+    {
+        "nom": "Espérance",
+        "quartier": "Bonangoh",
+        "district": "BANEKA 1",
+        "region_synodale": "MOUNGO NORD",
+        "niveau": "Bureau régional Bureau de district Bureau Paroissial",
+        "localisation": "",
+        "communiants": 202,
+        "non_communiants": 72
+    },
+    {
+        "nom": "Etetack",
+        "quartier": "Manga lieu dit papa emma",
+        "district": "CENTRE 1 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.480775 3.883261)",
+        "communiants": 120,
+        "non_communiants": 30
+    },
+    {
+        "nom": "Famgoum",
+        "quartier": "Famgoum",
+        "district": "BATIE",
+        "region_synodale": "HAUTS PLATEAUX",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.34365 5.324351)",
+        "communiants": 145,
+        "non_communiants": 16
+    },
+    {
+        "nom": "Famtchouet",
+        "quartier": "Famtchouet",
+        "district": "BALENG B",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.468998 5.495813)",
+        "communiants": 100,
+        "non_communiants": 35
+    },
+    {
+        "nom": "Fiko",
+        "quartier": "Village Fiko",
+        "district": "ABO-NORD",
+        "region_synodale": "MOUNGO SUD & MEME",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.68339 4.305284)",
+        "communiants": 39,
+        "non_communiants": 22
+    },
+    {
+        "nom": "Fokoué",
+        "quartier": "Fokoué",
+        "district": "DSCHANG II",
+        "region_synodale": "MENOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 106,
+        "non_communiants": 20
+    },
+    {
+        "nom": "Fomchou",
+        "quartier": "Fomchou et Gabon",
+        "district": "FOUMBAN 1",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 276,
+        "non_communiants": 289
+    },
+    {
+        "nom": "Fomepea",
+        "quartier": "Madong",
+        "district": "DSCHANG II",
+        "region_synodale": "MENOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 30,
+        "non_communiants": 23
+    },
+    {
+        "nom": "Fondjomekwet",
+        "quartier": "Djiffo",
+        "district": "BANDJA",
+        "region_synodale": "HAUT NKAM",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.168503 5.280828)",
+        "communiants": 128,
+        "non_communiants": 18
+    },
+    {
+        "nom": "FONGO-TONGO II",
+        "quartier": "LOUNG",
+        "district": "DSCHANG I",
+        "region_synodale": "MENOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.034937 5.519607)",
+        "communiants": 66,
+        "non_communiants": 92
+    },
+    {
+        "nom": "Fongotongo1",
+        "quartier": "Nzo'o",
+        "district": "DSCHANG I",
+        "region_synodale": "MENOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.060968 5.421324)",
+        "communiants": 92,
+        "non_communiants": 56
+    },
+    {
+        "nom": "FONTAIN",
+        "quartier": "Shinghom",
+        "district": "FOUMBAN 3",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.906465 5.727223)",
+        "communiants": 362,
+        "non_communiants": 1
+    },
+    {
+        "nom": "Fossang",
+        "quartier": "Fossang",
+        "district": "FOUMBOT I",
+        "region_synodale": "NOUN SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.64306 5.444861)",
+        "communiants": 24,
+        "non_communiants": 0
+    },
+    {
+        "nom": "Fosset",
+        "quartier": "Fosset Carrefour",
+        "district": "FOUMBOT I",
+        "region_synodale": "NOUN SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.672632 5.494338)",
+        "communiants": 52,
+        "non_communiants": 0
+    },
+    {
+        "nom": "Foto",
+        "quartier": "Foto",
+        "district": "DSCHANG II",
+        "region_synodale": "MENOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.072737 5.460662)",
+        "communiants": 379,
+        "non_communiants": 7
+    },
+    {
+        "nom": "Fotouni",
+        "quartier": "Kouokoup",
+        "district": "BANDJA",
+        "region_synodale": "HAUT NKAM",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 65,
+        "non_communiants": 30
+    },
+    {
+        "nom": "Foyett",
+        "quartier": "Njipouoche",
+        "district": "NJIMOM",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 69,
+        "non_communiants": 1
+    },
+    {
+        "nom": "GAROUA BOULAI",
+        "quartier": "Gamo",
+        "district": "LOM & DJEREM NORD",
+        "region_synodale": "EST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (14.542405 5.884355)",
+        "communiants": 73,
+        "non_communiants": 11
+    },
+    {
+        "nom": "Ghanka",
+        "quartier": "Ghanka",
+        "district": "BALENG A",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.414219 5.53286)",
+        "communiants": 120,
+        "non_communiants": 38
+    },
+    {
+        "nom": "Grand moulin",
+        "quartier": "Grand moulin",
+        "district": "BONEBELA",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 370,
+        "non_communiants": 300
+    },
+    {
+        "nom": "Grand Souza",
+        "quartier": "Grand Souza",
+        "district": "ABO-SUD \"A\"",
+        "region_synodale": "MOUNGO SUD & MEME",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.619347 4.23488)",
+        "communiants": 168,
+        "non_communiants": 52
+    },
+    {
+        "nom": "Grand- temple",
+        "quartier": "Centre -ville",
+        "district": "BANEKA 1",
+        "region_synodale": "MOUNGO NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 1102,
+        "non_communiants": 13
+    },
+    {
+        "nom": "HIALA",
+        "quartier": "HIALA",
+        "district": "BATIE",
+        "region_synodale": "HAUTS PLATEAUX",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.271405 5.307205)",
+        "communiants": 75,
+        "non_communiants": 9
+    },
+    {
+        "nom": "HOUA",
+        "quartier": "HOUA",
+        "district": "BANDJOUN A",
+        "region_synodale": "KOUNG KHI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.42411 5.369125)",
+        "communiants": 174,
+        "non_communiants": 87
+    },
+    {
+        "nom": "Jourdain de beka hossere",
+        "quartier": "250",
+        "district": "NGAOUNDERE",
+        "region_synodale": "ADAMAOUA",
+        "niveau": "Bureau régional Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (13.551397 7.305577)",
+        "communiants": 100,
+        "non_communiants": 150
+    },
+    {
+        "nom": "Kaffo",
+        "quartier": "Kaffo Baham",
+        "district": "BAHAM SUD",
+        "region_synodale": "HAUTS PLATEAUX",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.397925 5.313254)",
+        "communiants": 96,
+        "non_communiants": 22
+    },
+    {
+        "nom": "Kakè",
+        "quartier": "Kakè",
+        "district": "ABO-SUD \"A\"",
+        "region_synodale": "MOUNGO SUD & MEME",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.609258 4.288809)",
+        "communiants": 49,
+        "non_communiants": 30
+    },
+    {
+        "nom": "Kam Ngwinkè",
+        "quartier": "Yom3",
+        "district": "BANDJOUN B",
+        "region_synodale": "KOUNG KHI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.423326 5.414202)",
+        "communiants": 300,
+        "non_communiants": 50
+    },
+    {
+        "nom": "KAMGO",
+        "quartier": "KAMGO",
+        "district": "BANDJOUN  E",
+        "region_synodale": "KOUNG KHI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.432506 5.388891)",
+        "communiants": 63,
+        "non_communiants": 42
+    },
+    {
+        "nom": "Kamkop centenaire",
+        "quartier": "Kamkop , commune de Bafoussam 3e",
+        "district": "BAMOUGOUM A",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.38633 5.500262)",
+        "communiants": 1125,
+        "non_communiants": 73
+    },
+    {
+        "nom": "Kam-Ngwinkè",
+        "quartier": "Yom 3",
+        "district": "BANDJOUN B",
+        "region_synodale": "KOUNG KHI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.423677 5.424517)",
+        "communiants": 250,
+        "non_communiants": 50
+    },
+    {
+        "nom": "KASSAH TOSSEUH",
+        "quartier": "TOKET",
+        "district": "BAMOUGOUM B",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.389695 5.479493)",
+        "communiants": 97,
+        "non_communiants": 200
+    },
+    {
+        "nom": "KASSANG",
+        "quartier": "TOUSAP",
+        "district": "nan",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 47,
+        "non_communiants": 36
+    },
+    {
+        "nom": "Katsela",
+        "quartier": "Katsela",
+        "district": "BANDJOUN D",
+        "region_synodale": "KOUNG KHI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.411388 5.371528)",
+        "communiants": 203,
+        "non_communiants": 27
+    },
+    {
+        "nom": "KENA",
+        "quartier": "KENA",
+        "district": "BAMOUGOUM A",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.370387 5.516556)",
+        "communiants": 160,
+        "non_communiants": 110
+    },
+    {
+        "nom": "Kombou",
+        "quartier": "Bamegnia",
+        "district": "BABADJOU",
+        "region_synodale": "BAMBOUTOS ET NORD OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.16575 5.738245)",
+        "communiants": 300,
+        "non_communiants": 60
+    },
+    {
+        "nom": "Kondi Pk8",
+        "quartier": "Pk8 face ESG a 200m",
+        "district": "B. B. D II",
+        "region_synodale": "WOURI SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.756398 4.042856)",
+        "communiants": 168,
+        "non_communiants": 20
+    },
+    {
+        "nom": "Kongso'o avec ces annexes",
+        "quartier": "Kongso'o est à Torloum; Njouo-Dukang est à Kouabang ; Famkou est à Famkou",
+        "district": "BAMOUGOUM A",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.344003 5.487117)",
+        "communiants": 301,
+        "non_communiants": 177
+    },
+    {
+        "nom": "Kouchakap",
+        "quartier": "Malatam",
+        "district": "NKOUTIE",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 25,
+        "non_communiants": 52
+    },
+    {
+        "nom": "Kouchong",
+        "quartier": "Kouchong",
+        "district": "BANGOURAIN",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 134,
+        "non_communiants": 4
+    },
+    {
+        "nom": "Kouchouontoum",
+        "quartier": "Kouchouontom",
+        "district": "FOUMBOT II",
+        "region_synodale": "NOUN SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.587813 5.643253)",
+        "communiants": 39,
+        "non_communiants": 0
+    },
+    {
+        "nom": "KOUNGA",
+        "quartier": "Kounga",
+        "district": "FOUMBAN 1",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.886315 5.72908)",
+        "communiants": 812,
+        "non_communiants": 1
+    },
+    {
+        "nom": "kouogouo-ville",
+        "quartier": "kouogouo (montee touristique)",
+        "district": "BAMOUGOUM B",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.411427 5.482853)",
+        "communiants": 965,
+        "non_communiants": 674
+    },
+    {
+        "nom": "Kouoptamo",
+        "quartier": "Kouoptamo",
+        "district": "NKOUGHAM 1",
+        "region_synodale": "NOUN SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.604689 5.649072)",
+        "communiants": 127,
+        "non_communiants": 5
+    },
+    {
+        "nom": "Koupa",
+        "quartier": "X",
+        "district": "NKOUPA",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.894016 5.721051)",
+        "communiants": 500,
+        "non_communiants": 8
+    },
+    {
+        "nom": "Kourom",
+        "quartier": "Kourom-Chefferie",
+        "district": "BANGOURAIN",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 34,
+        "non_communiants": 2
+    },
+    {
+        "nom": "KOUSSERI",
+        "quartier": "RESIDENTIEL SECTEUR ZERO",
+        "district": "MAROUA",
+        "region_synodale": "NORD & EXTREME-NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (15.032302 12.09483)",
+        "communiants": 40,
+        "non_communiants": 35
+    },
+    {
+        "nom": "Koutié 1",
+        "quartier": "Koutié Njemnshüt 2 Nji Emmana",
+        "district": "NKOUTIE",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 142,
+        "non_communiants": 142
+    },
+    {
+        "nom": "Kouwet",
+        "quartier": "Faloum",
+        "district": "BANGOURAIN",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 35,
+        "non_communiants": 4
+    },
+    {
+        "nom": "Kumba",
+        "quartier": "Ntam 2",
+        "district": "BALONG",
+        "region_synodale": "MOUNGO SUD & MEME",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.461885 4.642189)",
+        "communiants": 112,
+        "non_communiants": 65
+    },
+    {
+        "nom": "Kwetvu",
+        "quartier": "Kwetvu",
+        "district": "MANGOUM",
+        "region_synodale": "NOUN SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.579371 5.484708)",
+        "communiants": 82,
+        "non_communiants": 38
+    },
+    {
+        "nom": "La Refondation de Mbouroukou",
+        "quartier": "Mouandja",
+        "district": "MBO ELONG",
+        "region_synodale": "MOUNGO NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.893206 5.060259)",
+        "communiants": 213,
+        "non_communiants": 532
+    },
+    {
+        "nom": "Lafe-Baleng",
+        "quartier": "Lafe-baoba",
+        "district": "BALENG A",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.401418 5.50724)",
+        "communiants": 580,
+        "non_communiants": 350
+    },
+    {
+        "nom": "Lafié avec son annexe Latsit Bamougoum",
+        "quartier": "Lafié-Bamougoum",
+        "district": "BAMOUGOUM B",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.371447 5.450477)",
+        "communiants": 290,
+        "non_communiants": 150
+    },
+    {
+        "nom": "Le Jourdain de beka hossere",
+        "quartier": "Beka hossere",
+        "district": "NGAOUNDERE",
+        "region_synodale": "ADAMAOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 80,
+        "non_communiants": 80
+    },
+    {
+        "nom": "Leffé",
+        "quartier": "Foto",
+        "district": "DSCHANG II",
+        "region_synodale": "MENOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.088951 5.470598)",
+        "communiants": 40,
+        "non_communiants": 20
+    },
+    {
+        "nom": "Lieu de culte Cité Des Merveilles",
+        "quartier": "Messassi Cité Des Merveilles",
+        "district": "CENTRE 3",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 73,
+        "non_communiants": 87
+    },
+    {
+        "nom": "Lieu de Culte de DEMBOU (PAROISSE DE MTIEKI)",
+        "quartier": "DEMBOU ( MTIEKI)",
+        "district": "BANDJOUN A",
+        "region_synodale": "KOUNG KHI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.372365 5.390032)",
+        "communiants": 36,
+        "non_communiants": 10
+    },
+    {
+        "nom": "Lieu de culte de Mbanga Bakoko logements sociaux",
+        "quartier": "Yassa Mbanga Bakoko",
+        "district": "NEW-BELL D",
+        "region_synodale": "WOURI SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.791393 4.003058)",
+        "communiants": 96,
+        "non_communiants": 2
+    },
+    {
+        "nom": "Lieu de Culte de Nkolondom",
+        "quartier": "Nkolondom",
+        "district": "CENTRE 3",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.497991 3.954188)",
+        "communiants": 60,
+        "non_communiants": 18
+    },
+    {
+        "nom": "Logntoka",
+        "quartier": "Logntoka",
+        "district": "DISTRICT DE YABASSI-YINGUI",
+        "region_synodale": "NKAM",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.97256 4.487428)",
+        "communiants": 45,
+        "non_communiants": 8
+    },
+    {
+        "nom": "Louh",
+        "quartier": "Louh",
+        "district": "BAMENA",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.45634 5.155586)",
+        "communiants": 192,
+        "non_communiants": 40
+    },
+    {
+        "nom": "LOUM A",
+        "quartier": "Quartier Abattoir",
+        "district": "LOUM",
+        "region_synodale": "MOUNGO CENTRE",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.732855 4.721452)",
+        "communiants": 290,
+        "non_communiants": 138
+    },
+    {
+        "nom": "LOUM B",
+        "quartier": "Madagascar",
+        "district": "LOUM",
+        "region_synodale": "MOUNGO CENTRE",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.738887 4.717318)",
+        "communiants": 545,
+        "non_communiants": 75
+    },
+    {
+        "nom": "LOUM C",
+        "quartier": "LOUM Chantier gare",
+        "district": "LOUM",
+        "region_synodale": "MOUNGO CENTRE",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.71882 4.675802)",
+        "communiants": 222,
+        "non_communiants": 117
+    },
+    {
+        "nom": "LOUM D",
+        "quartier": "MANENGWASSA",
+        "district": "LOUM",
+        "region_synodale": "MOUNGO CENTRE",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.728534 4.721859)",
+        "communiants": 397,
+        "non_communiants": 240
+    },
+    {
+        "nom": "LOUM E",
+        "quartier": "NASSIF",
+        "district": "LOUM",
+        "region_synodale": "MOUNGO CENTRE",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.71534 4.697547)",
+        "communiants": 147,
+        "non_communiants": 15
+    },
+    {
+        "nom": "Mafofa",
+        "quartier": "Mafofa",
+        "district": "BAMENDJINDA",
+        "region_synodale": "BAMBOUTOS ET NORD OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.284377 5.570379)",
+        "communiants": 55,
+        "non_communiants": 23
+    },
+    {
+        "nom": "Magba",
+        "quartier": "Nylon",
+        "district": "MAGBA",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 394,
+        "non_communiants": 11
+    },
+    {
+        "nom": "Maka",
+        "quartier": "Maka",
+        "district": "BOMONO",
+        "region_synodale": "MOUNGO SUD & MEME",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.645097 4.232977)",
+        "communiants": 62,
+        "non_communiants": 27
+    },
+    {
+        "nom": "Makepe tonnerre",
+        "quartier": "Bepanda tonnerre",
+        "district": "DEIDO MAKEPE",
+        "region_synodale": "WOURI CENTRE",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.727201 4.074029)",
+        "communiants": 3195,
+        "non_communiants": 0
+    },
+    {
+        "nom": "MAKEPE VILLAGE",
+        "quartier": "MAKEPE",
+        "district": "DOUALA NORD",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.752651 4.077175)",
+        "communiants": 118,
+        "non_communiants": 38
+    },
+    {
+        "nom": "MAKWETVU",
+        "quartier": "Chéfferie",
+        "district": "NJIMOM",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 105,
+        "non_communiants": 5
+    },
+    {
+        "nom": "Malantouen",
+        "quartier": "Njissé",
+        "district": "MALANTOUEN",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.133604 5.714486)",
+        "communiants": 198,
+        "non_communiants": 170
+    },
+    {
+        "nom": "Malenden",
+        "quartier": "Machinben",
+        "district": "GBA-NJA",
+        "region_synodale": "NOUN SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.681787 5.495142)",
+        "communiants": 45,
+        "non_communiants": 15
+    },
+    {
+        "nom": "Maloum",
+        "quartier": "Maloum_centre",
+        "district": "NJIMOM",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 54,
+        "non_communiants": 1
+    },
+    {
+        "nom": "MAMBAIN",
+        "quartier": "Mambain",
+        "district": "FOUMBAN 4",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.893077 5.706532)",
+        "communiants": 172,
+        "non_communiants": 0
+    },
+    {
+        "nom": "Mandjou",
+        "quartier": "Mandjou",
+        "district": "LOM & DJEREM NORD",
+        "region_synodale": "EST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (13.733667 4.592844)",
+        "communiants": 66,
+        "non_communiants": 100
+    },
+    {
+        "nom": "Mandouka",
+        "quartier": "Bona Ngassè",
+        "district": "ABO-NORD",
+        "region_synodale": "MOUNGO SUD & MEME",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.712991 4.310606)",
+        "communiants": 24,
+        "non_communiants": 15
+    },
+    {
+        "nom": "Manengolè1",
+        "quartier": "KEM",
+        "district": "NDOUNGUE SUD",
+        "region_synodale": "MOUNGO CENTRE",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.855733 4.879212)",
+        "communiants": 80,
+        "non_communiants": 20
+    },
+    {
+        "nom": "Manengoteng",
+        "quartier": "Komkok",
+        "district": "MANJO A",
+        "region_synodale": "MOUNGO CENTRE",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.797668 4.814405)",
+        "communiants": 50,
+        "non_communiants": 10
+    },
+    {
+        "nom": "MANENGOUBA",
+        "quartier": "Manengouba 2",
+        "district": "NDOUNGUE NORD",
+        "region_synodale": "MOUNGO CENTRE",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.862582 4.952888)",
+        "communiants": 85,
+        "non_communiants": 35
+    },
+    {
+        "nom": "Manewang",
+        "quartier": "Quartier 6 de Manjo",
+        "district": "MANJO B",
+        "region_synodale": "MOUNGO CENTRE",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.819643 4.846989)",
+        "communiants": 198,
+        "non_communiants": 25
+    },
+    {
+        "nom": "Mangamba",
+        "quartier": "Bon'Eyang",
+        "district": "ABO-NORD",
+        "region_synodale": "MOUNGO SUD & MEME",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.733196 4.318897)",
+        "communiants": 151,
+        "non_communiants": 15
+    },
+    {
+        "nom": "Mangkoulang",
+        "quartier": "Mangkoulang",
+        "district": "ABO-SUD \"A\"",
+        "region_synodale": "MOUNGO SUD & MEME",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.595343 4.332702)",
+        "communiants": 63,
+        "non_communiants": 43
+    },
+    {
+        "nom": "Mangoum Njincha",
+        "quartier": "Njincha",
+        "district": "MANGOUM",
+        "region_synodale": "NOUN SUD",
+        "niveau": "Bureau de district Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.613145 5.490562)",
+        "communiants": 250,
+        "non_communiants": 12
+    },
+    {
+        "nom": "Mangwété",
+        "quartier": "Bloc 3-4",
+        "district": "MELONG",
+        "region_synodale": "MOUNGO NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.974485 5.155053)",
+        "communiants": 209,
+        "non_communiants": 15
+    },
+    {
+        "nom": "MANJO CENTRE",
+        "quartier": "Quartier 3",
+        "district": "MANJO A",
+        "region_synodale": "MOUNGO CENTRE",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.826269 4.84977)",
+        "communiants": 250,
+        "non_communiants": 120
+    },
+    {
+        "nom": "Manjo village",
+        "quartier": "Quartier 1",
+        "district": "MANJO A",
+        "region_synodale": "MOUNGO CENTRE",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.824863 4.842338)",
+        "communiants": 250,
+        "non_communiants": 53
+    },
+    {
+        "nom": "Manjouom",
+        "quartier": "Tounsèn",
+        "district": "nan",
+        "region_synodale": "nan",
+        "niveau": "Bureau de district Bureau Paroissial",
+        "localisation": "",
+        "communiants": 24,
+        "non_communiants": 0
+    },
+    {
+        "nom": "Manjouom",
+        "quartier": "Tounsèn",
+        "district": "MALANTOUEN",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau National Bureau régional Bureau de district Bureau Paroissial",
+        "localisation": "",
+        "communiants": 24,
+        "non_communiants": 0
+    },
+    {
+        "nom": "Mankouombi",
+        "quartier": "Mapassen",
+        "district": "MASSANGAM II",
+        "region_synodale": "NOUN SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.039182 5.446397)",
+        "communiants": 40,
+        "non_communiants": 60
+    },
+    {
+        "nom": "Mapouoche",
+        "quartier": "Station",
+        "district": "NKOUSSAM",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 100,
+        "non_communiants": 2
+    },
+    {
+        "nom": "Massam",
+        "quartier": "Mankii",
+        "district": "BANGOURAIN",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 21,
+        "non_communiants": 1
+    },
+    {
+        "nom": "MATOUBE",
+        "quartier": "Quartier Bonadjo",
+        "district": "NKONDJOCK SUD",
+        "region_synodale": "NKAM",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.238108 4.824795)",
+        "communiants": 60,
+        "non_communiants": 20
+    },
+    {
+        "nom": "Mayouom",
+        "quartier": "Malam",
+        "district": "NJIMOM",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 118,
+        "non_communiants": 0
+    },
+    {
+        "nom": "Mbadoumou",
+        "quartier": "Mbadoumou",
+        "district": "CENTRE 2 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.454492 3.809684)",
+        "communiants": 210,
+        "non_communiants": 2
+    },
+    {
+        "nom": "Mbalmayo New town centre",
+        "quartier": "New town centre",
+        "district": "NYONG & SOO",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 260,
+        "non_communiants": 12
+    },
+    {
+        "nom": "Mbalmayo New town centre",
+        "quartier": "New town centre",
+        "district": "NYONG & SOO",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 220,
+        "non_communiants": 30
+    },
+    {
+        "nom": "Mbanda Sic",
+        "quartier": "Mbanda Sic derrière camp sic",
+        "district": "EDEA  I",
+        "region_synodale": "SANAGA MARITIME ET OCEAN",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 200,
+        "non_communiants": 30
+    },
+    {
+        "nom": "Mbanda Sic",
+        "quartier": "Mbanda-sic (derrière camp Sic)",
+        "district": "EDEA  I",
+        "region_synodale": "SANAGA MARITIME ET OCEAN",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 150,
+        "non_communiants": 30
+    },
+    {
+        "nom": "Mbandjock",
+        "quartier": "kaka",
+        "district": "HTE SANAGA",
+        "region_synodale": "CENTRE SUD 2",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 40,
+        "non_communiants": 65
+    },
+    {
+        "nom": "Mbanga Bakoko logements sociaux",
+        "quartier": "Mbanga Bakoko - Yassa",
+        "district": "NEW-BELL D",
+        "region_synodale": "WOURI SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 96,
+        "non_communiants": 2
+    },
+    {
+        "nom": "Mbanga -Balong",
+        "quartier": "Quartier 1",
+        "district": "BALONG",
+        "region_synodale": "MOUNGO SUD & MEME",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.567522 4.46857)",
+        "communiants": 86,
+        "non_communiants": 56
+    },
+    {
+        "nom": "Mbanga -Gare",
+        "quartier": "Quartier 12",
+        "district": "BALONG",
+        "region_synodale": "MOUNGO SUD & MEME",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.5676 4.497668)",
+        "communiants": 293,
+        "non_communiants": 204
+    },
+    {
+        "nom": "Mbanjou",
+        "quartier": "Mbanjou",
+        "district": "MBANJOU",
+        "region_synodale": "NOUN SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.624046 5.521373)",
+        "communiants": 294,
+        "non_communiants": 2
+    },
+    {
+        "nom": "Mbankolo",
+        "quartier": "Oliga (Mbankolo)",
+        "district": "CENTRE 1 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.496987 3.900551)",
+        "communiants": 180,
+        "non_communiants": 15
+    },
+    {
+        "nom": "MBARESSOUMTOU 2",
+        "quartier": "MBARESSOUMTOU, quartier 5",
+        "district": "BANEKA 3",
+        "region_synodale": "MOUNGO NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 346,
+        "non_communiants": 20
+    },
+    {
+        "nom": "MBELA JEDU",
+        "quartier": "BONANGANG",
+        "district": "DOUALA NORD",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.748147 4.09246)",
+        "communiants": 550,
+        "non_communiants": 750
+    },
+    {
+        "nom": "Mbonjo",
+        "quartier": "Mbonjo 2",
+        "district": "ABO-SUD \"A\"",
+        "region_synodale": "MOUNGO SUD & MEME",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.521289 4.209527)",
+        "communiants": 110,
+        "non_communiants": 27
+    },
+    {
+        "nom": "Mbou",
+        "quartier": "Mbou",
+        "district": "BALENGOU",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.456088 5.117117)",
+        "communiants": 404,
+        "non_communiants": 2
+    },
+    {
+        "nom": "MBOU",
+        "quartier": "Mbou",
+        "district": "BALENGOU",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.459902 5.114258)",
+        "communiants": 201,
+        "non_communiants": 102
+    },
+    {
+        "nom": "Mboukue-Baham",
+        "quartier": "Mboukué",
+        "district": "BAHAM NORD",
+        "region_synodale": "HAUTS PLATEAUX",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.379543 5.334628)",
+        "communiants": 141,
+        "non_communiants": 42
+    },
+    {
+        "nom": "Mebouti",
+        "quartier": "Tougang 2",
+        "district": "BALENG B",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.445802 5.491587)",
+        "communiants": 119,
+        "non_communiants": 65
+    },
+    {
+        "nom": "Meji",
+        "quartier": "Meji",
+        "district": "nan",
+        "region_synodale": "HAUTS PLATEAUX",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.452125 5.292577)",
+        "communiants": 126,
+        "non_communiants": 4
+    },
+    {
+        "nom": "Melap",
+        "quartier": "Koumelap",
+        "district": "NKOUPA",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 219,
+        "non_communiants": 4
+    },
+    {
+        "nom": "Melen",
+        "quartier": "Melen",
+        "district": "CENTRE 2 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.489824 3.863655)",
+        "communiants": 1310,
+        "non_communiants": 32
+    },
+    {
+        "nom": "Melong 2a",
+        "quartier": "melong 2 quartier bangangte",
+        "district": "MBARA 1",
+        "region_synodale": "MOUNGO NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.959606 5.035463)",
+        "communiants": 166,
+        "non_communiants": 53
+    },
+    {
+        "nom": "Melong Centre",
+        "quartier": "Quartier 3bis",
+        "district": "MELONG",
+        "region_synodale": "MOUNGO NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 929,
+        "non_communiants": 81
+    },
+    {
+        "nom": "Melong Pont",
+        "quartier": "Quartier Pont",
+        "district": "MELONG",
+        "region_synodale": "MOUNGO NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 324,
+        "non_communiants": 39
+    },
+    {
+        "nom": "MESSAMENDONGO",
+        "quartier": "MESSAMENDONGO",
+        "district": "CENTRE 1",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.517683 3.797218)",
+        "communiants": 151,
+        "non_communiants": 53
+    },
+    {
+        "nom": "Messassi",
+        "quartier": "Messassi Ngonlong",
+        "district": "CENTRE 3",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.514197 3.93657)",
+        "communiants": 320,
+        "non_communiants": 175
+    },
+    {
+        "nom": "Metchou",
+        "quartier": "Metchou 1",
+        "district": "PENKA MICHEL",
+        "region_synodale": "MENOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.221785 5.441888)",
+        "communiants": 39,
+        "non_communiants": 24
+    },
+    {
+        "nom": "Mewoulou",
+        "quartier": "Etoug-Ebé",
+        "district": "CENTRE 2 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.474612 3.858341)",
+        "communiants": 196,
+        "non_communiants": 250
+    },
+    {
+        "nom": "Mfeutom  annexe de bahouoc",
+        "quartier": "Noumko",
+        "district": "nan",
+        "region_synodale": "nan",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.486043 5.126106)",
+        "communiants": 120,
+        "non_communiants": 10
+    },
+    {
+        "nom": "Mfolap",
+        "quartier": "Mfencha",
+        "district": "NJIMOM",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 160,
+        "non_communiants": 12
+    },
+    {
+        "nom": "Minkwele",
+        "quartier": "Minkwe cimetière",
+        "district": "BOMONO",
+        "region_synodale": "MOUNGO SUD & MEME",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.645097 4.232977)",
+        "communiants": 89,
+        "non_communiants": 89
+    },
+    {
+        "nom": "Mombo",
+        "quartier": "Koubi",
+        "district": "BALONG",
+        "region_synodale": "MOUNGO SUD & MEME",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.592909 4.570968)",
+        "communiants": 57,
+        "non_communiants": 38
+    },
+    {
+        "nom": "Monatele",
+        "quartier": "Prison",
+        "district": "LEKIE' ET MBAM",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.535088 3.896543)",
+        "communiants": 45,
+        "non_communiants": 65
+    },
+    {
+        "nom": "Mont des oliviers",
+        "quartier": "Residentiel",
+        "district": "NGAOUNDERE",
+        "region_synodale": "ADAMAOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (13.58808 7.3137)",
+        "communiants": 750,
+        "non_communiants": 350
+    },
+    {
+        "nom": "Mont des oliviers/annexe de Djalingo",
+        "quartier": "Djalingo",
+        "district": "NGAOUNDERE",
+        "region_synodale": "ADAMAOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 32,
+        "non_communiants": 10
+    },
+    {
+        "nom": "Mont Sinaï de GADA Mabanga",
+        "quartier": "Gada Mabanga",
+        "district": "NGAOUNDERE",
+        "region_synodale": "ADAMAOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (13.582677 7.36424)",
+        "communiants": 40,
+        "non_communiants": 110
+    },
+    {
+        "nom": "Moulon",
+        "quartier": "Quartier 11",
+        "district": "BALONG",
+        "region_synodale": "MOUNGO SUD & MEME",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.570303 4.500637)",
+        "communiants": 144,
+        "non_communiants": 48
+    },
+    {
+        "nom": "Moutcha",
+        "quartier": "Dem kouck",
+        "district": "BANDJOUN  C",
+        "region_synodale": "KOUNG KHI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 150,
+        "non_communiants": 30
+    },
+    {
+        "nom": "Moutcha annexe de djiogo",
+        "quartier": "Djiogo",
+        "district": "BANDJOUN  C",
+        "region_synodale": "KOUNG KHI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 50,
+        "non_communiants": 12
+    },
+    {
+        "nom": "MTIÉKI",
+        "quartier": "MTIÉKI",
+        "district": "BANDJOUN A",
+        "region_synodale": "KOUNG KHI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.391395 5.370202)",
+        "communiants": 112,
+        "non_communiants": 46
+    },
+    {
+        "nom": "Muyouka",
+        "quartier": "Muyouka",
+        "district": "BALONG",
+        "region_synodale": "MOUNGO SUD & MEME",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.567522 4.46857)",
+        "communiants": 75,
+        "non_communiants": 47
+    },
+    {
+        "nom": "MVOUTSA'HA-BANEFO",
+        "quartier": "MVOUTSA'HA",
+        "district": "BAFOUSSAM A",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 180,
+        "non_communiants": 100
+    },
+    {
+        "nom": "Nchoutnoun",
+        "quartier": "Paysana",
+        "district": "NKOUGHAM III",
+        "region_synodale": "NOUN SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.504403 5.698324)",
+        "communiants": 100,
+        "non_communiants": 3
+    },
+    {
+        "nom": "NDA'MBANSIE",
+        "quartier": "Garage banso'o",
+        "district": "FOUMBAN 1",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.881642 5.726948)",
+        "communiants": 486,
+        "non_communiants": 1
+    },
+    {
+        "nom": "Ndengnieup",
+        "quartier": "Ndengnieup",
+        "district": "BANGOU",
+        "region_synodale": "HAUTS PLATEAUX",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.380358 5.179092)",
+        "communiants": 177,
+        "non_communiants": 80
+    },
+    {
+        "nom": "Ndiambou",
+        "quartier": "Medjo",
+        "district": "BAFOUSSAM B",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.450765 5.438539)",
+        "communiants": 187,
+        "non_communiants": 151
+    },
+    {
+        "nom": "NDIANGDAM A",
+        "quartier": "NDIANGDAM",
+        "district": "BAFOUSSAM B",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 633,
+        "non_communiants": 20
+    },
+    {
+        "nom": "Ndiangdam B",
+        "quartier": "Ndiangdam",
+        "district": "BAFOUSSAM B",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.423972 5.452833)",
+        "communiants": 143,
+        "non_communiants": 164
+    },
+    {
+        "nom": "NDIONKOU LAGOUENG kounti",
+        "quartier": "NDIONKOU",
+        "district": "BALENG A",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.41209 5.517376)",
+        "communiants": 191,
+        "non_communiants": 116
+    },
+    {
+        "nom": "NDIONKOU LAGOUENG kounti",
+        "quartier": "NDIONKOU",
+        "district": "BALENG A",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.407877 5.489346)",
+        "communiants": 191,
+        "non_communiants": 116
+    },
+    {
+        "nom": "Ndionkou-Lagoueng-konti",
+        "quartier": "Dionkou Manguier",
+        "district": "BALENG A",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.412792 5.524149)",
+        "communiants": 106,
+        "non_communiants": 224
+    },
+    {
+        "nom": "NDOGPASSI 2",
+        "quartier": "NYALLA 1",
+        "district": "NEW-BELL D",
+        "region_synodale": "WOURI SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.772022 4.028088)",
+        "communiants": 693,
+        "non_communiants": 439
+    },
+    {
+        "nom": "Ndombeng",
+        "quartier": "Village ndombeng",
+        "district": "NDOUNGUE NORD",
+        "region_synodale": "MOUNGO CENTRE",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.870107 4.936037)",
+        "communiants": 80,
+        "non_communiants": 20
+    },
+    {
+        "nom": "NDOTTO-KWAKWACK",
+        "quartier": "Ndobalo",
+        "district": "NKONDJOCK NORD",
+        "region_synodale": "NKAM",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.26286 4.978333)",
+        "communiants": 35,
+        "non_communiants": 8
+    },
+    {
+        "nom": "Ndoumkain",
+        "quartier": "Nkouotain",
+        "district": "NKOUGHAM 2",
+        "region_synodale": "NOUN SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.558453 5.657748)",
+        "communiants": 156,
+        "non_communiants": 7
+    },
+    {
+        "nom": "Ndoungouot",
+        "quartier": "Ndoungouot",
+        "district": "NKOUPA",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.803002 5.768144)",
+        "communiants": 594,
+        "non_communiants": 5
+    },
+    {
+        "nom": "Ndoungue A",
+        "quartier": "Ndoungue",
+        "district": "nan",
+        "region_synodale": "MOUNGO CENTRE",
+        "niveau": "Bureau régional Bureau Paroissial",
+        "localisation": "",
+        "communiants": 204,
+        "non_communiants": 86
+    },
+    {
+        "nom": "Ndoungue A",
+        "quartier": "Ekelè",
+        "district": "NDOUNGUE NORD",
+        "region_synodale": "MOUNGO CENTRE",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.894712 4.902635)",
+        "communiants": 103,
+        "non_communiants": 64
+    },
+    {
+        "nom": "Ndoungue B",
+        "quartier": "Ndoungue",
+        "district": "NDOUNGUE NORD",
+        "region_synodale": "MOUNGO CENTRE",
+        "niveau": "Bureau de district Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.893437 4.918952)",
+        "communiants": 80,
+        "non_communiants": 10
+    },
+    {
+        "nom": "New Bell",
+        "quartier": "New Bell",
+        "district": "MVILA & NTEM",
+        "region_synodale": "CENTRE SUD 2",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (18 10)",
+        "communiants": 130,
+        "non_communiants": 80
+    },
+    {
+        "nom": "New Bell",
+        "quartier": "Quartier mikongoo",
+        "district": "MVILA & NTEM",
+        "region_synodale": "CENTRE SUD 2",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (15 7)",
+        "communiants": 130,
+        "non_communiants": 80
+    },
+    {
+        "nom": "New bell 1",
+        "quartier": "New bell",
+        "district": "NEW-BELL A",
+        "region_synodale": "WOURI SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.711237 4.028269)",
+        "communiants": 780,
+        "non_communiants": 273
+    },
+    {
+        "nom": "New Bell source",
+        "quartier": "New Bell",
+        "district": "NEW-BELL A",
+        "region_synodale": "WOURI SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.710628 4.029648)",
+        "communiants": 458,
+        "non_communiants": 200
+    },
+    {
+        "nom": "NEW BELL TSF",
+        "quartier": "New Bell Bassa",
+        "district": "nan",
+        "region_synodale": "WOURI CENTRE",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 92,
+        "non_communiants": 7
+    },
+    {
+        "nom": "NEW-BELL MAKEA",
+        "quartier": "MAKEA (NEW-BELL)",
+        "district": "NEW-BELL A",
+        "region_synodale": "WOURI SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.706025 4.037468)",
+        "communiants": 203,
+        "non_communiants": 4
+    },
+    {
+        "nom": "New-Bell source",
+        "quartier": "New-Bell",
+        "district": "NEW-BELL A",
+        "region_synodale": "WOURI SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.7106 4.029632)",
+        "communiants": 473,
+        "non_communiants": 200
+    },
+    {
+        "nom": "Ngakun",
+        "quartier": "Quartier 6",
+        "district": "BANGANGTE II",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau de district Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.53383 5.141693)",
+        "communiants": 180,
+        "non_communiants": 120
+    },
+    {
+        "nom": "Ngambouo",
+        "quartier": "Tenjouonouo01",
+        "district": "NKOUGHAM III",
+        "region_synodale": "NOUN SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.531824 5.680536)",
+        "communiants": 88,
+        "non_communiants": 3
+    },
+    {
+        "nom": "Ngaoundal",
+        "quartier": "Quartier Carrière",
+        "district": "nan",
+        "region_synodale": "ADAMAOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (13.261472 6.47113)",
+        "communiants": 55,
+        "non_communiants": 3
+    },
+    {
+        "nom": "Ngba Nkoup0",
+        "quartier": "Ngba Nkoup",
+        "district": "FOUMBOT II",
+        "region_synodale": "NOUN SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.678266 5.577239)",
+        "communiants": 124,
+        "non_communiants": 1
+    },
+    {
+        "nom": "Ngodi Bakoko II",
+        "quartier": "Ngodi bakoko",
+        "district": "NEW-BELL D",
+        "region_synodale": "WOURI SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.780243 3.978967)",
+        "communiants": 150,
+        "non_communiants": 300
+    },
+    {
+        "nom": "Ngodi Bakoko II",
+        "quartier": "Ngodi Bakoko",
+        "district": "NEW-BELL D",
+        "region_synodale": "WOURI SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.716349 4.032338)",
+        "communiants": 160,
+        "non_communiants": 300
+    },
+    {
+        "nom": "NGODI BAKOKO1",
+        "quartier": "NGODI BAKOKO",
+        "district": "NEW-BELL D",
+        "region_synodale": "WOURI SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.778964 3.988584)",
+        "communiants": 156,
+        "non_communiants": 200
+    },
+    {
+        "nom": "Ngouang",
+        "quartier": "Ngouang (nket)",
+        "district": "BAMEKA",
+        "region_synodale": "HAUTS PLATEAUX",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.343412 5.448865)",
+        "communiants": 160,
+        "non_communiants": 14
+    },
+    {
+        "nom": "NGOULMEKONG II",
+        "quartier": "FOUGEROLE",
+        "district": "CENTRE 2",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 300,
+        "non_communiants": 524
+    },
+    {
+        "nom": "Ngoulmekong1",
+        "quartier": "Ngoulmekong",
+        "district": "CENTRE 1",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 250,
+        "non_communiants": 80
+    },
+    {
+        "nom": "Ngouongouo",
+        "quartier": "Ngouongouo",
+        "district": "FOUMBOT I",
+        "region_synodale": "NOUN SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.649044 5.512193)",
+        "communiants": 200,
+        "non_communiants": 201
+    },
+    {
+        "nom": "Ngousso Essessalakok",
+        "quartier": "Quartier eleveur, Mvog Ebanda",
+        "district": "CENTRE 2",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.566195 3.906337)",
+        "communiants": 620,
+        "non_communiants": 58
+    },
+    {
+        "nom": "Ngùendùem",
+        "quartier": "Ngùendùem -chefferie",
+        "district": "nan",
+        "region_synodale": "nan",
+        "niveau": "Bureau National Bureau régional Bureau de district Bureau Paroissial",
+        "localisation": "",
+        "communiants": 58,
+        "non_communiants": 8
+    },
+    {
+        "nom": "NGUI TAM-TAM",
+        "quartier": "NGUI",
+        "district": "DSCHANG II",
+        "region_synodale": "MENOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.051526 5.430201)",
+        "communiants": 106,
+        "non_communiants": 0
+    },
+    {
+        "nom": "NGWA",
+        "quartier": "NGWA",
+        "district": "BANEKA 3",
+        "region_synodale": "MOUNGO NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.918047 4.919768)",
+        "communiants": 65,
+        "non_communiants": 85
+    },
+    {
+        "nom": "Njambah",
+        "quartier": "La'a veng",
+        "district": "BANGOULAP",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.51571 5.105351)",
+        "communiants": 90,
+        "non_communiants": 70
+    },
+    {
+        "nom": "Njiamgbie",
+        "quartier": "Njiamgbie",
+        "district": "NKOUGHAM III",
+        "region_synodale": "NOUN SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.571152 5.681459)",
+        "communiants": 72,
+        "non_communiants": 4
+    },
+    {
+        "nom": "Njighait",
+        "quartier": "Njighait",
+        "district": "MALANTOUEN",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 42,
+        "non_communiants": 0
+    },
+    {
+        "nom": "Njigham-canaan",
+        "quartier": "Njigham/Manfu",
+        "district": "NKOUTIE",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau de district Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.843266 5.634809)",
+        "communiants": 48,
+        "non_communiants": 37
+    },
+    {
+        "nom": "NJILOUM",
+        "quartier": "NJILOUM",
+        "district": "FOUMBAN 2",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.884392 5.738943)",
+        "communiants": 369,
+        "non_communiants": 0
+    },
+    {
+        "nom": "NJIMBAM",
+        "quartier": "Njimbam",
+        "district": "FOUMBAN 4",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.903337 5.71509)",
+        "communiants": 376,
+        "non_communiants": 0
+    },
+    {
+        "nom": "Njimom",
+        "quartier": "Njitouyùen",
+        "district": "NJIMOM",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 507,
+        "non_communiants": 5
+    },
+    {
+        "nom": "NJINDEN",
+        "quartier": "Njinden",
+        "district": "FOUMBAN 1",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.89095 5.723015)",
+        "communiants": 209,
+        "non_communiants": 1
+    },
+    {
+        "nom": "NJINKA",
+        "quartier": "Machainka",
+        "district": "FOUMBAN 2",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.895833 5.736972)",
+        "communiants": 379,
+        "non_communiants": 0
+    },
+    {
+        "nom": "Njintout",
+        "quartier": "Njintout",
+        "district": "FOUMBAN 2",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.888957 5.737448)",
+        "communiants": 475,
+        "non_communiants": 2
+    },
+    {
+        "nom": "Njintout-Bangourain",
+        "quartier": "Njintout-Bangourain",
+        "district": "BANGOURAIN",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.671576 5.889767)",
+        "communiants": 50,
+        "non_communiants": 15
+    },
+    {
+        "nom": "NJIYOUOM",
+        "quartier": "NJIYOUOM",
+        "district": "FOUMBAN 3",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.901902 5.723048)",
+        "communiants": 221,
+        "non_communiants": 3
+    },
+    {
+        "nom": "Njombé",
+        "quartier": "Koligo",
+        "district": "NJOMBE - PENJA",
+        "region_synodale": "MOUNGO CENTRE",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.661108 4.595837)",
+        "communiants": 160,
+        "non_communiants": 30
+    },
+    {
+        "nom": "Njouki/ Biendede",
+        "quartier": "Njouki Biendede",
+        "district": "BAKOKO",
+        "region_synodale": "MOUNGO SUD & MEME",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.654495 4.205035)",
+        "communiants": 62,
+        "non_communiants": 21
+    },
+    {
+        "nom": "Nkende",
+        "quartier": "Nkende",
+        "district": "BOMONO",
+        "region_synodale": "MOUNGO SUD & MEME",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.645097 4.232977)",
+        "communiants": 61,
+        "non_communiants": 47
+    },
+    {
+        "nom": "Nkolfoulou II",
+        "quartier": "Nkolfoulou",
+        "district": "CENTRE 1",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 80,
+        "non_communiants": 71
+    },
+    {
+        "nom": "nkoLndongo 2",
+        "quartier": "nkoLndongo",
+        "district": "CENTRE 1",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.52745 3.858821)",
+        "communiants": 800,
+        "non_communiants": 130
+    },
+    {
+        "nom": "Nkololoun",
+        "quartier": "Nkololoun - Km5",
+        "district": "NEW-BELL B",
+        "region_synodale": "WOURI SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 295,
+        "non_communiants": 55
+    },
+    {
+        "nom": "NKOMBA",
+        "quartier": "Bonaberi",
+        "district": "BELE-BELE  2",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 172,
+        "non_communiants": 101
+    },
+    {
+        "nom": "Nkomo",
+        "quartier": "Nkomo",
+        "district": "CENTRE 4",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.549228 3.840379)",
+        "communiants": 1087,
+        "non_communiants": 430
+    },
+    {
+        "nom": "Nkompita",
+        "quartier": "Nkompita",
+        "district": "NJOMBE - PENJA",
+        "region_synodale": "MOUNGO CENTRE",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 250,
+        "non_communiants": 50
+    },
+    {
+        "nom": "Nkongsamba",
+        "quartier": "Quartier 11",
+        "district": "BANEKA 1",
+        "region_synodale": "MOUNGO NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.934459 4.9477)",
+        "communiants": 159,
+        "non_communiants": 2
+    },
+    {
+        "nom": "Nkongsoung Centre",
+        "quartier": "Quartier TCHOUA",
+        "district": "MELONG",
+        "region_synodale": "MOUNGO NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.008525 5.15254)",
+        "communiants": 366,
+        "non_communiants": 22
+    },
+    {
+        "nom": "Nkongsoung Long-Trait",
+        "quartier": "Quartier bafang",
+        "district": "MELONG",
+        "region_synodale": "MOUNGO NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 144,
+        "non_communiants": 6
+    },
+    {
+        "nom": "Nkong'waame",
+        "quartier": "Ntollo-ekoock",
+        "district": "NDOUNGUE NORD",
+        "region_synodale": "MOUNGO CENTRE",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.887797 4.903852)",
+        "communiants": 101,
+        "non_communiants": 30
+    },
+    {
+        "nom": "Nkonto",
+        "quartier": "Zemto (baleveng)",
+        "district": "NKONG - NI",
+        "region_synodale": "MENOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.144593 5.540132)",
+        "communiants": 32,
+        "non_communiants": 68
+    },
+    {
+        "nom": "Nkoulou-Carrière",
+        "quartier": "Nkoulou Carrière",
+        "district": "CENTRE 4",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.56122 3.793413)",
+        "communiants": 200,
+        "non_communiants": 50
+    },
+    {
+        "nom": "NKOUONDOUM",
+        "quartier": "MAMFU",
+        "district": "NKOUTIE",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.888628 5.647258)",
+        "communiants": 80,
+        "non_communiants": 0
+    },
+    {
+        "nom": "Nkozoa",
+        "quartier": "Nkometou",
+        "district": "CENTRE 3",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.548074 4.035816)",
+        "communiants": 60,
+        "non_communiants": 90
+    },
+    {
+        "nom": "NLOHE",
+        "quartier": "Quartier NLOHE",
+        "district": "MANJO B",
+        "region_synodale": "MOUNGO CENTRE",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.749154 4.762805)",
+        "communiants": 162,
+        "non_communiants": 24
+    },
+    {
+        "nom": "Nlongkak",
+        "quartier": "Valée-Nlongkak",
+        "district": "CENTRE 3",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.52302 3.89368)",
+        "communiants": 2000,
+        "non_communiants": 500
+    },
+    {
+        "nom": "Nsam Efoulan",
+        "quartier": "Efoulan",
+        "district": "CENTRE 3 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.502736 3.827697)",
+        "communiants": 850,
+        "non_communiants": 410
+    },
+    {
+        "nom": "Nsamntouen",
+        "quartier": "Kueka camp galion",
+        "district": "FOUMBAN 3",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 250,
+        "non_communiants": 150
+    },
+    {
+        "nom": "Nsimeyong",
+        "quartier": "Nkolbenda(montée jouvence)",
+        "district": "CENTRE 3 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.48413 3.829735)",
+        "communiants": 305,
+        "non_communiants": 2
+    },
+    {
+        "nom": "Nyalla",
+        "quartier": "Nyalla quartier Haoussa",
+        "district": "B. B. D I",
+        "region_synodale": "WOURI SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.774709 4.035307)",
+        "communiants": 413,
+        "non_communiants": 43
+    },
+    {
+        "nom": "Nyanganza",
+        "quartier": "Nyanganza",
+        "district": "LOM & DJEREM SUD",
+        "region_synodale": "EST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (13.66793 4.568526)",
+        "communiants": 177,
+        "non_communiants": 22
+    },
+    {
+        "nom": "Nzintia",
+        "quartier": "567",
+        "district": "MBOUDA",
+        "region_synodale": "BAMBOUTOS ET NORD OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 489,
+        "non_communiants": 78
+    },
+    {
+        "nom": "Obala",
+        "quartier": "ELOT 1",
+        "district": "LEKIE' ET MBAM",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 306,
+        "non_communiants": 5
+    },
+    {
+        "nom": "OBALA",
+        "quartier": "ELOT 1 (Quartier Bamileke)",
+        "district": "LEKIE' ET MBAM",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 350,
+        "non_communiants": 15
+    },
+    {
+        "nom": "Obam Ongola",
+        "quartier": "Obam dans Ahala 1",
+        "district": "CENTRE 3 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 168,
+        "non_communiants": 132
+    },
+    {
+        "nom": "Oyom-abang",
+        "quartier": "Oyom-abang",
+        "district": "CENTRE 1 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 1731,
+        "non_communiants": 522
+    },
+    {
+        "nom": "Pare Mefire",
+        "quartier": "Nchoutnsam Centre",
+        "district": "FOUMBOT II",
+        "region_synodale": "NOUN SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.642004 5.626729)",
+        "communiants": 120,
+        "non_communiants": 3
+    },
+    {
+        "nom": "Paroisse  OBAM ONGOLA",
+        "quartier": "AHALA 1 Dernière la station A B Petroluim",
+        "district": "CENTRE 3 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 180,
+        "non_communiants": 230
+    },
+    {
+        "nom": "Paroisse Bakong centre Annexe Bakong plateau",
+        "quartier": "Tahleu",
+        "district": "BALENGOU",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.490061 5.108506)",
+        "communiants": 35,
+        "non_communiants": 25
+    },
+    {
+        "nom": "Paroisse d'Akak",
+        "quartier": "Akak",
+        "district": "CENTRE 3",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.560703 3.99785)",
+        "communiants": 208,
+        "non_communiants": 240
+    },
+    {
+        "nom": "Paroisse de  deptoup",
+        "quartier": "Ndeptoup",
+        "district": "BANGOUA  SUD",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.465861 5.203874)",
+        "communiants": 150,
+        "non_communiants": 100
+    },
+    {
+        "nom": "Paroisse de Badiangseu",
+        "quartier": "Tsingang",
+        "district": "BANGOUA  SUD",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.504551 5.175477)",
+        "communiants": 80,
+        "non_communiants": 30
+    },
+    {
+        "nom": "Paroisse de bafia",
+        "quartier": "Beyabeyakan",
+        "district": "LEKIE' ET MBAM",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.230332 4.741255)",
+        "communiants": 263,
+        "non_communiants": 43
+    },
+    {
+        "nom": "Paroisse de Bafolé",
+        "quartier": "Folé",
+        "district": "TABE I",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.708567 5.643318)",
+        "communiants": 52,
+        "non_communiants": 2
+    },
+    {
+        "nom": "PÀROISSE DE BAKONG",
+        "quartier": "Mbou",
+        "district": "BALENGOU",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.493232 5.091458)",
+        "communiants": 49,
+        "non_communiants": 57
+    },
+    {
+        "nom": "PAROISSE DE BAKONG LIEU DE CULTE DE NTANDZE",
+        "quartier": "Ntandze",
+        "district": "BALENGOU",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.490634 5.081179)",
+        "communiants": 7,
+        "non_communiants": 13
+    },
+    {
+        "nom": "Paroisse de BALATCHI Centre",
+        "quartier": "Village Balatchi",
+        "district": "BALATCHI",
+        "region_synodale": "BAMBOUTOS ET NORD OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.18277 5.629054)",
+        "communiants": 175,
+        "non_communiants": 25
+    },
+    {
+        "nom": "PAROISSE DE BALEGOU KASSANG",
+        "quartier": "TOUDZAP",
+        "district": "BALENGOU",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.403345 5.122315)",
+        "communiants": 47,
+        "non_communiants": 37
+    },
+    {
+        "nom": "paroisse de Balessing Centre",
+        "quartier": "Bawoumwa",
+        "district": "BALESSING",
+        "region_synodale": "MENOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.24639 5.500138)",
+        "communiants": 102,
+        "non_communiants": 20
+    },
+    {
+        "nom": "PAROISSE DE BAMENDZI A",
+        "quartier": "BAMENDZI",
+        "district": "BAFOUSSAM A",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.431265 5.47447)",
+        "communiants": 750,
+        "non_communiants": 300
+    },
+    {
+        "nom": "Paroisse de bandjoun centre annexe de ha",
+        "quartier": "Ha bandjoun",
+        "district": "BANDJOUN A",
+        "region_synodale": "KOUNG KHI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.438076 5.376871)",
+        "communiants": 20,
+        "non_communiants": 150
+    },
+    {
+        "nom": "Paroisse de BANEKANE",
+        "quartier": "Banekane",
+        "district": "BANEKANE",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.567419 5.13416)",
+        "communiants": 231,
+        "non_communiants": 93
+    },
+    {
+        "nom": "Paroisse de Banekane Annexe de Mfeugnoun",
+        "quartier": "Mfeugnoun",
+        "district": "BANEKANE",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.579944 5.108027)",
+        "communiants": 31,
+        "non_communiants": 45
+    },
+    {
+        "nom": "PAROISSE DE BANGWA NORD",
+        "quartier": "DOUKONG",
+        "district": "BANGOUA  NORD",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.457615 5.21693)",
+        "communiants": 400,
+        "non_communiants": 150
+    },
+    {
+        "nom": "Paroisse DE BANZA",
+        "quartier": "Quartier nzimla'a",
+        "district": "NKONG - NI",
+        "region_synodale": "MENOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.144657 5.519615)",
+        "communiants": 144,
+        "non_communiants": 10
+    },
+    {
+        "nom": "PAROISSE DE BAPOUNDEU",
+        "quartier": "BAPOUNDEU VILLAGE",
+        "district": "BAFANG CENTRE",
+        "region_synodale": "HAUT NKAM",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.183108 5.161004)",
+        "communiants": 80,
+        "non_communiants": 10
+    },
+    {
+        "nom": "Paroisse de Bassamba",
+        "quartier": "Baboussa",
+        "district": "BANGOULAP",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.563187 5.04889)",
+        "communiants": 140,
+        "non_communiants": 67
+    },
+    {
+        "nom": "PAROISSE DE BATOUKOP",
+        "quartier": "BATOUKOP",
+        "district": "BAFOUSSAM A",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.479276 5.473397)",
+        "communiants": 150,
+        "non_communiants": 70
+    },
+    {
+        "nom": "Paroisse de Batoula",
+        "quartier": "Ndoukong",
+        "district": "BANGOUA  SUD",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.447668 5.216495)",
+        "communiants": 45,
+        "non_communiants": 25
+    },
+    {
+        "nom": "Paroisse de Bonandam",
+        "quartier": "Village Bonandam",
+        "district": "NJOMBE - PENJA",
+        "region_synodale": "MOUNGO CENTRE",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.672248 4.613521)",
+        "communiants": 54,
+        "non_communiants": 0
+    },
+    {
+        "nom": "Paroisse de Chiekouo.",
+        "quartier": "Chengne",
+        "district": "BAHAM SUD",
+        "region_synodale": "HAUTS PLATEAUX",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.364703 5.29212)",
+        "communiants": 80,
+        "non_communiants": 30
+    },
+    {
+        "nom": "Paroisse de Cogefar",
+        "quartier": "Kambo Boko",
+        "district": "NEW-BELL D",
+        "region_synodale": "WOURI SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.7785 3.993462)",
+        "communiants": 235,
+        "non_communiants": 200
+    },
+    {
+        "nom": "Paroisse de Djeugheu",
+        "quartier": "Togheu",
+        "district": "BAHOUAN / BAMENDJOU",
+        "region_synodale": "HAUTS PLATEAUX",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.345517 5.366622)",
+        "communiants": 142,
+        "non_communiants": 31
+    },
+    {
+        "nom": "Paroisse de DJIONE",
+        "quartier": "DJIONE",
+        "district": "BANDJOUN  E",
+        "region_synodale": "KOUNG KHI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.445905 5.377265)",
+        "communiants": 161,
+        "non_communiants": 18
+    },
+    {
+        "nom": "Paroisse de DJOUM",
+        "quartier": "TAMEZOU",
+        "district": "DJA & LOBO",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (12.696098 2.673591)",
+        "communiants": 60,
+        "non_communiants": 12
+    },
+    {
+        "nom": "Paroisse de Famdianseu Annexe de Tougwi Fametcha",
+        "quartier": "Fapmetcha'a",
+        "district": "BANGOUA  SUD",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.505536 5.198389)",
+        "communiants": 53,
+        "non_communiants": 43
+    },
+    {
+        "nom": "Paroisse de Famgo",
+        "quartier": "Centre ville",
+        "district": "BANGANGTE I",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (-73.568391 45.459271)",
+        "communiants": 1000,
+        "non_communiants": 300
+    },
+    {
+        "nom": "PAROISSE DE FAMLENG",
+        "quartier": "FAMLENG DJIOGO",
+        "district": "BANDJOUN D",
+        "region_synodale": "KOUNG KHI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.405292 5.411283)",
+        "communiants": 189,
+        "non_communiants": 50
+    },
+    {
+        "nom": "Paroisse de houkaha",
+        "quartier": "Le quartier NDJENDAM",
+        "district": "BAFOUSSAM A",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.437373 5.462032)",
+        "communiants": 90,
+        "non_communiants": 160
+    },
+    {
+        "nom": "Paroisse de kaele",
+        "quartier": "Camp fonctionnaire",
+        "district": "nan",
+        "region_synodale": "nan",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (14.44883 10.105348)",
+        "communiants": 103,
+        "non_communiants": 11
+    },
+    {
+        "nom": "Paroisse de Kaffo",
+        "quartier": "Kaffo",
+        "district": "BAHAM SUD",
+        "region_synodale": "HAUTS PLATEAUX",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 53,
+        "non_communiants": 15
+    },
+    {
+        "nom": "Paroisse de kAMKOP VALLÉE",
+        "quartier": "KAMKOP 3",
+        "district": "BAMOUGOUM A",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.371891 5.491743)",
+        "communiants": 91,
+        "non_communiants": 139
+    },
+    {
+        "nom": "PAROISSE DE KAMNA",
+        "quartier": "Kamna",
+        "district": "BANGOUA  NORD",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.454194 5.238755)",
+        "communiants": 105,
+        "non_communiants": 100
+    },
+    {
+        "nom": "Paroisse de Katsela",
+        "quartier": "Katsela",
+        "district": "BANDJOUN D",
+        "region_synodale": "KOUNG KHI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 203,
+        "non_communiants": 27
+    },
+    {
+        "nom": "Paroisse de kouenmeka",
+        "quartier": "Kouenmeka",
+        "district": "NKOUSSAM",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.952621 5.765269)",
+        "communiants": 40,
+        "non_communiants": 1
+    },
+    {
+        "nom": "Paroisse de Kourom",
+        "quartier": "Magnitrom",
+        "district": "BANGOURAIN",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (60 40)",
+        "communiants": 25,
+        "non_communiants": 9
+    },
+    {
+        "nom": "PAROISSE DE LA CARRIERE",
+        "quartier": "Longbaba",
+        "district": "NEW-BELL D",
+        "region_synodale": "WOURI SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.757587 4.025824)",
+        "communiants": 302,
+        "non_communiants": 90
+    },
+    {
+        "nom": "Paroisse de la Carrière",
+        "quartier": "Zone industrielle de Bassa",
+        "district": "NEW-BELL D",
+        "region_synodale": "WOURI SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.758633 4.024237)",
+        "communiants": 300,
+        "non_communiants": 57
+    },
+    {
+        "nom": "Paroisse de lada",
+        "quartier": "Lada",
+        "district": "CENTRE 2",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 125,
+        "non_communiants": 100
+    },
+    {
+        "nom": "Paroisse de Lobethal",
+        "quartier": "Ndogminying",
+        "district": "MOUANKO",
+        "region_synodale": "SANAGA MARITIME ET OCEAN",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.78842 3.640322)",
+        "communiants": 72,
+        "non_communiants": 32
+    },
+    {
+        "nom": "Paroisse de Loumbouot",
+        "quartier": "Loumbouot",
+        "district": "FOUMBOT II",
+        "region_synodale": "NOUN SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.680379 5.57914)",
+        "communiants": 170,
+        "non_communiants": 2
+    },
+    {
+        "nom": "Paroisse de Madoum",
+        "quartier": "Madoum I",
+        "district": "BANGOULAP",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.538429 5.109067)",
+        "communiants": 50,
+        "non_communiants": 70
+    },
+    {
+        "nom": "Paroisse de Makenene",
+        "quartier": "École publique",
+        "district": "TONGA",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.805372 4.885019)",
+        "communiants": 362,
+        "non_communiants": 225
+    },
+    {
+        "nom": "Paroisse de Makepe Université",
+        "quartier": "Ange Raphaël, campus 2",
+        "district": "DEIDO MAKEPE",
+        "region_synodale": "WOURI CENTRE",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.739816 4.058801)",
+        "communiants": 400,
+        "non_communiants": 600
+    },
+    {
+        "nom": "Paroisse de Malantouen",
+        "quartier": "Njissé",
+        "district": "MALANTOUEN",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 198,
+        "non_communiants": 198
+    },
+    {
+        "nom": "Paroisse de MBANKOUOP",
+        "quartier": "MBANKOUOP",
+        "district": "nan",
+        "region_synodale": "NOUN SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.61033 5.655464)",
+        "communiants": 405,
+        "non_communiants": 1
+    },
+    {
+        "nom": "PAROISSE DE MBOU +AN E E DE KATIO",
+        "quartier": "Katio",
+        "district": "BALENGOU",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.443192 5.086809)",
+        "communiants": 59,
+        "non_communiants": 40
+    },
+    {
+        "nom": "Paroisse de Metaket",
+        "quartier": "Entrée Monastère Cistercien de Koutaba",
+        "district": "TABE II",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.78338 5.66475)",
+        "communiants": 29,
+        "non_communiants": 6
+    },
+    {
+        "nom": "Paroisse de Mfeutom Annexe de bahouoc",
+        "quartier": "Noumko",
+        "district": "BANGANGTE II",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.486071 5.126229)",
+        "communiants": 125,
+        "non_communiants": 10
+    },
+    {
+        "nom": "Paroisse de Mongnawou",
+        "quartier": "Mongnawou",
+        "district": "NKOUSSAM",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.930788 5.770405)",
+        "communiants": 43,
+        "non_communiants": 0
+    },
+    {
+        "nom": "PAROISSE DE MTIÉKI",
+        "quartier": "MTIÉKI",
+        "district": "BANDJOUN A",
+        "region_synodale": "KOUNG KHI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.391143 5.370128)",
+        "communiants": 112,
+        "non_communiants": 46
+    },
+    {
+        "nom": "PAROISSE DE MVOUTSAHA",
+        "quartier": "BANEFO-BAFOUSSAM",
+        "district": "BAFOUSSAM A",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.502013 5.480662)",
+        "communiants": 145,
+        "non_communiants": 50
+    },
+    {
+        "nom": "Paroisse de Ndikinimeki",
+        "quartier": "Quartier Bamileké",
+        "district": "TONGA",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.828667 4.762781)",
+        "communiants": 66,
+        "non_communiants": 65
+    },
+    {
+        "nom": "PAROISSE DE NDIPGANG",
+        "quartier": "Ndipgang",
+        "district": "BAZOU",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.477053 5.053249)",
+        "communiants": 77,
+        "non_communiants": 39
+    },
+    {
+        "nom": "PAROISSE DE NDIPTA I",
+        "quartier": "Ndipta 1",
+        "district": "BAZOU",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.469429 5.065013)",
+        "communiants": 165,
+        "non_communiants": 146
+    },
+    {
+        "nom": "Paroisse de NGAGNOU",
+        "quartier": "Koupa-Ngagnou",
+        "district": "FOUMBAN 2",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 173,
+        "non_communiants": 1
+    },
+    {
+        "nom": "Paroisse de Ngouache",
+        "quartier": "Ngouache",
+        "district": "BAMOUGOUM B",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.400504 5.491089)",
+        "communiants": 350,
+        "non_communiants": 310
+    },
+    {
+        "nom": "Paroisse de Njamga",
+        "quartier": "Njilou",
+        "district": "BANGOULAP",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.55654 5.092341)",
+        "communiants": 38,
+        "non_communiants": 46
+    },
+    {
+        "nom": "Paroisse de Njindaré",
+        "quartier": "Quartier Njindaré (non loin du centre ville de Foumban",
+        "district": "FOUMBAN 3",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (-4.571013 -19.979237)",
+        "communiants": 389,
+        "non_communiants": 0
+    },
+    {
+        "nom": "Paroisse de Njinden",
+        "quartier": "Njinden",
+        "district": "FOUMBAN 1",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 208,
+        "non_communiants": 1
+    },
+    {
+        "nom": "PAROISSE DE NJISSÉ",
+        "quartier": "Njissé",
+        "district": "FOUMBAN 4",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.895263 5.721873)",
+        "communiants": 74,
+        "non_communiants": 1
+    },
+    {
+        "nom": "Paroisse de Nkaganzog",
+        "quartier": "Nkaganzog",
+        "district": "MOUANKO",
+        "region_synodale": "SANAGA MARITIME ET OCEAN",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.773482 3.636617)",
+        "communiants": 35,
+        "non_communiants": 15
+    },
+    {
+        "nom": "PAROISSE DE NKOLNDONGO I",
+        "quartier": "NKOLNDONGO",
+        "district": "CENTRE 4",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.528226 3.854294)",
+        "communiants": 602,
+        "non_communiants": 10
+    },
+    {
+        "nom": "Paroisse de NKOUO",
+        "quartier": "NKOUO",
+        "district": "BANDJOUN  E",
+        "region_synodale": "KOUNG KHI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 252,
+        "non_communiants": 20
+    },
+    {
+        "nom": "Paroisse de PEUP",
+        "quartier": "Peup",
+        "district": "BANGOUA  NORD",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.466564 5.232784)",
+        "communiants": 54,
+        "non_communiants": 40
+    },
+    {
+        "nom": "Paroisse de SOA",
+        "quartier": "Entrée Complexe",
+        "district": "nan",
+        "region_synodale": "nan",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.58598 3.959115)",
+        "communiants": 145,
+        "non_communiants": 90
+    },
+    {
+        "nom": "Paroisse de Soa (Annexe d'Andon)",
+        "quartier": "Andon",
+        "district": "CENTRE 1",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 35,
+        "non_communiants": 8
+    },
+    {
+        "nom": "Paroisse de Tabe 1",
+        "quartier": "Tabe",
+        "district": "TABE II",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.807652 5.686363)",
+        "communiants": 520,
+        "non_communiants": 30
+    },
+    {
+        "nom": "Paroisse de Takasko",
+        "quartier": "Takasko",
+        "district": "nan",
+        "region_synodale": "nan",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 95,
+        "non_communiants": 35
+    },
+    {
+        "nom": "PAROISSE DE TAP",
+        "quartier": "Tap",
+        "district": "BAMENA",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.403275 5.173527)",
+        "communiants": 70,
+        "non_communiants": 50
+    },
+    {
+        "nom": "PAROISSE DE TAYIM",
+        "quartier": "TAYIM",
+        "district": "BAFOUSSAM A",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.467707 5.476111)",
+        "communiants": 135,
+        "non_communiants": 40
+    },
+    {
+        "nom": "Paroisse de TCHITCHAP",
+        "quartier": "Quartier TCHITCHAP 1-Marché Bigmop",
+        "district": "BALENG B",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.432665 5.48492)",
+        "communiants": 1242,
+        "non_communiants": 677
+    },
+    {
+        "nom": "Paroisse de Tchoudim",
+        "quartier": "Quartier Nzuko",
+        "district": "BANEKANE",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.606101 5.121044)",
+        "communiants": 50,
+        "non_communiants": 25
+    },
+    {
+        "nom": "Paroisse de TIE2",
+        "quartier": "Njidoum",
+        "district": "nan",
+        "region_synodale": "nan",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.755414 5.641134)",
+        "communiants": 105,
+        "non_communiants": 2
+    },
+    {
+        "nom": "Paroisse de tomdjo-kouekong",
+        "quartier": "Bafoussam 1 tougnic",
+        "district": "BAFOUSSAM A",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.511859 5.485581)",
+        "communiants": 65,
+        "non_communiants": 30
+    },
+    {
+        "nom": "PAROISSE DE TOMDJO-KOUEKONG",
+        "quartier": "TOUOGNIEH",
+        "district": "BAFOUSSAM A",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.525589 5.490938)",
+        "communiants": 61,
+        "non_communiants": 43
+    },
+    {
+        "nom": "PAROISSE DE TOUKOP",
+        "quartier": "Toukop",
+        "district": "BANGANGTE I",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.540458 5.159447)",
+        "communiants": 120,
+        "non_communiants": 60
+    },
+    {
+        "nom": "Paroisse de Tsougwi",
+        "quartier": "Tsougwi",
+        "district": "BATOUFAM / BADREFAM",
+        "region_synodale": "KOUNG KHI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.454155 5.25375)",
+        "communiants": 105,
+        "non_communiants": 60
+    },
+    {
+        "nom": "Paroisse de wouom.",
+        "quartier": "Quartier bawouom.",
+        "district": "BAHAM SUD",
+        "region_synodale": "HAUTS PLATEAUX",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 57,
+        "non_communiants": 38
+    },
+    {
+        "nom": "Paroisse de. Grand souza",
+        "quartier": "Grand souza",
+        "district": "ABO-SUD \"A\"",
+        "region_synodale": "MOUNGO SUD & MEME",
+        "niveau": "Bureau National Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.645097 4.232977)",
+        "communiants": 168,
+        "non_communiants": 52
+    },
+    {
+        "nom": "Paroisse du Centre Urbain",
+        "quartier": "Quartier Administratif, entrée Sous- Préfecture",
+        "district": "TABE I",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau de district Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.760648 5.655935)",
+        "communiants": 250,
+        "non_communiants": 50
+    },
+    {
+        "nom": "Paroisse EEC BANGUE",
+        "quartier": "BANGUE VILLAGE",
+        "district": "DOUALA NORD",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.753135 4.104433)",
+        "communiants": 344,
+        "non_communiants": 3
+    },
+    {
+        "nom": "Paroisse EEC de BENGA I",
+        "quartier": "Benga",
+        "district": "DISTRICT DE M. B. N",
+        "region_synodale": "NKAM",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.063416 4.62398)",
+        "communiants": 20,
+        "non_communiants": 25
+    },
+    {
+        "nom": "PAROISSE EEC DE FAMNGO",
+        "quartier": "Quartier 5",
+        "district": "BANGANGTE I",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.523056 5.138394)",
+        "communiants": 800,
+        "non_communiants": 600
+    },
+    {
+        "nom": "Paroisse EEC de Mbouo",
+        "quartier": "Mbouo",
+        "district": "BANDJOUN B",
+        "region_synodale": "KOUNG KHI",
+        "niveau": "Bureau de district Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.419128 5.437434)",
+        "communiants": 500,
+        "non_communiants": 200
+    },
+    {
+        "nom": "Paroisse EEC de NOUMGA",
+        "quartier": "Noumga",
+        "district": "BANGANGTE I",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.568291 5.162414)",
+        "communiants": 30,
+        "non_communiants": 20
+    },
+    {
+        "nom": "PAROISSE EEC DE SAGNAM ANNEXE DE FEUTAP",
+        "quartier": "FEUTAP",
+        "district": "BANGANGTE II",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.477395 5.157486)",
+        "communiants": 70,
+        "non_communiants": 30
+    },
+    {
+        "nom": "Paroisse EEC KOTTO",
+        "quartier": "KOTTO VILLAGE",
+        "district": "DOUALA NORD",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.756247 4.09712)",
+        "communiants": 156,
+        "non_communiants": 234
+    },
+    {
+        "nom": "Paroisse EEC MFETOM",
+        "quartier": "Mfamgo Neta",
+        "district": "BANGANGTE II",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.524504 5.130786)",
+        "communiants": 250,
+        "non_communiants": 80
+    },
+    {
+        "nom": "Paroisse EEC SAGNAM",
+        "quartier": "Quartier 8",
+        "district": "BANGANGTE II",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.525082 5.14109)",
+        "communiants": 400,
+        "non_communiants": 200
+    },
+    {
+        "nom": "Paroisse eecNOUMGA ANNEXE DE MANGO NITSIT",
+        "quartier": "Mango",
+        "district": "BANGANGTE I",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.621342 5.219621)",
+        "communiants": 25,
+        "non_communiants": 30
+    },
+    {
+        "nom": "Paroisse Fonkouankem Plateau",
+        "quartier": "première étape",
+        "district": "KEKEM",
+        "region_synodale": "HAUT NKAM",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 102,
+        "non_communiants": 20
+    },
+    {
+        "nom": "Paroisse Galilée de DANG",
+        "quartier": "Malang",
+        "district": "NGAOUNDERE",
+        "region_synodale": "ADAMAOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (13.552713 7.44022)",
+        "communiants": 120,
+        "non_communiants": 130
+    },
+    {
+        "nom": "Paroisse KENA",
+        "quartier": "KENA",
+        "district": "BAMOUGOUM A",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.368212 5.512329)",
+        "communiants": 160,
+        "non_communiants": 110
+    },
+    {
+        "nom": "Paroisse Mamevoue",
+        "quartier": "Mamevoue",
+        "district": "TABE II",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.8393 5.663823)",
+        "communiants": 68,
+        "non_communiants": 0
+    },
+    {
+        "nom": "Paroisse New Bell III",
+        "quartier": "New belle quartier Bangangté",
+        "district": "NEW-BELL A",
+        "region_synodale": "WOURI SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 97,
+        "non_communiants": 15
+    },
+    {
+        "nom": "Paroisse Njambam",
+        "quartier": "Nkopnten",
+        "district": "FOUMBOT I",
+        "region_synodale": "NOUN SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.636284 5.510082)",
+        "communiants": 781,
+        "non_communiants": 27
+    },
+    {
+        "nom": "Paroisse Obam Ongola.",
+        "quartier": "AHALA1( derrière Station AB Petroluim)",
+        "district": "CENTRE 3 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 180,
+        "non_communiants": 230
+    },
+    {
+        "nom": "Paroisse TIE2",
+        "quartier": "Njidoum",
+        "district": "nan",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.796656 5.635514)",
+        "communiants": 105,
+        "non_communiants": 2
+    },
+    {
+        "nom": "PAROISSE TOUTAH ANNEXE DE BANGWE",
+        "quartier": "BANGWE",
+        "district": "BAMENA",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.415895 5.129126)",
+        "communiants": 40,
+        "non_communiants": 35
+    },
+    {
+        "nom": "PENJA CENTRE",
+        "quartier": "NKOLO MBIANDI",
+        "district": "NJOMBE - PENJA",
+        "region_synodale": "MOUNGO CENTRE",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.686613 4.6372)",
+        "communiants": 150,
+        "non_communiants": 60
+    },
+    {
+        "nom": "PENJA Plateau",
+        "quartier": "NKOLO MBIANDI",
+        "district": "NJOMBE - PENJA",
+        "region_synodale": "MOUNGO CENTRE",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.68697 4.636117)",
+        "communiants": 454,
+        "non_communiants": 44
+    },
+    {
+        "nom": "Penkue",
+        "quartier": "Cheffou",
+        "district": "BAHAM SUD",
+        "region_synodale": "HAUTS PLATEAUX",
+        "niveau": "Bureau de district Bureau Paroissial",
+        "localisation": "",
+        "communiants": 212,
+        "non_communiants": 22
+    },
+    {
+        "nom": "POU DJEBEM Annexe de FAMWOUO",
+        "quartier": "DJEBEM et l'annexe à FAMWOUO",
+        "district": "BANDJOUN  C",
+        "region_synodale": "KOUNG KHI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.455989 5.33275)",
+        "communiants": 43,
+        "non_communiants": 17
+    },
+    {
+        "nom": "POU-DJEBEM",
+        "quartier": "Pou, Famwouo et Mbem",
+        "district": "BANDJOUN  C",
+        "region_synodale": "KOUNG KHI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.450412 5.325829)",
+        "communiants": 341,
+        "non_communiants": 119
+    },
+    {
+        "nom": "Pouokong",
+        "quartier": "Bahouan Balessing",
+        "district": "BALESSING",
+        "region_synodale": "MENOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.242313 5.486403)",
+        "communiants": 156,
+        "non_communiants": 5
+    },
+    {
+        "nom": "Rouotam",
+        "quartier": "Mfekah -Dallas",
+        "district": "FOUMBAN 2",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.882722 5.748796)",
+        "communiants": 114,
+        "non_communiants": 2
+    },
+    {
+        "nom": "RUE MANGUIERS",
+        "quartier": "RUE MANGUIERS",
+        "district": "CENTRE 3",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 1302,
+        "non_communiants": 762
+    },
+    {
+        "nom": "Sa'a",
+        "quartier": "Quartier \"Bali\"",
+        "district": "LEKIE' ET MBAM",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.441868 4.36154)",
+        "communiants": 255,
+        "non_communiants": 8
+    },
+    {
+        "nom": "Sa'a",
+        "quartier": "Quartier Bami",
+        "district": "LEKIE' ET MBAM",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.44214 4.36179)",
+        "communiants": 255,
+        "non_communiants": 8
+    },
+    {
+        "nom": "Sagnam",
+        "quartier": "Quartier 8",
+        "district": "BANGANGTE II",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.496395 5.154281)",
+        "communiants": 300,
+        "non_communiants": 150
+    },
+    {
+        "nom": "Sedembom",
+        "quartier": "Dembom Sedembom",
+        "district": "BANDJOUN  C",
+        "region_synodale": "KOUNG KHI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.476568 5.338746)",
+        "communiants": 94,
+        "non_communiants": 18
+    },
+    {
+        "nom": "Singte",
+        "quartier": "Singte",
+        "district": "BALENG B",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.437022 5.51726)",
+        "communiants": 61,
+        "non_communiants": 58
+    },
+    {
+        "nom": "SION GBAKOUNGUE",
+        "quartier": "Meiganga",
+        "district": "NGAOUNDERE",
+        "region_synodale": "ADAMAOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 150,
+        "non_communiants": 80
+    },
+    {
+        "nom": "SOA",
+        "quartier": "Ebogo 1",
+        "district": "CENTRE 1",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 319,
+        "non_communiants": 20
+    },
+    {
+        "nom": "Sodiko Rural",
+        "quartier": "Sodiko",
+        "district": "BELE-BELE  1",
+        "region_synodale": "WOURI NORD & SUD-OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.664095 4.115476)",
+        "communiants": 107,
+        "non_communiants": 20
+    },
+    {
+        "nom": "Souza Centre 1",
+        "quartier": "Quartier Bayon",
+        "district": "ABO-SUD \"A\"",
+        "region_synodale": "MOUNGO SUD & MEME",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.609258 4.288809)",
+        "communiants": 172,
+        "non_communiants": 24
+    },
+    {
+        "nom": "Souza centre 2",
+        "quartier": "Quartier Bangoulap",
+        "district": "ABO-SUD \"A\"",
+        "region_synodale": "MOUNGO SUD & MEME",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.60891 4.234062)",
+        "communiants": 88,
+        "non_communiants": 80
+    },
+    {
+        "nom": "Tambouom",
+        "quartier": "Tambouom",
+        "district": "MALANTOUEN",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.097521 5.73234)",
+        "communiants": 60,
+        "non_communiants": 10
+    },
+    {
+        "nom": "Tchououn Gallilé avec son annexe Thououn Vallée",
+        "quartier": "Tchououn",
+        "district": "BAMOUGOUM B",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.403488 5.44923)",
+        "communiants": 114,
+        "non_communiants": 119
+    },
+    {
+        "nom": "TEMPLE HISTORIQUE",
+        "quartier": "Mangouet",
+        "district": "FOUMBAN 4",
+        "region_synodale": "NOUN NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.897515 5.721763)",
+        "communiants": 140,
+        "non_communiants": 1
+    },
+    {
+        "nom": "TIALONG",
+        "quartier": "TIALONG",
+        "district": "BALATCHI",
+        "region_synodale": "BAMBOUTOS ET NORD OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.183702 5.617605)",
+        "communiants": 378,
+        "non_communiants": 27
+    },
+    {
+        "nom": "Toket avec son lieu de culte Tapouh",
+        "quartier": "À Toket",
+        "district": "BAMOUGOUM B",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.399445 5.466095)",
+        "communiants": 757,
+        "non_communiants": 300
+    },
+    {
+        "nom": "Tomlem",
+        "quartier": "Yom 6",
+        "district": "BANDJOUN B",
+        "region_synodale": "KOUNG KHI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 60,
+        "non_communiants": 10
+    },
+    {
+        "nom": "totsela",
+        "quartier": "tsela",
+        "district": "BANDJOUN D",
+        "region_synodale": "KOUNG KHI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 150,
+        "non_communiants": 85
+    },
+    {
+        "nom": "Touelekeo",
+        "quartier": "Mbouo",
+        "district": "BAMENDOU",
+        "region_synodale": "MENOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.133741 5.38751)",
+        "communiants": 120,
+        "non_communiants": 53
+    },
+    {
+        "nom": "Tougang",
+        "quartier": "Tougang village",
+        "district": "BALENG B",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.419765 5.491787)",
+        "communiants": 643,
+        "non_communiants": 330
+    },
+    {
+        "nom": "Toukop",
+        "quartier": "Manja",
+        "district": "BANGANGTE I",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau National Bureau régional Bureau de district Bureau Paroissial",
+        "localisation": "",
+        "communiants": 100,
+        "non_communiants": 20
+    },
+    {
+        "nom": "TOUOPBA TESSE",
+        "quartier": "TESSE lieu-dit carrefour Toga",
+        "district": "BANDJOUN B",
+        "region_synodale": "KOUNG KHI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 120,
+        "non_communiants": 110
+    },
+    {
+        "nom": "Tousso",
+        "quartier": "Tousso",
+        "district": "NDA'A",
+        "region_synodale": "BAMBOUTOS ET NORD OUEST",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.296298 5.612889)",
+        "communiants": 95,
+        "non_communiants": 18
+    },
+    {
+        "nom": "Toutah temple du centenaire",
+        "quartier": "Toutah - Ndepgang",
+        "district": "BAMENA",
+        "region_synodale": "NDE MBAM ET INOUBOU",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 225,
+        "non_communiants": 190
+    },
+    {
+        "nom": "Tseugwe",
+        "quartier": "Cebec",
+        "district": "BANGOU",
+        "region_synodale": "HAUTS PLATEAUX",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.394212 5.25785)",
+        "communiants": 206,
+        "non_communiants": 2
+    },
+    {
+        "nom": "Tsinkop- Tchoualé",
+        "quartier": "Tsinkop",
+        "district": "DSCHANG I",
+        "region_synodale": "MENOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.05852 5.455278)",
+        "communiants": 104,
+        "non_communiants": 55
+    },
+    {
+        "nom": "Tsinkop-Tchouale : Annexe de Tchouale",
+        "quartier": "Tchouale bloc 3",
+        "district": "DSCHANG I",
+        "region_synodale": "MENOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.042434 5.446502)",
+        "communiants": 90,
+        "non_communiants": 75
+    },
+    {
+        "nom": "Tyo Baleng (Tyo Ville)",
+        "quartier": "Tyo",
+        "district": "BALENG A",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.409593 5.501128)",
+        "communiants": 530,
+        "non_communiants": 137
+    },
+    {
+        "nom": "Tyo Lagoueng Lagoueng",
+        "quartier": "Lagoueng",
+        "district": "BALENG B",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.433061 5.506827)",
+        "communiants": 63,
+        "non_communiants": 88
+    },
+    {
+        "nom": "Voutsa'ha-banefo",
+        "quartier": "Mvoutsa'ha",
+        "district": "BAFOUSSAM A",
+        "region_synodale": "MIFI",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 100,
+        "non_communiants": 80
+    },
+    {
+        "nom": "Wouom",
+        "quartier": "Bawouom à baham",
+        "district": "BAHAM SUD",
+        "region_synodale": "HAUTS PLATEAUX",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 57,
+        "non_communiants": 38
+    },
+    {
+        "nom": "Yabea",
+        "quartier": "Yabea",
+        "district": "BAKOKO",
+        "region_synodale": "MOUNGO SUD & MEME",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.654495 4.205035)",
+        "communiants": 98,
+        "non_communiants": 35
+    },
+    {
+        "nom": "Yadom",
+        "quartier": "Yandom",
+        "district": "BAKOKO",
+        "region_synodale": "MOUNGO SUD & MEME",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.654495 4.205035)",
+        "communiants": 82,
+        "non_communiants": 33
+    },
+    {
+        "nom": "YAGOUA",
+        "quartier": "BAGARA non loin de la SEMRY",
+        "district": "YAGOUA",
+        "region_synodale": "NORD & EXTREME-NORD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (15.240943 10.348622)",
+        "communiants": 57,
+        "non_communiants": 26
+    },
+    {
+        "nom": "Yambong",
+        "quartier": "NGODI BAKOKO",
+        "district": "NEW-BELL D",
+        "region_synodale": "WOURI SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.78582 3.995892)",
+        "communiants": 92,
+        "non_communiants": 25
+    },
+    {
+        "nom": "Yamikoki",
+        "quartier": "Yamikoki",
+        "district": "BAKOKO",
+        "region_synodale": "MOUNGO SUD & MEME",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.654495 4.205035)",
+        "communiants": 58,
+        "non_communiants": 17
+    },
+    {
+        "nom": "Yassa Village",
+        "quartier": "Yassa",
+        "district": "NEW-BELL D",
+        "region_synodale": "WOURI SUD",
+        "niveau": "Bureau Paroissial",
+        "localisation": "",
+        "communiants": 53,
+        "non_communiants": 84
+    },
+    {
+        "nom": "YOUPWE",
+        "quartier": "YOUPWE",
+        "district": "nan",
+        "region_synodale": "WOURI CENTRE",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.698251 4.008918)",
+        "communiants": 45,
+        "non_communiants": 13
+    },
+    {
+        "nom": "YOUPWE",
+        "quartier": "BONAPRISO",
+        "district": "NJO-NJO",
+        "region_synodale": "WOURI CENTRE",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (9.698251 4.008918)",
+        "communiants": 45,
+        "non_communiants": 15
+    },
+    {
+        "nom": "nan",
+        "quartier": "nan",
+        "district": "CENTRE 2",
+        "region_synodale": "CENTRE SUD 1",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (11.542476 3.870868)",
+        "communiants": 2500,
+        "non_communiants": 1500
+    },
+    {
+        "nom": "nan",
+        "quartier": "nan",
+        "district": "PENKA MICHEL",
+        "region_synodale": "MENOUA",
+        "niveau": "Bureau Paroissial",
+        "localisation": "SRID=4326;POINT (10.24587 5.475843)",
+        "communiants": 400,
+        "non_communiants": 85
+    }
+]

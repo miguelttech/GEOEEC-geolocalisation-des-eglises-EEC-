@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Rapport Statistique GEOEEC</title>
+    <style>
+        body { font-family: Arial; }
+        h1, h2 { color: #2C3E50; }
+        table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+        th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+        th { background-color: #eee; }
+    </style>
+</head>
+<body>
+    <h1>Rapport Statistique GEOEEC</h1>
+
+    <h2>Effectifs Globaux</h2>
+    <p>Total Paroisses : {{ total_paroisses }}</p>
+    <p>Total Œuvres : {{ total_oeuvres }}</p>
+    <p>Total Ouvriers : {{ total_ouvriers }}</p>
+
+    <h2>Paroisses par Région</h2>
+    <table>
+        <tr><th>Région</th><th>Nombre de paroisses</th></tr>
+        {% for region, count in paroisses_par_region.items %}
+        <tr><td>{{ region }}</td><td>{{ count }}</td></tr>
+        {% endfor %}
+    </table>
+
+    <h2>Œuvres par Catégorie</h2>
+    <table>
+        <tr><th>Catégorie</th><th>Nombre</th></tr>
+        {% for cat, count in oeuvres_par_categorie.items %}
+        <tr><td>{{ cat }}</td><td>{{ count }}</td></tr>
+        {% endfor %}
+    </table>
+
+    <h2>Ouvriers par Grade</h2>
+    <table>
+        <tr><th>Grade</th><th>Nombre</th></tr>
+        {% for grade, count in ouvriers_par_grade.items %}
+        <tr><td>{{ grade }}</td><td>{{ count }}</td></tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

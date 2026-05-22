@@ -1,0 +1,884 @@
+[
+    {
+        "nom": "EP Njimbam",
+        "type": "scolaire",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.512168 10.632501)"
+    },
+    {
+        "nom": "Écoles Maternelles et primaires cepca : Banka ; Demgo  ;  chiekoui ;Penkueu ; Bapa-Kensm ; Tweugweu ; Bamendjou ; Kontcha ;Dleugheu ; Djeugoo ;  Messenger ; Njouong ;  école primaire de Bameutchue_tcha ; École Maternelle de Famgoumeu ; nka ;",
+        "type": "scolaire",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.342217 10.375893)"
+    },
+    {
+        "nom": "Centres de santé de: Lieugneu-Baham  ; Medjié-Bameka ; kontcha-Bahouan ; Centre Medicalisé protestant de Batié .",
+        "type": "medicale",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.330498 10.348568)"
+    },
+    {
+        "nom": "EP Mangoum",
+        "type": "scolaire",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.494486 10.61033)"
+    },
+    {
+        "nom": "Paroisse de Mangoum -Njincha",
+        "type": "autre",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.491314 10.607163)"
+    },
+    {
+        "nom": "EM Mbaye",
+        "type": "scolaire",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.502944 10.620271)"
+    },
+    {
+        "nom": "Paroisse de Mbanjou",
+        "type": "autre",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.502944 10.620271)"
+    },
+    {
+        "nom": "CMP BAIGOM",
+        "type": "medicale",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.571707 10.680379)"
+    },
+    {
+        "nom": "EM BAIGOM",
+        "type": "scolaire",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.572449 10.675097)"
+    },
+    {
+        "nom": "Paroisse de BAIGOM",
+        "type": "autre",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.573665 10.679322)"
+    },
+    {
+        "nom": "EP MBANKOUOP",
+        "type": "scolaire",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.655464 10.61033)"
+    },
+    {
+        "nom": "École primaire bilingue EEC de Mbanga, École maternelle bilingue EEC de Mbanga, Collège Évangélique bilingue de Mbanga",
+        "type": "scolaire",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.504089 9.573781)"
+    },
+    {
+        "nom": "Trois bâtiments de 17 salles de classe",
+        "type": "autre",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.500657 9.566512)"
+    },
+    {
+        "nom": "École maternelle bilingue EEC de Mbanga",
+        "type": "scolaire",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.501646 9.566131)"
+    },
+    {
+        "nom": "02 bâtiments de trois salles de classe",
+        "type": "autre",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.501646 9.566131)"
+    },
+    {
+        "nom": "CSI EEC de Mbanga",
+        "type": "medicale",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.504089 9.573781)"
+    },
+    {
+        "nom": "01 bâtiment",
+        "type": "autre",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.507573 9.574824)"
+    },
+    {
+        "nom": "Écoles maternelles et primaires EEC de Mombo",
+        "type": "scolaire",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.570968 9.592909)"
+    },
+    {
+        "nom": "Un bâtiment de 03 salles de classe",
+        "type": "autre",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.570654 9.592561)"
+    },
+    {
+        "nom": "EP Pare Njimbie",
+        "type": "scolaire",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.636437 10.588869)"
+    },
+    {
+        "nom": "EP Loumbouot",
+        "type": "scolaire",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.527699 10.648692)"
+    },
+    {
+        "nom": "Ecole primaire maternelle New-Bell centre",
+        "type": "scolaire",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.032929 9.715898)"
+    },
+    {
+        "nom": "Collège Évangélique de New-Bell",
+        "type": "scolaire",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.032975 9.716275)"
+    },
+    {
+        "nom": "Centre médical protestant de New-Bell  (CMP)",
+        "type": "medicale",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.032225 9.716493)"
+    },
+    {
+        "nom": "École primaire et maternelle de New-Bell Aviation",
+        "type": "scolaire",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.027999 9.71517)"
+    },
+    {
+        "nom": "École maternelle New-Bell 1",
+        "type": "scolaire",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.028389 9.711149)"
+    },
+    {
+        "nom": "Temple New-Bell 1",
+        "type": "autre",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.028438 9.711038)"
+    },
+    {
+        "nom": "Temple de New-Bell Aviation",
+        "type": "autre",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.027896 9.715227)"
+    },
+    {
+        "nom": "Temple New-Bell Centre",
+        "type": "autre",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.032509 9.716359)"
+    },
+    {
+        "nom": "École primaire et maternelle de Soboum",
+        "type": "scolaire",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.021084 9.733779)"
+    },
+    {
+        "nom": "Paroisse Soboum",
+        "type": "autre",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.021084 9.733779)"
+    },
+    {
+        "nom": "Adamaoua",
+        "type": "terrain",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (7.305593 13.551389)"
+    },
+    {
+        "nom": "Siège, CADA",
+        "type": "autre",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.721602 10.895215)"
+    },
+    {
+        "nom": "HÔPITAL PROTESTANTE DE NJISSE ET ANNEXE",
+        "type": "medicale",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.721051 10.894016)"
+    },
+    {
+        "nom": "INSPECTION REGIONLE PLUS ECOLE PRIMAIRE ET MATERNELLE",
+        "type": "scolaire",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.722689 10.894774)"
+    },
+    {
+        "nom": "Collège protestant Josué MOUICHE",
+        "type": "scolaire",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.723756 10.896211)"
+    },
+    {
+        "nom": "École CEBEC LOUM A",
+        "type": "scolaire",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.721585 9.732722)"
+    },
+    {
+        "nom": "CSI EEC MBANGA",
+        "type": "medicale",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.498119 9.566861)"
+    },
+    {
+        "nom": "FERME ECOLE DE NDOUNGUE (FEN)",
+        "type": "agropastorale",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.927113 9.891577)"
+    },
+    {
+        "nom": "Centre de Santé Intégré de Mfetom",
+        "type": "medicale",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.131145 10.524722)"
+    },
+    {
+        "nom": "REGION SCOLAIRE DU NDE,MBAM ET INOUBOU",
+        "type": "scolaire",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.131394 10.523343)"
+    },
+    {
+        "nom": "Paroisse de soboum",
+        "type": "terrain",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.02071 9.733818)"
+    },
+    {
+        "nom": "ECOLEPRIMAIRE ET MATETNELLE EEC DE MFETOM",
+        "type": "scolaire",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.130937 10.523801)"
+    },
+    {
+        "nom": "CENTRE DE SANTE INTEGRE DE MFEYOM",
+        "type": "medicale",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.131188 10.524729)"
+    },
+    {
+        "nom": "INSPECTION REGIONALE EP DU NDE MBAM ET INOUBOU",
+        "type": "scolaire",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.131386 10.523381)"
+    },
+    {
+        "nom": "REGION SCOLAIRE DU NDE MBAM ET INOUBOU",
+        "type": "scolaire",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.131319 10.523376)"
+    },
+    {
+        "nom": "CENTRE DE SANTE INTEGRE DE MFETOM",
+        "type": "medicale",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.131126 10.524652)"
+    },
+    {
+        "nom": "Groupe scolaire Bilingue EEC de Bodomo",
+        "type": "scolaire",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.57889 13.680303)"
+    },
+    {
+        "nom": "Adamaoua",
+        "type": "terrain",
+        "niveau": "regional",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (7.305593 13.551389)"
+    },
+    {
+        "nom": "BAMEKA",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.419042 10.353368)"
+    },
+    {
+        "nom": "BATIE",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.307378 10.313785)"
+    },
+    {
+        "nom": "Centre Médical Protestant de Batié",
+        "type": "medicale",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.307265 10.313848)"
+    },
+    {
+        "nom": "FOUMBOT II",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.572449 10.675097)"
+    },
+    {
+        "nom": "B. B. D NORD",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.054344 9.749201)"
+    },
+    {
+        "nom": "PENKA MICHEL",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.478232 10.306675)"
+    },
+    {
+        "nom": "École primaire et maternelle",
+        "type": "scolaire",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.477948 10.30685)"
+    },
+    {
+        "nom": "DSCHANG II",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.444976 10.056422)"
+    },
+    {
+        "nom": "Site où se trouve le temple",
+        "type": "terrain",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.444976 10.056422)"
+    },
+    {
+        "nom": "FOUMBOT I",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.511878 10.63448)"
+    },
+    {
+        "nom": "BAMOUGOUM A",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.499917 10.386827)"
+    },
+    {
+        "nom": "2- Collège Évangélique de Baleveng",
+        "type": "scolaire",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.497288 10.160045)"
+    },
+    {
+        "nom": "École Cepca de Baleveng",
+        "type": "scolaire",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.49707 10.159365)"
+    },
+    {
+        "nom": "École Cepca de Bafou Fonzong",
+        "type": "scolaire",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.484705 10.108388)"
+    },
+    {
+        "nom": "NKONG - NI",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.519898 10.144983)"
+    },
+    {
+        "nom": "1 école cebec Zoa",
+        "type": "scolaire",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.519977 10.144903)"
+    },
+    {
+        "nom": "Ce champ est celui de la Paroisse de Banza siège de district",
+        "type": "immeuble",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.51999 10.144887)"
+    },
+    {
+        "nom": "Ce terrain est celui de la Paroisse de Banza et celui du district a et no",
+        "type": "terrain",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.51999 10.144887)"
+    },
+    {
+        "nom": "BATCHAM II",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.533981 10.210064)"
+    },
+    {
+        "nom": "Collège Évangélique Polyvalent de Balena",
+        "type": "scolaire",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.533988 10.210068)"
+    },
+    {
+        "nom": "BATCHAM II",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.533988 10.210068)"
+    },
+    {
+        "nom": "Collège Évangélique Polyvalent de Balena",
+        "type": "scolaire",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.533988 10.210068)"
+    },
+    {
+        "nom": "BALESSING",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.500375 10.245919)"
+    },
+    {
+        "nom": "BONEBELA",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.071108 9.712643)"
+    },
+    {
+        "nom": "CENTRE 3",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (3.897223 11.535102)"
+    },
+    {
+        "nom": "Ecole CEBEC DE MBALLA 5",
+        "type": "scolaire",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (3.897526 11.53519)"
+    },
+    {
+        "nom": "FOUMBAN 4",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.721051 10.894016)"
+    },
+    {
+        "nom": "DJA & LOBO",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (3.256838 11.885429)"
+    },
+    {
+        "nom": "BALONG",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.577663 9.592213)"
+    },
+    {
+        "nom": "Ecole maternelle de mombo",
+        "type": "scolaire",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.577663 9.592213)"
+    },
+    {
+        "nom": "BALONG",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.577663 9.592213)"
+    },
+    {
+        "nom": "Ecole primaire de mombo",
+        "type": "scolaire",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.577663 9.592213)"
+    },
+    {
+        "nom": "LOUM",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.675677 9.71842)"
+    },
+    {
+        "nom": "École primaire et maternelle EEC LOUM GARE",
+        "type": "scolaire",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.675512 9.718898)"
+    },
+    {
+        "nom": "NJOMBE - PENJA",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.63636 9.687308)"
+    },
+    {
+        "nom": "École primaire et maternelle bilingue EEC Penja plateau",
+        "type": "scolaire",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.63631 9.687373)"
+    },
+    {
+        "nom": "BALENG B",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.484663 10.432688)"
+    },
+    {
+        "nom": "Écoles primaires et maternelles de Tchitchap ; Écoles primaires et maternelles de Tougang ; Écoles primaires et maternelles de Famtchouet",
+        "type": "scolaire",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.484824 10.432757)"
+    },
+    {
+        "nom": "MANJO B",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.763167 9.750087)"
+    },
+    {
+        "nom": "École primaire et maternelle EEC NLOHE",
+        "type": "scolaire",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.763317 9.749555)"
+    },
+    {
+        "nom": "BAMOUGOUM B",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.477993 10.416058)"
+    },
+    {
+        "nom": "TABE I",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.655935 10.760802)"
+    },
+    {
+        "nom": "Terrain EEC, District de Tabe",
+        "type": "terrain",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.655935 10.760802)"
+    },
+    {
+        "nom": "BANGOU",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.216743 10.426328)"
+    },
+    {
+        "nom": "BAFOUSSAM A",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.481172 10.42191)"
+    },
+    {
+        "nom": "École Maternelle du Plateau",
+        "type": "scolaire",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.481172 10.42191)"
+    },
+    {
+        "nom": "BANDJA",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.268876 10.233552)"
+    },
+    {
+        "nom": "BANKA",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.162938 10.199094)"
+    },
+    {
+        "nom": "BABADJOU",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.738419 10.166249)"
+    },
+    {
+        "nom": "KADEY",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (1.2 1.2)"
+    },
+    {
+        "nom": "BAMENDJINDA",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.630149 10.272457)"
+    },
+    {
+        "nom": "Collège évangélique bilingue de Mbouda",
+        "type": "scolaire",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.630149 10.272457)"
+    },
+    {
+        "nom": "BANGANG A",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.57149 10.184403)"
+    },
+    {
+        "nom": "BAHOUAN / BAMENDJOU",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.359368 10.368563)"
+    },
+    {
+        "nom": "BANDJOUN B",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.43742 10.419043)"
+    },
+    {
+        "nom": "École maternelle et primaire pilote de Mbouo, École primaire de Touopba Tessé, École primaire et maternelle de Ngwinké",
+        "type": "scolaire",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.437452 10.419083)"
+    },
+    {
+        "nom": "Institut Universitaire Evangélique de Mbouo",
+        "type": "universitaire",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.437447 10.419106)"
+    },
+    {
+        "nom": "Hôpital protestant de Mbouo",
+        "type": "medicale",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.437454 10.419115)"
+    },
+    {
+        "nom": "Centre Polyvalente de Mbouo CPF",
+        "type": "agropastorale",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.437454 10.419115)"
+    },
+    {
+        "nom": "NGAOUNDERE",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (7.319593 13.577117)"
+    },
+    {
+        "nom": "Mont des oliviers",
+        "type": "immeuble",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (7.319593 13.577117)"
+    },
+    {
+        "nom": "Mont des oliviers",
+        "type": "terrain",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (7.319593 13.577117)"
+    },
+    {
+        "nom": "NDOUNGUE NORD",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.91899 9.893687)"
+    },
+    {
+        "nom": "École primaire protestantes, Collège protestant polyvalent de ndoungue, hôpital protestant de ndoungue, ferme ecole",
+        "type": "scolaire",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.923856 9.892175)"
+    },
+    {
+        "nom": "Hôpital protestant de ndoungue",
+        "type": "medicale",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.921058 9.893145)"
+    },
+    {
+        "nom": "Ferme ecole",
+        "type": "agropastorale",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.926933 9.891002)"
+    },
+    {
+        "nom": "NKOUTIE",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.63345 10.839785)"
+    },
+    {
+        "nom": "DJA & LOBO",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (3.259252 11.889707)"
+    },
+    {
+        "nom": "Temple ,presbytere",
+        "type": "immeuble",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (3.260843 11.885429)"
+    },
+    {
+        "nom": "Site paroissial",
+        "type": "terrain",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (3.259252 11.889707)"
+    },
+    {
+        "nom": "TABE I",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.655923 10.760688)"
+    },
+    {
+        "nom": "L'école Maternelle et Primaire Bilingue le Samaritaine",
+        "type": "scolaire",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.656063 10.760627)"
+    },
+    {
+        "nom": "Centre de santé EEC de Didango",
+        "type": "medicale",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.656065 10.760637)"
+    },
+    {
+        "nom": "Terrain du District",
+        "type": "terrain",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.656032 10.760688)"
+    },
+    {
+        "nom": "nan",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.693957 11.11907)"
+    },
+    {
+        "nom": "BANEKA 1",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (4.974954 9.933411)"
+    },
+    {
+        "nom": "BANGANGTE II",
+        "type": "autre",
+        "niveau": "district",
+        "paroisse": "",
+        "localisation": "SRID=4326;POINT (5.141915 10.533967)"
+    }
+]

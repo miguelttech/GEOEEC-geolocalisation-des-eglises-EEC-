@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        h1, h2 { text-align: center; font-family: Arial, sans-serif; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
+        th, td { border: 1px solid #444; padding: 4px; text-align: left; }
+        th { background-color: #eee; }
+    </style>
+</head>
+<body>
+    <h1>Rapport Statistique - GEOEEC</h1>
+
+    <h2>Œuvres</h2>
+    <p>Total : {{ data.oeuvres.total }}</p>
+    <table>
+        <tr><th>Région</th><th>Nombre</th></tr>
+        {% for item in data.oeuvres.par_region %}
+        <tr><td>{{ item.region }}</td><td>{{ item.nombre }}</td></tr>
+        {% endfor %}
+    </table>
+
+    <h2>Paroisses</h2>
+    <p>Total : {{ data.paroisses.total }}</p>
+    <table>
+        <tr><th>Niveau</th><th>Nombre</th></tr>
+        {% for item in data.paroisses.par_niveau %}
+        <tr><td>{{ item.niveau }}</td><td>{{ item.nombre }}</td></tr>
+        {% endfor %}
+    </table>
+
+    <h2>Ouvriers</h2>
+    <p>Total : {{ data.ouvriers.total }}</p>
+    <table>
+        <tr><th>Type</th><th>Nombre</th></tr>
+        {% for item in data.ouvriers.par_type %}
+        <tr><td>{{ item.type }}</td><td>{{ item.nombre }}</td></tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

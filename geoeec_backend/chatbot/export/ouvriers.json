@@ -1,0 +1,5666 @@
+[
+    {
+        "nom": "TAKAM Roger Ernest",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "96",
+        "district": "DSCHANG II",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "TCHAMADEU Gaëlle   ratachée",
+        "grade": "Pasteure",
+        "contact": "nan",
+        "paroisse_nom": "96",
+        "district": "DSCHANG II",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "MOUNDE NGOUGOURE Pascaline Épse NGAMBÉKET",
+        "grade": "Pasteur",
+        "contact": "695847762",
+        "paroisse_nom": "AHALA-ECHANGEURS",
+        "district": "CENTRE 1",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "NTCHOUNDOP MATTHIEU--",
+        "grade": "Pasteur",
+        "contact": "670735278",
+        "paroisse_nom": "AKAK",
+        "district": "CENTRE 3",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "KENGNE SIMO Josiane epse GAPINGSSI",
+        "grade": "Pasteure",
+        "contact": "674601545",
+        "paroisse_nom": "Akok Ndoe",
+        "district": "CENTRE 3 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2"
+    },
+    {
+        "nom": "NSANGOU Moïse",
+        "grade": "Pasteur",
+        "contact": "00237697871545",
+        "paroisse_nom": "akombang-marché/kyé-ossi",
+        "district": "MVILA & NTEM",
+        "region_synodale": "CENTRE SUD 2"
+    },
+    {
+        "nom": "MBENDA Émile Magloire",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Akonolinga",
+        "district": "CENTRE 4",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "YONKEU TCHADJEU Carlos",
+        "grade": "Pasteur",
+        "contact": "694267838",
+        "paroisse_nom": "Ambam",
+        "district": "MVILA & NTEM",
+        "region_synodale": "CENTRE SUD 2"
+    },
+    {
+        "nom": "Mefire Mbouombouo Junior",
+        "grade": "Évangéliste",
+        "contact": "690784889",
+        "paroisse_nom": "Ambam",
+        "district": "MVILA & NTEM",
+        "region_synodale": "CENTRE SUD 2"
+    },
+    {
+        "nom": "PADJIO NANKIE SÉVERIN MARTIAL",
+        "grade": "Évangéliste",
+        "contact": "678105295",
+        "paroisse_nom": "ANNEXE DE BAHOUOC",
+        "district": "BANGANGTE II",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "GUEMWO jean",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "Annexe de Fonegom",
+        "district": "BANDJOUN  E",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "DOUMTSOP SOGANG Guy Landry  tel",
+        "grade": "Évangéliste",
+        "contact": "653950553/695115389",
+        "paroisse_nom": "Annexe de Fontsa-touala",
+        "district": "DSCHANG II",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "SOP Yves Beaulaire angéliste",
+        "grade": "Ev",
+        "contact": "yvessopgmailcom / 650505842/ 697174990",
+        "paroisse_nom": "ANNEXE DE LEMGO",
+        "district": "BANDJOUN  E",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "SEHEPING GEORGES MICHAEL",
+        "grade": "nan",
+        "contact": "699587943",
+        "paroisse_nom": "Annexe de mokolo",
+        "district": "KADEY",
+        "region_synodale": "EST"
+    },
+    {
+        "nom": "Nono célestin  tel",
+        "grade": "Évangéliste",
+        "contact": "671149965",
+        "paroisse_nom": "annexe de Ngnou",
+        "district": "BAMENA",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "NJIFONTAIN Joseph Roland",
+        "grade": "Ev",
+        "contact": "694346389",
+        "paroisse_nom": "Annexe de Tabe 2",
+        "district": "TABE II",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "MBOMA Samuel",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "AYOLO Béthanie SANGMÉLIMA",
+        "district": "DJA & LOBO",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "Bilo'o Yannick",
+        "grade": "Évangéliste",
+        "contact": "nan",
+        "paroisse_nom": "AYOLO Béthanie SANGMÉLIMA",
+        "district": "DJA & LOBO",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "Chapwa yamfa Mirabeau",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Baboate",
+        "district": "BANKA",
+        "region_synodale": "HAUT NKAM"
+    },
+    {
+        "nom": "Tchokouadeu Mbounga Blaise Alain",
+        "grade": "Évangéliste",
+        "contact": "679679243",
+        "paroisse_nom": "Babouantou Tonko",
+        "district": "BABOUANTOU",
+        "region_synodale": "HAUT NKAM"
+    },
+    {
+        "nom": "Tenekeu Mathieu",
+        "grade": "Ev",
+        "contact": "697722452",
+        "paroisse_nom": "Badeng",
+        "district": "BALENG A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "Kwemo Marie Christane epse Ngatchou Licence",
+        "grade": "Pasteur",
+        "contact": "677960909",
+        "paroisse_nom": "Bafang 2 Lieushi- Mouankeu",
+        "district": "BAFANG CENTRE",
+        "region_synodale": "HAUT NKAM"
+    },
+    {
+        "nom": "Noumeni Julienne epse Tientcheu Master",
+        "grade": "Pasteur",
+        "contact": "673210521",
+        "paroisse_nom": "Bafang 2 Lieushi- Mouankeu",
+        "district": "BAFANG CENTRE",
+        "region_synodale": "HAUT NKAM"
+    },
+    {
+        "nom": "Mougang Dieuwo Georges Arthur Licence",
+        "grade": "Pasteur",
+        "contact": "696284846",
+        "paroisse_nom": "Bafang 2 Lieushi- Mouankeu",
+        "district": "BAFANG CENTRE",
+        "region_synodale": "HAUT NKAM"
+    },
+    {
+        "nom": "Kamaha Monthe Samanta Florida",
+        "grade": "Ev",
+        "contact": "655668673",
+        "paroisse_nom": "Bafang 2 Lieushi- Mouankeu",
+        "district": "BAFANG CENTRE",
+        "region_synodale": "HAUT NKAM"
+    },
+    {
+        "nom": "NJOUONANG Justin  KAMDJI Lydie epse DONGMO",
+        "grade": "Pasteur",
+        "contact": "677769332",
+        "paroisse_nom": "BAFANG -DOKOVI",
+        "district": "BAFANG CENTRE",
+        "region_synodale": "HAUT NKAM"
+    },
+    {
+        "nom": "Lacdo Justin   waffo Thiam Gédéon",
+        "grade": "Pasteur",
+        "contact": "679923963",
+        "paroisse_nom": "Bafou Fodzong",
+        "district": "NKONG - NI",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "Fonkoeng Jean",
+        "grade": "Pasteur",
+        "contact": "681116873",
+        "paroisse_nom": "Bafoussam Plateau",
+        "district": "BAFOUSSAM A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "Mouliom Emmanuel",
+        "grade": "Pasteur",
+        "contact": "697006870",
+        "paroisse_nom": "Baigom",
+        "district": "FOUMBOT II",
+        "region_synodale": "NOUN SUD"
+    },
+    {
+        "nom": "LEUMENI DJATCHUE ARMEL STE",
+        "grade": "Ev",
+        "contact": "694954098/ 677984482",
+        "paroisse_nom": "Bakap district de Bana",
+        "district": "nan",
+        "region_synodale": "HAUT NKAM"
+    },
+    {
+        "nom": "MBA MBA ABEL",
+        "grade": "Dp",
+        "contact": "650762565",
+        "paroisse_nom": "Bakassa",
+        "district": "PENKA MICHEL",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "EKOME Prière Maîtrise en théologie",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Bakoko Sud",
+        "district": "B. B. D I",
+        "region_synodale": "WOURI SUD"
+    },
+    {
+        "nom": "CHOUKOUO Barthélémy Délégué Pastoral",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Bakoko Sud",
+        "district": "B. B. D I",
+        "region_synodale": "WOURI SUD"
+    },
+    {
+        "nom": "KEMO KANO Amina Élodie Epse NZILAPOCK  TANENANG Michel",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Baleveng-centre",
+        "district": "NKONG - NI",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "Komguem épouse Tangeri Julienne",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Balonmgou",
+        "district": "BANGOU",
+        "region_synodale": "HAUTS PLATEAUX"
+    },
+    {
+        "nom": "kenfack Jeanne Pélagie  tene Ngantchia Paul Carnot",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "Baloum",
+        "district": "PENKA MICHEL",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "Tchakouandeu  licenc",
+        "grade": "nan",
+        "contact": "6779845",
+        "paroisse_nom": "Baloum",
+        "district": "BABOUANTOU",
+        "region_synodale": "HAUT NKAM"
+    },
+    {
+        "nom": "Komguem épouse tagne julienne",
+        "grade": "Pasteur",
+        "contact": "695143814/",
+        "paroisse_nom": "Baloumgou",
+        "district": "BANGOU",
+        "region_synodale": "HAUTS PLATEAUX"
+    },
+    {
+        "nom": "Yemeli Johny",
+        "grade": "Ev",
+        "contact": "678813651",
+        "paroisse_nom": "Bambou'u",
+        "district": "BANGANG B",
+        "region_synodale": "BAMBOUTOS ET NORD OUEST"
+    },
+    {
+        "nom": "Zemafo Nouteng Marcel Carlos",
+        "grade": "nan",
+        "contact": "674803302",
+        "paroisse_nom": "Bamemba",
+        "district": "nan",
+        "region_synodale": "BAMBOUTOS ET NORD OUEST"
+    },
+    {
+        "nom": "Ngongang Nanwouo Kévin",
+        "grade": "Évangéliste",
+        "contact": "nan",
+        "paroisse_nom": "Bamemba",
+        "district": "nan",
+        "region_synodale": "BAMBOUTOS ET NORD OUEST"
+    },
+    {
+        "nom": "Kamdem Tchuenchie Henri Joël",
+        "grade": "Pasteur",
+        "contact": "677801162",
+        "paroisse_nom": "Bamendjou",
+        "district": "BAHOUAN / BAMENDJOU",
+        "region_synodale": "HAUTS PLATEAUX"
+    },
+    {
+        "nom": "Memeyi Ste Jovial",
+        "grade": "Ev",
+        "contact": "691443086",
+        "paroisse_nom": "Bamendjou",
+        "district": "BAHOUAN / BAMENDJOU",
+        "region_synodale": "HAUTS PLATEAUX"
+    },
+    {
+        "nom": "TEKUETCHE SIGNE MIRABEAU",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "Bamendou Léo",
+        "district": "BAMENDOU",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "NGOUANA TSUONG Hugues Brice",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "Bamendou Léo",
+        "district": "BAMENDOU",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "Ant YIMELE Gaston",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Bamendou Léo",
+        "district": "BAMENDOU",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "Tayo Monique  Fonkou kamta romain",
+        "grade": "Dp",
+        "contact": "nan",
+        "paroisse_nom": "Bamendou molepeu",
+        "district": "PENKA MICHEL",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "FOKOU KENNE MESMER",
+        "grade": "Ev",
+        "contact": "678998187/ 693929038",
+        "paroisse_nom": "Bamendou-chefferie",
+        "district": "BAMENDOU",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "FOKOU KENNE MESMER",
+        "grade": "Ev",
+        "contact": "678998187/693929038",
+        "paroisse_nom": "BAMENDOU-CHEFFERIE",
+        "district": "BAMENDOU",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "GIOGUE TAFEUKENG GILLES-VALERE  Pp FOMEKEU SEBASTIEN   LONGMENE TIOKANG DUCHEL",
+        "grade": "Ev",
+        "contact": "675444893",
+        "paroisse_nom": "BAMESSANG",
+        "district": "BATCHAM II",
+        "region_synodale": "BAMBOUTOS ET NORD OUEST"
+    },
+    {
+        "nom": "KUNNE Luc Bertin  en paroisse",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "BANDENKOP-CENTRE",
+        "district": "BAPA - BADENKOP",
+        "region_synodale": "HAUTS PLATEAUX"
+    },
+    {
+        "nom": "DJEUTCHAM DELMAS - dans l'annexe de DENKENG",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "BANDENKOP-CENTRE",
+        "district": "BAPA - BADENKOP",
+        "region_synodale": "HAUTS PLATEAUX"
+    },
+    {
+        "nom": "NOUMOWE NGALANI ANDRÉ  PROPOSANT AVEC DÉLÉGATION PASTORALE",
+        "grade": "Pasteur",
+        "contact": "691167821/ 676479155",
+        "paroisse_nom": "BANDJA - CHEFFERIE",
+        "district": "BANDJA",
+        "region_synodale": "HAUT NKAM"
+    },
+    {
+        "nom": "Feukwoua Honoré Noël Licence",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Bandja centre",
+        "district": "BANDJA",
+        "region_synodale": "HAUT NKAM"
+    },
+    {
+        "nom": "Tegang Francky Danilson Licence",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Bandja centre",
+        "district": "BANDJA",
+        "region_synodale": "HAUT NKAM"
+    },
+    {
+        "nom": "R GUETTE PHILIPPE  R DOMCHE BLAISE",
+        "grade": "Ev",
+        "contact": "699544266",
+        "paroisse_nom": "Bandjoun Centre",
+        "district": "BANDJOUN A",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "PP MBUEDA VITALICE",
+        "grade": "nan",
+        "contact": "681643606",
+        "paroisse_nom": "Bandjoun Centre",
+        "district": "BANDJOUN A",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "FOUODOP GHISCARD Annexe de HA",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "Bandjoun Centre",
+        "district": "BANDJOUN A",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "DEGRACE WOMBI OUMBE Roussel  Proposant avec Délégation Pastorale",
+        "grade": "Pasteur",
+        "contact": "690533441",
+        "paroisse_nom": "BANDOUMKASSA",
+        "district": "nan",
+        "region_synodale": "HAUT NKAM"
+    },
+    {
+        "nom": "Ngouannou Emmanuel",
+        "grade": "Ev",
+        "contact": "698027237",
+        "paroisse_nom": "Banefo-Mifi",
+        "district": "BALENG A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "KONDA TUEMGNIE Gotthilf Gerhard  Master en théologie",
+        "grade": "nan",
+        "contact": "6799661026",
+        "paroisse_nom": "Baneghang",
+        "district": "nan",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "MBA MBA ABEL",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "Baneghang",
+        "district": "nan",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "Wabo Martin Luter",
+        "grade": "Pasteur",
+        "contact": "696315290",
+        "paroisse_nom": "Banengo 1",
+        "district": "BAFOUSSAM B",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "proposant KAMWA kenmoe Paul Simplice",
+        "grade": "Pasteur",
+        "contact": "696589829",
+        "paroisse_nom": "Banengo 1",
+        "district": "BAFOUSSAM B",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "Taboula jean-Pierre",
+        "grade": "Pasteur",
+        "contact": "654944060",
+        "paroisse_nom": "Banengo 2",
+        "district": "BAFOUSSAM B",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "Proposant YEMZE KOUMETIO FOSSO PETI Élie",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Banféko",
+        "district": "nan",
+        "region_synodale": "HAUT NKAM"
+    },
+    {
+        "nom": "NGANKEKEN JEAN Annexe de Bandoumven",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Banféko",
+        "district": "nan",
+        "region_synodale": "HAUT NKAM"
+    },
+    {
+        "nom": "Mounchili Abel",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "Bangambi",
+        "district": "BANGOURAIN",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "Ngoupeyou Seuwa Alphonse  Maître en Théologie Tel",
+        "grade": "Pasteur",
+        "contact": "670734066 / 696176899",
+        "paroisse_nom": "Bangang - Fokam",
+        "district": "BANGOUA  NORD",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "R Njifenjou Jean Calvin Master",
+        "grade": "Ev",
+        "contact": "677841431",
+        "paroisse_nom": "BANGANG -Centre",
+        "district": "BANGANG B",
+        "region_synodale": "BAMBOUTOS ET NORD OUEST"
+    },
+    {
+        "nom": "Douanla Meli Martial   Doungue De Tsinda Jonathan  PP",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Bangang Nzong",
+        "district": "BANGANG A",
+        "region_synodale": "BAMBOUTOS ET NORD OUEST"
+    },
+    {
+        "nom": "mbami Michel  Edou bien vouloir  Tchemologne tagne joel",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "Bangopè",
+        "district": "NORD MAKOMBE",
+        "region_synodale": "NKAM"
+    },
+    {
+        "nom": "Yanzieya Emmanuel",
+        "grade": "Pasteur",
+        "contact": "697255534",
+        "paroisse_nom": "Bangourain centre",
+        "district": "BANGOURAIN",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "Pr KEMEGNI Rabeline licence en théologie tel",
+        "grade": "nan",
+        "contact": "675313383",
+        "paroisse_nom": "Banka centre",
+        "district": "BANKA",
+        "region_synodale": "HAUT NKAM"
+    },
+    {
+        "nom": "pr TOKO Gabriel licence en théologie tel",
+        "grade": "nan",
+        "contact": "675926723",
+        "paroisse_nom": "Banka centre",
+        "district": "BANKA",
+        "region_synodale": "HAUT NKAM"
+    },
+    {
+        "nom": "TCHATCHOUA MFASSU Patrice   Tel",
+        "grade": "Pasteur",
+        "contact": "699284320",
+        "paroisse_nom": "Banka-Baham",
+        "district": "BAHAM NORD",
+        "region_synodale": "HAUTS PLATEAUX"
+    },
+    {
+        "nom": "- Ndema Soumelong Blaise Alex  Proposant DP - tél",
+        "grade": "Pasteur",
+        "contact": "698244080",
+        "paroisse_nom": "Banock",
+        "district": "PENKA MICHEL",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "TATSITSA François Luther  Aide",
+        "grade": "Ev",
+        "contact": "678131780 /",
+        "paroisse_nom": "Bansoa-Chéfferie",
+        "district": "PENKA MICHEL",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "KONGNE Ningou Martin",
+        "grade": "nan",
+        "contact": "672900404",
+        "paroisse_nom": "Bansoa-Chéfferie",
+        "district": "PENKA MICHEL",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "Ngapmen Éric   Woncheu Emmanuel",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "Bantoum1",
+        "district": "BANEKANE",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "Elong Songue Alain responsabl e de la paroisse",
+        "grade": "nan",
+        "contact": "697976024",
+        "paroisse_nom": "Banya 1",
+        "district": "DISTRICT DE YABASSI-YINGUI",
+        "region_synodale": "NKAM"
+    },
+    {
+        "nom": "Mbiafeun Yvan Stéphane PP",
+        "grade": "Dp",
+        "contact": "nan",
+        "paroisse_nom": "Banya 1",
+        "district": "DISTRICT DE YABASSI-YINGUI",
+        "region_synodale": "NKAM"
+    },
+    {
+        "nom": "R Kouam Roger",
+        "grade": "Ev",
+        "contact": "690125161",
+        "paroisse_nom": "Bapi",
+        "district": "BALENG A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "Fodjo Mopo Franck",
+        "grade": "Ev",
+        "contact": "697355264",
+        "paroisse_nom": "Bapi",
+        "district": "BALENG A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "Tchadjeu Alakou Silvio Elgard",
+        "grade": "Pasteur",
+        "contact": "674397292",
+        "paroisse_nom": "Bassamba",
+        "district": "BANGOULAP",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "Nzouatchoua Rostand",
+        "grade": "Dp",
+        "contact": "677485012",
+        "paroisse_nom": "Bassamba",
+        "district": "BANGOULAP",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "NZIE SOLANGE LANDRY EPSE NOUMOUIN  FOULAMI",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Bassé",
+        "district": "BAMOUGOUM A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "Kuete talom gabriel Licence",
+        "grade": "nan",
+        "contact": "696998476",
+        "paroisse_nom": "Basseu",
+        "district": "nan",
+        "region_synodale": "HAUT NKAM"
+    },
+    {
+        "nom": "Zangueu Ngouanfo Martin",
+        "grade": "Pasteur",
+        "contact": "679812747/694476093",
+        "paroisse_nom": "Bataki",
+        "district": "BATCHAM I",
+        "region_synodale": "BAMBOUTOS ET NORD OUEST"
+    },
+    {
+        "nom": "NKOUINDJA Emmanuel",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Batouri -Centre",
+        "district": "KADEY",
+        "region_synodale": "EST"
+    },
+    {
+        "nom": "Dadjio Robert Honoré pp Djeumene Lazare",
+        "grade": "Dp",
+        "contact": "676394400 /",
+        "paroisse_nom": "Batsing'la",
+        "district": "NKONG - NI",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "Mouskouri Orphée Lionel",
+        "grade": "Ev",
+        "contact": "693779297",
+        "paroisse_nom": "Bekoko",
+        "district": "BOMONO",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "PEFURA MEFIRE ALAIN PAUL Licence en Théologie",
+        "grade": "Pasteur",
+        "contact": "696823600/682249065",
+        "paroisse_nom": "BELABO",
+        "district": "LOM & DJEREM SUD",
+        "region_synodale": "EST"
+    },
+    {
+        "nom": "MENVIEGO ALPHONSE LOVE LEGRAND Baccalauréat en Théologie",
+        "grade": "Pasteur",
+        "contact": "675164642",
+        "paroisse_nom": "BELABO",
+        "district": "LOM & DJEREM SUD",
+        "region_synodale": "EST"
+    },
+    {
+        "nom": "KENNE  JOSEPH PARFAIT A",
+        "grade": "Ev",
+        "contact": "681228842",
+        "paroisse_nom": "Benga 2",
+        "district": "DISTRICT DE M. B. N",
+        "region_synodale": "NKAM"
+    },
+    {
+        "nom": "NDOKATI  ANNEXE",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Benga 2",
+        "district": "DISTRICT DE M. B. N",
+        "region_synodale": "NKAM"
+    },
+    {
+        "nom": "NDAM MOUMBANGA Philippe Sylvain  Proposant avec Délégation Pastorale",
+        "grade": "Pasteur",
+        "contact": "673869008",
+        "paroisse_nom": "BENGA I",
+        "district": "DISTRICT DE M. B. N",
+        "region_synodale": "NKAM"
+    },
+    {
+        "nom": "ETOUKE Blaise Pascal",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "BEPANDA OMNISPORTS",
+        "district": "B. B. D NORD",
+        "region_synodale": "WOURI CENTRE"
+    },
+    {
+        "nom": "MBOME Sakeo",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "BEPANDA OMNISPORTS",
+        "district": "B. B. D NORD",
+        "region_synodale": "WOURI CENTRE"
+    },
+    {
+        "nom": "Lobè Missango Raymond",
+        "grade": "Ev",
+        "contact": "678633078",
+        "paroisse_nom": "Bessungkang",
+        "district": "ABO-NORD",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "LONTSIE JEAN LUDOVIE tle",
+        "grade": "nan",
+        "contact": "673507326/657744555",
+        "paroisse_nom": "Betare-oya",
+        "district": "LOM & DJEREM NORD",
+        "region_synodale": "EST"
+    },
+    {
+        "nom": "FOSSOUO PASCAL",
+        "grade": "Pasteur",
+        "contact": "658442701",
+        "paroisse_nom": "Biyem-Assi",
+        "district": "CENTRE 3 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2"
+    },
+    {
+        "nom": "Eyamba Marcel",
+        "grade": "Pasteur",
+        "contact": "694839549",
+        "paroisse_nom": "Boadibo",
+        "district": "BOMONO",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "Nsile Mi-long   Henri",
+        "grade": "Ev",
+        "contact": "690726153",
+        "paroisse_nom": "Boadibo",
+        "district": "BOMONO",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "Kome Totto Alain",
+        "grade": "Ev",
+        "contact": "691007003",
+        "paroisse_nom": "Bomono Ba Mbengue",
+        "district": "BOMONO",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "Motassi Bessemer Eugène",
+        "grade": "nan",
+        "contact": "699420441",
+        "paroisse_nom": "Bomono Gare",
+        "district": "BOMONO",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "NDEUPE SIMAPI Michel",
+        "grade": "Pasteur",
+        "contact": "677479668",
+        "paroisse_nom": "Bonabéké",
+        "district": "DISTRICT DE YABASSI-YINGUI",
+        "region_synodale": "NKAM"
+    },
+    {
+        "nom": "EBANDA NGO Isaac pp",
+        "grade": "Dp",
+        "contact": "699422155",
+        "paroisse_nom": "Bonabéké",
+        "district": "DISTRICT DE YABASSI-YINGUI",
+        "region_synodale": "NKAM"
+    },
+    {
+        "nom": "Moukeka  Nyame Alphonse",
+        "grade": "Ev",
+        "contact": "6991589",
+        "paroisse_nom": "Bonabweny",
+        "district": "DIBOMBARI CENTRE",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "SINEFFEU FRIDE épouse TIAMGNE",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "Bonadjeng",
+        "district": "BODIMAN",
+        "region_synodale": "NKAM"
+    },
+    {
+        "nom": "NKAKE MITAMBO Samuel",
+        "grade": "Pasteur",
+        "contact": "677892562/697047673",
+        "paroisse_nom": "BONAKU 2",
+        "district": "BONAKOU",
+        "region_synodale": "WOURI CENTRE"
+    },
+    {
+        "nom": "Avec Délégation Pastorale EWOUDOU MANYANYE Moïse",
+        "grade": "Évangéliste",
+        "contact": "nan",
+        "paroisse_nom": "BONAMATUMBE",
+        "district": "BELE-BELE  1",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "DJOPTCHOUANG STÉPHANE RODRIGUE",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Bonamoutongo",
+        "district": "B. B. D II",
+        "region_synodale": "WOURI SUD"
+    },
+    {
+        "nom": "BEKIMA MBOULE JOSEPH",
+        "grade": "Pasteur",
+        "contact": "691516829",
+        "paroisse_nom": "BONAMUDURU",
+        "district": "BONEBELA",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "MISSE BILLE BENOÎT ZACHARIE",
+        "grade": "Pasteur",
+        "contact": "694264816",
+        "paroisse_nom": "BONAMUDURU",
+        "district": "BONEBELA",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "BEKIMA MBOULE Joseph Responsable de Paroisse  MISSE BILLE Benoît Zachari",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "BONAMUNDURU",
+        "district": "BONEBELA",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "Ebouel épée Gilbert",
+        "grade": "Pasteur",
+        "contact": "677824519/659459490",
+        "paroisse_nom": "Bonandam",
+        "district": "NJOMBE - PENJA",
+        "region_synodale": "MOUNGO CENTRE"
+    },
+    {
+        "nom": "DIPANDA Jacques Responsable de Paroisse  MBONJO Auguste PR  en second",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "BONATEKI",
+        "district": "BONEBELA",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "PP Enora ENOPA Guy ferry licence en théologie",
+        "grade": "Dp",
+        "contact": "nan",
+        "paroisse_nom": "Bonkeng",
+        "district": "LOUM",
+        "region_synodale": "MOUNGO CENTRE"
+    },
+    {
+        "nom": "DOUMHOROUM RIDINGAM Barak  Contact",
+        "grade": "Pasteur",
+        "contact": "695258053",
+        "paroisse_nom": "BRIQUETERIE",
+        "district": "LOM & DJEREM SUD",
+        "region_synodale": "EST"
+    },
+    {
+        "nom": "Dr Nyamsi Ngomsi Etienne Aimée",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Briqueterie 1",
+        "district": "CENTRE 2 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2"
+    },
+    {
+        "nom": "responsable de la paroisse",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Briqueterie 1",
+        "district": "CENTRE 2 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2"
+    },
+    {
+        "nom": "Makon Ma Ngue Pierre",
+        "grade": "président de région",
+        "contact": "696574070",
+        "paroisse_nom": "Briqueterie 1",
+        "district": "CENTRE 2 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2"
+    },
+    {
+        "nom": "Njoh Patrick Célestin",
+        "grade": "Pasteur",
+        "contact": "696325222",
+        "paroisse_nom": "Briqueterie 1",
+        "district": "CENTRE 2 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2"
+    },
+    {
+        "nom": "Emma victorine Ady epse MBILI",
+        "grade": "Évangéliste",
+        "contact": "nan",
+        "paroisse_nom": "Briqueterie 1",
+        "district": "CENTRE 2 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2"
+    },
+    {
+        "nom": "Yeyap André",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Briqueterie 2",
+        "district": "CENTRE 1",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "SIKADI EmmanuelLicence en théologie",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Buea",
+        "district": "SUD OUEST",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "Ebouel Jonas Chancelain",
+        "grade": "Dp",
+        "contact": "nan",
+        "paroisse_nom": "Bwanebwa",
+        "district": "B.B.M DU MONGO CENTRE",
+        "region_synodale": "MOUNGO CENTRE"
+    },
+    {
+        "nom": "NCHOUTNSU JEAN-CLAUDE",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Camp militaire",
+        "district": "TABE I",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "NDASSA Pierre Master II en Théologie Nouveau Testament",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Centre Urbain de Koutaba",
+        "district": "TABE I",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "Piegouong Christian",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Chila",
+        "district": "BATOUFAM / BADREFAM",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "Defo Kamga Lionel Gaitan",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Chila",
+        "district": "BATOUFAM / BADREFAM",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "responsable  LEINTU GUY AURÉLIEN DIT TCHOKONA",
+        "grade": "Pasteur",
+        "contact": "699904041//672337022",
+        "paroisse_nom": "Cité des palmiers",
+        "district": "B. B. D NORD",
+        "region_synodale": "WOURI CENTRE"
+    },
+    {
+        "nom": "SIMO ANDRÉ",
+        "grade": "Pasteur",
+        "contact": "699708567",
+        "paroisse_nom": "Cité des palmiers",
+        "district": "B. B. D NORD",
+        "region_synodale": "WOURI CENTRE"
+    },
+    {
+        "nom": "RATTACHÉ KEMOGNE JONAS",
+        "grade": "Pasteur",
+        "contact": "699867652",
+        "paroisse_nom": "Cité des palmiers",
+        "district": "B. B. D NORD",
+        "region_synodale": "WOURI CENTRE"
+    },
+    {
+        "nom": "Njifenjou Jean Calvin",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Collège Évangélique Polyvalent de Balena",
+        "district": "BATCHAM I",
+        "region_synodale": "BAMBOUTOS ET NORD OUEST"
+    },
+    {
+        "nom": "Ngouwouo Felix Rodrigue",
+        "grade": "Pasteur",
+        "contact": "693550408",
+        "paroisse_nom": "Company",
+        "district": "nan",
+        "region_synodale": "NOUN SUD"
+    },
+    {
+        "nom": "djoumbi keumouen Cyril Clermont",
+        "grade": "Dp",
+        "contact": "676332183",
+        "paroisse_nom": "Demguieu-meudjieu",
+        "district": "BANGOU",
+        "region_synodale": "HAUTS PLATEAUX"
+    },
+    {
+        "nom": "Djadja kamga aurelien",
+        "grade": "Ev",
+        "contact": "690404197",
+        "paroisse_nom": "Demguieu-meudjieu",
+        "district": "BANGOU",
+        "region_synodale": "HAUTS PLATEAUX"
+    },
+    {
+        "nom": "MADIBA Josué",
+        "grade": "Ev",
+        "contact": "679306703",
+        "paroisse_nom": "Denzo",
+        "district": "MELONG",
+        "region_synodale": "MOUNGO NORD"
+    },
+    {
+        "nom": "KOUE MATCHOUA TCHOUAKAM Leonel  avec délégation pastorale",
+        "grade": "Évangéliste",
+        "contact": "698877217",
+        "paroisse_nom": "Dibo",
+        "district": "DISTRICT DE YABASSI-YINGUI",
+        "region_synodale": "NKAM"
+    },
+    {
+        "nom": "Ngang Richard",
+        "grade": "Ev",
+        "contact": "698378692",
+        "paroisse_nom": "Dikouma",
+        "district": "BALONG",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "Nakomo Didier",
+        "grade": "Ev",
+        "contact": "683343633",
+        "paroisse_nom": "Dikouma",
+        "district": "BALONG",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "Dachi Ngoko Nathalie",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Dikouma -Malèndè",
+        "district": "BALONG",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "PP NKOUE KOLLO Salomon Bertin",
+        "grade": "Dp",
+        "contact": "nan",
+        "paroisse_nom": "DISSAKE-LOKO",
+        "district": "DISTRICT DE YABASSI-YINGUI",
+        "region_synodale": "NKAM"
+    },
+    {
+        "nom": "Edei Mbella Virgilien",
+        "grade": "Ev",
+        "contact": "693968205",
+        "paroisse_nom": "District Abo Sud B , paroisse de Ndoulou",
+        "district": "ABO-SUD \"A\"",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "Eyadi Ebenguè Étienne Marie",
+        "grade": "Pasteur",
+        "contact": "699658947",
+        "paroisse_nom": "District Abo Sud B Paroisse Miang",
+        "district": "ABO-SUD \"A\"",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "PP Paning Martin",
+        "grade": "Dp",
+        "contact": "699655658",
+        "paroisse_nom": "Djaa-kassap",
+        "district": "BAYANGAM",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "Nzelong Matthieu",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Djaa-kassap",
+        "district": "BAYANGAM",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "NZELONG MATTHIEU BEPC THEOLOGIQUE",
+        "grade": "Ev",
+        "contact": "697637147",
+        "paroisse_nom": "Djaa-kassap ( annexe de kassap )",
+        "district": "BAYANGAM",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "EKEN Gabriel",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "Djassa",
+        "district": "BALENG B",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "DAWAK NZADI Mohamed Willy",
+        "grade": "Pasteur",
+        "contact": "675216348/658313235",
+        "paroisse_nom": "Djedem",
+        "district": "BATIE",
+        "region_synodale": "HAUTS PLATEAUX"
+    },
+    {
+        "nom": "Proposant DJUEYA TCHUIGWAHA Bertric Gaël",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Djedem",
+        "district": "BATIE",
+        "region_synodale": "HAUTS PLATEAUX"
+    },
+    {
+        "nom": "Touonmeu Choupo Alain  proposant",
+        "grade": "Pasteur",
+        "contact": "675069530 691476365",
+        "paroisse_nom": "Djiogue",
+        "district": "BANDJOUN D",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "TCHOUAMO NANA Achille",
+        "grade": "Pasteur",
+        "contact": "699747652",
+        "paroisse_nom": "Djiomghouo",
+        "district": "BANDJOUN A",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "Pp KEGAM TONKAM",
+        "grade": "Dp",
+        "contact": "696571821",
+        "paroisse_nom": "Djiomghouo",
+        "district": "BANDJOUN A",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "Nsangou Josué",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Djoua",
+        "district": "BAMENDOU",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "tchimtchoua AlaiN",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Djut",
+        "district": "BAMEKA",
+        "region_synodale": "HAUTS PLATEAUX"
+    },
+    {
+        "nom": "Fotsing honoré",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "Doupe",
+        "district": "BALENG B",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "Djomou DITCHONG Valentin",
+        "grade": "Ev",
+        "contact": "674357073",
+        "paroisse_nom": "ECC soundop,Eboukou",
+        "district": "MBARA 1",
+        "region_synodale": "MOUNGO NORD"
+    },
+    {
+        "nom": "Ekoume Parfait",
+        "grade": "Pasteur",
+        "contact": "697985826",
+        "paroisse_nom": "Edea Ville",
+        "district": "EDEA  I",
+        "region_synodale": "SANAGA MARITIME ET OCEAN"
+    },
+    {
+        "nom": "Ekango Simon",
+        "grade": "Ev",
+        "contact": "696473546",
+        "paroisse_nom": "Edjogmoa",
+        "district": "BANEKA 2",
+        "region_synodale": "MOUNGO NORD"
+    },
+    {
+        "nom": "MBAMENI  BANKOUE",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "EEC  zoetele",
+        "district": "DJA & LOBO",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "SOP JACQUES CLAUDE",
+        "grade": "Pasteur",
+        "contact": "673792919",
+        "paroisse_nom": "EEC (Elig edzoa)",
+        "district": "CENTRE 3",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "PEMPEME Salomon",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "EEC BAHO PETIT MONDE",
+        "district": "DOUALA NORD",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "Mambou nkomguep Guy Mino",
+        "grade": "Pasteur",
+        "contact": "676698910/ 698423726",
+        "paroisse_nom": "EEC bandrefam",
+        "district": "BATOUFAM / BADREFAM",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "BENGA Victor Simplice",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "EEC BANEN- NESTLÉ",
+        "district": "BELE-BELE  1",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "R ETOUKE Blaise Pascal",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "EEC BEPANDA OMNISPORTS",
+        "district": "B. B. D NORD",
+        "region_synodale": "WOURI CENTRE"
+    },
+    {
+        "nom": "R MBOME Sakeo",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "EEC BEPANDA OMNISPORTS",
+        "district": "B. B. D NORD",
+        "region_synodale": "WOURI CENTRE"
+    },
+    {
+        "nom": "TOWO Jacqueline Responsable de Paroisse",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "EEC BESSEKE",
+        "district": "BELE-BELE  1",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "LANGA Victor",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "EEC BOJONGO",
+        "district": "BELE-BELE  1",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "MALAKE Étienne Bosco Responsable de Paroisse  EPEE MOUYOMBONE Désirée",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "EEC BONABÉRI",
+        "district": "BELE-BELE  1",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "BEKIMA MBOULE Responsable de Paroisse  MISSE",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "EEC BONAMOUNDOURU",
+        "district": "BONEBELA",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "EBOULE Raymond Lechanceux Président du District",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "EEC BONASSAMA",
+        "district": "BELE-BELE  1",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "DIPANDA Jacques Chef de Paroisse  MBONDJO Auguste",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "EEC BONATEKI",
+        "district": "BONEBELA",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "ELOKAN Alain Bruno",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "EEC BONENDALE",
+        "district": "BELE-BELE  1",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "TCHOUAKE Emmanuel Responsable de Paroisse  LEUDJEU Magloire",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "EEC CINQUANTENAIRE",
+        "district": "DOUALA NORD",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "MBOUTE Madeleine    ELLONG MBELLA",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "EEC CINQUANTENAIRE",
+        "district": "DOUALA NORD",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "YUENGNENGNI Jean Rosier",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "EEC CINQUANTENAIRE",
+        "district": "DOUALA NORD",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "MIMIAFO Abestine ÉPOUSE KENMOGNE  Rattaché",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "EEC CINQUANTENAIRE",
+        "district": "DOUALA NORD",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "PP BOGNING HUBERT AIME",
+        "grade": "Dp",
+        "contact": "nan",
+        "paroisse_nom": "EEC DE DJIONE",
+        "district": "BANDJOUN  E",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "R FONGUIENG Guillaume Basile Licence tel",
+        "grade": "Ev",
+        "contact": "699045013",
+        "paroisse_nom": "EEC de Mouatong",
+        "district": "MELONG",
+        "region_synodale": "MOUNGO NORD"
+    },
+    {
+        "nom": "koumda Guy Bertin",
+        "grade": "Ev",
+        "contact": "699070244/677230159",
+        "paroisse_nom": "EEC de Sambo",
+        "district": "KADEY",
+        "region_synodale": "EST"
+    },
+    {
+        "nom": "SEHEPING GEORGES MICHAEL",
+        "grade": "Ev",
+        "contact": "677984915/699589843",
+        "paroisse_nom": "EEC de Sambo",
+        "district": "KADEY",
+        "region_synodale": "EST"
+    },
+    {
+        "nom": "FOUNDIKOU Esaï",
+        "grade": "Pasteur / Responsable de Paroisse  MFOREN Josué",
+        "contact": "nan",
+        "paroisse_nom": "EEC DEIDO VALLÉE",
+        "district": "BONEBELA",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "Docteur TCHIO ANDRE",
+        "grade": "Pasteur",
+        "contact": "699730399",
+        "paroisse_nom": "EEC ETOUG-EBE",
+        "district": "CENTRE 3 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2"
+    },
+    {
+        "nom": "MOUSSIMA Charly Responsable de Paroisse",
+        "grade": "Pasteur",
+        "contact": "694653351",
+        "paroisse_nom": "EEC GRAND HANGARD",
+        "district": "BELE-BELE  2",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "TCHUENKAM Titus",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "EEC Hôpital CEBEC de Bonaberi",
+        "district": "BELE-BELE  2",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "NDEDI Patrick",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "EEC KOTTO",
+        "district": "DOUALA NORD",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "- TCHOUATEU Christian Legrand Master",
+        "grade": "nan",
+        "contact": "699118044/ 676860515",
+        "paroisse_nom": "EEC KOUOPOU",
+        "district": "BAYANGAM",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "- BATCHAYA Anie epse TCHATCHOUANG Licence",
+        "grade": "nan",
+        "contact": "696214651",
+        "paroisse_nom": "EEC KOUOPOU",
+        "district": "BAYANGAM",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "SIGNE Jean-Clovis",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "EEC LENDI",
+        "district": "DOUALA NORD",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "KOUM LAMBO Jean",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "EEC LOGPOM",
+        "district": "DOUALA NORD",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "NJIMOLOU Georges  Responsable de la paroisse  KOUO Eitel ISSEDOU",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "EEC MAMBANDA 1",
+        "district": "BELE-BELE  2",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "TCHAPSI Emmanuel Responsable de Paroisse",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "EEC MAMBANDA 2 ALPICAM",
+        "district": "BELE-BELE  2",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "NJIMOLOU Georges  responsable de la paroisse  KOUO Eitel ISSEDOU",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "EEC MAMBANDA1",
+        "district": "BELE-BELE  2",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "KWIN David Responsable de Paroisse  MAWOUE Caroline",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "EEC MBELA JEDU",
+        "district": "DOUALA NORD",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "KWIN David  Epse TAKAM",
+        "grade": "Pasteur / Responsable de Paroisse  MAWOUE Caroline",
+        "contact": "nan",
+        "paroisse_nom": "EEC MBELA JEDU",
+        "district": "DOUALA NORD",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "NDE Claude",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "EEC MPANJO- Ferme",
+        "district": "BELE-BELE  1",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "NYAMSI Louis Lopez",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "EEC NDOBO",
+        "district": "BELE-BELE  1",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "DEGUELA Raphaël Responsable de la paroisse",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "EEC NGWELE",
+        "district": "BELE-BELE  2",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "KEGNI Gaston",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "EEC NKOMBA",
+        "district": "BELE-BELE  2",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "Noumbissi Moise",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "EEC NKOTENG",
+        "district": "HTE SANAGA",
+        "region_synodale": "CENTRE SUD 2"
+    },
+    {
+        "nom": "Koumda Guy Bertin",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "EEC sambo",
+        "district": "KADEY",
+        "region_synodale": "EST"
+    },
+    {
+        "nom": "SEHEPING Georges Michael",
+        "grade": "Ev",
+        "contact": "677230159/699070244",
+        "paroisse_nom": "EEC sambo",
+        "district": "KADEY",
+        "region_synodale": "EST"
+    },
+    {
+        "nom": "NANA KUIPOU Roger",
+        "grade": "Pasteur / Responsable de la paroisse",
+        "contact": "nan",
+        "paroisse_nom": "EEC SODIKO- VILLE",
+        "district": "BELE-BELE  1",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "MBAMENI BANKOUE Robert Roger",
+        "grade": "Pasteur",
+        "contact": "690895404/677222163",
+        "paroisse_nom": "EEC. Zoetele",
+        "district": "DJA & LOBO",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "Matheng Blaise Flaurent -",
+        "grade": "Pasteur",
+        "contact": "699286780",
+        "paroisse_nom": "Eglise Évangélique du Cameroun Paroisse Bilingue de Kribi",
+        "district": "KRIBI",
+        "region_synodale": "SANAGA MARITIME ET OCEAN"
+    },
+    {
+        "nom": "Sanjo yonga jean romain -",
+        "grade": "Pasteur",
+        "contact": "694526814",
+        "paroisse_nom": "Eglise Évangélique du Cameroun Paroisse Bilingue de Kribi",
+        "district": "KRIBI",
+        "region_synodale": "SANAGA MARITIME ET OCEAN"
+    },
+    {
+        "nom": "Eloka François -",
+        "grade": "Ev",
+        "contact": "693249201",
+        "paroisse_nom": "Eglise Évangélique du Cameroun Paroisse Bilingue de Kribi",
+        "district": "KRIBI",
+        "region_synodale": "SANAGA MARITIME ET OCEAN"
+    },
+    {
+        "nom": "Dipanda Patrick - angéliste",
+        "grade": "Ev",
+        "contact": "656170855",
+        "paroisse_nom": "Eglise Évangélique du Cameroun Paroisse Bilingue de Kribi",
+        "district": "KRIBI",
+        "region_synodale": "SANAGA MARITIME ET OCEAN"
+    },
+    {
+        "nom": "Kamwa Kamdem Ebenezer - angéliste",
+        "grade": "Ev",
+        "contact": "693359747",
+        "paroisse_nom": "Eglise Évangélique du Cameroun Paroisse Bilingue de Kribi",
+        "district": "KRIBI",
+        "region_synodale": "SANAGA MARITIME ET OCEAN"
+    },
+    {
+        "nom": "Dassi Joseph responsable de la paroisse",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Ekorezock",
+        "district": "CENTRE 1 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2"
+    },
+    {
+        "nom": "DJOMO NKWILANG Christian",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Ekorezock",
+        "district": "CENTRE 1 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2"
+    },
+    {
+        "nom": "YAKOUA TCHANA BLAIRIO DANIQUE   LAPPA Thierry",
+        "grade": "Pasteur",
+        "contact": "697930119 /",
+        "paroisse_nom": "EKOUNOU",
+        "district": "LOM & DJEREM NORD",
+        "region_synodale": "EST"
+    },
+    {
+        "nom": "SOP JACQUES CLAUDE",
+        "grade": "Pasteur",
+        "contact": "673792919",
+        "paroisse_nom": "ELIG-EDZOA",
+        "district": "CENTRE 3",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "NZAKEP CHEGOUA Christelle Elia epse KOUAM -  -",
+        "grade": "Pasteure",
+        "contact": "679236692/658800308",
+        "paroisse_nom": "EMANA-BUEA",
+        "district": "CENTRE 3",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "Tsayou Rodrigue Berliin",
+        "grade": "Licencié en théologie",
+        "contact": "nan",
+        "paroisse_nom": "Enia",
+        "district": "LOM & DJEREM NORD",
+        "region_synodale": "EST"
+    },
+    {
+        "nom": "ZEH Rémy",
+        "grade": "Pasteur",
+        "contact": "678873450/697118047",
+        "paroisse_nom": "Eseka",
+        "district": "CENTRE 2 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2"
+    },
+    {
+        "nom": "KoueKam Aristide",
+        "grade": "Pasteur",
+        "contact": "67000011",
+        "paroisse_nom": "Famgoum",
+        "district": "BATIE",
+        "region_synodale": "HAUTS PLATEAUX"
+    },
+    {
+        "nom": "MENDJI NGOUMOU Henri Joël",
+        "grade": "Pasteur",
+        "contact": "696878607",
+        "paroisse_nom": "Famtchouet",
+        "district": "BALENG B",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "DJOUTA KANOUO eline angéliste",
+        "grade": "Ev",
+        "contact": "698227018",
+        "paroisse_nom": "Famtchouet",
+        "district": "BALENG B",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "Pendant Simon",
+        "grade": "Ev",
+        "contact": "691639850",
+        "paroisse_nom": "Fiko",
+        "district": "ABO-NORD",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "proposant PANYERE TETANG MARINOT",
+        "grade": "Pasteur",
+        "contact": "675844374/",
+        "paroisse_nom": "Fokoué",
+        "district": "DSCHANG II",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "-Ndoutngamdi Patrice    w",
+        "grade": "Pasteur",
+        "contact": "699835131",
+        "paroisse_nom": "Fomchou",
+        "district": "FOUMBAN 1",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "-NDAM Samuel Loïc",
+        "grade": "Évangéliste",
+        "contact": "658093798",
+        "paroisse_nom": "Fomchou",
+        "district": "FOUMBAN 1",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "Délégué pastoral MOUGUE Salomon",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "Fomepea",
+        "district": "DSCHANG II",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "wemedick Emmanuel",
+        "grade": "EV",
+        "contact": "nan",
+        "paroisse_nom": "Fondjomekwet",
+        "district": "BANDJA",
+        "region_synodale": "HAUT NKAM"
+    },
+    {
+        "nom": "NDJALLA ESSOH Ripolin Mondelli",
+        "grade": "EV",
+        "contact": "nan",
+        "paroisse_nom": "FONGO-TONGO II",
+        "district": "DSCHANG I",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "JOGO Chiraque",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "FONGO-TONGO II",
+        "district": "DSCHANG I",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "PP Moundou André Armel",
+        "grade": "Dp",
+        "contact": "694852107",
+        "paroisse_nom": "Fongotongo1",
+        "district": "DSCHANG I",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "Ngouoko Nounjouo Christian",
+        "grade": "Ev/responsable d'annexe",
+        "contact": "678813718",
+        "paroisse_nom": "Fongotongo1",
+        "district": "DSCHANG I",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "RENGOU NJOYA Aloys Doucet",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "FONTAIN",
+        "district": "FOUMBAN 3",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "Master en théologie",
+        "grade": "nan",
+        "contact": "697205198",
+        "paroisse_nom": "FONTAIN",
+        "district": "FOUMBAN 3",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "Peyepsa Samuel",
+        "grade": "Ev",
+        "contact": "697667344",
+        "paroisse_nom": "Fossang",
+        "district": "FOUMBOT I",
+        "region_synodale": "NOUN SUD"
+    },
+    {
+        "nom": "Liengop François",
+        "grade": "Ev",
+        "contact": "699091406",
+        "paroisse_nom": "Fosset",
+        "district": "FOUMBOT I",
+        "region_synodale": "NOUN SUD"
+    },
+    {
+        "nom": "NGOUFACK TSAFACK Achil Hervé",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Foto",
+        "district": "DSCHANG II",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "Proposante CHOUSSI Yvette Désirée",
+        "grade": "Pasteure",
+        "contact": "nan",
+        "paroisse_nom": "Foto",
+        "district": "DSCHANG II",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "Aide-Évangeliste NGWANOM KUATE Nathan Blaise",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Foto",
+        "district": "DSCHANG II",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "TOMTA Alphonse",
+        "grade": "Ev",
+        "contact": "675743448",
+        "paroisse_nom": "Fotouni",
+        "district": "BANDJA",
+        "region_synodale": "HAUT NKAM"
+    },
+    {
+        "nom": "LIETMBOUE MATTHIEU",
+        "grade": "Ev",
+        "contact": "656235200",
+        "paroisse_nom": "Foyett",
+        "district": "NJIMOM",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "TIOMBOU Pauline bachelier En théologie",
+        "grade": "Pasteur",
+        "contact": "657968970",
+        "paroisse_nom": "GAROUA BOULAI",
+        "district": "LOM & DJEREM NORD",
+        "region_synodale": "EST"
+    },
+    {
+        "nom": "R Prowo Samuel",
+        "grade": "Ev",
+        "contact": "695887386",
+        "paroisse_nom": "Ghanka",
+        "district": "BALENG A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "Fotsing Joseph",
+        "grade": "Ev",
+        "contact": "655435273",
+        "paroisse_nom": "Ghanka",
+        "district": "BALENG A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "KOTTO EYOUM René",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Grand moulin",
+        "district": "BONEBELA",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "Bessingui Samuel",
+        "grade": "Pasteur",
+        "contact": "697959061",
+        "paroisse_nom": "Grand Souza",
+        "district": "ABO-SUD \"A\"",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "Otto Alain Guillot",
+        "grade": "Ev",
+        "contact": "657589795",
+        "paroisse_nom": "Grand Souza",
+        "district": "ABO-SUD \"A\"",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "Ngade Raymond Maîtrise",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Grand- temple",
+        "district": "BANEKA 1",
+        "region_synodale": "MOUNGO NORD"
+    },
+    {
+        "nom": "Kalondji Claude Doctorat",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Grand- temple",
+        "district": "BANEKA 1",
+        "region_synodale": "MOUNGO NORD"
+    },
+    {
+        "nom": "Takoukam Robert Licence",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Grand- temple",
+        "district": "BANEKA 1",
+        "region_synodale": "MOUNGO NORD"
+    },
+    {
+        "nom": "ANGELISTE AVEC DÉLÉGATION PASTORAL NGOLEBE JEAN PAUL",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "HIALA",
+        "district": "BATIE",
+        "region_synodale": "HAUTS PLATEAUX"
+    },
+    {
+        "nom": "FOTSO WILLY CÉDRIC",
+        "grade": "Pasteur",
+        "contact": "674545946",
+        "paroisse_nom": "HOUA",
+        "district": "BANDJOUN A",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "Tsagna kamdem djiken licence en théologie",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Jourdain de beka hossere",
+        "district": "NGAOUNDERE",
+        "region_synodale": "ADAMAOUA"
+    },
+    {
+        "nom": "Ngantchoue Djamouo Laure",
+        "grade": "nan",
+        "contact": "672681320",
+        "paroisse_nom": "Kaffo",
+        "district": "BAHAM SUD",
+        "region_synodale": "HAUTS PLATEAUX"
+    },
+    {
+        "nom": "Nguiabou Jeanne",
+        "grade": "Évangéliste",
+        "contact": "691432322",
+        "paroisse_nom": "Kaffo",
+        "district": "BAHAM SUD",
+        "region_synodale": "HAUTS PLATEAUX"
+    },
+    {
+        "nom": "Missè Ndong Bernard",
+        "grade": "Ev",
+        "contact": "699653583",
+        "paroisse_nom": "Kakè",
+        "district": "ABO-SUD \"A\"",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "FEULEFACK Michel",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Kam Ngwinkè",
+        "district": "BANDJOUN B",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "FOTSO Amos Boris",
+        "grade": "licencié en théologie",
+        "contact": "nan",
+        "paroisse_nom": "Kam Ngwinkè",
+        "district": "BANDJOUN B",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "YOMI ROBERT",
+        "grade": "Pasteur",
+        "contact": "672794320/ 694859034",
+        "paroisse_nom": "KAMGO",
+        "district": "BANDJOUN  E",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "TUEBOU Rosette Émilienne",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Kamkop centenaire",
+        "district": "BAMOUGOUM A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "DJAMI NGUETNKAM Noël Stéphane",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Kamkop centenaire",
+        "district": "BAMOUGOUM A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "PP Martin NZUANYAN NCHINDA",
+        "grade": "Dp",
+        "contact": "nan",
+        "paroisse_nom": "Kamkop centenaire",
+        "district": "BAMOUGOUM A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "NZESSE Clément",
+        "grade": "Évangéliste",
+        "contact": "nan",
+        "paroisse_nom": "Kamkop centenaire",
+        "district": "BAMOUGOUM A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "FEULEFACK Michel",
+        "grade": "Pasteur",
+        "contact": "676400568",
+        "paroisse_nom": "Kam-Ngwinkè",
+        "district": "BANDJOUN B",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "FOTO Amos Boris",
+        "grade": "Pasteur / titulaire d'une licence en théologie",
+        "contact": "695508052/679331557",
+        "paroisse_nom": "Kam-Ngwinkè",
+        "district": "BANDJOUN B",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "FOHM DJOUM MOPO Ghislain",
+        "grade": "Pasteur",
+        "contact": "697639671",
+        "paroisse_nom": "KASSAH TOSSEUH",
+        "district": "BAMOUGOUM B",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "TCHUAYA KOMBOU Ulrich Taylor epouse TCHOUMI",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "KASSANG",
+        "district": "nan",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "Rostand MBATCHOU TAMDEM",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Katsela",
+        "district": "BANDJOUN D",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "MBE Philippe",
+        "grade": "Pasteur",
+        "contact": "696706424",
+        "paroisse_nom": "KENA",
+        "district": "BAMOUGOUM A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "NTANKEU NDJIKI Yannick",
+        "grade": "Pasteur",
+        "contact": "696382806",
+        "paroisse_nom": "Kombou",
+        "district": "BABADJOU",
+        "region_synodale": "BAMBOUTOS ET NORD OUEST"
+    },
+    {
+        "nom": "DESAHA LONTSI Fabrice",
+        "grade": "Évangéliste",
+        "contact": "nan",
+        "paroisse_nom": "Kombou",
+        "district": "BABADJOU",
+        "region_synodale": "BAMBOUTOS ET NORD OUEST"
+    },
+    {
+        "nom": "FOKOU NGUELEWOU Théophile Délégué Pastoral",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Kombou",
+        "district": "BABADJOU",
+        "region_synodale": "BAMBOUTOS ET NORD OUEST"
+    },
+    {
+        "nom": "Tokap Edith Dieunedort",
+        "grade": "Licence en Théologie",
+        "contact": "696966279",
+        "paroisse_nom": "Kondi Pk8",
+        "district": "B. B. D II",
+        "region_synodale": "WOURI SUD"
+    },
+    {
+        "nom": "NGUEPINSI TENEFOPA Pascal",
+        "grade": "Pasteur",
+        "contact": "699344925",
+        "paroisse_nom": "Kongso'o avec ces annexes",
+        "district": "BAMOUGOUM A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "NDANBOU TCHAKOUNTE Michael  proposant avec Délégation pastorale",
+        "grade": "Pasteur",
+        "contact": "699853787-670654904",
+        "paroisse_nom": "Kongso'o avec ces annexes",
+        "district": "BAMOUGOUM A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "TCHAKOUNTE Marquise Nathalie  avec Délégation pastorale",
+        "grade": "Évangéliste",
+        "contact": "696082173",
+        "paroisse_nom": "Kongso'o avec ces annexes",
+        "district": "BAMOUGOUM A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "sechouket Emmanuel",
+        "grade": "E v dp",
+        "contact": "nan",
+        "paroisse_nom": "Kouchakap",
+        "district": "NKOUTIE",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "Nchouwait Jean Paul",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "Kouchong",
+        "district": "BANGOURAIN",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "Nsangou Dominique",
+        "grade": "Ev",
+        "contact": "691039015",
+        "paroisse_nom": "Kouchouontoum",
+        "district": "FOUMBOT II",
+        "region_synodale": "NOUN SUD"
+    },
+    {
+        "nom": "DJEKAINKOULA Zachée",
+        "grade": "Pasteur",
+        "contact": "696028779",
+        "paroisse_nom": "KOUNGA",
+        "district": "FOUMBAN 1",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "PP NJOYA Cyrille Thierry",
+        "grade": "nan",
+        "contact": "691374986",
+        "paroisse_nom": "KOUNGA",
+        "district": "FOUMBAN 1",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "Ngouh Israël Bien Aimé",
+        "grade": "Pasteur",
+        "contact": "696361581",
+        "paroisse_nom": "Kouoptamo",
+        "district": "NKOUGHAM 1",
+        "region_synodale": "NOUN SUD"
+    },
+    {
+        "nom": "Semimche Daniel",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "Kourom",
+        "district": "BANGOURAIN",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "RED MARTIN",
+        "grade": "Ev",
+        "contact": "698161668",
+        "paroisse_nom": "KOUSSERI",
+        "district": "MAROUA",
+        "region_synodale": "NORD & EXTREME-NORD"
+    },
+    {
+        "nom": "Njiawouo Albert",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Koutié 1",
+        "district": "NKOUTIE",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "Ndam Nsangou Moïse",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "Kouwet",
+        "district": "BANGOURAIN",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "Epanguè Francis",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Kumba",
+        "district": "BALONG",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "Mbouombouo Edouard Pp",
+        "grade": "nan",
+        "contact": "695285666",
+        "paroisse_nom": "Kwetvu",
+        "district": "MANGOUM",
+        "region_synodale": "NOUN SUD"
+    },
+    {
+        "nom": "Moussinga kolle faustin",
+        "grade": "Pasteur",
+        "contact": "676122440/ 696046410",
+        "paroisse_nom": "Kye-ossi",
+        "district": "MVILA & NTEM",
+        "region_synodale": "CENTRE SUD 2"
+    },
+    {
+        "nom": "-  Ndobo Ndobo jules",
+        "grade": "Pasteur",
+        "contact": "672292375",
+        "paroisse_nom": "La Refondation de Mbouroukou",
+        "district": "MBO ELONG",
+        "region_synodale": "MOUNGO NORD"
+    },
+    {
+        "nom": "délégué pastoral Mitonga Ndip Robert",
+        "grade": "Évangéliste",
+        "contact": "673070501",
+        "paroisse_nom": "La Refondation de Mbouroukou",
+        "district": "MBO ELONG",
+        "region_synodale": "MOUNGO NORD"
+    },
+    {
+        "nom": "R Tchokobou Jules Bruno",
+        "grade": "Ev",
+        "contact": "677957556",
+        "paroisse_nom": "Lafe-Baleng",
+        "district": "BALENG A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "R Djeatsa Pierrette epse Nna",
+        "grade": "Ev",
+        "contact": "675708439",
+        "paroisse_nom": "Lafe-Baleng",
+        "district": "BALENG A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "TATSAMBONG DJOU Martial",
+        "grade": "Pasteur",
+        "contact": "694781866",
+        "paroisse_nom": "Lafié avec son annexe Latsit Bamougoum",
+        "district": "BAMOUGOUM B",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "KOAGNE Jacques",
+        "grade": "Évangéliste",
+        "contact": "655488028",
+        "paroisse_nom": "Lafié avec son annexe Latsit Bamougoum",
+        "district": "BAMOUGOUM B",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "TCHANA KAMDEM DIKENS",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Le Jourdain de beka hossere",
+        "district": "NGAOUNDERE",
+        "region_synodale": "ADAMAOUA"
+    },
+    {
+        "nom": "DJAMEGNI FRANK",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Le Jourdain de beka hossere",
+        "district": "NGAOUNDERE",
+        "region_synodale": "ADAMAOUA"
+    },
+    {
+        "nom": "Ngwanom kuate nathan blaise",
+        "grade": "Ev / Aide-angeliste",
+        "contact": "671219781",
+        "paroisse_nom": "Leffé",
+        "district": "DSCHANG II",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "FOPOSSI KEMGANG Emblème-Vertu licence",
+        "grade": "Pasteur",
+        "contact": "675689848",
+        "paroisse_nom": "Lieu de culte Cité Des Merveilles",
+        "district": "CENTRE 3",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "RNGUEZEM NONGNI ECLADOR",
+        "grade": "Ev",
+        "contact": "696495797",
+        "paroisse_nom": "Lieu de Culte de DEMBOU (PAROISSE DE MTIEKI)",
+        "district": "BANDJOUN A",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "MBIABOUO NZOUTOM Daniel Doré",
+        "grade": "nan",
+        "contact": "699801798",
+        "paroisse_nom": "Lieu de culte de Mbanga Bakoko logements sociaux",
+        "district": "NEW-BELL D",
+        "region_synodale": "WOURI SUD"
+    },
+    {
+        "nom": "NGONGUE Marc Aurel  EEC",
+        "grade": "Pasteur",
+        "contact": "670370434",
+        "paroisse_nom": "Lieu de Culte de Nkolondom",
+        "district": "CENTRE 3",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "KOUAM SIMO Albin Michel",
+        "grade": "Ev",
+        "contact": "697892099",
+        "paroisse_nom": "Logntoka",
+        "district": "DISTRICT DE YABASSI-YINGUI",
+        "region_synodale": "NKAM"
+    },
+    {
+        "nom": "proposant Nangang Djomeni Georges",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Louh",
+        "district": "BAMENA",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "R BIKEK ISACK  NGASSEH EPOH Moshe Dayan",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "LOUM A",
+        "district": "LOUM",
+        "region_synodale": "MOUNGO CENTRE"
+    },
+    {
+        "nom": "R NOUNDJO Alfred Dieu de grâce",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "LOUM B",
+        "district": "LOUM",
+        "region_synodale": "MOUNGO CENTRE"
+    },
+    {
+        "nom": "R NGANGUIN LaurentBac en théologie",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "LOUM C",
+        "district": "LOUM",
+        "region_synodale": "MOUNGO CENTRE"
+    },
+    {
+        "nom": "R GWALA Abel  DOUNDA Robert",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "LOUM D",
+        "district": "LOUM",
+        "region_synodale": "MOUNGO CENTRE"
+    },
+    {
+        "nom": "R SILATCHOM TCHUENTE Rodrigue AIMÉ",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "LOUM E",
+        "district": "LOUM",
+        "region_synodale": "MOUNGO CENTRE"
+    },
+    {
+        "nom": "Tenke Tanang Nicodem licencié en théologie",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "Mafofa",
+        "district": "BAMENDJINDA",
+        "region_synodale": "BAMBOUTOS ET NORD OUEST"
+    },
+    {
+        "nom": "Fouenpemoun Daniel",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Magba",
+        "district": "MAGBA",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "le  MICHIREN Francis Valéry",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Magba",
+        "district": "MAGBA",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "Sani Sani Joseph",
+        "grade": "Ev",
+        "contact": "699092768",
+        "paroisse_nom": "Maka",
+        "district": "BOMONO",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "KOULOUSSE BOWEYE Roger",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "MAKEPE VILLAGE",
+        "district": "DOUALA NORD",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "NCHETKOU VALENTIN",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "MAKWETVU",
+        "district": "NJIMOM",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "NZUOPMIN Jean Claude",
+        "grade": "Pasteur",
+        "contact": "691476235",
+        "paroisse_nom": "Malantouen",
+        "district": "MALANTOUEN",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "Njimessa Jean Noël",
+        "grade": "Ev",
+        "contact": "690768187",
+        "paroisse_nom": "Malenden",
+        "district": "GBA-NJA",
+        "region_synodale": "NOUN SUD"
+    },
+    {
+        "nom": "NJOYA MARCUS",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "Maloum",
+        "district": "NJIMOM",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "GBETNKOM ISMAILA",
+        "grade": "Diplome école biblique national",
+        "contact": "693021699",
+        "paroisse_nom": "MAMBAIN",
+        "district": "FOUMBAN 4",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "Kouotou Jean Michel",
+        "grade": "Ev",
+        "contact": "699754068",
+        "paroisse_nom": "Mandjou",
+        "district": "LOM & DJEREM NORD",
+        "region_synodale": "EST"
+    },
+    {
+        "nom": "Mekon Yannick stagiaire",
+        "grade": "nan",
+        "contact": "691595250",
+        "paroisse_nom": "Mandjou",
+        "district": "LOM & DJEREM NORD",
+        "region_synodale": "EST"
+    },
+    {
+        "nom": "Souma Jacob",
+        "grade": "Ev",
+        "contact": "675796873",
+        "paroisse_nom": "Mandouka",
+        "district": "ABO-NORD",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "R WANGUE Eugène",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "Manengolè1",
+        "district": "NDOUNGUE SUD",
+        "region_synodale": "MOUNGO CENTRE"
+    },
+    {
+        "nom": "Délégué Pastoral KOUMBOU Achille Frigil",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Manengoteng",
+        "district": "MANJO A",
+        "region_synodale": "MOUNGO CENTRE"
+    },
+    {
+        "nom": "MATIKE EJABE AURELIEN Neston",
+        "grade": "Pasteur",
+        "contact": "674018769",
+        "paroisse_nom": "MANENGOUBA",
+        "district": "NDOUNGUE NORD",
+        "region_synodale": "MOUNGO CENTRE"
+    },
+    {
+        "nom": "NYETCHO CAMEL",
+        "grade": "Évangéliste",
+        "contact": "nan",
+        "paroisse_nom": "MANENGOUBA",
+        "district": "NDOUNGUE NORD",
+        "region_synodale": "MOUNGO CENTRE"
+    },
+    {
+        "nom": "Chimchua Félix",
+        "grade": "Pasteur",
+        "contact": "677316776",
+        "paroisse_nom": "Manewang",
+        "district": "MANJO B",
+        "region_synodale": "MOUNGO CENTRE"
+    },
+    {
+        "nom": "Nkoué Zachée",
+        "grade": "Ev",
+        "contact": "679378603",
+        "paroisse_nom": "Manewang",
+        "district": "MANJO B",
+        "region_synodale": "MOUNGO CENTRE"
+    },
+    {
+        "nom": "Bombo Toh Fils Emmanuel",
+        "grade": "nan",
+        "contact": "671839924",
+        "paroisse_nom": "Manewang",
+        "district": "MANJO B",
+        "region_synodale": "MOUNGO CENTRE"
+    },
+    {
+        "nom": "Kwedi Mbongo Jules",
+        "grade": "Pasteur",
+        "contact": "677073181",
+        "paroisse_nom": "Mangamba",
+        "district": "ABO-NORD",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "Mbounja Pierre Édouard",
+        "grade": "Ev",
+        "contact": "694064680",
+        "paroisse_nom": "Mangamba",
+        "district": "ABO-NORD",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "Banga Samuel Blaise",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Mangkoulang",
+        "district": "ABO-SUD \"A\"",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "Tembrng Ange Thierry",
+        "grade": "Pasteur",
+        "contact": "699076539",
+        "paroisse_nom": "Mangoum Njincha",
+        "district": "MANGOUM",
+        "region_synodale": "NOUN SUD"
+    },
+    {
+        "nom": "TIWA Marcel -licence Tel",
+        "grade": "Pasteur",
+        "contact": "675276519",
+        "paroisse_nom": "Mangwété",
+        "district": "MELONG",
+        "region_synodale": "MOUNGO NORD"
+    },
+    {
+        "nom": "R TCHUATOU KAJE RODRIGUE",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "MANJO CENTRE",
+        "district": "MANJO A",
+        "region_synodale": "MOUNGO CENTRE"
+    },
+    {
+        "nom": "R EKANGO EBANG Emmanuel",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "Manjo village",
+        "district": "MANJO A",
+        "region_synodale": "MOUNGO CENTRE"
+    },
+    {
+        "nom": "Ngumpuenyinyi Paul",
+        "grade": "Ev",
+        "contact": "655807430",
+        "paroisse_nom": "Manjouom",
+        "district": "nan",
+        "region_synodale": "nan"
+    },
+    {
+        "nom": "Mfossi poutougnigni Joseph",
+        "grade": "Ev",
+        "contact": "658799223",
+        "paroisse_nom": "Mankouombi",
+        "district": "MASSANGAM II",
+        "region_synodale": "NOUN SUD"
+    },
+    {
+        "nom": "Nsangou Josué baccalauréat en théologie",
+        "grade": "Pasteur",
+        "contact": "696231988",
+        "paroisse_nom": "Mapouoche",
+        "district": "NKOUSSAM",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "KENNE NANTSA Narcisse PP",
+        "grade": "Dp",
+        "contact": "691351283",
+        "paroisse_nom": "MATOUBE",
+        "district": "NKONDJOCK SUD",
+        "region_synodale": "NKAM"
+    },
+    {
+        "nom": "Njoya Emmanuel",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "Mayouom",
+        "district": "NJIMOM",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "Njoya Rayé Isac",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "Mayouom",
+        "district": "NJIMOM",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "Ngansop Nguemnang Carine",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Mbadoumou",
+        "district": "CENTRE 2 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2"
+    },
+    {
+        "nom": "MANYAKA MANYAKA Samuel Décor",
+        "grade": "Évangéliste",
+        "contact": "nan",
+        "paroisse_nom": "Mbadoumou",
+        "district": "CENTRE 2 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2"
+    },
+    {
+        "nom": "Moussima Charles",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Mbalmayo 1- Lycée",
+        "district": "NYONG & SOO",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "Sone Ebako Victor",
+        "grade": "Pasteur",
+        "contact": "652540859",
+        "paroisse_nom": "Mbalmayo 2 Boulet",
+        "district": "NYONG & SOO",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "Kankeu Alain",
+        "grade": "Pasteur",
+        "contact": "672955396",
+        "paroisse_nom": "Mbalmayo New town centre",
+        "district": "NYONG & SOO",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "Yamdjieu Daniel   pamen prince",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Mbanda Sic",
+        "district": "EDEA  I",
+        "region_synodale": "SANAGA MARITIME ET OCEAN"
+    },
+    {
+        "nom": "Ngwa Bertrand",
+        "grade": "nan",
+        "contact": "677339820",
+        "paroisse_nom": "Mbandjock",
+        "district": "HTE SANAGA",
+        "region_synodale": "CENTRE SUD 2"
+    },
+    {
+        "nom": "MBIABOUO NZOUTOM Daniel",
+        "grade": "nan",
+        "contact": "699801798",
+        "paroisse_nom": "Mbanga Bakoko logements sociaux",
+        "district": "NEW-BELL D",
+        "region_synodale": "WOURI SUD"
+    },
+    {
+        "nom": "Ewanè Ntonè Thomas",
+        "grade": "Pasteur",
+        "contact": "675063595",
+        "paroisse_nom": "Mbanga -Balong",
+        "district": "BALONG",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "Mbouombouo Nicodème",
+        "grade": "Pasteur",
+        "contact": "697128257",
+        "paroisse_nom": "Mbanjou",
+        "district": "MBANJOU",
+        "region_synodale": "NOUN SUD"
+    },
+    {
+        "nom": "ETOUKE MBEBI Isaac  Responsable",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Mbankolo",
+        "district": "CENTRE 1 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2"
+    },
+    {
+        "nom": "NJANANG MABOU Arielle",
+        "grade": "Évangéliste",
+        "contact": "nan",
+        "paroisse_nom": "Mbankolo",
+        "district": "CENTRE 1 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2"
+    },
+    {
+        "nom": "TOUOYEM ELVIS",
+        "grade": "Pasteur",
+        "contact": "674971874",
+        "paroisse_nom": "MBARESSOUMTOU 2",
+        "district": "BANEKA 3",
+        "region_synodale": "MOUNGO NORD"
+    },
+    {
+        "nom": "KWIN David",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "MBELA JEDU",
+        "district": "DOUALA NORD",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "MAWOUE TAKAM",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "MBELA JEDU",
+        "district": "DOUALA NORD",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "Bollè Njomè Donald",
+        "grade": "Pasteur",
+        "contact": "653529850",
+        "paroisse_nom": "Mbonjo",
+        "district": "ABO-SUD \"A\"",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "Bebey Guy Rodrigue",
+        "grade": "Pasteur",
+        "contact": "676087875",
+        "paroisse_nom": "Mbonjo",
+        "district": "ABO-SUD \"A\"",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "NANA NJANGOU RODRIGUE",
+        "grade": "Dp",
+        "contact": "677794922",
+        "paroisse_nom": "MBOU",
+        "district": "BALENGOU",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "Kamguia joseph",
+        "grade": "Pasteur",
+        "contact": "6998580394774",
+        "paroisse_nom": "Mboukue-Baham",
+        "district": "BAHAM NORD",
+        "region_synodale": "HAUTS PLATEAUX"
+    },
+    {
+        "nom": "Tchuente Nguechou Emmanuel Elysé",
+        "grade": "nan",
+        "contact": "656996625/ 699418587",
+        "paroisse_nom": "Mboukue-Baham",
+        "district": "BAHAM NORD",
+        "region_synodale": "HAUTS PLATEAUX"
+    },
+    {
+        "nom": "Foka Takoukam Alain",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Mebouti",
+        "district": "BALENG B",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "Nya Bruno",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "Meji",
+        "district": "nan",
+        "region_synodale": "HAUTS PLATEAUX"
+    },
+    {
+        "nom": "Youmfoute Emmanuel",
+        "grade": "Pasteur",
+        "contact": "690360050/654033917",
+        "paroisse_nom": "Melap",
+        "district": "NKOUPA",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "Ndie Fondop Bernard maîtrise en théologie",
+        "grade": "licences en droit",
+        "contact": "nan",
+        "paroisse_nom": "Melen",
+        "district": "CENTRE 2 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2"
+    },
+    {
+        "nom": "Boto Paul",
+        "grade": "master en théologie",
+        "contact": "nan",
+        "paroisse_nom": "Melen",
+        "district": "CENTRE 2 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2"
+    },
+    {
+        "nom": "Djeumo Anie Christelle epse Tchiemegni licence en théologie",
+        "grade": "licence en tourisme",
+        "contact": "nan",
+        "paroisse_nom": "Melen",
+        "district": "CENTRE 2 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2"
+    },
+    {
+        "nom": "Domkop Jules",
+        "grade": "Ev",
+        "contact": "675556028",
+        "paroisse_nom": "Melong 2a",
+        "district": "MBARA 1",
+        "region_synodale": "MOUNGO NORD"
+    },
+    {
+        "nom": "PP ENOBIL Irène",
+        "grade": "Dp",
+        "contact": "nan",
+        "paroisse_nom": "Melong Centre",
+        "district": "MELONG",
+        "region_synodale": "MOUNGO NORD"
+    },
+    {
+        "nom": "R TCHOUNLAHUI TEBONSO Joseph",
+        "grade": "Ev",
+        "contact": "670344681",
+        "paroisse_nom": "Melong Centre",
+        "district": "MELONG",
+        "region_synodale": "MOUNGO NORD"
+    },
+    {
+        "nom": "NGANDE Pierre Licence Tel",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Melong Pont",
+        "district": "MELONG",
+        "region_synodale": "MOUNGO NORD"
+    },
+    {
+        "nom": "Watio Célestin",
+        "grade": "Pasteur",
+        "contact": "696647153/675404455",
+        "paroisse_nom": "MESSAMENDONGO",
+        "district": "CENTRE 1",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "NDOUMBE EPOH SARAH",
+        "grade": "Ev",
+        "contact": "680783375",
+        "paroisse_nom": "MESSAMENDONGO",
+        "district": "CENTRE 1",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "- NGOUANEU ÉTIENNE Maîtrise en Théologie",
+        "grade": "nan",
+        "contact": "696661836",
+        "paroisse_nom": "Messassi",
+        "district": "CENTRE 3",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "- DR SEZONO SEZINE SAMUEL",
+        "grade": "nan",
+        "contact": "699542653",
+        "paroisse_nom": "Messassi",
+        "district": "CENTRE 3",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "-FOPESSI EMBLÈME VERTU Licence en Théologie",
+        "grade": "nan",
+        "contact": "675680948",
+        "paroisse_nom": "Messassi",
+        "district": "CENTRE 3",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "Ngoumwa kengne Elie",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "Metchou",
+        "district": "PENKA MICHEL",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "Fankam Simplice Delor Master en Théologie",
+        "grade": "Pasteur",
+        "contact": "675248185",
+        "paroisse_nom": "Mewoulou",
+        "district": "CENTRE 2 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2"
+    },
+    {
+        "nom": "Padjio Nankie Séverin Martial",
+        "grade": "Évangéliste",
+        "contact": "nan",
+        "paroisse_nom": "Mfeutom  annexe de bahouoc",
+        "district": "nan",
+        "region_synodale": "nan"
+    },
+    {
+        "nom": "Mbouombouo jean",
+        "grade": "Pasteur",
+        "contact": "675404081/696166242",
+        "paroisse_nom": "Mfolap",
+        "district": "NJIMOM",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "Leundeu Hugues",
+        "grade": "Pasteur",
+        "contact": "691485174",
+        "paroisse_nom": "Minkwele",
+        "district": "BOMONO",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "Tocko Eteki Théodore",
+        "grade": "Ev",
+        "contact": "699203248",
+        "paroisse_nom": "Mombo",
+        "district": "BALONG",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "Kamdoum Tchoulegheu pp",
+        "grade": "Dp",
+        "contact": "nan",
+        "paroisse_nom": "Monatele",
+        "district": "LEKIE' ET MBAM",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "Djeukeu Alain pp",
+        "grade": "Dp",
+        "contact": "nan",
+        "paroisse_nom": "Monatele",
+        "district": "LEKIE' ET MBAM",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "Lilouendi Jonatan tel",
+        "grade": "Pasteur",
+        "contact": "694571103",
+        "paroisse_nom": "Mont des oliviers",
+        "district": "NGAOUNDERE",
+        "region_synodale": "ADAMAOUA"
+    },
+    {
+        "nom": "Pouani Lambert",
+        "grade": "Pasteur",
+        "contact": "674490585",
+        "paroisse_nom": "Mont des oliviers",
+        "district": "NGAOUNDERE",
+        "region_synodale": "ADAMAOUA"
+    },
+    {
+        "nom": "djamegni Franck alerice",
+        "grade": "Évangéliste",
+        "contact": "678307424",
+        "paroisse_nom": "Mont des oliviers",
+        "district": "NGAOUNDERE",
+        "region_synodale": "ADAMAOUA"
+    },
+    {
+        "nom": "djanmegni Alerice Franck",
+        "grade": "Évangéliste",
+        "contact": "678307424/",
+        "paroisse_nom": "Mont des oliviers/annexe de Djalingo",
+        "district": "NGAOUNDERE",
+        "region_synodale": "ADAMAOUA"
+    },
+    {
+        "nom": "TCHOFFO SONKOUAL ROMÉO  consacré",
+        "grade": "Pasteur",
+        "contact": "677364200/691694984",
+        "paroisse_nom": "Mont Sinaï de GADA Mabanga",
+        "district": "NGAOUNDERE",
+        "region_synodale": "ADAMAOUA"
+    },
+    {
+        "nom": "EbenguèEtoa Alain Joël",
+        "grade": "Pasteur",
+        "contact": "699972548",
+        "paroisse_nom": "Moulon",
+        "district": "BALONG",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "Ndando Alexandre Civil",
+        "grade": "nan",
+        "contact": "697567985",
+        "paroisse_nom": "Moulon",
+        "district": "BALONG",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "NGEUDENDJE Sopdjo David",
+        "grade": "ANGÉLISTE",
+        "contact": "675816941",
+        "paroisse_nom": "Moutcha",
+        "district": "BANDJOUN  C",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "KUITCHE Jean Bosco ANGÉLISTE",
+        "grade": "Ev",
+        "contact": "670006641",
+        "paroisse_nom": "Moutcha annexe de djiogo",
+        "district": "BANDJOUN  C",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "NGUEZEM NONGNI ECLADOR",
+        "grade": "LICENCE EN THÉOLOGIE ET LICENCE ÈS PHILOSOPHIE",
+        "contact": "nan",
+        "paroisse_nom": "MTIÉKI",
+        "district": "BANDJOUN A",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "Dibobè Epoupa Paul Célestin Pp",
+        "grade": "Dp",
+        "contact": "694716088",
+        "paroisse_nom": "Muyouka",
+        "district": "BALONG",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "Nguimè Mbappè Herman",
+        "grade": "Ev",
+        "contact": "682430499",
+        "paroisse_nom": "Muyouka",
+        "district": "BALONG",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "Eyambè Ako Martin Pp",
+        "grade": "nan",
+        "contact": "690209114",
+        "paroisse_nom": "Muyouka",
+        "district": "BALONG",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "FOTIO KENNE BORIS NELSON",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "MVOUTSA'HA-BANEFO",
+        "district": "BAFOUSSAM A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "Mefire Ayihouo Josué",
+        "grade": "Pasteur",
+        "contact": "696768593",
+        "paroisse_nom": "Nchoutnoun",
+        "district": "NKOUGHAM III",
+        "region_synodale": "NOUN SUD"
+    },
+    {
+        "nom": "NJOUONDOU ISAAC MASTER EN THÉOLOGIE",
+        "grade": "nan",
+        "contact": "695735350",
+        "paroisse_nom": "NDA'MBANSIE",
+        "district": "FOUMBAN 1",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "R Nguefang kouadjop ezechiel",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "Ndengnieup",
+        "district": "BANGOU",
+        "region_synodale": "HAUTS PLATEAUX"
+    },
+    {
+        "nom": "NGUIADEM Quely Meideros epse CHASSEM",
+        "grade": "Pp",
+        "contact": "nan",
+        "paroisse_nom": "Ndengnieup",
+        "district": "BANGOU",
+        "region_synodale": "HAUTS PLATEAUX"
+    },
+    {
+        "nom": "TENE MOUMBE Martin",
+        "grade": "Licence en théologie",
+        "contact": "673300177/ 699873060",
+        "paroisse_nom": "Ndiambou",
+        "district": "BAFOUSSAM B",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "OUBE ABRAHAM   NJOMOU HUGUES",
+        "grade": "Pasteur",
+        "contact": "695602509 /",
+        "paroisse_nom": "NDIANGDAM A",
+        "district": "BAFOUSSAM B",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "Dongmo Diane",
+        "grade": "Pasteure",
+        "contact": "nan",
+        "paroisse_nom": "Ndiangdam B",
+        "district": "BAFOUSSAM B",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "Teta Hervé pokam",
+        "grade": "Ev",
+        "contact": "+237699832150",
+        "paroisse_nom": "NDIONKOU LAGOUENG kounti",
+        "district": "BALENG A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "FOKA VINY VADEX",
+        "grade": "Ev",
+        "contact": "691036566",
+        "paroisse_nom": "NDIONKOU LAGOUENG kounti",
+        "district": "BALENG A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "Teta Hervé pokam",
+        "grade": "Ev",
+        "contact": "+237699832150",
+        "paroisse_nom": "NDIONKOU LAGOUENG kounti",
+        "district": "BALENG A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "FOKA VINY VADEX",
+        "grade": "Ev",
+        "contact": "691036566",
+        "paroisse_nom": "NDIONKOU LAGOUENG kounti",
+        "district": "BALENG A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "Teta pouokam Hervé Michel",
+        "grade": "Ev",
+        "contact": "699832150",
+        "paroisse_nom": "Ndionkou-Lagoueng-konti",
+        "district": "BALENG A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "Foka vinny valderse",
+        "grade": "Ev",
+        "contact": "691036566",
+        "paroisse_nom": "Ndionkou-Lagoueng-konti",
+        "district": "BALENG A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "Diemo Samuel Responsable",
+        "grade": "Rév",
+        "contact": "677186116",
+        "paroisse_nom": "NDOGPASSI 2",
+        "district": "NEW-BELL D",
+        "region_synodale": "WOURI SUD"
+    },
+    {
+        "nom": "Tsinda Jean-Bernard   en second",
+        "grade": "Pasteur",
+        "contact": "676764710",
+        "paroisse_nom": "NDOGPASSI 2",
+        "district": "NEW-BELL D",
+        "region_synodale": "WOURI SUD"
+    },
+    {
+        "nom": "ndjie Adolphe",
+        "grade": "Dp",
+        "contact": "nan",
+        "paroisse_nom": "Ndombeng",
+        "district": "NDOUNGUE NORD",
+        "region_synodale": "MOUNGO CENTRE"
+    },
+    {
+        "nom": "FEKOUA ELOGE Baurice",
+        "grade": "Évangéliste",
+        "contact": "699658423653187968",
+        "paroisse_nom": "NDOTTO-KWAKWACK",
+        "district": "NKONDJOCK NORD",
+        "region_synodale": "NKAM"
+    },
+    {
+        "nom": "Ayiangningni Beaudelaire",
+        "grade": "Pasteur",
+        "contact": "657650775",
+        "paroisse_nom": "Ndoumkain",
+        "district": "NKOUGHAM 2",
+        "region_synodale": "NOUN SUD"
+    },
+    {
+        "nom": "PETAYAP LOUIS ROGER",
+        "grade": "Pasteur/licence en théologie",
+        "contact": "nan",
+        "paroisse_nom": "Ndoungouot",
+        "district": "NKOUPA",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "NGAVOM ALEXIS",
+        "grade": "Évangéliste",
+        "contact": "696108321",
+        "paroisse_nom": "Ndoungouot",
+        "district": "NKOUPA",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "KOLLO BANG JULES",
+        "grade": "Licence en théologie/Ev",
+        "contact": "674093070",
+        "paroisse_nom": "Ndoungue A",
+        "district": "nan",
+        "region_synodale": "MOUNGO CENTRE"
+    },
+    {
+        "nom": "R Mboula moto licence en théologie",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "Ndoungue B",
+        "district": "NDOUNGUE NORD",
+        "region_synodale": "MOUNGO CENTRE"
+    },
+    {
+        "nom": "seungang Jules Roger",
+        "grade": "Pasteur",
+        "contact": "675687134",
+        "paroisse_nom": "New Bell",
+        "district": "MVILA & NTEM",
+        "region_synodale": "CENTRE SUD 2"
+    },
+    {
+        "nom": "KUATE KAMGA Aimé",
+        "grade": "Pasteur",
+        "contact": "699593255",
+        "paroisse_nom": "New bell 1",
+        "district": "NEW-BELL A",
+        "region_synodale": "WOURI SUD"
+    },
+    {
+        "nom": "NGUEFACK ZAMBOU Lavoisier",
+        "grade": "Pasteur",
+        "contact": "698918778",
+        "paroisse_nom": "New bell 1",
+        "district": "NEW-BELL A",
+        "region_synodale": "WOURI SUD"
+    },
+    {
+        "nom": "NOMEGNE DJOMO Félix",
+        "grade": "Pasteur",
+        "contact": "697491708",
+        "paroisse_nom": "New bell 1",
+        "district": "NEW-BELL A",
+        "region_synodale": "WOURI SUD"
+    },
+    {
+        "nom": "RévKenne Aubert",
+        "grade": "chef de la Paroisse",
+        "contact": "99710727",
+        "paroisse_nom": "New Bell source",
+        "district": "NEW-BELL A",
+        "region_synodale": "WOURI SUD"
+    },
+    {
+        "nom": "Rév Emadeu Maurice  Rattaché",
+        "grade": "nan",
+        "contact": "670425510",
+        "paroisse_nom": "New Bell source",
+        "district": "NEW-BELL A",
+        "region_synodale": "WOURI SUD"
+    },
+    {
+        "nom": "MAWEL MBEM Serge Lavie",
+        "grade": "Pasteur",
+        "contact": "657950233",
+        "paroisse_nom": "NEW BELL TSF",
+        "district": "nan",
+        "region_synodale": "WOURI CENTRE"
+    },
+    {
+        "nom": "KONTCHOU LAURENT",
+        "grade": "Pasteur",
+        "contact": "675199174/697011474",
+        "paroisse_nom": "NEW-BELL MAKEA",
+        "district": "NEW-BELL A",
+        "region_synodale": "WOURI SUD"
+    },
+    {
+        "nom": "TATMBA NDJEKOUA LAURENTINE",
+        "grade": "Pasteure",
+        "contact": "650941980/655778546",
+        "paroisse_nom": "NEW-BELL MAKEA",
+        "district": "NEW-BELL A",
+        "region_synodale": "WOURI SUD"
+    },
+    {
+        "nom": "KENNE Aubert chef de paroisse",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "New-Bell source",
+        "district": "NEW-BELL A",
+        "region_synodale": "WOURI SUD"
+    },
+    {
+        "nom": "NDJAHO TCHEKEU CALVIN",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Ngakun",
+        "district": "BANGANGTE II",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "Nsah Sylvain Blaise",
+        "grade": "Dp",
+        "contact": "696878666",
+        "paroisse_nom": "Ngambouo",
+        "district": "NKOUGHAM III",
+        "region_synodale": "NOUN SUD"
+    },
+    {
+        "nom": "Njitouo Nsangou Étienne",
+        "grade": "Pasteur",
+        "contact": "677979382",
+        "paroisse_nom": "Ngaoundal",
+        "district": "nan",
+        "region_synodale": "ADAMAOUA"
+    },
+    {
+        "nom": "Mimche Catherine",
+        "grade": "Ev",
+        "contact": "690639527",
+        "paroisse_nom": "Ngba Nkoup0",
+        "district": "FOUMBOT II",
+        "region_synodale": "NOUN SUD"
+    },
+    {
+        "nom": "Noupibon Francky Roland",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Ngodi Bakoko II",
+        "district": "NEW-BELL D",
+        "region_synodale": "WOURI SUD"
+    },
+    {
+        "nom": "FOTSING TAKOUKAM Alain",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "NGODI BAKOKO1",
+        "district": "NEW-BELL D",
+        "region_synodale": "WOURI SUD"
+    },
+    {
+        "nom": "NGUEMBOU Vogellad  PP",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "NGODI BAKOKO1",
+        "district": "NEW-BELL D",
+        "region_synodale": "WOURI SUD"
+    },
+    {
+        "nom": "DJIOMO NANSI Rolande Cécile",
+        "grade": "Pasteur",
+        "contact": "674482055",
+        "paroisse_nom": "Ngouang",
+        "district": "BAMEKA",
+        "region_synodale": "HAUTS PLATEAUX"
+    },
+    {
+        "nom": "NOUBISSIE BANGOP Taddee",
+        "grade": "Ev",
+        "contact": "697568423",
+        "paroisse_nom": "Ngouang",
+        "district": "BAMEKA",
+        "region_synodale": "HAUTS PLATEAUX"
+    },
+    {
+        "nom": "MOUDALEN Marc",
+        "grade": "Pasteur",
+        "contact": "654998659",
+        "paroisse_nom": "NGOULMEKONG II",
+        "district": "CENTRE 2",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "MONGBET Alain Cyril",
+        "grade": "Évangéliste",
+        "contact": "nan",
+        "paroisse_nom": "NGOULMEKONG II",
+        "district": "CENTRE 2",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "PEYUENE Jules Bruno  Master en Théologie",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Ngoulmekong1",
+        "district": "nan",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "PEYUENE Jules Bruno  Master en Théologie",
+        "grade": "Pasteur",
+        "contact": "695841151",
+        "paroisse_nom": "Ngoulmekong1",
+        "district": "CENTRE 1",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "Nkome Mfako Valentin",
+        "grade": "Pasteur",
+        "contact": "656856992",
+        "paroisse_nom": "Ngouongouo",
+        "district": "FOUMBOT I",
+        "region_synodale": "NOUN SUD"
+    },
+    {
+        "nom": "- Zangué Pascal",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Ngousso Essessalakok",
+        "district": "CENTRE 2",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "baccalauréat en theologie   Tayo Nji Jacques Hippolyte tel",
+        "grade": "Pasteur",
+        "contact": "69404102",
+        "paroisse_nom": "Ngousso Essessalakok",
+        "district": "CENTRE 2",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "doctorat en theologie",
+        "grade": "nan",
+        "contact": "699818212",
+        "paroisse_nom": "Ngousso Essessalakok",
+        "district": "CENTRE 2",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "Apounamoun Moïse",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Ngùendùem",
+        "district": "nan",
+        "region_synodale": "nan"
+    },
+    {
+        "nom": "TAKAM Roger Ernest  contacts",
+        "grade": "Pasteur",
+        "contact": "677575574",
+        "paroisse_nom": "NGUI TAM-TAM",
+        "district": "DSCHANG II",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "TCHAMADEU Gaëlle épse KAMGA",
+        "grade": "Pasteure",
+        "contact": "696992875",
+        "paroisse_nom": "NGUI TAM-TAM",
+        "district": "DSCHANG II",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "Wandji Pierre Branly  er vice-président du district contact",
+        "grade": "nan",
+        "contact": "677828414",
+        "paroisse_nom": "Njambah",
+        "district": "BANGOULAP",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "Mafoureyou Nicaud",
+        "grade": "Ev",
+        "contact": "691593491",
+        "paroisse_nom": "Njiamgbie",
+        "district": "NKOUGHAM III",
+        "region_synodale": "NOUN SUD"
+    },
+    {
+        "nom": "NSHA'NDINI PEKA GUY",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "Njighait",
+        "district": "MALANTOUEN",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "Koumboure Guillaume",
+        "grade": "Ev",
+        "contact": "656429224",
+        "paroisse_nom": "Njigham-canaan",
+        "district": "NKOUTIE",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "NKASUME EUGENIE",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "NJILOUM",
+        "district": "FOUMBAN 2",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "NGAMBOU PHILIPPE Licence en théologie",
+        "grade": "nan",
+        "contact": "699901273",
+        "paroisse_nom": "NJIMBAM",
+        "district": "FOUMBAN 4",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "Njankouo Kutnjem Martin",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Njimom",
+        "district": "NJIMOM",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "Nchoutpouendinyinyi Emmanuel",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "Njimom",
+        "district": "NJIMOM",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "Fonte Emmanuel ArnaudAide",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "Njimom",
+        "district": "NJIMOM",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "Pp  MACHE MAPOUOCHI MBOHOU Roland",
+        "grade": "Dp",
+        "contact": "nan",
+        "paroisse_nom": "NJINDEN",
+        "district": "FOUMBAN 1",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "NJOUONDOU Zébedé Diplôme école biblique nationale",
+        "grade": "Pasteur",
+        "contact": "696310445",
+        "paroisse_nom": "NJINKA",
+        "district": "FOUMBAN 2",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "Njoupouo MFOPOU Solange licence en théologie",
+        "grade": "Pasteur",
+        "contact": "699379886",
+        "paroisse_nom": "Njintout",
+        "district": "FOUMBAN 2",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "Fagnigni Patrice Delpèche baccalauréat A Espagnol",
+        "grade": "Évangéliste",
+        "contact": "697802018",
+        "paroisse_nom": "Njintout",
+        "district": "FOUMBAN 2",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "Ndam Ézéchiel",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "Njintout-Bangourain",
+        "district": "BANGOURAIN",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "MOUANFON MATHIEU",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "NJIYOUOM",
+        "district": "FOUMBAN 3",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "Yanguet Étienne",
+        "grade": "Pasteur",
+        "contact": "675007746",
+        "paroisse_nom": "Njombé",
+        "district": "NJOMBE - PENJA",
+        "region_synodale": "MOUNGO CENTRE"
+    },
+    {
+        "nom": "Mbafack Joseph",
+        "grade": "Ev",
+        "contact": "674423998",
+        "paroisse_nom": "Njouki/ Biendede",
+        "district": "BAKOKO",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "Moyen Jean Rodrigue",
+        "grade": "Ev",
+        "contact": "670856340",
+        "paroisse_nom": "Nkende",
+        "district": "BOMONO",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "Djamen christophere  Master",
+        "grade": "Pasteur",
+        "contact": "699838614/670562700",
+        "paroisse_nom": "Nkolfoulou II",
+        "district": "CENTRE 1",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "NKONDJE EWANE Paul",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "nkoLndongo 2",
+        "district": "CENTRE 1",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "Master",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "nkoLndongo 2",
+        "district": "CENTRE 1",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "Ndabo Eyango jules doctorat engeliste  EMADE JEANINE",
+        "grade": "Ev",
+        "contact": "680852712",
+        "paroisse_nom": "nkoLndongo 2",
+        "district": "CENTRE 1",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "Ndabo Eyango jules docteur   EMADE JEANINE",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "nkoLndongo 2",
+        "district": "CENTRE 1",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "Révérende TCHEUZEULE Jenny Huguette épouse KOUAM",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "NKOLO-MIMBOMAN",
+        "district": "CENTRE 2",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "KEGNI Gaston licence en théologie",
+        "grade": "nan",
+        "contact": "696115418",
+        "paroisse_nom": "NKOMBA",
+        "district": "BELE-BELE  2",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "FAKA TCHINDA Sidonie Héloïse epse KUNGNE",
+        "grade": "Pasteure",
+        "contact": "699514100/676592472",
+        "paroisse_nom": "Nkomo",
+        "district": "CENTRE 4",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "NTEUBISSICHIMI Israël",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Nkomo",
+        "district": "CENTRE 4",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "Master en théologietel",
+        "grade": "nan",
+        "contact": "699185466/678488145",
+        "paroisse_nom": "Nkomo",
+        "district": "CENTRE 4",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "NONO NONO Mathieu Wilfriedl licence en théologie",
+        "grade": "Pasteur",
+        "contact": "655780179/679140827",
+        "paroisse_nom": "Nkomo",
+        "district": "CENTRE 4",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "Kamnang Charlotte",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Nkongsamba",
+        "district": "BANEKA 1",
+        "region_synodale": "MOUNGO NORD"
+    },
+    {
+        "nom": "KUEGNONG Joseph Bac en théologie Tel",
+        "grade": "nan",
+        "contact": "675779750",
+        "paroisse_nom": "Nkongsoung Centre",
+        "district": "MELONG",
+        "region_synodale": "MOUNGO NORD"
+    },
+    {
+        "nom": "NYAMI WENDE Jérémie  Tel",
+        "grade": "Ev",
+        "contact": "671363861",
+        "paroisse_nom": "Nkongsoung Long-Trait",
+        "district": "MELONG",
+        "region_synodale": "MOUNGO NORD"
+    },
+    {
+        "nom": "Rde MAFOMATCHEME Naoussi Sorel Aimée Master en théologie",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "Nkong'waame",
+        "district": "NDOUNGUE NORD",
+        "region_synodale": "MOUNGO CENTRE"
+    },
+    {
+        "nom": "TATCHIE KOUANANG Dary",
+        "grade": "nan",
+        "contact": "677987038/693136906",
+        "paroisse_nom": "Nkonto",
+        "district": "NKONG - NI",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "Totio Michel Licencier",
+        "grade": "nan",
+        "contact": "675707631",
+        "paroisse_nom": "Nkoulou-Carrière",
+        "district": "CENTRE 4",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "Minfang Sabrina épouse Djimen",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Nkozoa",
+        "district": "CENTRE 3",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "R MEGAPTCHE Justin licence en théologie",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "NLOHE",
+        "district": "MANJO B",
+        "region_synodale": "MOUNGO CENTRE"
+    },
+    {
+        "nom": "TIETCHOU Laurent",
+        "grade": "nan",
+        "contact": "670007271",
+        "paroisse_nom": "Nlongkak",
+        "district": "CENTRE 3",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "KAMGUE SIMO jules",
+        "grade": "nan",
+        "contact": "699939605",
+        "paroisse_nom": "Nlongkak",
+        "district": "CENTRE 3",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "KENGNE KAMGA Lilienne Epse Bongongui",
+        "grade": "nan",
+        "contact": "677225022",
+        "paroisse_nom": "Nlongkak",
+        "district": "CENTRE 3",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "NCHANKOU Désire",
+        "grade": "nan",
+        "contact": "699747937",
+        "paroisse_nom": "Nlongkak",
+        "district": "CENTRE 3",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "PANGANG Michel",
+        "grade": "nan",
+        "contact": "694744425",
+        "paroisse_nom": "Nlongkak",
+        "district": "CENTRE 3",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "NGONGUE Marc Aurel lieu de culte de nkolongdom",
+        "grade": "nan",
+        "contact": "670370434",
+        "paroisse_nom": "Nlongkak",
+        "district": "CENTRE 3",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "-R Dr KUATE DJILO Clément Hervé - R Bekima Paul Armel -  Njimla Clovis Ottis",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "Nsam Efoulan",
+        "district": "CENTRE 3 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2"
+    },
+    {
+        "nom": "MFOCHIVE Joseph",
+        "grade": "Pasteur",
+        "contact": "694274997",
+        "paroisse_nom": "Nsamntouen",
+        "district": "FOUMBAN 3",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "R Dr NGAMBEKET Ebenezer   PP  FOUNSIE Samuel Elvis",
+        "grade": "Ev",
+        "contact": "699998338",
+        "paroisse_nom": "Nsimeyong",
+        "district": "CENTRE 3 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2"
+    },
+    {
+        "nom": "Soumelong Ehawé Aaron Félicité",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Nyalla",
+        "district": "B. B. D I",
+        "region_synodale": "WOURI SUD"
+    },
+    {
+        "nom": "Njoh Marcel Jacquinot",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "Nyalla",
+        "district": "B. B. D I",
+        "region_synodale": "WOURI SUD"
+    },
+    {
+        "nom": "Tchuente Tchudjo Ghislain",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Nyanganza",
+        "district": "LOM & DJEREM SUD",
+        "region_synodale": "EST"
+    },
+    {
+        "nom": "l'  EmGa Rodolphe",
+        "grade": "Évangéliste",
+        "contact": "nan",
+        "paroisse_nom": "Nyanganza",
+        "district": "LOM & DJEREM SUD",
+        "region_synodale": "EST"
+    },
+    {
+        "nom": "TSAPI Talla Serge Alain licencié en Théologie",
+        "grade": "nan",
+        "contact": "675099234",
+        "paroisse_nom": "Nzintia",
+        "district": "MBOUDA",
+        "region_synodale": "BAMBOUTOS ET NORD OUEST"
+    },
+    {
+        "nom": "PP GUEPKAM Tchimi Michel licencié en Théologie",
+        "grade": "Dp",
+        "contact": "679703438",
+        "paroisse_nom": "Nzintia",
+        "district": "MBOUDA",
+        "region_synodale": "BAMBOUTOS ET NORD OUEST"
+    },
+    {
+        "nom": "Momfout Georges",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Obala",
+        "district": "LEKIE' ET MBAM",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "Tasse Daniel",
+        "grade": "Maître en théologie",
+        "contact": "698431343",
+        "paroisse_nom": "Obala",
+        "district": "LEKIE' ET MBAM",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "Momfout Georges tel",
+        "grade": "Pasteur",
+        "contact": "698431343",
+        "paroisse_nom": "OBALA",
+        "district": "LEKIE' ET MBAM",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "Tasse Daniel tel",
+        "grade": "PP",
+        "contact": "nan",
+        "paroisse_nom": "OBALA",
+        "district": "LEKIE' ET MBAM",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "Ndzenga Mfomi Bernard",
+        "grade": "Pasteur/Master en théologie",
+        "contact": "nan",
+        "paroisse_nom": "Obam Ongola",
+        "district": "CENTRE 3 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2"
+    },
+    {
+        "nom": "NGOULOU ABESSOLO THOMAS",
+        "grade": "Responsable de la paroisse Master en Théologie",
+        "contact": "695959294",
+        "paroisse_nom": "Oyom-abang",
+        "district": "CENTRE 1 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2"
+    },
+    {
+        "nom": "NONO DOPKAP ELÉONORE MANUELA epse KAPGUEP",
+        "grade": "Pasteure",
+        "contact": "671615831",
+        "paroisse_nom": "Oyom-abang",
+        "district": "CENTRE 1 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2"
+    },
+    {
+        "nom": "KEGNE KANKEU GUILLAUME BLAISE",
+        "grade": "Pasteur / Licence en Théologie",
+        "contact": "699455935",
+        "paroisse_nom": "Oyom-abang",
+        "district": "CENTRE 1 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2"
+    },
+    {
+        "nom": "MounFoucheyi Jean Claude",
+        "grade": "Ev",
+        "contact": "657246711",
+        "paroisse_nom": "Pare Mefire",
+        "district": "FOUMBOT II",
+        "region_synodale": "NOUN SUD"
+    },
+    {
+        "nom": "NDZENGA NFOMI Bernard   Maitrise",
+        "grade": "Pasteur",
+        "contact": "690573183",
+        "paroisse_nom": "Paroisse  OBAM ONGOLA",
+        "district": "CENTRE 3 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2"
+    },
+    {
+        "nom": "Tonji Jiacqueline",
+        "grade": "Ev",
+        "contact": "654920134/699",
+        "paroisse_nom": "Paroisse Bakong centre Annexe Bakong plateau",
+        "district": "BALENGOU",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "tchouandop Mathieu",
+        "grade": "Pasteur",
+        "contact": "699108792",
+        "paroisse_nom": "Paroisse d'Akak",
+        "district": "CENTRE 3",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "NGUIENDJOUO KEPSRU ELVIS",
+        "grade": "Pasteur",
+        "contact": "676542928160",
+        "paroisse_nom": "Paroisse de  deptoup",
+        "district": "BANGOUA  SUD",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "Tchimou Bertrand",
+        "grade": "Pasteur",
+        "contact": "677251545",
+        "paroisse_nom": "Paroisse de Badiangseu",
+        "district": "BANGOUA  SUD",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "ndjantou Bangmi Isaac  s yondja Christian",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Paroisse de bafia",
+        "district": "LEKIE' ET MBAM",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "nanmegne david",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Paroisse de bafia",
+        "district": "LEKIE' ET MBAM",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "Ranekame Roland ll",
+        "grade": "Ev diplômé de l'école biblique nationale",
+        "contact": "656748476",
+        "paroisse_nom": "Paroisse de Bafolé",
+        "district": "TABE I",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "NANA JACQUES",
+        "grade": "Ev",
+        "contact": "676406475",
+        "paroisse_nom": "PÀROISSE DE BAKONG",
+        "district": "BALENGOU",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "proposant Kemajou Lionel Priva",
+        "grade": "Pasteur",
+        "contact": "693131283",
+        "paroisse_nom": "Paroisse de BALATCHI Centre",
+        "district": "BALATCHI",
+        "region_synodale": "BAMBOUTOS ET NORD OUEST"
+    },
+    {
+        "nom": "Alontsi Loïc",
+        "grade": "Évangéliste",
+        "contact": "671365279",
+        "paroisse_nom": "Paroisse de BALATCHI Centre",
+        "district": "BALATCHI",
+        "region_synodale": "BAMBOUTOS ET NORD OUEST"
+    },
+    {
+        "nom": "TCHUYA KOMBOU ULRICH",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "PAROISSE DE BALEGOU KASSANG",
+        "district": "BALENGOU",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "Djeungoue Francis",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "paroisse de Balessing Centre",
+        "district": "BALESSING",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "MOUMI MOUMI Guy Raoul",
+        "grade": "PR/Responsable de Paroisse",
+        "contact": "675243116",
+        "paroisse_nom": "PAROISSE DE BAMENDZI A",
+        "district": "BAFOUSSAM A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "EPOMA MILONG DAVY BRAWNDON",
+        "grade": "PR",
+        "contact": "697454732",
+        "paroisse_nom": "PAROISSE DE BAMENDZI A",
+        "district": "BAFOUSSAM A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "Fodouop tamgne Giscard  avec délégation pastorale",
+        "grade": "Évangéliste",
+        "contact": "699210530/674071644",
+        "paroisse_nom": "Paroisse de bandjoun centre annexe de ha",
+        "district": "BANDJOUN A",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "Tematio Pierre Ledoux",
+        "grade": "Pasteur",
+        "contact": "677330916",
+        "paroisse_nom": "Paroisse de BANEKANE",
+        "district": "BANEKANE",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "Djomo David",
+        "grade": "Ev",
+        "contact": "674536946",
+        "paroisse_nom": "Paroisse de Banekane Annexe de Mfeugnoun",
+        "district": "BANEKANE",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "Ada NKOYESSI Louise Treshore   CAKEU RHODE ÛÛPP",
+        "grade": "Pasteur",
+        "contact": "698474235",
+        "paroisse_nom": "PAROISSE DE BANGWA NORD",
+        "district": "BANGOUA  NORD",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "Kengmeni Jean Baptiste",
+        "grade": "Pasteur",
+        "contact": "674045846",
+        "paroisse_nom": "Paroisse DE BANZA",
+        "district": "NKONG - NI",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "A Tchoffo Justin",
+        "grade": "Ev",
+        "contact": "698615886",
+        "paroisse_nom": "Paroisse DE BANZA",
+        "district": "NKONG - NI",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "YOUTCHEU BERNARD",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "PAROISSE DE BAPOUNDEU",
+        "district": "BAFANG CENTRE",
+        "region_synodale": "HAUT NKAM"
+    },
+    {
+        "nom": "Tchadjeu Alakou Silvio Elgard",
+        "grade": "Pasteur",
+        "contact": "674397292",
+        "paroisse_nom": "Paroisse de Bassamba",
+        "district": "BANGOULAP",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "Nzouatchoua Rostand",
+        "grade": "Ev",
+        "contact": "677485012",
+        "paroisse_nom": "Paroisse de Bassamba",
+        "district": "BANGOULAP",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "Proposant TEKA NUAGUE Isaac",
+        "grade": "Pasteur",
+        "contact": "656232399",
+        "paroisse_nom": "PAROISSE DE BATOUKOP",
+        "district": "BAFOUSSAM A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "DJOMO BIAZI Mikaël",
+        "grade": "Pasteur Stagiaire",
+        "contact": "nan",
+        "paroisse_nom": "Paroisse de Batoula",
+        "district": "BANGOUA  SUD",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "Ebouel épée Gilbert",
+        "grade": "Pasteur",
+        "contact": "659459490/677824519",
+        "paroisse_nom": "Paroisse de Bonandam",
+        "district": "NJOMBE - PENJA",
+        "region_synodale": "MOUNGO CENTRE"
+    },
+    {
+        "nom": "DSCHOUANWOU JOB",
+        "grade": "Pasteur",
+        "contact": "690981640",
+        "paroisse_nom": "Paroisse de Chiekouo.",
+        "district": "BAHAM SUD",
+        "region_synodale": "HAUTS PLATEAUX"
+    },
+    {
+        "nom": "Kountchou Noé",
+        "grade": "Dp",
+        "contact": "694596064",
+        "paroisse_nom": "Paroisse de Chiekouo.",
+        "district": "BAHAM SUD",
+        "region_synodale": "HAUTS PLATEAUX"
+    },
+    {
+        "nom": "DOMTCHOM JEAN PIERRE  CEL",
+        "grade": "Pasteur",
+        "contact": "699656059",
+        "paroisse_nom": "Paroisse de Cogefar",
+        "district": "NEW-BELL D",
+        "region_synodale": "WOURI SUD"
+    },
+    {
+        "nom": "KAMGAING KOUAM Jean Marc",
+        "grade": "PPDP",
+        "contact": "nan",
+        "paroisse_nom": "Paroisse de Djeugheu",
+        "district": "BAHOUAN / BAMENDJOU",
+        "region_synodale": "HAUTS PLATEAUX"
+    },
+    {
+        "nom": "BOGNING HUBERT AIME  SOP YVES BEAUDELAIRE",
+        "grade": "Dp /PP",
+        "contact": "nan",
+        "paroisse_nom": "Paroisse de DJIONE",
+        "district": "BANDJOUN  E",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "TALONTIO KEUBENG Célestin",
+        "grade": "Pasteur",
+        "contact": "677847166",
+        "paroisse_nom": "Paroisse de DJOUM",
+        "district": "DJA & LOBO",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "proposant  NYA KAPLO Valter",
+        "grade": "Pasteur",
+        "contact": "678905000",
+        "paroisse_nom": "Paroisse de DJOUM",
+        "district": "DJA & LOBO",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "Tchamo Hélène",
+        "grade": "Ev",
+        "contact": "677822931",
+        "paroisse_nom": "Paroisse de Famdianseu Annexe de Tougwi Fametcha",
+        "district": "BANGOUA  SUD",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "NGUETOUM PATRICK LICENCE EN THÉOLOGIE",
+        "grade": "Pasteur",
+        "contact": "674017120 / 695123519",
+        "paroisse_nom": "PAROISSE DE FAMLENG",
+        "district": "BANDJOUN D",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "NEGOU fotso Paul Hermann  s",
+        "grade": "Évangéliste",
+        "contact": "nan",
+        "paroisse_nom": "Paroisse de houkaha",
+        "district": "BAFOUSSAM A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "Behodjimel Urbain tel",
+        "grade": "Ev",
+        "contact": "698147756/675745613",
+        "paroisse_nom": "Paroisse de kaele",
+        "district": "nan",
+        "region_synodale": "nan"
+    },
+    {
+        "nom": "NGANTCHOUE DJAMOUO LAURE",
+        "grade": "Pasteur",
+        "contact": "672671320",
+        "paroisse_nom": "Paroisse de Kaffo",
+        "district": "BAHAM SUD",
+        "region_synodale": "HAUTS PLATEAUX"
+    },
+    {
+        "nom": "NGUIABOU JEANNE",
+        "grade": "Évangéliste",
+        "contact": "69143232",
+        "paroisse_nom": "Paroisse de Kaffo",
+        "district": "BAHAM SUD",
+        "region_synodale": "HAUTS PLATEAUX"
+    },
+    {
+        "nom": "NZESSE CHIMI Clément",
+        "grade": "Ev",
+        "contact": "670436069",
+        "paroisse_nom": "Paroisse de kAMKOP VALLÉE",
+        "district": "BAMOUGOUM A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "GUEPOP TCHOUANSSITHIERRY  O",
+        "grade": "Pasteur",
+        "contact": "699636926/6708",
+        "paroisse_nom": "PAROISSE DE KAMNA",
+        "district": "BANGOUA  NORD",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "Rostand Le Grand MBATCHOU TAMDEM",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Paroisse de Katsela",
+        "district": "BANDJOUN D",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "proposant MEFIRE NCHARE Olivier",
+        "grade": "Pasteur",
+        "contact": "655265401",
+        "paroisse_nom": "Paroisse de kouenmeka",
+        "district": "NKOUSSAM",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "Fouandou Jonas",
+        "grade": "nan",
+        "contact": "691435365",
+        "paroisse_nom": "Paroisse de kouenmeka",
+        "district": "NKOUSSAM",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "Semimche Daniel  avec délégation pastorale",
+        "grade": "Évangéliste",
+        "contact": "690150088",
+        "paroisse_nom": "Paroisse de Kourom",
+        "district": "BANGOURAIN",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "Rév NOUONA Bachelier en Théologie",
+        "grade": "nan",
+        "contact": "696904589",
+        "paroisse_nom": "PAROISSE DE LA CARRIERE",
+        "district": "NEW-BELL D",
+        "region_synodale": "WOURI SUD"
+    },
+    {
+        "nom": "Rév MOMENI Guy Marcel Master en Théologie",
+        "grade": "nan",
+        "contact": "675525641",
+        "paroisse_nom": "PAROISSE DE LA CARRIERE",
+        "district": "NEW-BELL D",
+        "region_synodale": "WOURI SUD"
+    },
+    {
+        "nom": "Rév NOUONA BACHELIER EN THEOLOGIE",
+        "grade": "nan",
+        "contact": "696904589",
+        "paroisse_nom": "Paroisse de la Carrière",
+        "district": "NEW-BELL D",
+        "region_synodale": "WOURI SUD"
+    },
+    {
+        "nom": "Rév MOMENI Guy Marcel Master en Théologie",
+        "grade": "nan",
+        "contact": "675525642",
+        "paroisse_nom": "Paroisse de la Carrière",
+        "district": "NEW-BELL D",
+        "region_synodale": "WOURI SUD"
+    },
+    {
+        "nom": "Sandeu T",
+        "grade": "licence en théologie",
+        "contact": "651118707",
+        "paroisse_nom": "Paroisse de lada",
+        "district": "CENTRE 2",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "EDIO NJOH François Dauphin",
+        "grade": "Pasteur",
+        "contact": "690374854",
+        "paroisse_nom": "Paroisse de Lobethal",
+        "district": "MOUANKO",
+        "region_synodale": "SANAGA MARITIME ET OCEAN"
+    },
+    {
+        "nom": "DJEMBE Prosper",
+        "grade": "Évangéliste",
+        "contact": "691659756",
+        "paroisse_nom": "Paroisse de Lobethal",
+        "district": "MOUANKO",
+        "region_synodale": "SANAGA MARITIME ET OCEAN"
+    },
+    {
+        "nom": "Gbetnkom Samuel",
+        "grade": "Ev",
+        "contact": "695675697",
+        "paroisse_nom": "Paroisse de Loumbouot",
+        "district": "FOUMBOT II",
+        "region_synodale": "NOUN SUD"
+    },
+    {
+        "nom": "Ayetgna Nofessi Roland",
+        "grade": "Pasteur",
+        "contact": "695055155",
+        "paroisse_nom": "Paroisse de Madoum",
+        "district": "BANGOULAP",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "Ndjikafou mbianda Fabrice Romary",
+        "grade": "Pasteur",
+        "contact": "696651383",
+        "paroisse_nom": "Paroisse de Makenene",
+        "district": "TONGA",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "TCHATCHOUANG Justin Baudelaire",
+        "grade": "Pasteur",
+        "contact": "677612764",
+        "paroisse_nom": "Paroisse de Makepe Université",
+        "district": "DEIDO MAKEPE",
+        "region_synodale": "WOURI CENTRE"
+    },
+    {
+        "nom": "NZALLI MAMBOU Freddy Mardochée",
+        "grade": "Pasteur",
+        "contact": "679199176",
+        "paroisse_nom": "Paroisse de Makepe Université",
+        "district": "DEIDO MAKEPE",
+        "region_synodale": "WOURI CENTRE"
+    },
+    {
+        "nom": "NZUOPMIN Jean Claude",
+        "grade": "Pasteur",
+        "contact": "691476235",
+        "paroisse_nom": "Paroisse de Malantouen",
+        "district": "MALANTOUEN",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "Pountougnigni kpoumie Moïse",
+        "grade": "maître en théologie  théologie",
+        "contact": "699984384",
+        "paroisse_nom": "Paroisse de MBANKOUOP",
+        "district": "nan",
+        "region_synodale": "NOUN SUD"
+    },
+    {
+        "nom": "Ngalami Élisée   INQNA",
+        "grade": "Ev",
+        "contact": "281009",
+        "paroisse_nom": "PAROISSE DE MBOU +AN E E DE KATIO",
+        "district": "BALENGOU",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "METCHINJIN FIDELE DANIELE",
+        "grade": "nan",
+        "contact": "650675618",
+        "paroisse_nom": "PAROISSE DE MBOU A NNEXE DE .DEPGWE",
+        "district": "BALENGOU",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "Proposant NGOUH TAFON Thomas",
+        "grade": "Pasteur/Licence Théologie",
+        "contact": "698398799",
+        "paroisse_nom": "Paroisse de Metaket",
+        "district": "TABE II",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "Padjio Nankie Séverin Martial",
+        "grade": "Évangéliste",
+        "contact": "nan",
+        "paroisse_nom": "Paroisse de Mfeutom Annexe de bahouoc",
+        "district": "BANGANGTE II",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "Poutougnigni Georges Célestin",
+        "grade": "Pasteur",
+        "contact": "655194514",
+        "paroisse_nom": "Paroisse de Mongnawou",
+        "district": "NKOUSSAM",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "NGUEZEM NONGNI ECLADOR",
+        "grade": "LICENCE EN THÉOLOGIE ET LICENCE ÈS PHILOSOPHIE",
+        "contact": "nan",
+        "paroisse_nom": "PAROISSE DE MTIÉKI",
+        "district": "BANDJOUN A",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "KENNE FOTIO Boris Nelson",
+        "grade": "Ev",
+        "contact": "699249770",
+        "paroisse_nom": "PAROISSE DE MVOUTSAHA",
+        "district": "BAFOUSSAM A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "Paulin Narke",
+        "grade": "Pasteur",
+        "contact": "675327624",
+        "paroisse_nom": "Paroisse de Ndikinimeki",
+        "district": "TONGA",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "NJINGA NKWENJA ALAIN LUTHER",
+        "grade": "Pasteur",
+        "contact": "674838749",
+        "paroisse_nom": "PAROISSE DE NDIPGANG",
+        "district": "BAZOU",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "TCHOUMI ABERNICOT",
+        "grade": "Pasteur",
+        "contact": "675530321",
+        "paroisse_nom": "PAROISSE DE NDIPTA I",
+        "district": "BAZOU",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "PP NSANGOU NJOYA Josué",
+        "grade": "Dp",
+        "contact": "675027912",
+        "paroisse_nom": "Paroisse de NGAGNOU",
+        "district": "FOUMBAN 2",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "KENFACK WAMBA Raymond",
+        "grade": "nan",
+        "contact": "699335600",
+        "paroisse_nom": "Paroisse de Ngouache",
+        "district": "BAMOUGOUM B",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "Ranedoupouo Anne PP",
+        "grade": "Dp",
+        "contact": "697422915",
+        "paroisse_nom": "Paroisse de Njamga",
+        "district": "BANGOULAP",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "GHAMENYINYI MEFIRE GEORGES Bachelier",
+        "grade": "Pasteur",
+        "contact": "691499250",
+        "paroisse_nom": "Paroisse de Njindaré",
+        "district": "FOUMBAN 3",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "MACHE MAPOUOCHI MBOHOU Roland",
+        "grade": "P",
+        "contact": "nan",
+        "paroisse_nom": "Paroisse de Njinden",
+        "district": "FOUMBAN 1",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "MAMBOUNE ANNIK LAURE",
+        "grade": "Pasteur/LICENCE EN THÉOLOGIE",
+        "contact": "697243088",
+        "paroisse_nom": "PAROISSE DE NJISSÉ",
+        "district": "FOUMBAN 4",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "NSANGOU HENRY",
+        "grade": "Pasteur/LICENCE EN THÉOLOGIE",
+        "contact": "655542772",
+        "paroisse_nom": "PAROISSE DE NJISSÉ",
+        "district": "FOUMBAN 4",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "proposant PENGA Guy Alain",
+        "grade": "Pasteur",
+        "contact": "695071077",
+        "paroisse_nom": "Paroisse de Nkaganzog",
+        "district": "MOUANKO",
+        "region_synodale": "SANAGA MARITIME ET OCEAN"
+    },
+    {
+        "nom": "KAMGUE TAGNE ELIE",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Paroisse de Nkoabang",
+        "district": "CENTRE 4",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "KEMAJOU TIA EBENEZER",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Paroisse de Nkoabang",
+        "district": "CENTRE 4",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "NJOYA NJIKOUFON SYLVAIN",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Paroisse de Nkoabang",
+        "district": "CENTRE 4",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "- KOUAMEGNE DANIEL  DOCTEUR TEL",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "PAROISSE DE NKOLNDONGO I",
+        "district": "CENTRE 4",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "- YONDJIO PAULETTE  TEL",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "PAROISSE DE NKOLNDONGO I",
+        "district": "CENTRE 4",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "- TALOM JACQUES  TEL",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "PAROISSE DE NKOLNDONGO I",
+        "district": "CENTRE 4",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "NGUEFACK janvier      GUEMWO jean",
+        "grade": "Pasteur",
+        "contact": "672216990",
+        "paroisse_nom": "Paroisse de NKOUO",
+        "district": "BANDJOUN  E",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "DONMO DONMO LIS",
+        "grade": "Ev",
+        "contact": "699967248",
+        "paroisse_nom": "Paroisse de PEUP",
+        "district": "BANGOUA  NORD",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "PP POUOPÉZÉE TCHINDA DIEUNEDOR Licence en théologie",
+        "grade": "Dp",
+        "contact": "nan",
+        "paroisse_nom": "Paroisse de Soa (Annexe d'Andon)",
+        "district": "CENTRE 1",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "PEKASSA Richard Licence Théologie",
+        "grade": "Pasteur",
+        "contact": "697356364",
+        "paroisse_nom": "Paroisse de Tabe 1",
+        "district": "TABE II",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "NJIFONTAIN Joseph Roland",
+        "grade": "Ev",
+        "contact": "694346389",
+        "paroisse_nom": "Paroisse de Tabe 1",
+        "district": "TABE II",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "Wina pierre",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "Paroisse de Takasko",
+        "district": "nan",
+        "region_synodale": "nan"
+    },
+    {
+        "nom": "VERLA MENGNJO STEPHAN PP",
+        "grade": "nan",
+        "contact": "671535801/691195498",
+        "paroisse_nom": "PAROISSE DE TAP",
+        "district": "BAMENA",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "MAGNE DAVID",
+        "grade": "Pasteur",
+        "contact": "696926788",
+        "paroisse_nom": "PAROISSE DE TAYIM",
+        "district": "BAFOUSSAM A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "R NGUEPDJOP DJONAN HARRY",
+        "grade": "Ev/ Responsable de Paroisse",
+        "contact": "nan",
+        "paroisse_nom": "Paroisse de TCHITCHAP",
+        "district": "BALENG B",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "R DJIAGA Camille Second",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "Paroisse de TCHITCHAP",
+        "district": "BALENG B",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "PP NOUMSI Honoré",
+        "grade": "Dp",
+        "contact": "nan",
+        "paroisse_nom": "Paroisse de TCHITCHAP",
+        "district": "BALENG B",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "MBAJOUN CONSTANT",
+        "grade": "Pasteur",
+        "contact": "694809011",
+        "paroisse_nom": "Paroisse de Tchoudim",
+        "district": "BANEKANE",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "MBEMAP JONAS",
+        "grade": "Dp",
+        "contact": "694434427",
+        "paroisse_nom": "Paroisse de TIE2",
+        "district": "nan",
+        "region_synodale": "nan"
+    },
+    {
+        "nom": "Megaptche komguep Justin",
+        "grade": "Délégué pastoral",
+        "contact": "675787195/674179270/657713966",
+        "paroisse_nom": "Paroisse de tomdjo-kouekong",
+        "district": "BAFOUSSAM A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "MEGAPTCHE KOMGUEP Justin",
+        "grade": "Ev",
+        "contact": "674179270",
+        "paroisse_nom": "PAROISSE DE TOMDJO-KOUEKONG",
+        "district": "BAFOUSSAM A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "SAA GERVAIS",
+        "grade": "Pasteur",
+        "contact": "699446182",
+        "paroisse_nom": "PAROISSE DE TOUKOP",
+        "district": "BANGANGTE I",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "Leudjeu Valérie",
+        "grade": "Pasteur",
+        "contact": "675767059",
+        "paroisse_nom": "Paroisse de Tsougwi",
+        "district": "BATOUFAM / BADREFAM",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "Fotso Mathieu",
+        "grade": "Ev",
+        "contact": "656396216",
+        "paroisse_nom": "Paroisse de wouom.",
+        "district": "BAHAM SUD",
+        "region_synodale": "HAUTS PLATEAUX"
+    },
+    {
+        "nom": "Bessingui Samuelpaste",
+        "grade": "nan",
+        "contact": "697959061",
+        "paroisse_nom": "Paroisse de. Grand souza",
+        "district": "ABO-SUD \"A\"",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "Otto Alain Guillot",
+        "grade": "Ev",
+        "contact": "657589795",
+        "paroisse_nom": "Paroisse de. Grand souza",
+        "district": "ABO-SUD \"A\"",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "NDASSA Pierre Master II en Théologie",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Paroisse du Centre Urbain",
+        "district": "TABE I",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "SAME LOTTIN Manfred",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Paroisse EEC BANGUE",
+        "district": "DOUALA NORD",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "NDAM MOUMBANGA Philippe Sylvain PP",
+        "grade": "Dp",
+        "contact": "673869008",
+        "paroisse_nom": "Paroisse EEC de BENGA I",
+        "district": "DISTRICT DE M. B. N",
+        "region_synodale": "NKAM"
+    },
+    {
+        "nom": "MENOH NOUME ARISTIDE  EKITI AARON MANFREF  KOUAMEGNE MARTIAL",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "PAROISSE EEC DE FAMNGO",
+        "district": "BANGANGTE I",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "CHIMI YANKEP Rosine Fleur",
+        "grade": "Master en Théologie",
+        "contact": "696620716",
+        "paroisse_nom": "Paroisse EEC de Mbouo",
+        "district": "BANDJOUN B",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "NZEKET Caroline",
+        "grade": "Aumôniere Hôpital Mbouo",
+        "contact": "697891139",
+        "paroisse_nom": "Paroisse EEC de Mbouo",
+        "district": "BANDJOUN B",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "MOUAFO Gertrude PP Aumônière CPF Mbouo",
+        "grade": "Dp",
+        "contact": "653023814",
+        "paroisse_nom": "Paroisse EEC de Mbouo",
+        "district": "BANDJOUN B",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "NGUECHOU SERGES Tel",
+        "grade": "Pasteur",
+        "contact": "674657811",
+        "paroisse_nom": "Paroisse EEC de NOUMGA",
+        "district": "BANGANGTE I",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "NANA JOUNDA PARFAIT GAYARD",
+        "grade": "Ev",
+        "contact": "696501336",
+        "paroisse_nom": "PAROISSE EEC DE SAGNAM ANNEXE DE FEUTAP",
+        "district": "BANGANGTE II",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "NDEDI Patrick",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Paroisse EEC KOTTO",
+        "district": "DOUALA NORD",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "Tadjo  seraphin tel  Rvd Takoukam Martial  Tel BIEDA MFASSU EDOUARD  tel",
+        "grade": "Ev",
+        "contact": "678105295",
+        "paroisse_nom": "Paroisse EEC MFETOM",
+        "district": "BANGANGTE II",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "Njaho Calvin",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Paroisse EEC NGANKOUN",
+        "district": "BANGANGTE II",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "R Tchapga Nganso Jean Flaubert",
+        "grade": "Pasteur",
+        "contact": "6999078 45",
+        "paroisse_nom": "Paroisse EEC SAGNAM",
+        "district": "BANGANGTE II",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "Towa Guy Martial   Proposant avec Délégation pastorale Tél",
+        "grade": "Pasteur",
+        "contact": "674006360",
+        "paroisse_nom": "Paroisse EEC SAGNAM",
+        "district": "BANGANGTE II",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "Révérend LONTSIE TATSABONG DANIEL",
+        "grade": "nan",
+        "contact": "677393334",
+        "paroisse_nom": "Paroisse Fonkouankem Plateau",
+        "district": "KEKEM",
+        "region_synodale": "HAUT NKAM"
+    },
+    {
+        "nom": "MBE Philippe",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Paroisse KENA",
+        "district": "BAMOUGOUM A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "MOUMBANA Israël  diplômé école biblique nationale",
+        "grade": "Ev",
+        "contact": "699198195",
+        "paroisse_nom": "Paroisse Mamevoue",
+        "district": "TABE II",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "NJONDA DJENKOUA guy Marcel",
+        "grade": "Pasteur",
+        "contact": "677571885/691787799",
+        "paroisse_nom": "Paroisse New Bell III",
+        "district": "NEW-BELL A",
+        "region_synodale": "WOURI SUD"
+    },
+    {
+        "nom": "PT Woukouo Edouard",
+        "grade": "nan",
+        "contact": "699676172",
+        "paroisse_nom": "Paroisse Njambam",
+        "district": "FOUMBOT I",
+        "region_synodale": "NOUN SUD"
+    },
+    {
+        "nom": "PT Mounkambou Mathieu",
+        "grade": "nan",
+        "contact": "698260465",
+        "paroisse_nom": "Paroisse Njambam",
+        "district": "FOUMBOT I",
+        "region_synodale": "NOUN SUD"
+    },
+    {
+        "nom": "Chungam Paul",
+        "grade": "Ev",
+        "contact": "697756402",
+        "paroisse_nom": "Paroisse Njambam",
+        "district": "FOUMBOT I",
+        "region_synodale": "NOUN SUD"
+    },
+    {
+        "nom": "NDZENGA MFOMI Bernard  Maîtrise",
+        "grade": "Pasteur",
+        "contact": "690573183",
+        "paroisse_nom": "Paroisse Obam Ongola.",
+        "district": "CENTRE 3 DU CENTRE SUD 2",
+        "region_synodale": "CENTRE SUD 2"
+    },
+    {
+        "nom": "MBEMAP JONAS",
+        "grade": "Dp",
+        "contact": "694434427",
+        "paroisse_nom": "Paroisse TIE2",
+        "district": "nan",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "SIMEN CHRISTA AIMÉ",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "PAROISSE TOUTAH ANNEXE DE BANGWE",
+        "district": "BAMENA",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "R NDOBO EKOBE Richard bac en théologie",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "PENJA CENTRE",
+        "district": "NJOMBE - PENJA",
+        "region_synodale": "MOUNGO CENTRE"
+    },
+    {
+        "nom": "R NJIKAM GBETNKOM Joseph désiréMtre en théologieRde",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "PENJA Plateau",
+        "district": "NJOMBE - PENJA",
+        "region_synodale": "MOUNGO CENTRE"
+    },
+    {
+        "nom": "Piengbum waffo Gaston  mbakop Nana Roberto Carlos angeliste",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Penkue",
+        "district": "BAHAM SUD",
+        "region_synodale": "HAUTS PLATEAUX"
+    },
+    {
+        "nom": "GUENANG NJILO AMÉDÉ",
+        "grade": "Évangéliste",
+        "contact": "nan",
+        "paroisse_nom": "POU DJEBEM Annexe de FAMWOUO",
+        "district": "BANDJOUN  C",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "PIELEO Christian",
+        "grade": "Pasteur",
+        "contact": "699662591",
+        "paroisse_nom": "POU-DJEBEM",
+        "district": "BANDJOUN  C",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "KAMGUE Alain Chamfort",
+        "grade": "Dp",
+        "contact": "nan",
+        "paroisse_nom": "POU-DJEBEM",
+        "district": "BANDJOUN  C",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "NGUENANG NJILO Amedé",
+        "grade": "Dp",
+        "contact": "nan",
+        "paroisse_nom": "POU-DJEBEM",
+        "district": "BANDJOUN  C",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "NZOYEM Pierre Clovis",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Pouokong",
+        "district": "BALESSING",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "POUNTUNYINYI EBENEZER  GÉLISTE AVEC DÉLÉGATION PASTORALE",
+        "grade": "Évangéliste",
+        "contact": "655600716 /654295118",
+        "paroisse_nom": "Rouotam",
+        "district": "FOUMBAN 2",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "R MBECK FRANCIS-  RESPONSABLE-",
+        "grade": "Ev",
+        "contact": "699559480/674768950",
+        "paroisse_nom": "RUE MANGUIERS",
+        "district": "CENTRE 3",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "- R MBIANDA MBIANDA BERNARD--",
+        "grade": "Ev",
+        "contact": "699866661",
+        "paroisse_nom": "RUE MANGUIERS",
+        "district": "CENTRE 3",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "- DJOU TCHOUATA JEAN MICHEL--",
+        "grade": "Pasteur",
+        "contact": "698656006",
+        "paroisse_nom": "RUE MANGUIERS",
+        "district": "CENTRE 3",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "- ETOUKE FRANKLIN-PP-",
+        "grade": "Dp",
+        "contact": "699136278",
+        "paroisse_nom": "RUE MANGUIERS",
+        "district": "CENTRE 3",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "Isabelle Essamba Mbozo'o  master en théologie",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Sa'a",
+        "district": "LEKIE' ET MBAM",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "Isabelle Essamba Mbozo'o",
+        "grade": "Pasteure",
+        "contact": "nan",
+        "paroisse_nom": "Sa'a",
+        "district": "LEKIE' ET MBAM",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "tchapga Jean flobert",
+        "grade": "Pasteur",
+        "contact": "674263866 / 699907845",
+        "paroisse_nom": "Sagnam",
+        "district": "BANGANGTE II",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "PP TOWA Guy Martial",
+        "grade": "Dp/EV",
+        "contact": "nan",
+        "paroisse_nom": "Sagnam",
+        "district": "BANGANGTE II",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "PP MOBOU LINE STELINE  FOUODOP Emmanuel",
+        "grade": "Dp",
+        "contact": "nan",
+        "paroisse_nom": "Sedembom",
+        "district": "BANDJOUN  C",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "FOTIO Jean Pierre",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "Singte",
+        "district": "BALENG B",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "Licencier en théologie SOUE SOUE",
+        "grade": "nan",
+        "contact": "690934450",
+        "paroisse_nom": "SION GBAKOUNGUE",
+        "district": "NGAOUNDERE",
+        "region_synodale": "ADAMAOUA"
+    },
+    {
+        "nom": "EBOKOLO Suzanne épouse KINGUE",
+        "grade": "Pasteur",
+        "contact": "699770754",
+        "paroisse_nom": "SOA",
+        "district": "CENTRE 1",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "POUOPEZEE Dieunedort PP",
+        "grade": "Dp",
+        "contact": "675765383",
+        "paroisse_nom": "SOA",
+        "district": "CENTRE 1",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "MISSOTA DALLE Samuel -proposant",
+        "grade": "Pasteur",
+        "contact": "+237692553925",
+        "paroisse_nom": "Sodiko Rural",
+        "district": "BELE-BELE  1",
+        "region_synodale": "WOURI NORD & SUD-OUEST"
+    },
+    {
+        "nom": "Mabonguè Moukétè Simon",
+        "grade": "Pasteur",
+        "contact": "685270719",
+        "paroisse_nom": "Souza Centre 1",
+        "district": "ABO-SUD \"A\"",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "Wanga Adèle",
+        "grade": "Ev",
+        "contact": "690499344",
+        "paroisse_nom": "Souza Centre 1",
+        "district": "ABO-SUD \"A\"",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "Danzoué Inée Blanche",
+        "grade": "Pasteur",
+        "contact": "678747649",
+        "paroisse_nom": "Souza centre 2",
+        "district": "ABO-SUD \"A\"",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "Njoya Jonas Délégué Pastoral avec Diplôme École Biblique Nationale",
+        "grade": "nan",
+        "contact": "693697583",
+        "paroisse_nom": "Tambouom",
+        "district": "MALANTOUEN",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "SANDIE Guy Berlin  avec Délégation pastorale",
+        "grade": "Évangéliste",
+        "contact": "699137480",
+        "paroisse_nom": "Tchououn Gallilé avec son annexe Thououn Vallée",
+        "district": "BAMOUGOUM B",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "DELOKO Charmante",
+        "grade": "Évangéliste",
+        "contact": "671398685",
+        "paroisse_nom": "Tchououn Gallilé avec son annexe Thououn Vallée",
+        "district": "BAMOUGOUM B",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "MOUNCHINGAM Martin Diplôme école biblique nationale",
+        "grade": "nan",
+        "contact": "694973783",
+        "paroisse_nom": "TEMPLE HISTORIQUE",
+        "district": "FOUMBAN 4",
+        "region_synodale": "NOUN NORD"
+    },
+    {
+        "nom": "DOUMÉNÉ Hervé Licence en Théologie",
+        "grade": "Pasteur",
+        "contact": "679467254",
+        "paroisse_nom": "TIALONG",
+        "district": "BALATCHI",
+        "region_synodale": "BAMBOUTOS ET NORD OUEST"
+    },
+    {
+        "nom": "POUNEGNONG TETANG Benjamin",
+        "grade": "Évangéliste",
+        "contact": "nan",
+        "paroisse_nom": "TIALONG",
+        "district": "BALATCHI",
+        "region_synodale": "BAMBOUTOS ET NORD OUEST"
+    },
+    {
+        "nom": "POUPOH Silas Noël",
+        "grade": "Évangéliste",
+        "contact": "nan",
+        "paroisse_nom": "TIALONG",
+        "district": "BALATCHI",
+        "region_synodale": "BAMBOUTOS ET NORD OUEST"
+    },
+    {
+        "nom": "TAGNE Jean Claude",
+        "grade": "Pasteur",
+        "contact": "697552730",
+        "paroisse_nom": "Toket avec son lieu de culte Tapouh",
+        "district": "BAMOUGOUM B",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "DOUNMENE Narcisse",
+        "grade": "Pasteur",
+        "contact": "679395857",
+        "paroisse_nom": "Toket avec son lieu de culte Tapouh",
+        "district": "BAMOUGOUM B",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "FOTSO Amos Boris",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Tomlem",
+        "district": "BANDJOUN B",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "kaptue Elie     foadjo noè Nestor",
+        "grade": "Pasteur",
+        "contact": "686886696/ 696690045/672046129",
+        "paroisse_nom": "totsela",
+        "district": "BANDJOUN D",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "Mayoueghoue Adeline",
+        "grade": "Ev",
+        "contact": "677966226",
+        "paroisse_nom": "Touelekeo",
+        "district": "BAMENDOU",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "Nana Alain patrice PP",
+        "grade": "Dp",
+        "contact": "699980570",
+        "paroisse_nom": "Touelekeo",
+        "district": "BAMENDOU",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "Batchou pelogie Bruno",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Tougang",
+        "district": "BALENG B",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "Djoufang Carine epse Batchou",
+        "grade": "Pasteur",
+        "contact": "nan",
+        "paroisse_nom": "Tougang",
+        "district": "BALENG B",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "Ngenbou Norbert",
+        "grade": "Ev",
+        "contact": "nan",
+        "paroisse_nom": "Tougang",
+        "district": "BALENG B",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "R SAA TIONWA Franck Gervais",
+        "grade": "Ev/Vice président du District de Bangangté",
+        "contact": "699446182/676228498",
+        "paroisse_nom": "Toukop",
+        "district": "BANGANGTE I",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "TCHEUDJOU KAMDEM Joseph Amiel",
+        "grade": "Pasteur",
+        "contact": "696011194 /josephtcheudjougmailcom",
+        "paroisse_nom": "TOUOPBA TESSE",
+        "district": "BANDJOUN B",
+        "region_synodale": "KOUNG KHI"
+    },
+    {
+        "nom": "KADJE NZALI Alice Robertine epse NOUZOUÉ",
+        "grade": "Pp",
+        "contact": "nan",
+        "paroisse_nom": "Tousso",
+        "district": "NDA'A",
+        "region_synodale": "BAMBOUTOS ET NORD OUEST"
+    },
+    {
+        "nom": "Kuate Théodore Gerves",
+        "grade": "Pasteur",
+        "contact": "699830606",
+        "paroisse_nom": "Toutah temple du centenaire",
+        "district": "BAMENA",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "SIMEN Christa Aimé",
+        "grade": "Ev",
+        "contact": "6693039662",
+        "paroisse_nom": "Toutah temple du centenaire",
+        "district": "BAMENA",
+        "region_synodale": "NDE MBAM ET INOUBOU"
+    },
+    {
+        "nom": "R FOKO SOB jilbert",
+        "grade": "Ev/Dp",
+        "contact": "nan",
+        "paroisse_nom": "Tseugwe",
+        "district": "BANGOU",
+        "region_synodale": "HAUTS PLATEAUX"
+    },
+    {
+        "nom": "Tognia tchana William",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "Tseugwe",
+        "district": "BANGOU",
+        "region_synodale": "HAUTS PLATEAUX"
+    },
+    {
+        "nom": "KENGNE Sésarine Miriande epse TAKAM   PETCHA Adolphe  avec Délégation Pastorale",
+        "grade": "Pasteure",
+        "contact": "691187745/673567580",
+        "paroisse_nom": "Tsinkop-Tchouale : Annexe de Tchouale",
+        "district": "DSCHANG I",
+        "region_synodale": "MENOUA"
+    },
+    {
+        "nom": "Djipmo Jean",
+        "grade": "Master  en Théologie Licence en Sciences Économiques",
+        "contact": "nan",
+        "paroisse_nom": "Tyo Baleng (Tyo Ville)",
+        "district": "BALENG A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "Nna Mvondo Ronald Aaron",
+        "grade": "Master  en Théologie",
+        "contact": "675589613/694426444",
+        "paroisse_nom": "Tyo Baleng (Tyo Ville)",
+        "district": "BALENG A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "KAMDEM FOTSO Chancel",
+        "grade": "Ev",
+        "contact": "690626075/651587900",
+        "paroisse_nom": "Tyo Lagoueng Lagoueng",
+        "district": "BALENG B",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "Fotio kenne bonris nelson",
+        "grade": "Licence en Sociologie",
+        "contact": "652588144",
+        "paroisse_nom": "Voutsa'ha-banefo",
+        "district": "BAFOUSSAM A",
+        "region_synodale": "MIFI"
+    },
+    {
+        "nom": "fotso Mathieu",
+        "grade": "Ev/Dp",
+        "contact": "656396216/699512794/675450164",
+        "paroisse_nom": "Wouom",
+        "district": "BAHAM SUD",
+        "region_synodale": "HAUTS PLATEAUX"
+    },
+    {
+        "nom": "Jacques  Juin  Logo",
+        "grade": "Pp",
+        "contact": "656849176",
+        "paroisse_nom": "Yabea",
+        "district": "BAKOKO",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "Nguea Marthe",
+        "grade": "Ev",
+        "contact": "699710769",
+        "paroisse_nom": "Yabea",
+        "district": "BAKOKO",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "Eloko Patrice",
+        "grade": "Ev/DP",
+        "contact": "696173387",
+        "paroisse_nom": "Yadom",
+        "district": "BAKOKO",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "WARDA",
+        "grade": "Pasteur",
+        "contact": "694797766/650580331",
+        "paroisse_nom": "YAGOUA",
+        "district": "YAGOUA",
+        "region_synodale": "NORD & EXTREME-NORD"
+    },
+    {
+        "nom": "TCHATCHOUANG NONO Simplice Honoré",
+        "grade": "Pasteur/Master en théologie",
+        "contact": "677576406/694970970",
+        "paroisse_nom": "Yambong",
+        "district": "NEW-BELL D",
+        "region_synodale": "WOURI SUD"
+    },
+    {
+        "nom": "Eke Nsame Moïse",
+        "grade": "Ev",
+        "contact": "653334435",
+        "paroisse_nom": "Yamikoki",
+        "district": "BAKOKO",
+        "region_synodale": "MOUNGO SUD & MEME"
+    },
+    {
+        "nom": "MEKOUONTCHOU PENGOU SERGES RAOUL",
+        "grade": "Pasteur",
+        "contact": "676317217/696214323",
+        "paroisse_nom": "Yassa Village",
+        "district": "NEW-BELL D",
+        "region_synodale": "WOURI SUD"
+    },
+    {
+        "nom": "TCHAKOUNTE Romuald",
+        "grade": "Pasteur",
+        "contact": "699585865",
+        "paroisse_nom": "YOUPWE",
+        "district": "nan",
+        "region_synodale": "WOURI CENTRE"
+    },
+    {
+        "nom": "TCHAKOUNTE Romuald",
+        "grade": "nan",
+        "contact": "699585865",
+        "paroisse_nom": "YOUPWE",
+        "district": "NJO-NJO",
+        "region_synodale": "WOURI CENTRE"
+    },
+    {
+        "nom": "Kontcho Christophe  Maîtrise  en Théologie",
+        "grade": "nan",
+        "contact": "677705841",
+        "paroisse_nom": "nan",
+        "district": "CENTRE 2",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "woumeni  ngongang  nadine Master",
+        "grade": "nan",
+        "contact": "677535296",
+        "paroisse_nom": "nan",
+        "district": "CENTRE 2",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "Nseke ellong ernest baccalauréat  Théologie  de Ndiki",
+        "grade": "nan",
+        "contact": "nan",
+        "paroisse_nom": "nan",
+        "district": "CENTRE 2",
+        "region_synodale": "CENTRE SUD 1"
+    },
+    {
+        "nom": "Foka Louis",
+        "grade": "nan",
+        "contact": "678166077",
+        "paroisse_nom": "nan",
+        "district": "PENKA MICHEL",
+        "region_synodale": "MENOUA"
+    }
+]
