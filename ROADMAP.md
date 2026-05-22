@@ -1,8 +1,8 @@
 # FEUILLE DE ROUTE — Plateforme EEC Géolocalisation
 ## Roadmap technique complète — Équipe de 6 développeurs
 
-**Date de création :** 21 mai 2026 (v2 — intégration fonctionnalités complètes)
-**Échéance locale :** 01 juin 2026 (12 jours ouvrables)
+**Date de création :** 22 mai 2026 (v2 — intégration fonctionnalités complètes)
+**Échéance locale :** 05 juin 2026 (12 jours ouvrables)
 **Déploiement production :** phase distincte après validation locale
 **Chef de projet et Lead Dev :** Miguel
 **Commanditaire :** Église Évangélique du Cameroun (EEC) — Direction Nationale
