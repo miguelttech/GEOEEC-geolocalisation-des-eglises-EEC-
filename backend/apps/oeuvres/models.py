@@ -11,17 +11,28 @@ MODÈLES :
   - TypeOeuvre : catégorie d'une œuvre (7 types prédéfinis)
   - Oeuvre     : l'œuvre elle-même, avec sa position GPS et ses informations
 
+HIÉRARCHIE DES ŒUVRES :
+  L'EEC possède des œuvres à 3 niveaux hiérarchiques distincts :
+    - Niveau Région   → ex: siège régional de l'EEC avec une école ou un hôpital
+    - Niveau District → ex: bureau de district avec une infrastructure
+    - Niveau Paroisse → ex: école primaire gérée par une paroisse locale
+
+  Selon son niveau, une œuvre est rattachée à SOIT une région, SOIT un district,
+  SOIT une paroisse. Les deux autres liens restent null.
+  Contrainte : au moins un des trois liens (region, district, paroisse) doit
+  être non-null pour qu'une œuvre soit valide.
+
 DÉPENDANCES :
   - django.contrib.gis.db → champs géographiques (PointField pour le GPS)
-  - apps.geo.models.Paroisse → chaque œuvre est rattachée à une paroisse
+  - apps.geo.models       → Paroisse, District, RegionSynodale
 =============================================================================
 """
 
 # Import géographique : nécessaire pour PointField (coordonnées GPS de l'œuvre)
 from django.contrib.gis.db import models
 
-# Chaque œuvre appartient à une paroisse — on importe le modèle Paroisse
-from apps.geo.models import Paroisse
+# Imports des modèles géographiques — utilisés comme clés étrangères optionnelles
+from apps.geo.models import Paroisse, District, RegionSynodale
 
 
 # =============================================================================
@@ -100,11 +111,29 @@ class Oeuvre(models.Model):
         TypeOeuvre, on_delete=models.PROTECT, related_name="oeuvres"
     )
 
-    # Paroisse gestionnaire de cette œuvre
-    # PROTECT : on ne supprime pas une paroisse si elle a des œuvres actives
-    # related_name="oeuvres" : paroisse.oeuvres.all() → toutes les œuvres de cette paroisse
+    # ------------------------------------------------------------------
+    # LIENS HIÉRARCHIQUES (un seul doit être non-null selon le niveau)
+    # ------------------------------------------------------------------
+
+    # Paroisse gestionnaire — renseigné pour les œuvres de niveau Paroisse
+    # null=True + blank=True : les œuvres régionales/districtales n'ont pas de paroisse
     paroisse = models.ForeignKey(
-        Paroisse, on_delete=models.PROTECT, related_name="oeuvres"
+        Paroisse, on_delete=models.PROTECT, related_name="oeuvres",
+        null=True, blank=True,
+    )
+
+    # District gestionnaire — renseigné pour les œuvres de niveau District
+    # null=True + blank=True : les œuvres régionales/paroissiales n'ont pas de district propre
+    district = models.ForeignKey(
+        District, on_delete=models.PROTECT, related_name="oeuvres",
+        null=True, blank=True,
+    )
+
+    # Région gestionnaire — renseigné pour les œuvres de niveau Région
+    # null=True + blank=True : la plupart des œuvres sont au niveau paroisse/district
+    region = models.ForeignKey(
+        RegionSynodale, on_delete=models.PROTECT, related_name="oeuvres",
+        null=True, blank=True,
     )
 
     # Coordonnées GPS de l'œuvre (Point = un seul point sur la carte)
@@ -143,5 +172,13 @@ class Oeuvre(models.Model):
         ordering = ["paroisse__district__region", "paroisse", "nom"]
 
     def __str__(self):
-        # Ex: "École Primaire de Bonanjo (Scolaire) — PAROISSE DE BONANJO"
-        return f"{self.nom} ({self.type_oeuvre}) — {self.paroisse.nom}"
+        # Choisit le label en fonction du niveau de l'œuvre
+        if self.paroisse_id:
+            lieu = self.paroisse.nom
+        elif self.district_id:
+            lieu = f"District {self.district.nom}"
+        elif self.region_id:
+            lieu = f"Région {self.region.nom}"
+        else:
+            lieu = "Lieu inconnu"
+        return f"{self.nom} ({self.type_oeuvre}) — {lieu}"

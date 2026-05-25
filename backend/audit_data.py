@@ -1,14 +1,36 @@
 """
-Script d'audit des données sources EEC.
-Lance avec : docker compose run --rm -v "d:/Academique/GEOEEC/data:/data" backend python audit_data.py
+=============================================================================
+FICHIER : backend/audit_data.py
+ROLE    : Audit des fichiers sources avant import en base de donnees
+
+Ce script analyse les fichiers Excel et le Shapefile pour comprendre leur
+structure, detecter les problemes et preparer les commandes d'import.
+
+Questions auxquelles ce script repond :
+  - Quelles colonnes existent dans chaque fichier Excel ?
+  - Combien de paroisses ont des coordonnees GPS ? Combien n'en ont pas ?
+  - Quels sont les noms exacts des regions dans le shapefile ?
+  - Quels types d'oeuvres existent dans les donnees ?
+  - Quels grades d'ouvriers sont presents ?
+
+COMMANDE D'EXECUTION (depuis la racine du projet) :
+  docker compose run --rm -v "d:/Academique/GEOEEC/data:/data" backend python audit_data.py
+=============================================================================
 """
+import os
 import sys
 from pathlib import Path
+
+# Initialiser Django pour utiliser son wrapper GDAL (lecture du shapefile)
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "eec_core.settings.dev")
+
+import django
+django.setup()
 
 try:
     import openpyxl
 except ImportError:
-    print("ERREUR: openpyxl non installé")
+    print("ERREUR: openpyxl non installe")
     sys.exit(1)
 
 SEPARATEUR = "=" * 70
@@ -90,63 +112,46 @@ def auditer_excel(chemin: str, nom: str):
 
 
 def auditer_shapefile(chemin_shp: str):
-    """Analyse le Shapefile via GDAL."""
+    """
+    Analyse le Shapefile des regions synodales via le wrapper GDAL de Django.
+
+    Affiche :
+      - Le systeme de coordonnees (CRS)
+      - Le type de geometrie (MultiPolygon)
+      - Les champs disponibles dans la table attributaire
+      - Toutes les valeurs de chaque champ (pour voir les noms de regions)
+    """
     print(f"\n{SEPARATEUR}")
     print(f"SHAPEFILE : {chemin_shp}")
     print(SEPARATEUR)
 
+    # On utilise le DataSource de Django (wrapper autour de GDAL)
+    # Pas besoin d'importer osgeo directement — Django l'expose proprement
+    from django.contrib.gis.gdal import DataSource
+
     try:
-        from osgeo import ogr, osr
-    except ImportError:
-        print("  ERREUR: GDAL/OGR non disponible")
+        ds = DataSource(chemin_shp)
+    except Exception as e:
+        print(f"  ERREUR ouverture shapefile : {e}")
         return
 
-    ds = ogr.Open(chemin_shp)
-    if ds is None:
-        print("  ERREUR: impossible d'ouvrir le shapefile")
-        return
+    # Un shapefile = 1 seule couche (layer index 0)
+    layer = ds[0]
 
-    layer = ds.GetLayer(0)
-    feature_count = layer.GetFeatureCount()
-    print(f"  Nombre d'entités (polygones) : {feature_count}")
+    print(f"  Nombre d'entites (polygones) : {len(layer)}")
+    print(f"  Type de geometrie            : {layer.geom_type}")
+    print(f"  Systeme de coordonnees       : {layer.srs}")
+    print(f"  Champs disponibles           : {layer.fields}")
 
-    # Projection
-    srs = layer.GetSpatialRef()
-    if srs:
-        print(f"  Système de coordonnées : {srs.GetAttrValue('AUTHORITY', 0)}:{srs.GetAttrValue('AUTHORITY', 1)}")
-        print(f"  Description : {srs.GetAttrValue('PROJCS') or srs.GetAttrValue('GEOGCS')}")
+    # Afficher toutes les valeurs de chaque champ pour reperer les noms de regions
+    print(f"\n  VALEURS DE CHAQUE CHAMP :")
+    for champ in layer.fields:
+        valeurs = sorted(set(str(feat[champ].value) for feat in layer if feat[champ].value))
+        print(f"\n  Champ '{champ}' — {len(valeurs)} valeurs uniques :")
+        for v in valeurs:
+            print(f"    -> '{v}'")
 
-    # Type de géométrie
-    geom_type = ogr.GeometryTypeToName(layer.GetGeomType())
-    print(f"  Type de géométrie : {geom_type}")
-
-    # Champs attributaires
-    defn = layer.GetLayerDefn()
-    print(f"\n  CHAMPS ATTRIBUTAIRES ({defn.GetFieldCount()} colonnes) :")
-    for i in range(defn.GetFieldCount()):
-        field = defn.GetFieldDefn(i)
-        print(f"    [{i+1}] '{field.GetName()}' — type : {field.GetFieldTypeName(field.GetType())}, largeur : {field.GetWidth()}")
-
-    # Lire toutes les valeurs d'un champ important (nom de la région)
-    print(f"\n  TOUTES LES VALEURS DES CHAMPS (pour identifier le nom de région) :")
-    layer.ResetReading()
-    champs_noms = [defn.GetFieldDefn(i).GetName() for i in range(defn.GetFieldCount())]
-
-    valeurs_par_champ = {c: [] for c in champs_noms}
-    for feature in layer:
-        for champ in champs_noms:
-            val = feature.GetField(champ)
-            if val:
-                valeurs_par_champ[champ].append(str(val))
-
-    for champ, valeurs in valeurs_par_champ.items():
-        uniques = sorted(set(valeurs))
-        print(f"\n  Champ '{champ}' — {len(uniques)} valeurs uniques :")
-        for v in uniques:
-            print(f"    → '{v}'")
-
-    ds = None
-    print(f"\n  Shapefile analysé avec succès.")
+    print(f"\n  Shapefile analyse avec succes.")
 
 
 if __name__ == "__main__":
