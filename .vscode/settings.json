@@ -8,5 +8,7 @@
   "python.linting.ruffEnabled": true,
   "files.eol": "\n",
   "editor.rulers": [88],
-  "typescript.preferences.importModuleSpecifier": "relative"
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "python.analysis.typeCheckingMode": "off",
+  "python.analysis.extraPaths": ["backend"]
 }

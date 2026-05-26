@@ -1,161 +1,170 @@
-"""
-=============================================================================
-FICHIER N°15 (dans l'ordre de création du projet)
-CHEMIN   : backend/apps/accounts/views.py
-CRÉÉ     : Phase 3 — APIs REST
-DÉPEND DE: apps/accounts/serializers.py, apps/accounts/models.py
-UTILISÉ PAR: eec_core/urls.py
-=============================================================================
-
-OBJECTIF :
-  Logique des endpoints pour les statistiques annuelles.
-
-ENDPOINTS GÉRÉS ICI :
-  GET /api/statistiques/                  → liste de toutes les statistiques
-  GET /api/statistiques/{id}/             → une statistique précise
-  GET /api/statistiques/?paroisse=5       → stats d'une paroisse
-  GET /api/statistiques/?annee=2025       → stats d'une année
-  GET /api/statistiques/totaux/?annee=2025 → totaux agrégés EEC
-
-LA PARTICULARITÉ DE CETTE VIEW :
-  En plus des actions standard (list, retrieve), elle a une action
-  personnalisée "totaux" qui retourne les SOMMES (agrégats) de toutes
-  les statistiques filtrées.
-  C'est utile pour le tableau de bord : "Total fidèles EEC 2025 = 183 470"
-=============================================================================
-"""
-
-# Sum : fonction SQL d'agrégation pour calculer la somme d'une colonne
-# Exemple : Sum("communiants") → SELECT SUM(communiants) FROM ...
 from django.db.models import Sum
 
-from rest_framework import viewsets, permissions
-from rest_framework.decorators import action   # Pour l'action personnalisée "totaux"
-from rest_framework.response import Response   # Pour retourner une réponse JSON custom
+from rest_framework import viewsets, permissions, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from .models import StatistiqueAnnuelle
 from .serializers import StatistiqueAnnuelleSerializer
+from apps.accounts.permissions import ReadPublicWriteAdmin
 
 
-class StatistiqueAnnuelleViewSet(viewsets.ReadOnlyModelViewSet):
+class StatistiqueAnnuelleViewSet(viewsets.ModelViewSet):
     """
-    API pour les 545 statistiques annuelles (une par paroisse pour 2025).
+    Statistiques annuelles par paroisse.
 
-    FILTRES DISPONIBLES (cumulables) :
-      ?paroisse={id}  → stats d'une paroisse spécifique
-      ?district={id}  → stats de toutes les paroisses d'un district
-      ?region={id}    → stats de toutes les paroisses d'une région
-      ?annee={year}   → stats d'une année précise (ex: ?annee=2025)
-
-    ACTION SPÉCIALE :
-      GET /api/statistiques/totaux/          → sommes de toutes les stats
-      GET /api/statistiques/totaux/?annee=2025 → sommes pour 2025 uniquement
-      GET /api/statistiques/totaux/?region=5   → sommes pour une région
+    Filtres :
+      ?paroisse={id}    — stats d'une paroisse
+      ?district={id}    — stats d'un district
+      ?region={id}      — stats d'une région
+      ?annee={year}     — année précise
+      ?non_validee=1    — uniquement les stats non validées
     """
-
-    # AllowAny : les statistiques EEC sont publiques (pas de données personnelles)
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [ReadPublicWriteAdmin]
     serializer_class = StatistiqueAnnuelleSerializer
 
     def get_queryset(self):
-        """
-        Construit la requête SQL de base et applique les filtres.
-
-        .select_related() charge les relations FK en une seule requête SQL :
-          paroisse → district → region
-        Sans select_related, Django ferait une requête séparée pour chaque
-        stat pour chercher la paroisse, puis une autre pour le district, etc.
-        Avec 545 stats, ça ferait 545 × 3 = 1635 requêtes → très lent !
-        Avec select_related, c'est 1 seule requête SQL (JOIN).
-        """
         qs = (
             StatistiqueAnnuelle.objects
             .select_related(
-                "paroisse",                    # charge la paroisse liée
-                "paroisse__district",          # charge aussi le district de la paroisse
-                "paroisse__district__region",  # charge aussi la région du district
+                "paroisse",
+                "paroisse__district",
+                "paroisse__district__region",
             )
-            # Tri : d'abord par année décroissante (2025 avant 2024), puis par nom
             .order_by("-annee", "paroisse__nom")
         )
+        params = self.request.query_params
 
-        params = self.request.query_params  # Dictionnaire des paramètres d'URL
-
-        # Filtre par paroisse : WHERE paroisse_id = ?
         paroisse_id = params.get("paroisse")
         if paroisse_id:
             qs = qs.filter(paroisse_id=paroisse_id)
 
-        # Filtre par district : WHERE paroisse.district_id = ?
         district_id = params.get("district")
         if district_id:
             qs = qs.filter(paroisse__district_id=district_id)
 
-        # Filtre par région : WHERE paroisse.district.region_id = ?
         region_id = params.get("region")
         if region_id:
             qs = qs.filter(paroisse__district__region_id=region_id)
 
-        # Filtre par année : WHERE annee = ?
         annee = params.get("annee")
         if annee:
             qs = qs.filter(annee=annee)
 
+        if params.get("non_validee") == "1":
+            qs = qs.filter(validee=False)
+
+        # Scope : les admins ne voient que leurs propres données
+        if self.request.user.is_authenticated:
+            qs = _filter_stats_by_scope(qs, self.request.user)
+
         return qs
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        # Un admin PAROISSE ne peut créer des stats que pour sa propre paroisse
+        if user.role == "PAROISSE" and user.paroisse_id:
+            serializer.save(paroisse=user.paroisse)
+        else:
+            serializer.save()
+
+    def update(self, request, *args, **kwargs):
+        stat = self.get_object()
+        if not _can_write_stat(request.user, stat):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        return super().update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        if request.user.role != "SUPER":
+            return Response(
+                {"detail": "Seul l'administrateur national peut supprimer des statistiques."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        return super().destroy(request, *args, **kwargs)
+
+    @action(detail=True, methods=["post"], url_path="valider",
+            permission_classes=[permissions.IsAuthenticated])
+    def valider(self, request, pk=None):
+        """POST /api/statistiques/{id}/valider/ — marque la stat comme validée."""
+        stat = self.get_object()
+        if request.user.role not in ("SUPER", "REGION", "DISTRICT"):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        if not _can_write_stat(request.user, stat):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        stat.validee = True
+        stat.save(update_fields=["validee"])
+        return Response({"validee": True})
 
     @action(detail=False, url_path="totaux")
     def totaux(self, request):
-        """
-        Action personnalisée : retourne les totaux agrégés (sommes) EEC.
-
-        URL : GET /api/statistiques/totaux/
-        URL : GET /api/statistiques/totaux/?annee=2025
-        URL : GET /api/statistiques/totaux/?region=10
-
-        EXEMPLE DE RÉPONSE :
-        {
-          "total_communiants": 133935,
-          "total_non_communiants": 49535,
-          "total_baptemes": 0,
-          "total_mariages": 0,
-          "total_deces": 0,
-          "total_fideles": 183470,
-          "nb_paroisses": 545
-        }
-
-        COMMENT FONCTIONNE .aggregate() ?
-        C'est une requête SQL avec des fonctions d'agrégation :
-          SELECT
-            SUM(communiants) AS total_communiants,
-            SUM(non_communiants) AS total_non_communiants,
-            ...
-          FROM accounts_statistiqueannuelle
-          WHERE annee = 2025   (si filtré par année)
-
-        detail=False : l'URL est /totaux/ sur la collection, pas sur un objet
-        url_path="totaux" : le segment final de l'URL
-        """
-        # get_queryset() applique déjà les filtres (?annee=, ?region=, etc.)
+        """GET /api/statistiques/totaux/?annee=2025&region=5 — totaux agrégés."""
         qs = self.get_queryset()
-
-        # .aggregate() exécute un seul SELECT avec plusieurs SUM()
         totaux = qs.aggregate(
-            total_communiants=Sum("communiants"),        # SUM(communiants)
-            total_non_communiants=Sum("non_communiants"),# SUM(non_communiants)
-            total_baptemes=Sum("baptemes"),              # SUM(baptemes) — vaut 0 pour 2025
-            total_mariages=Sum("mariages"),              # SUM(mariages) — vaut 0 pour 2025
-            total_deces=Sum("deces"),                    # SUM(deces) — vaut 0 pour 2025
+            total_communiants=Sum("communiants"),
+            total_non_communiants=Sum("non_communiants"),
+            total_baptemes=Sum("baptemes"),
+            total_mariages=Sum("mariages"),
+            total_deces=Sum("deces"),
         )
-
-        # Calculer le total fidèles (pas en SQL, en Python)
-        # "or 0" protège contre None (si aucune stat n'existe, Sum() retourne None)
         totaux["total_fideles"] = (
             (totaux["total_communiants"] or 0)
             + (totaux["total_non_communiants"] or 0)
         )
-
-        # Ajouter le nombre de paroisses concernées (COUNT en Python)
         totaux["nb_paroisses"] = qs.count()
-
-        # Response() retourne une réponse JSON custom (pas via le serializer)
         return Response(totaux)
+
+    @action(detail=False, url_path="par-annee", permission_classes=[permissions.IsAuthenticated])
+    def par_annee(self, request):
+        """GET /api/statistiques/par-annee/ — totaux groupés par année."""
+        qs = self.get_queryset()
+        annees = (
+            qs.values("annee")
+            .annotate(
+                total_communiants=Sum("communiants"),
+                total_non_communiants=Sum("non_communiants"),
+                total_baptemes=Sum("baptemes"),
+                nb_paroisses=Sum("id"),  # compte les lignes
+            )
+            .order_by("-annee")
+        )
+        # Recalcule nb_paroisses correctement
+        result = []
+        for row in annees:
+            year_qs = qs.filter(annee=row["annee"])
+            result.append({
+                "annee": row["annee"],
+                "nb_paroisses": year_qs.count(),
+                "total_communiants": row["total_communiants"] or 0,
+                "total_non_communiants": row["total_non_communiants"] or 0,
+                "total_fideles": (row["total_communiants"] or 0) + (row["total_non_communiants"] or 0),
+                "total_baptemes": row["total_baptemes"] or 0,
+            })
+        return Response(result)
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+def _filter_stats_by_scope(queryset, user):
+    if user.role == "SUPER":
+        return queryset
+    if user.role == "REGION" and user.region_id:
+        return queryset.filter(paroisse__district__region_id=user.region_id)
+    if user.role == "DISTRICT" and user.district_id:
+        return queryset.filter(paroisse__district_id=user.district_id)
+    if user.role == "PAROISSE" and user.paroisse_id:
+        return queryset.filter(paroisse_id=user.paroisse_id)
+    return queryset.none()
+
+
+def _can_write_stat(user, stat):
+    if user.role == "SUPER":
+        return True
+    if user.role == "REGION":
+        return stat.paroisse.district.region_id == user.region_id
+    if user.role == "DISTRICT":
+        return stat.paroisse.district_id == user.district_id
+    if user.role == "PAROISSE":
+        return stat.paroisse_id == user.paroisse_id
+    return False

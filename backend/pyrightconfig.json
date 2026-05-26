@@ -1,0 +1,10 @@
+{
+  "pythonVersion": "3.12",
+  "pythonPlatform": "Linux",
+  "venvPath": "/usr/local/lib",
+  "reportMissingModuleSource": "none",
+  "reportMissingImports": "none",
+  "reportMissingModuleSource": "none",
+  "ignore": ["**/*"],
+  "exclude": ["**/__pycache__"]
+}

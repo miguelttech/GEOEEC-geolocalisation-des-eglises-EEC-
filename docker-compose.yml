@@ -88,10 +88,11 @@ services:
       - ./frontend:/app
       - /app/node_modules
     ports:
-      - "3000:3000"
+      - "3004:3004"
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
       - NEXT_PUBLIC_GEOSERVER_URL=http://localhost:8080/geoserver
+      - BACKEND_INTERNAL_URL=http://backend:8000
     depends_on:
       - backend
     networks: [eecnet]
