@@ -1,4 +1,4 @@
-from django.db.models import Sum
+from django.db.models import Sum, Count
 
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
@@ -14,14 +14,14 @@ class StatistiqueAnnuelleViewSet(viewsets.ModelViewSet):
     Statistiques annuelles par paroisse.
 
     Filtres :
-      ?paroisse={id}    — stats d'une paroisse
-      ?district={id}    — stats d'un district
-      ?region={id}      — stats d'une région
-      ?annee={year}     — année précise
-      ?non_validee=1    — uniquement les stats non validées
+      ?paroisse={id}
+      ?district={id}
+      ?region={id}
+      ?annee={year}
+      ?non_validee=1
     """
     permission_classes = [ReadPublicWriteAdmin]
-    serializer_class = StatistiqueAnnuelleSerializer
+    serializer_class   = StatistiqueAnnuelleSerializer
 
     def get_queryset(self):
         qs = (
@@ -33,28 +33,19 @@ class StatistiqueAnnuelleViewSet(viewsets.ModelViewSet):
             )
             .order_by("-annee", "paroisse__nom")
         )
-        params = self.request.query_params
+        p = self.request.query_params
 
-        paroisse_id = params.get("paroisse")
-        if paroisse_id:
-            qs = qs.filter(paroisse_id=paroisse_id)
-
-        district_id = params.get("district")
-        if district_id:
-            qs = qs.filter(paroisse__district_id=district_id)
-
-        region_id = params.get("region")
-        if region_id:
-            qs = qs.filter(paroisse__district__region_id=region_id)
-
-        annee = params.get("annee")
-        if annee:
-            qs = qs.filter(annee=annee)
-
-        if params.get("non_validee") == "1":
+        if p.get("paroisse"):
+            qs = qs.filter(paroisse_id=p["paroisse"])
+        if p.get("district"):
+            qs = qs.filter(paroisse__district_id=p["district"])
+        if p.get("region"):
+            qs = qs.filter(paroisse__district__region_id=p["region"])
+        if p.get("annee"):
+            qs = qs.filter(annee=p["annee"])
+        if p.get("non_validee") == "1":
             qs = qs.filter(validee=False)
 
-        # Scope : les admins ne voient que leurs propres données
         if self.request.user.is_authenticated:
             qs = _filter_stats_by_scope(qs, self.request.user)
 
@@ -62,7 +53,6 @@ class StatistiqueAnnuelleViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         user = self.request.user
-        # Un admin PAROISSE ne peut créer des stats que pour sa propre paroisse
         if user.role == "PAROISSE" and user.paroisse_id:
             serializer.save(paroisse=user.paroisse)
         else:
@@ -82,10 +72,14 @@ class StatistiqueAnnuelleViewSet(viewsets.ModelViewSet):
             )
         return super().destroy(request, *args, **kwargs)
 
+    # ------------------------------------------------------------------
+    # Actions personnalisées
+    # ------------------------------------------------------------------
+
     @action(detail=True, methods=["post"], url_path="valider",
             permission_classes=[permissions.IsAuthenticated])
     def valider(self, request, pk=None):
-        """POST /api/statistiques/{id}/valider/ — marque la stat comme validée."""
+        """POST /api/statistiques/{id}/valider/"""
         stat = self.get_object()
         if request.user.role not in ("SUPER", "REGION", "DISTRICT"):
             return Response(status=status.HTTP_403_FORBIDDEN)
@@ -97,8 +91,8 @@ class StatistiqueAnnuelleViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, url_path="totaux")
     def totaux(self, request):
-        """GET /api/statistiques/totaux/?annee=2025&region=5 — totaux agrégés."""
-        qs = self.get_queryset()
+        """GET /api/statistiques/totaux/?annee=2025&region=5 — Totaux agrégés."""
+        qs     = self.get_queryset()
         totaux = qs.aggregate(
             total_communiants=Sum("communiants"),
             total_non_communiants=Sum("non_communiants"),
@@ -107,38 +101,115 @@ class StatistiqueAnnuelleViewSet(viewsets.ModelViewSet):
             total_deces=Sum("deces"),
         )
         totaux["total_fideles"] = (
-            (totaux["total_communiants"] or 0)
+            (totaux["total_communiants"]     or 0)
             + (totaux["total_non_communiants"] or 0)
         )
         totaux["nb_paroisses"] = qs.count()
         return Response(totaux)
 
-    @action(detail=False, url_path="par-annee", permission_classes=[permissions.IsAuthenticated])
+    @action(detail=False, url_path="par-annee",
+            permission_classes=[permissions.IsAuthenticated])
     def par_annee(self, request):
-        """GET /api/statistiques/par-annee/ — totaux groupés par année."""
-        qs = self.get_queryset()
+        """GET /api/statistiques/par-annee/ — Totaux groupés par année."""
+        qs     = self.get_queryset()
+        result = []
         annees = (
             qs.values("annee")
             .annotate(
                 total_communiants=Sum("communiants"),
                 total_non_communiants=Sum("non_communiants"),
                 total_baptemes=Sum("baptemes"),
-                nb_paroisses=Sum("id"),  # compte les lignes
             )
             .order_by("-annee")
         )
-        # Recalcule nb_paroisses correctement
-        result = []
         for row in annees:
-            year_qs = qs.filter(annee=row["annee"])
+            year_count = qs.filter(annee=row["annee"]).count()
             result.append({
-                "annee": row["annee"],
-                "nb_paroisses": year_qs.count(),
-                "total_communiants": row["total_communiants"] or 0,
+                "annee":                 row["annee"],
+                "nb_paroisses":          year_count,
+                "total_communiants":     row["total_communiants"]     or 0,
                 "total_non_communiants": row["total_non_communiants"] or 0,
-                "total_fideles": (row["total_communiants"] or 0) + (row["total_non_communiants"] or 0),
-                "total_baptemes": row["total_baptemes"] or 0,
+                "total_fideles":         (row["total_communiants"] or 0) + (row["total_non_communiants"] or 0),
+                "total_baptemes":        row["total_baptemes"]        or 0,
             })
+        return Response(result)
+
+    @action(detail=False, url_path="top-paroisses")
+    def top_paroisses(self, request):
+        """
+        GET /api/statistiques/top-paroisses/?annee=2025&limit=10
+
+        Retourne les N paroisses avec le plus grand nombre de fidèles.
+        Respecte le scope de l'utilisateur connecté.
+        """
+        annee = int(request.query_params.get("annee", 2025))
+        limit = min(int(request.query_params.get("limit", 10)), 50)
+
+        qs = (
+            StatistiqueAnnuelle.objects
+            .filter(annee=annee)
+            .select_related("paroisse", "paroisse__district", "paroisse__district__region")
+            .order_by("-communiants", "-non_communiants")
+        )
+
+        if self.request.user.is_authenticated:
+            qs = _filter_stats_by_scope(qs, self.request.user)
+
+        result = [
+            {
+                "rang":            i,
+                "paroisse_id":     s.paroisse_id,
+                "paroisse_nom":    s.paroisse.nom,
+                "district_nom":    s.paroisse.district.nom,
+                "region_nom":      s.paroisse.district.region.nom,
+                "communiants":     s.communiants,
+                "non_communiants": s.non_communiants,
+                "total_fideles":   s.communiants + s.non_communiants,
+                "annee":           s.annee,
+            }
+            for i, s in enumerate(qs[:limit], 1)
+        ]
+        return Response(result)
+
+    @action(detail=False, url_path="performance-regions")
+    def performance_regions(self, request):
+        """
+        GET /api/statistiques/performance-regions/?annee=2025
+
+        Classement des régions par nombre total de fidèles.
+        """
+        annee = int(request.query_params.get("annee", 2025))
+
+        rows = (
+            StatistiqueAnnuelle.objects
+            .filter(annee=annee)
+            .values(
+                "paroisse__district__region",
+                "paroisse__district__region__nom",
+            )
+            .annotate(
+                total_communiants=Sum("communiants"),
+                total_non_communiants=Sum("non_communiants"),
+                total_baptemes=Sum("baptemes"),
+                nb_paroisses=Count("paroisse", distinct=True),
+            )
+            .order_by("-total_communiants")
+        )
+
+        result = [
+            {
+                "rang":                  i,
+                "region_id":             row["paroisse__district__region"],
+                "region_nom":            row["paroisse__district__region__nom"],
+                "nb_paroisses":          row["nb_paroisses"],
+                "total_communiants":     row["total_communiants"]     or 0,
+                "total_non_communiants": row["total_non_communiants"] or 0,
+                "total_fideles":         (row["total_communiants"] or 0) + (row["total_non_communiants"] or 0),
+                "total_baptemes":        row["total_baptemes"]        or 0,
+                "annee":                 annee,
+            }
+            for i, row in enumerate(rows, 1)
+        ]
         return Response(result)
 
 

@@ -83,7 +83,7 @@ services:
       dockerfile: Dockerfile
     container_name: eec_frontend_dev
     restart: unless-stopped
-    command: npm run dev
+    command: npm run dev -- -p 3004
     volumes:
       - ./frontend:/app
       - /app/node_modules

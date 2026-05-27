@@ -10,8 +10,12 @@ import type { NextRequest } from 'next/server';
  * (IsAuthenticated sur chaque endpoint). Ce middleware est un garde UX.
  */
 export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  // Bypass auth in dev to allow UI testing before the login page is built
+  if (process.env.NODE_ENV === 'development') {
+    return NextResponse.next();
+  }
 
+  const { pathname } = request.nextUrl;
   const session = request.cookies.get('sessionid');
 
   if (!session) {

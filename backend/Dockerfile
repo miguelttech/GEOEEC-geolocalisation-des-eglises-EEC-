@@ -4,7 +4,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     DEBIAN_FRONTEND=noninteractive
 
-# GDAL/GEOS/PROJ sont requis par GeoDjango pour les opérations spatiales
+# GDAL/GEOS/PROJ requis par GeoDjango + Pango/Cairo requis par WeasyPrint (PDF)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     binutils \
     libproj-dev \
@@ -13,6 +13,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libgeos-dev \
     python3-gdal \
     curl \
+    libpango-1.0-0 \
+    libpangoft2-1.0-0 \
+    libpangocairo-1.0-0 \
+    libcairo2 \
+    libgdk-pixbuf-2.0-0 \
+    libffi8 \
+    shared-mime-info \
+    fonts-liberation \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

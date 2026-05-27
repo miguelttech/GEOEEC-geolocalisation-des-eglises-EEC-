@@ -8,7 +8,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from .models import User, StatistiqueAnnuelle
-from .permissions import IsAdminUser, IsSuperAdmin, can_manage_accounts
+from .permissions import can_manage_accounts
 from .serializers import UserSerializer, UserCreateSerializer
 
 
@@ -19,11 +19,7 @@ from .serializers import UserSerializer, UserCreateSerializer
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def csrf_token(request):
-    """
-    GET /api/auth/csrf/
-    Retourne le token CSRF. Le frontend doit appeler cet endpoint
-    au démarrage puis inclure le token dans l'en-tête X-CSRFToken.
-    """
+    """GET /api/auth/csrf/ — Retourne le token CSRF pour les requêtes POST."""
     return Response({"csrfToken": get_token(request)})
 
 
@@ -36,11 +32,11 @@ def csrf_token(request):
 def login_view(request):
     """
     POST /api/auth/login/
-    Body: { "username": "...", "password": "..." }
-
-    Crée une session Django (cookie HttpOnly sessionid).
-    Retourne les infos de l'utilisateur connecté.
+    Body : { "username": "...", "password": "..." }
+    Accepte username OU email.
     """
+    from apps.audit.utils import log_action
+
     username = request.data.get("username", "").strip()
     password = request.data.get("password", "")
 
@@ -50,13 +46,11 @@ def login_view(request):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    # Django accepte le login par username OU email
     user = authenticate(request, username=username, password=password)
 
-    # Si authenticate échoue par username, on essaie par email
     if user is None:
         try:
-            u = User.objects.get(email__iexact=username)
+            u    = User.objects.get(email__iexact=username)
             user = authenticate(request, username=u.username, password=password)
         except User.DoesNotExist:
             pass
@@ -75,8 +69,14 @@ def login_view(request):
 
     login(request, user)
 
+    log_action(
+        request, "LOGIN", "systeme",
+        objet_nom=user.get_full_name() or user.username,
+        description=f"Connexion réussie — rôle : {user.get_role_display()}",
+    )
+
     return Response({
-        "user": UserSerializer(user).data,
+        "user":                  UserSerializer(user).data,
         "force_password_change": user.force_password_change,
     })
 
@@ -89,12 +89,19 @@ def login_view(request):
 @permission_classes([IsAuthenticated])
 def logout_view(request):
     """POST /api/auth/logout/ — Détruit la session courante."""
+    from apps.audit.utils import log_action
+
+    log_action(
+        request, "LOGOUT", "systeme",
+        objet_nom=request.user.get_full_name() or request.user.username,
+        description="Déconnexion",
+    )
     logout(request)
     return Response({"detail": "Déconnecté."})
 
 
 # ---------------------------------------------------------------------------
-# ME — informations de l'utilisateur connecté
+# ME
 # ---------------------------------------------------------------------------
 
 @api_view(["GET"])
@@ -113,25 +120,25 @@ def me_view(request):
 def change_password(request):
     """
     POST /api/auth/change-password/
-    Body: { "old_password": "...", "new_password": "...", "confirm_password": "..." }
+    Body : { "old_password": "...", "new_password": "...", "confirm_password": "..." }
     """
-    user = request.user
+    from apps.audit.utils import log_action
+
+    user        = request.user
     old_password = request.data.get("old_password", "")
     new_password = request.data.get("new_password", "")
-    confirm = request.data.get("confirm_password", "")
+    confirm      = request.data.get("confirm_password", "")
 
     if not user.check_password(old_password):
         return Response(
             {"detail": "Mot de passe actuel incorrect."},
             status=status.HTTP_400_BAD_REQUEST,
         )
-
     if new_password != confirm:
         return Response(
             {"detail": "Les mots de passe ne correspondent pas."},
             status=status.HTTP_400_BAD_REQUEST,
         )
-
     if len(new_password) < 12:
         return Response(
             {"detail": "Le mot de passe doit contenir au moins 12 caractères."},
@@ -141,12 +148,15 @@ def change_password(request):
     user.set_password(new_password)
     user.force_password_change = False
     user.save()
-    update_session_auth_hash(request, user)  # Garde la session active après le changement
+    update_session_auth_hash(request, user)
+
+    log_action(request, "UPDATE", "user", objet_id=user.id, objet_nom=user.username,
+               description="Changement de mot de passe")
     return Response({"detail": "Mot de passe modifié avec succès."})
 
 
 # ---------------------------------------------------------------------------
-# GESTION DES COMPTES (CRUD Users — réservé SUPER/REGION/DISTRICT)
+# GESTION DES COMPTES (CRUD Users)
 # ---------------------------------------------------------------------------
 
 @api_view(["GET"])
@@ -154,8 +164,8 @@ def change_password(request):
 def list_users(request):
     """
     GET /api/auth/users/
-    SUPER → tous les comptes
-    REGION → ses admins district et paroisse
+    SUPER   → tous les comptes
+    REGION  → ses admins district et paroisse
     DISTRICT → ses admins paroisse
     """
     user = request.user
@@ -175,10 +185,9 @@ def list_users(request):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def create_user(request):
-    """
-    POST /api/auth/users/
-    Crée un nouveau compte admin.
-    """
+    """POST /api/auth/users/create/ — Crée un nouveau compte admin."""
+    from apps.audit.utils import log_action
+
     user = request.user
     if not can_manage_accounts(user):
         return Response(status=status.HTTP_403_FORBIDDEN)
@@ -186,6 +195,12 @@ def create_user(request):
     serializer = UserCreateSerializer(data=request.data, context={"request": request})
     if serializer.is_valid():
         new_user = serializer.save()
+        log_action(
+            request, "CREATE", "user",
+            objet_id=new_user.id,
+            objet_nom=new_user.get_full_name() or new_user.username,
+            description=f"Création compte — rôle : {new_user.get_role_display()}",
+        )
         return Response(UserSerializer(new_user).data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -193,9 +208,9 @@ def create_user(request):
 @api_view(["GET", "PATCH", "DELETE"])
 @permission_classes([IsAuthenticated])
 def user_detail(request, pk):
-    """
-    GET/PATCH/DELETE /api/auth/users/{pk}/
-    """
+    """GET/PATCH/DELETE /api/auth/users/{pk}/"""
+    from apps.audit.utils import log_action
+
     try:
         target = User.objects.get(pk=pk)
     except User.DoesNotExist:
@@ -204,19 +219,10 @@ def user_detail(request, pk):
     user = request.user
     if not can_manage_accounts(user):
         return Response(status=status.HTTP_403_FORBIDDEN)
-
-    # Un REGION ne peut gérer que ses sous-admins
-    if user.role == "REGION" and target.region != user.region:
+    if user.role == "REGION"   and target.region   != user.region:
         return Response(status=status.HTTP_403_FORBIDDEN)
     if user.role == "DISTRICT" and target.district != user.district:
         return Response(status=status.HTTP_403_FORBIDDEN)
-    # Personne ne peut supprimer le SUPER ou se supprimer soi-même
-    if request.method == "DELETE":
-        if target.role == "SUPER" or target == user:
-            return Response(
-                {"detail": "Cette opération n'est pas autorisée."},
-                status=status.HTTP_403_FORBIDDEN,
-            )
 
     if request.method == "GET":
         return Response(UserSerializer(target).data)
@@ -225,19 +231,30 @@ def user_detail(request, pk):
         serializer = UserSerializer(target, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
+            log_action(request, "UPDATE", "user", objet_id=target.id,
+                       objet_nom=target.get_full_name(), description="Modification compte utilisateur")
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     if request.method == "DELETE":
+        if target.role == "SUPER" or target == user:
+            return Response(
+                {"detail": "Cette opération n'est pas autorisée."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         target.is_active = False
         target.save()
+        log_action(request, "DELETE", "user", objet_id=target.id,
+                   objet_nom=target.get_full_name(), description="Désactivation compte utilisateur")
         return Response({"detail": "Compte désactivé."})
 
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def toggle_user_active(request, pk):
-    """POST /api/auth/users/{pk}/toggle-active/ — Active ou désactive un compte."""
+    """POST /api/auth/users/{pk}/toggle-active/"""
+    from apps.audit.utils import log_action
+
     try:
         target = User.objects.get(pk=pk)
     except User.DoesNotExist:
@@ -248,17 +265,18 @@ def toggle_user_active(request, pk):
 
     target.is_active = not target.is_active
     target.save()
+    action_label = "Activation" if target.is_active else "Désactivation"
+    log_action(request, "UPDATE", "user", objet_id=target.id,
+               objet_nom=target.get_full_name(), description=f"{action_label} du compte")
     return Response({"is_active": target.is_active})
 
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def reset_user_password(request, pk):
-    """
-    POST /api/auth/users/{pk}/reset-password/
-    Body: { "new_password": "..." }
-    Réservé SUPER ou manager direct de l'utilisateur cible.
-    """
+    """POST /api/auth/users/{pk}/reset-password/"""
+    from apps.audit.utils import log_action
+
     try:
         target = User.objects.get(pk=pk)
     except User.DoesNotExist:
@@ -277,68 +295,73 @@ def reset_user_password(request, pk):
     target.set_password(new_password)
     target.force_password_change = True
     target.save()
+    log_action(request, "UPDATE", "user", objet_id=target.id,
+               objet_nom=target.get_full_name(), description="Réinitialisation mot de passe")
     return Response({"detail": "Mot de passe réinitialisé."})
 
 
 # ---------------------------------------------------------------------------
-# STATISTIQUES DASHBOARD (endpoint agrégé pour le tableau de bord admin)
+# STATISTIQUES DASHBOARD
 # ---------------------------------------------------------------------------
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def dashboard_stats(request):
-    """
-    GET /api/auth/dashboard-stats/
-    Retourne les compteurs pour les widgets du tableau de bord admin.
-    Filtrés selon le scope de l'utilisateur.
-    """
+    """GET /api/auth/dashboard-stats/ — Compteurs pour le tableau de bord admin."""
     from apps.geo.models import RegionSynodale, District, Paroisse
     from apps.oeuvres.models import Oeuvre
     from apps.ouvriers.models import Ouvrier
 
     user = request.user
 
-    # Queryset de base filtré par scope
     if user.role == "SUPER":
         paroisses_qs = Paroisse.objects.all()
-        oeuvres_qs = Oeuvre.objects.all()
-        ouvriers_qs = Ouvrier.objects.all()
-        stats_qs = StatistiqueAnnuelle.objects.all()
+        oeuvres_qs   = Oeuvre.objects.all()
+        ouvriers_qs  = Ouvrier.objects.all()
+        stats_qs     = StatistiqueAnnuelle.objects.all()
     elif user.role == "REGION" and user.region_id:
         paroisses_qs = Paroisse.objects.filter(district__region_id=user.region_id)
-        oeuvres_qs = Oeuvre.objects.filter(region_id=user.region_id)
-        ouvriers_qs = Ouvrier.objects.filter(paroisse__district__region_id=user.region_id)
-        stats_qs = StatistiqueAnnuelle.objects.filter(paroisse__district__region_id=user.region_id)
+        oeuvres_qs   = Oeuvre.objects.filter(region_id=user.region_id)
+        ouvriers_qs  = Ouvrier.objects.filter(paroisse__district__region_id=user.region_id)
+        stats_qs     = StatistiqueAnnuelle.objects.filter(paroisse__district__region_id=user.region_id)
     elif user.role == "DISTRICT" and user.district_id:
         paroisses_qs = Paroisse.objects.filter(district_id=user.district_id)
-        oeuvres_qs = Oeuvre.objects.filter(district_id=user.district_id)
-        ouvriers_qs = Ouvrier.objects.filter(paroisse__district_id=user.district_id)
-        stats_qs = StatistiqueAnnuelle.objects.filter(paroisse__district_id=user.district_id)
+        oeuvres_qs   = Oeuvre.objects.filter(district_id=user.district_id)
+        ouvriers_qs  = Ouvrier.objects.filter(paroisse__district_id=user.district_id)
+        stats_qs     = StatistiqueAnnuelle.objects.filter(paroisse__district_id=user.district_id)
     else:
-        paroisses_qs = Paroisse.objects.filter(id=user.paroisse_id) if user.paroisse_id else Paroisse.objects.none()
-        oeuvres_qs = Oeuvre.objects.filter(paroisse_id=user.paroisse_id) if user.paroisse_id else Oeuvre.objects.none()
-        ouvriers_qs = Ouvrier.objects.filter(paroisse_id=user.paroisse_id) if user.paroisse_id else Ouvrier.objects.none()
-        stats_qs = StatistiqueAnnuelle.objects.filter(paroisse_id=user.paroisse_id) if user.paroisse_id else StatistiqueAnnuelle.objects.none()
+        pid          = user.paroisse_id
+        paroisses_qs = Paroisse.objects.filter(id=pid)        if pid else Paroisse.objects.none()
+        oeuvres_qs   = Oeuvre.objects.filter(paroisse_id=pid) if pid else Oeuvre.objects.none()
+        ouvriers_qs  = Ouvrier.objects.filter(paroisse_id=pid) if pid else Ouvrier.objects.none()
+        stats_qs     = StatistiqueAnnuelle.objects.filter(paroisse_id=pid) if pid else StatistiqueAnnuelle.objects.none()
 
-    annee = request.query_params.get("annee", 2025)
+    annee  = int(request.query_params.get("annee", 2025))
     totaux = stats_qs.filter(annee=annee).aggregate(
         total_communiants=Sum("communiants"),
         total_non_communiants=Sum("non_communiants"),
     )
 
+    nb_regions = (
+        RegionSynodale.objects.count() if user.role == "SUPER"
+        else (District.objects.filter(region=user.region).values("region").count() if user.role == "REGION" else 1)
+    )
+    nb_districts = (
+        District.objects.count() if user.role == "SUPER"
+        else (District.objects.filter(region=user.region).count() if user.role == "REGION" else 1)
+    )
+
     return Response({
-        "nb_paroisses": paroisses_qs.count(),
+        "nb_paroisses":          paroisses_qs.count(),
         "nb_paroisses_sans_gps": paroisses_qs.filter(position__isnull=True).count(),
-        "nb_oeuvres": oeuvres_qs.count(),
-        "nb_ouvriers": ouvriers_qs.count(),
-        "nb_regions": RegionSynodale.objects.count() if user.role == "SUPER" else 1,
-        "nb_districts": District.objects.count() if user.role == "SUPER" else (
-            District.objects.filter(region=user.region).count() if user.role == "REGION" else 1
-        ),
-        "total_communiants": totaux["total_communiants"] or 0,
+        "nb_oeuvres":            oeuvres_qs.count(),
+        "nb_ouvriers":           ouvriers_qs.count(),
+        "nb_regions":            nb_regions,
+        "nb_districts":          nb_districts,
+        "total_communiants":     totaux["total_communiants"]     or 0,
         "total_non_communiants": totaux["total_non_communiants"] or 0,
-        "total_fideles": (totaux["total_communiants"] or 0) + (totaux["total_non_communiants"] or 0),
-        "annee": annee,
-        "scope": user.get_scope_label(),
-        "role": user.role,
+        "total_fideles":         (totaux["total_communiants"] or 0) + (totaux["total_non_communiants"] or 0),
+        "annee":                 annee,
+        "scope":                 user.get_scope_label(),
+        "role":                  user.role,
     })

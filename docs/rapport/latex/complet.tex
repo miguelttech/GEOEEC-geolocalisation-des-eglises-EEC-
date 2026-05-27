@@ -1,0 +1,1110 @@
+% ============================================================
+%  Géolocalisation des Eglises EEC — ENSPY 2025-2026
+%  pdfLaTeX + biber
+%  Compilation : pdflatex → biber → pdflatex → pdflatex
+% ============================================================
+\documentclass[12pt, a4paper]{report}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{csquotes}
+\usepackage[a4paper, top=2.5cm, bottom=2.5cm,
+            left=3cm, right=2.5cm, headheight=14pt]{geometry}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{setspace}
+\setlength{\parindent}{1.2cm}
+\setlength{\parskip}{0pt}
+
+% ---- Couleurs ----
+\usepackage{xcolor}
+\definecolor{eecgreen}{RGB}{27,94,32}
+\definecolor{eecyellow}{RGB}{249,168,37}
+\definecolor{eeclightgreen}{RGB}{232,245,233}
+\definecolor{bordergold}{RGB}{212,160,23}
+
+% ---- Bordure double sur chaque page ----
+\usepackage{eso-pic}
+\usepackage{tikz}
+\AddToShipoutPictureBG{%
+  \begin{tikzpicture}[remember picture, overlay]
+    \draw[color=bordergold, line width=2pt]
+      ([xshift=10pt,yshift=-10pt]current page.north west)
+      rectangle
+      ([xshift=-10pt,yshift=10pt]current page.south east);
+    \draw[color=eecgreen, line width=0.7pt]
+      ([xshift=15pt,yshift=-15pt]current page.north west)
+      rectangle
+      ([xshift=-15pt,yshift=15pt]current page.south east);
+  \end{tikzpicture}}
+
+% ---- En-têtes et pieds — texte noir ----
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textit{Géolocalisation des Eglises EEC --- ENSPY 2025-2026}}
+\fancyhead[R]{\small\thepage}
+\fancyfoot[C]{\small\textit{Département de Génie Informatique}}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% ---- Titres de chapitre ----
+% Chapitres numérotés (Chapitre 1, 2, 3)
+\usepackage{titlesec}
+\titleformat{\chapter}[block]
+  {\normalfont\large\bfseries\color{eecgreen}}
+  {\MakeUppercase{\chaptertitlename}~\thechapter~:~}{0pt}{\MakeUppercase}
+  [\vspace{2pt}{\color{eecyellow}\hrule height 2pt}\vspace{4pt}]
+\titlespacing{\chapter}{0pt}{0pt}{8pt}
+
+% Chapitres non numérotés (\chapter*) — style identique mais sans numéro
+\titleformat{name=\chapter,numberless}[block]
+  {\normalfont\large\bfseries\color{eecgreen}}
+  {}{0pt}{\MakeUppercase}
+  [\vspace{2pt}{\color{eecyellow}\hrule height 2pt}\vspace{4pt}]
+\titlespacing{name=\chapter,numberless}{0pt}{0pt}{8pt}
+
+% Sections et sous-sections
+\titleformat{\section}
+  {\normalfont\normalsize\bfseries\color{eecgreen!85!black}}
+  {\thesection.}{6pt}{}
+\titleformat{\subsection}
+  {\normalfont\normalsize\bfseries}
+  {\thesubsection.}{6pt}{}
+\titleformat{\subsubsection}
+  {\normalfont\normalsize\itshape}
+  {\thesubsubsection.}{6pt}{}
+
+% ---- Tableaux ----
+\usepackage{array}
+\usepackage{colortbl}
+\usepackage{booktabs}
+
+% ---- Figures et flottants ----
+\usepackage{graphicx}
+\usepackage{float}
+
+% ---- Listes ----
+\usepackage{enumitem}
+
+% ---- Symboles ----
+\usepackage{pifont}
+\usepackage{amssymb}
+
+% ---- Liens ----
+\usepackage[colorlinks=true, linkcolor=eecgreen,
+            urlcolor=eecgreen, citecolor=eecgreen]{hyperref}
+
+% ---- Bibliographie (BibLaTeX + biber) ----
+\usepackage[style=numeric, sorting=none, backend=biber,
+            bibencoding=utf8]{biblatex}
+\addbibresource{references.bib}
+
+% ---- Symboles tableaux comparatifs ----
+\newcommand{\oui}{\textcolor{eecgreen}{\ding{51}}}
+\newcommand{\non}{\textcolor{red}{\ding{55}}}
+\newcommand{\partiel}{\textcolor{orange}{$\sim$}}
+
+% ============================================================
+\begin{document}
+\pagenumbering{roman}
+\setstretch{1.3}
+
+% ============================================================
+%  RÉSUMÉ
+% ============================================================
+\chapter*{Résumé}
+\addcontentsline{toc}{chapter}{Résumé}
+\markboth{Résumé}{Résumé}
+
+\noindent
+L'Église Évangélique du Cameroun (EEC) regroupe 565~paroisses, 311~œuvres
+sociales et éducatives, ainsi que 685~ouvriers ecclésiastiques répartis dans
+22~Régions Synodales et 134~districts couvrant l'ensemble du territoire
+national, sans que l'institution ne dispose d'aucun outil numérique centralisé
+permettant leur visualisation géographique ni leur administration hiérarchisée.
+Cette lacune compromet la capacité du Bureau National à piloter ses ressources
+territoriales, à produire des statistiques consolidées et à assurer une mise à
+jour contrôlée des données. Ce travail présente la conception et le développement
+d'une plateforme web cartographique institutionnelle répondant à ces besoins.
+L'approche adoptée s'appuie sur une architecture à services découplés~: Django~5
+et Django REST Framework assurent le backend et les API, Next.js~14 constitue
+l'interface web, PostgreSQL avec l'extension PostGIS gère la persistance des
+données spatiales, GeoServer assure la publication des couches cartographiques
+selon les standards OGC, et Leaflet.js permet la visualisation interactive côté
+navigateur~; l'ensemble est conteneurisé avec Docker Compose. La plateforme
+ainsi développée offre une carte interactive avec regroupement automatique des
+marqueurs, des filtres hiérarchiques par région, district et type d'entité, un
+panneau de détail par entité, ainsi qu'un module d'administration multi-niveaux
+fondé sur un contrôle d'accès basé sur les rôles (RBAC) à quatre profils~:
+national, régional, district et paroissial. Par rapport aux solutions existantes
+analysées, ce système se distingue par son alignement strict avec le référentiel
+hiérarchique synodal de l'EEC, l'utilisation de GeoServer pour la diffusion
+normalisée des données géographiques, et un déploiement entièrement conteneurisé
+garantissant la reproductibilité de l'environnement d'exécution.
+
+\smallskip
+\noindent\textbf{Mots-clés~:}
+géolocalisation, système d'information géographique, EEC~Cameroun,
+Django REST Framework, Leaflet.
+
+\vspace{0.8cm}
+\noindent{\color{eecgreen}\rule{\linewidth}{0.8pt}}
+\vspace{0.3cm}
+
+% ============================================================
+%  ABSTRACT
+% ============================================================
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+\markboth{Abstract}{Abstract}
+
+\noindent
+The Evangelical Church of Cameroon (EEC) encompasses 565~parishes,
+311~social and educational institutions, and 685~ordained workers spread across
+22~Synodal Regions and 134~districts covering the entire national territory,
+yet the institution lacks any centralized digital system for their geographic
+visualization or hierarchical administration. This gap undermines the National
+Bureau's ability to monitor its territorial resources, generate consolidated
+statistics, and maintain controlled data updates. This work presents the design
+and development of an institutional cartographic web platform addressing these
+needs. The approach relies on a decoupled service architecture~: Django~5 and
+Django REST Framework handle the backend and API layer, Next.js~14 provides the
+web interface, PostgreSQL with the PostGIS extension manages spatial data
+persistence, GeoServer handles OGC-compliant cartographic layer publication, and
+Leaflet.js enables client-side interactive mapping~; the entire stack is
+containerized using Docker Compose. The resulting platform delivers an
+interactive map with automatic marker clustering, hierarchical filters by region,
+district, and entity type, a per-entity detail panel, and a multi-level
+administration module enforcing role-based access control (RBAC) across four
+profiles~: national, regional, district, and parish. Compared to the existing
+solutions reviewed in this work, the system is distinguished by its strict
+alignment with the EEC synodal hierarchical framework, the use of GeoServer for
+standards-compliant geographic data publication, and a fully containerized
+deployment ensuring environment reproducibility.
+
+\smallskip
+\noindent\textbf{Keywords~:}
+geolocation, geographic information system, EEC~Cameroon,
+Django REST Framework, Leaflet.
+
+\clearpage
+
+% ============================================================
+%  SIGLES ET ABRÉVIATIONS
+% ============================================================
+\chapter*{Sigles et Abréviations}
+\addcontentsline{toc}{chapter}{Sigles et Abréviations}
+\markboth{Sigles et Abréviations}{Sigles et Abréviations}
+
+\noindent
+Le tableau ci-dessous recense par ordre alphabétique les sigles et abréviations
+employés dans ce document.
+
+\vspace{4pt}
+
+\begingroup
+\setstretch{1.0}
+\renewcommand{\arraystretch}{1.12}
+\noindent
+\begin{tabular}{%
+  >{\bfseries}p{3.2cm}%
+  p{10.8cm}}
+  \rowcolor{eecgreen}
+  \multicolumn{1}{>{\bfseries\color{white}}p{3.2cm}}{Sigle} &
+  \multicolumn{1}{>{\bfseries\color{white}}p{10.8cm}}{Signification complète} \\
+  \rowcolor{eeclightgreen!60}
+  API     & Application Programming Interface \\
+  CORS    & Cross-Origin Resource Sharing \\
+  \rowcolor{eeclightgreen!60}
+  CRUD    & Create, Read, Update, Delete \\
+  CSS     & Cascading Style Sheets \\
+  \rowcolor{eeclightgreen!60}
+  DRF     & Django REST Framework \\
+  EEC     & Église Évangélique du Cameroun \\
+  \rowcolor{eeclightgreen!60}
+  ENSPY   & École Nationale Supérieure Polytechnique de Yaoundé \\
+  GIS     & Geographic Information System \\
+  \rowcolor{eeclightgreen!60}
+  GPS     & Global Positioning System (Système de Positionnement Global) \\
+  HTML    & HyperText Markup Language \\
+  \rowcolor{eeclightgreen!60}
+  HTTP    & HyperText Transfer Protocol \\
+  HTTPS   & HyperText Transfer Protocol Secure \\
+  \rowcolor{eeclightgreen!60}
+  JSON    & JavaScript Object Notation \\
+  JWT     & JSON Web Token \\
+  \rowcolor{eeclightgreen!60}
+  OGC     & Open Geospatial Consortium \\
+  ORM     & Object-Relational Mapping \\
+  \rowcolor{eeclightgreen!60}
+  PDF     & Portable Document Format \\
+  PostGIS & PostgreSQL Spatial Extension \\
+  \rowcolor{eeclightgreen!60}
+  RBAC    & Role-Based Access Control (Contrôle d'accès basé sur les rôles) \\
+  REST    & Representational State Transfer \\
+  \rowcolor{eeclightgreen!60}
+  SIG     & Système d'Information Géographique \\
+  SLD     & Styled Layer Descriptor \\
+  \rowcolor{eeclightgreen!60}
+  SND30   & Stratégie Nationale de Développement 2020--2030 \\
+  SQL     & Structured Query Language \\
+  \rowcolor{eeclightgreen!60}
+  SRS     & Spatial Reference System \\
+  SSL     & Secure Sockets Layer \\
+  \rowcolor{eeclightgreen!60}
+  SSR     & Server-Side Rendering \\
+  TOTP    & Time-based One-Time Password \\
+  \rowcolor{eeclightgreen!60}
+  UI      & User Interface (Interface utilisateur) \\
+  URL     & Uniform Resource Locator \\
+  \rowcolor{eeclightgreen!60}
+  UX      & User Experience (Expérience utilisateur) \\
+  WFS     & Web Feature Service \\
+  \rowcolor{eeclightgreen!60}
+  WGS84   & World Geodetic System 1984 \\
+  WMS     & Web Map Service \\
+  \rowcolor{eeclightgreen!60}
+  WSL     & Windows Subsystem for Linux \\
+\end{tabular}
+\endgroup
+
+\clearpage
+
+% ============================================================
+%  GLOSSAIRE
+% ============================================================
+\chapter*{Glossaire}
+\addcontentsline{toc}{chapter}{Glossaire}
+\markboth{Glossaire}{Glossaire}
+
+\noindent
+Ce glossaire définit les termes techniques spécialisés employés dans ce document.
+
+\vspace{6pt}
+
+\noindent\textbf{Cluster de marqueurs~:}
+Technique de regroupement visuel sur une carte qui agrège les marqueurs
+géographiquement proches en un seul indicateur numérique. Lorsque l'utilisateur
+zoome, le cluster éclate pour révéler les marqueurs individuels. Cette technique
+améliore la lisibilité d'une carte comportant un grand nombre de points.
+
+\medskip
+\noindent\textbf{Conteneurisation~:}
+Approche de déploiement logiciel qui isole une application et toutes ses
+dépendances dans une unité standardisée appelée conteneur. Dans ce projet, Docker
+et Docker Compose orchestrent l'ensemble des services (backend, base de données,
+serveur cartographique, cache, frontend) de manière reproductible et indépendante
+de l'environnement hôte.
+
+\medskip
+\noindent\textbf{GeoServer~:}
+Serveur cartographique open source conforme aux standards de l'Open Geospatial
+Consortium (OGC). Il permet de publier, gérer et diffuser des données
+géographiques sous forme de services WMS et WFS, accessibles depuis n'importe
+quel client cartographique compatible.
+
+\medskip
+\noindent\textbf{Géolocalisation~:}
+Processus de détermination et d'enregistrement de la position géographique d'une
+entité à l'aide de coordonnées GPS (latitude, longitude). Dans ce projet, la
+géolocalisation désigne l'association de chaque paroisse et œuvre de l'EEC à des
+coordonnées précises sur le territoire camerounais.
+
+\medskip
+\noindent\textbf{PostGIS~:}
+Extension spatiale pour le système de gestion de base de données relationnelle
+PostgreSQL. PostGIS ajoute la prise en charge des types de données géographiques
+(points, lignes, polygones) et des fonctions de calcul spatial (distances,
+intersections, projections). Il constitue le standard de facto pour les bases de
+données spatiales open source.
+
+\medskip
+\noindent\textbf{RBAC --- Contrôle d'accès basé sur les rôles~:}
+Modèle de sécurité informatique dans lequel les droits d'accès aux ressources
+d'un système sont déterminés par le rôle attribué à chaque utilisateur, et non
+par son identité propre. Quatre rôles sont définis~: national, régional, district
+et paroissial, chacun disposant d'un périmètre d'action délimité.
+
+\medskip
+\noindent\textbf{Région synodale~:}
+Entité administrative de l'Église Évangélique du Cameroun regroupant un ensemble
+de districts et de paroisses dans une zone géographique définie. L'EEC compte
+22~régions synodales couvrant l'ensemble du territoire camerounais. La région
+synodale est le premier niveau hiérarchique sous le Bureau National.
+
+\medskip
+\noindent\textbf{Shapefile~:}
+Format de fichier géospatial vectoriel développé par ESRI, largement utilisé pour
+la représentation de données géographiques. Un shapefile est constitué de plusieurs
+fichiers complémentaires (\texttt{.shp}, \texttt{.dbf}, \texttt{.prj},
+\texttt{.shx}) qui encodent la géométrie, les attributs et le système de
+coordonnées des entités géographiques.
+
+\medskip
+\noindent\textbf{SLD --- Styled Layer Descriptor~:}
+Standard OGC permettant de décrire la symbolisation et l'apparence d'une couche
+géographique publiée via WMS. Les fichiers SLD définissent les couleurs, tailles
+et règles d'affichage des entités géographiques sur la carte.
+
+\medskip
+\noindent\textbf{Tuile cartographique~:}
+Image raster de dimensions fixes (généralement 256~$\times$~256~pixels)
+représentant une portion de carte à un niveau de zoom donné. Les bibliothèques
+cartographiques comme Leaflet assemblent dynamiquement ces tuiles pour former la
+carte visible par l'utilisateur.
+
+\medskip
+\noindent\textbf{WFS --- Web Feature Service~:}
+Standard OGC permettant de requêter et de récupérer des données géographiques
+vectorielles (points, lignes, polygones) depuis un serveur cartographique,
+généralement au format GeoJSON ou GML. Contrairement au WMS qui retourne des
+images, le WFS retourne des données brutes manipulables côté client.
+
+\medskip
+\noindent\textbf{WMS --- Web Map Service~:}
+Standard OGC permettant de requêter des cartes sous forme d'images raster depuis
+un serveur cartographique. Le client envoie une requête HTTP spécifiant l'étendue
+géographique et les couches souhaitées~; le serveur retourne une image PNG ou
+JPEG correspondante, prête à être superposée sur la carte.
+
+\clearpage
+
+% ============================================================
+%  TABLE DES MATIÈRES
+% ============================================================
+\tableofcontents
+\clearpage
+
+% ============================================================
+%  LISTE DES FIGURES
+% ============================================================
+\listoffigures
+\addcontentsline{toc}{chapter}{Liste des figures}
+\clearpage
+
+% ============================================================
+%  LISTE DES TABLEAUX
+% ============================================================
+\listoftables
+\addcontentsline{toc}{chapter}{Liste des tableaux}
+\clearpage
+
+% ============================================================
+%  CORPS DU RAPPORT — numérotation arabe
+% ============================================================
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+% ============================================================
+%  INTRODUCTION GÉNÉRALE
+% ============================================================
+\chapter*{Introduction Générale}
+\addcontentsline{toc}{chapter}{Introduction Générale}
+\markboth{Introduction Générale}{Introduction Générale}
+
+La transformation numérique des institutions publiques et religieuses constitue
+l'un des axes stratégiques du développement durable en Afrique subsaharienne.
+Selon l'Union Internationale des Télécommunications, le taux de pénétration
+d'Internet en Afrique subsaharienne a atteint 36~\% en 2023~\cite{itu2023},
+progressant de plus de dix points en cinq ans grâce au déploiement massif des
+réseaux mobiles. La région comptait en 2023 plus de 615~millions d'abonnés à la
+téléphonie mobile~\cite{gsma2023}, une dynamique qui confère aux technologies web
+un rôle central dans la modernisation des organisations de toute nature. Au
+Cameroun, cette tendance est amplifiée par la Stratégie Nationale de
+Développement 2020--2030 (SND30), qui identifie explicitement la numérisation de
+l'administration publique et des institutions nationales comme l'un des leviers
+prioritaires du développement économique du pays~\cite{snd2020}.
+
+Dans ce contexte, les Systèmes d'Information Géographique (SIG) se sont imposés
+comme des outils incontournables pour la gestion et la visualisation des données
+territoriales. Longley et al.~définissent un SIG comme un système informatique
+conçu pour la collecte, le stockage, la manipulation, l'analyse et la
+représentation de données géoréférencées~\cite{longley2015}. À l'échelle
+mondiale, ces plateformes sont déployées dans des domaines aussi variés que la
+santé publique, la gestion urbaine, la logistique humanitaire et la planification
+administrative. La standardisation des échanges de données géographiques par
+l'Open Geospatial Consortium (OGC) --- notamment les protocoles Web Map Service
+(WMS)~\cite{ogcwms2006} et Web Feature Service (WFS)~\cite{ogcwfs2010} --- a
+rendu ces technologies accessibles à des organisations de toute taille et de tout
+secteur, y compris les institutions confessionnelles. En Afrique centrale, les
+organisations religieuses constituent souvent le premier réseau d'établissements
+scolaires, de centres de santé et de structures d'encadrement rural présent dans
+les zones éloignées des grandes agglomérations~\cite{gifford2015}. Leur capacité
+à gérer efficacement des ressources géographiquement dispersées à travers de
+larges territoires nationaux constitue un enjeu direct pour le développement
+des communautés qu'elles desservent.
+
+L'Église Évangélique du Cameroun (EEC), fondée en 1957 dans la continuité des
+missions protestantes bâloises et parisiennes, est l'une des plus grandes
+institutions protestantes d'Afrique centrale. Son organisation territoriale
+repose sur une hiérarchie administrative à quatre niveaux~: le Bureau National,
+qui assure la direction centrale de l'institution~; les 22~Régions Synodales, qui
+couvrent l'ensemble du territoire camerounais~; les 134~districts ecclésiaux, qui
+coordonnent les activités locales~; et les 565~paroisses, qui constituent le
+maillage de base de la présence de l'EEC sur le terrain. À ces entités s'ajoutent
+311~œuvres sociales et éducatives --- établissements scolaires, centres médicaux,
+exploitations agropastorales, immeubles et terrains --- et plus de
+685~ouvriers ecclésiastiques (pasteurs, évangélistes, diacres permanents) répartis
+sur l'ensemble de ce réseau.
+
+Malgré cette envergure nationale considérable, l'EEC ne dispose à ce jour d'aucun
+système numérique centralisé permettant la visualisation géographique de ses
+entités, leur administration hiérarchisée selon les périmètres synodaux, ni la
+consolidation automatique de leurs données statistiques. La localisation des
+paroisses, la gestion des affectations des ouvriers et le suivi des statistiques
+annuelles sont assurés manuellement via des fichiers tableur transmis
+périodiquement entre niveaux hiérarchiques. Cette situation génère plusieurs
+problèmes opérationnels concrets~: l'absence de vue géographique d'ensemble
+empêche le Bureau National d'identifier les zones sous-dotées en ressources
+pastorales ou d'optimiser l'affectation des ouvriers~; la dispersion des données
+dans des fichiers non interconnectés rend toute consolidation statistique nationale
+laborieuse et sujette aux erreurs~; l'absence de contrôle d'accès formalisé
+compromet l'intégrité des informations institutionnelles~; et l'audit des données
+sources révèle que 127~paroisses, soit 22~\% de l'effectif total, ne disposent
+d'aucune coordonnée GPS valide, ce qui illustre l'inexistence d'un processus
+structuré de collecte et de validation des données de localisation.
+
+Plusieurs catégories de solutions pourraient théoriquement répondre à ces besoins.
+Les plateformes SIG généralistes comme ArcGIS~Online~\cite{arcgisonline2024} ou
+Google~Maps~Platform~\cite{googlemaps2024} offrent des capacités cartographiques
+avancées mais demeurent des outils génériques, soumis à des licences commerciales
+onéreuses et dépourvus de toute logique hiérarchique institutionnelle. Les outils
+open~source comme QGIS~\cite{qgis2024} ou OpenLayers permettent la visualisation
+cartographique avancée mais ne constituent pas des plateformes web multi-utilisateurs
+dotées de contrôle d'accès et de gestion de données métier. Une première version
+d'une plateforme de géolocalisation EEC avait été développée antérieurement --- elle
+offrait une cartographie de base mais reposait sur des fichiers GeoJSON statiques,
+ne disposait pas d'un mécanisme d'authentification par sessions sécurisées, et son
+contrôle d'accès ne correspondait pas à la granularité de la hiérarchie synodale.
+Aucune des solutions recensées ne répond simultanément aux exigences d'une
+plateforme institutionnelle sécurisée, intégrée, alignée sur la structure synodale
+de l'EEC et déployable dans un environnement à infrastructure informatique limitée.
+
+\medskip
+
+Face à ces constats, la problématique suivante guide ce travail~:
+
+\vspace{6pt}
+\noindent\colorbox{eeclightgreen!80}{\parbox{0.88\linewidth}{%
+  \vspace{6pt}%
+  \noindent\textit{\textbf{Question de recherche~:} Comment concevoir et
+  implémenter une plateforme web cartographique institutionnelle répondant
+  simultanément aux exigences de visualisation géographique interactive,
+  d'administration hiérarchisée à quatre niveaux de l'autorité synodale et de
+  sécurité des données de l'Église Évangélique du Cameroun~?}%
+  \vspace{6pt}%
+}}
+\vspace{6pt}
+
+Nous posons l'hypothèse qu'une architecture à services découplés --- combinant un
+backend Django~5 avec GeoDjango et Django REST Framework pour la logique métier et
+les interfaces de programmation (API), une base de données PostgreSQL avec
+l'extension PostGIS pour la persistance des données spatiales, un serveur
+cartographique GeoServer~2.26 pour la publication des couches géographiques selon
+les standards OGC (WMS et WFS), et une interface Next.js~14 pour la consultation
+publique et l'administration --- permettrait de répondre à cette problématique. La
+sécurité reposerait sur un mécanisme d'authentification par sessions Django
+(\textit{HttpOnly}, \textit{Secure}, \textit{SameSite}) et un contrôle d'accès
+basé sur les rôles (RBAC) à quatre niveaux hiérarchiques aligné sur la structure
+synodale. La conteneurisation de l'ensemble via Docker Compose garantirait la
+reproductibilité de l'environnement d'exécution et la facilité du déploiement.
+
+\medskip
+
+Pour répondre à cette problématique, ce travail se fixe les objectifs suivants~:
+
+\begin{enumerate}[leftmargin=1.5cm, itemsep=2pt, topsep=4pt]
+  \item \textbf{Modéliser} la structure de données hiérarchique de l'EEC
+    (régions synodales, districts, paroisses, œuvres sociales, ouvriers
+    ecclésiastiques) dans un schéma de base de données relationnelle-spatiale
+    PostGIS intégrant les contraintes d'intégrité référentielle et les
+    informations de géolocalisation~;
+
+  \item \textbf{Développer} un backend API REST sécurisé avec Django~5 et
+    Django REST Framework, implémentant un contrôle d'accès basé sur les rôles
+    à quatre niveaux --- national, régional, district et paroissial --- et un
+    journal d'audit automatique de toutes les opérations d'écriture~;
+
+  \item \textbf{Configurer} un serveur cartographique GeoServer~2.26 publiant
+    les couches géographiques de l'EEC selon les standards OGC WMS~1.3.0 et
+    WFS~2.0.0, avec des styles SLD aux couleurs institutionnelles de l'EEC~;
+
+  \item \textbf{Implémenter} une interface cartographique interactive basée sur
+    Leaflet.js avec regroupement automatique des marqueurs (\textit{clustering}),
+    filtres hiérarchiques multicritères, popups de détail par entité et contrôle
+    dynamique des couches cartographiques~;
+
+  \item \textbf{Réaliser} un module d'administration multi-niveaux en Next.js~14
+    permettant le CRUD des entités selon le périmètre du rôle, l'import des
+    données depuis les fichiers sources, l'export PDF et Excel, et la
+    visualisation des statistiques avancées par région et par année~;
+
+  \item \textbf{Conteneuriser} l'ensemble de la plateforme avec Docker Compose
+    en cinq services afin de garantir la reproductibilité de l'environnement
+    d'exécution et de simplifier le déploiement en production.
+\end{enumerate}
+
+\medskip
+
+La démarche adoptée s'organise en phases séquentielles et itératives. Une première
+phase d'audit des données sources --- fichiers Excel paroisses, ouvriers et
+œuvres, et Shapefile des régions synodales --- permet de valider la structure
+réelle des données avant toute modélisation, notamment d'identifier les problèmes
+de qualité~: inversion des coordonnées GPS dans les fichiers sources, incohérences
+de nommage entre l'Excel et le Shapefile, paroisses sans géolocalisation. Une
+deuxième phase de conception définit le schéma de base de données, l'architecture
+des services et les modèles UML. L'implémentation procède ensuite couche par
+couche~: modèles de données et scripts d'import, API REST avec sécurisation RBAC,
+publication GeoServer des couches cartographiques avec styles SLD, développement
+du frontend public et de l'interface d'administration. Une validation fonctionnelle
+couvre les scénarios d'utilisation des quatre profils d'accès et les tests de
+sécurité conformément aux recommandations OWASP~\cite{owasp2021}.
+
+\medskip
+
+La suite de ce mémoire est structurée comme suit. Le \textbf{Chapitre~1} présente
+les concepts généraux fondamentaux --- SIG, standards OGC, architecture REST,
+contrôle d'accès basé sur les rôles --- et expose l'état de l'art des solutions
+de gestion cartographique institutionnelle existantes~; il conclut par un tableau
+comparatif et le positionnement de notre solution par rapport à l'existant. Le
+\textbf{Chapitre~2} expose l'analyse des besoins à travers un tableau d'exigences
+fonctionnelles et non-fonctionnelles ainsi que les diagrammes UML nécessaires à la
+compréhension du système, puis présente la conception de l'architecture technique
+retenue. Le \textbf{Chapitre~3} détaille l'environnement d'implémentation et les
+choix technologiques, présente les résultats à travers les interfaces fonctionnelles
+de la plateforme, et propose une discussion critique des forces et des limites de la
+solution réalisée. Une \textbf{Conclusion Générale} clôt ce document en synthétisant
+les apports du travail, ses limites et les perspectives d'amélioration et de
+déploiement.
+
+\clearpage
+
+% ============================================================
+%  CHAPITRE 1 — CONCEPTS GÉNÉRAUX ET ÉTAT DE L'ART
+% ============================================================
+\chapter{Concepts Généraux et État de l'Art}
+
+Ce chapitre pose les fondements théoriques et contextuels nécessaires à la
+compréhension du travail réalisé. La section~\ref{sec:concepts} présente les
+concepts généraux mobilisés tout au long de ce mémoire~: systèmes d'information
+géographique, standards de services cartographiques, base de données spatiale,
+architecture REST, contrôle d'accès basé sur les rôles et conteneurisation. La
+section~\ref{sec:etat-art} dresse un état de l'art de quatre solutions existantes
+répondant partiellement ou totalement aux besoins de l'EEC, analysées selon un
+format homogène. La section~\ref{sec:bilan} synthétise cette analyse dans un
+tableau comparatif et positionne notre solution par rapport à l'existant.
+
+\section{Concepts Généraux}
+\label{sec:concepts}
+
+\subsection{Système d'Information Géographique (SIG)}
+
+Un Système d'Information Géographique (SIG) est un système informatique conçu
+pour la collecte, le stockage, la manipulation, l'analyse et la représentation
+de données géoréférencées, c'est-à-dire de données auxquelles est associée une
+position sur la surface terrestre~\cite{longley2015}. Cette définition, établie
+par Longley et al., est aujourd'hui l'une des plus citées dans la littérature
+géomatique internationale. Un SIG intègre trois grandes dimensions~: la dimension
+spatiale (coordonnées, géométries), la dimension attributaire (données descriptives
+associées aux entités géographiques) et la dimension temporelle (évolution des
+données dans le temps).
+
+Dans le contexte de ce projet, le SIG constitue la couche centrale permettant de
+lier les 565~paroisses, 134~districts et 22~régions synodales de l'EEC à leurs
+coordonnées géographiques sur le territoire camerounais. Il permet non seulement
+la visualisation cartographique de ces entités, mais aussi leur interrogation
+spatiale~: identification des paroisses proches d'une localité, calcul de densité
+pastorale par région, localisation des zones sous-dotées en ressources. Ces
+opérations sont directement utiles au pilotage stratégique de l'institution.
+
+\subsection{Standards OGC et Services Cartographiques Web}
+
+L'Open Geospatial Consortium (OGC) est un organisme de normalisation
+international fondé en 1994, regroupant des industriels, des organismes
+gouvernementaux et des institutions académiques du domaine géospatial. Il
+publie des spécifications ouvertes pour les services géographiques sur le web,
+garantissant l'interopérabilité entre différents serveurs cartographiques et
+clients web, indépendamment des fournisseurs et des plateformes logicielles.
+
+\subsubsection{Web Map Service (WMS)}
+
+Le standard \textit{Web Map Service} (WMS) 1.3.0, publié par l'OGC en 2006,
+définit une interface de service permettant à un client web de requêter des
+représentations cartographiques sous forme d'images raster depuis un serveur
+géographique~\cite{ogcwms2006}. Le client envoie une requête HTTP décrivant
+l'étendue géographique souhaitée, les couches à afficher et les dimensions de
+l'image~; le serveur retourne une image PNG ou JPEG directement superposable sur
+n'importe quelle interface cartographique compatible. Dans ce projet, GeoServer
+publie les couches des régions synodales, des paroisses et des œuvres sociales de
+l'EEC en WMS~1.3.0, ce qui permet à l'interface Leaflet d'afficher ces couches
+institutionnelles par-dessus le fond de carte OpenStreetMap.
+
+\subsubsection{Web Feature Service (WFS)}
+
+Le standard \textit{Web Feature Service} (WFS) 2.0.0, publié par l'OGC en 2010,
+permet de requêter et de récupérer des données géographiques vectorielles ---
+points, lignes, polygones --- sous forme structurée (GeoJSON ou GML) depuis un
+serveur cartographique~\cite{ogcwfs2010}. Contrairement au WMS qui transmet des
+images prérendues, le WFS retourne des données brutes directement manipulables
+côté client. Ce projet exploite le WFS pour permettre à l'interface cartographique
+de récupérer les géométries des régions synodales et d'appliquer des filtres
+géographiques dynamiques selon le périmètre de l'utilisateur connecté.
+
+\subsection{Base de Données Spatiale PostGIS}
+
+PostGIS est une extension spatiale open source pour le système de gestion de base
+de données relationnelle PostgreSQL~\cite{postgis2023}. Elle ajoute la prise en
+charge de types de données géographiques conformes aux spécifications OGC Simple
+Features --- géométries points (\texttt{PointField}), lignes
+(\texttt{LineStringField}) et polygones (\texttt{PolygonField},
+\texttt{MultiPolygonField}) --- ainsi que des opérateurs spatiaux (intersections,
+calcul de distances, recouvrements) et des fonctions de transformation de systèmes
+de coordonnées. PostGIS est le standard de facto pour les bases de données
+spatiales open source, utilisé des systèmes d'information institutionnels aux
+grandes applications de cartographie collaborative.
+
+Dans ce projet, PostGIS stocke la géométrie point de chaque paroisse et les
+polygones des 22~régions synodales importés depuis le Shapefile source.
+GeoDjango, la couche spatiale du framework Django, expose ces données via des
+modèles Python et permet l'interrogation spatiale directement depuis l'ORM
+(\textit{Object-Relational Mapper}), sans requêtes SQL manuelles.
+
+\subsection{Architecture REST et Interface de Programmation (API)}
+
+Le style architectural REST (\textit{Representational State Transfer}) est défini
+par Fielding comme un ensemble de contraintes architecturales pour les systèmes
+distribués~\cite{fielding2000}~: séparation client-serveur, absence d'état côté
+serveur (\textit{stateless}), mise en cache des réponses, interface uniforme et
+système de couches. Une API REST expose des ressources identifiées par des URI,
+accessibles via les méthodes HTTP standard (GET, POST, PUT, PATCH, DELETE), et
+retourne les données dans un format standardisé, généralement JSON. Ce style
+garantit la scalabilité, la maintenabilité et l'interopérabilité des services web.
+
+Django REST Framework (DRF) est la bibliothèque de référence pour implémenter
+des API REST avec le framework Django~\cite{drf2024}. Dans ce projet, la couche
+API du backend expose l'ensemble des ressources institutionnelles de l'EEC ---
+paroisses, districts, régions, œuvres, ouvriers, statistiques, journaux d'audit
+--- consommées par le frontend Next.js~14. Cette séparation stricte entre backend
+API et frontend constitue un pilier de l'architecture à services découplés retenue.
+
+\subsection{Contrôle d'Accès Basé sur les Rôles (RBAC)}
+
+Le contrôle d'accès basé sur les rôles (\textit{Role-Based Access Control},
+RBAC) est un modèle de sécurité dans lequel les droits d'accès aux ressources
+d'un système sont accordés selon le rôle attribué à chaque utilisateur, et non
+selon son identité individuelle. Un rôle représente un ensemble cohérent de
+permissions correspondant à une fonction ou une responsabilité dans
+l'organisation. Ce modèle réduit la complexité administrative, minimise le risque
+d'escalade de privilèges et facilite l'audit de sécurité. L'OWASP le recommande
+comme mécanisme d'autorisation de référence pour les applications
+web~\cite{owasp2021}.
+
+Dans ce projet, quatre rôles hiérarchiques alignés sur la structure synodale de
+l'EEC ont été définis~:
+\begin{itemize}[itemsep=2pt, topsep=4pt, leftmargin=1.5cm]
+  \item \textbf{SUPER} (Bureau National)~: accès complet à l'ensemble des données
+    de toutes les régions synodales~;
+  \item \textbf{REGION} (Administrateur régional)~: accès limité aux entités de
+    la région synodale dont l'utilisateur est responsable~;
+  \item \textbf{DISTRICT} (Administrateur de district)~: accès limité aux entités
+    du district ecclésial correspondant~;
+  \item \textbf{PAROISSE} (Administrateur paroissial)~: accès en lecture étendue,
+    modifications limitées à la paroisse de l'utilisateur.
+\end{itemize}
+
+\subsection{Conteneurisation --- Docker et Docker Compose}
+
+La conteneurisation est une technique de virtualisation légère qui isole une
+application et l'ensemble de ses dépendances dans une unité standardisée appelée
+conteneur. Contrairement à la virtualisation classique, un conteneur partage le
+noyau du système d'exploitation hôte tout en disposant de son propre système de
+fichiers, de ses processus et de sa pile réseau, le rendant bien plus léger et
+plus rapide à démarrer qu'une machine virtuelle. Docker est la plateforme de
+conteneurisation la plus répandue, avec plusieurs millions de déploiements en
+production à travers le monde~\cite{docker2024}. Docker Compose permet de définir
+et d'orchestrer des applications multi-conteneurs dans un fichier de configuration
+déclaratif (\texttt{docker-compose.yml}).
+
+Ce projet déploie cinq services orchestrés par Docker Compose~:
+\begin{enumerate}[itemsep=2pt, topsep=4pt, leftmargin=1.5cm]
+  \item \texttt{backend} --- le serveur Django~5 avec GeoDjango et DRF~;
+  \item \texttt{db} --- PostgreSQL~16 avec l'extension PostGIS~3.4~;
+  \item \texttt{geoserver} --- GeoServer~2.26 pour la publication WMS/WFS~;
+  \item \texttt{redis} --- le serveur de cache Redis~7~;
+  \item \texttt{frontend} --- le serveur Next.js~14.
+\end{enumerate}
+
+Cette configuration garantit la reproductibilité de l'environnement d'exécution
+sur n'importe quelle machine hôte et simplifie considérablement le déploiement
+en production, un avantage décisif dans un contexte institutionnel à ressources
+informatiques limitées.
+
+% ----
+\section{État de l'Art des Solutions Existantes}
+\label{sec:etat-art}
+
+Plusieurs catégories de solutions existent pour la gestion cartographique
+institutionnelle. Cette section en analyse quatre représentatives~: la plateforme
+GeoEEC développée antérieurement, deux plateformes cartographiques commerciales
+majeures (ArcGIS Online et Google Maps Platform) et une solution libre de
+référence (QGIS associé à OpenLayers). Pour chaque solution, le même format
+d'analyse est appliqué~: description générale, illustration, fonctionnalités
+principales, forces et faiblesses.
+
+\subsection{Plateforme GeoEEC v1.0 (Version Antérieure)}
+
+La plateforme GeoEEC v1.0 a été développée en 2025 dans le cadre d'un projet
+académique antérieur à ce mémoire. Elle constitue la référence la plus proche
+de notre contexte puisqu'elle traite du même cas d'usage --- la cartographie des
+entités de l'EEC --- et a été conçue avec une partie du même stack technologique.
+Elle repose sur Django~5 (sans Docker), une authentification JWT
+(\textit{JSON Web Token}), un frontend Next.js (Pages Router), une interface
+cartographique Leaflet, et un chatbot intégré basé sur le modèle de langage
+Ollama phi3:mini associé à LangChain et FAISS. Les données géographiques des
+régions synodales sont stockées sous forme de fichiers GeoJSON statiques dans le
+répertoire \texttt{public/} du frontend, sans serveur cartographique dédié.
+
+\begin{figure}[H]
+  \centering
+  \fbox{\parbox{0.72\textwidth}{\centering\vspace{1.8cm}
+    \textit{[Capture d'écran à intégrer~: Interface cartographique GeoEEC v1.0]}
+    \vspace{1.8cm}}}
+  \caption{Interface cartographique de la plateforme GeoEEC v1.0}
+  \label{fig:geoeec-v1}
+\end{figure}
+
+\noindent\textbf{Fonctionnalités principales~:}
+\begin{itemize}[itemsep=2pt, topsep=4pt, leftmargin=1.5cm]
+  \item Carte interactive Leaflet affichant les paroisses, œuvres et ouvriers~;
+  \item Import Excel des trois types d'entités avec gestion de la conversion des
+    coordonnées sources (Coord\_x/Coord\_y)~;
+  \item API REST CRUD pour les paroisses, œuvres et ouvriers~;
+  \item Statistiques par région, district et type d'entité~; export PDF~;
+  \item Chatbot IA contextuel (Ollama phi3:mini + LangChain + FAISS)~;
+  \item Quatre rôles utilisateurs~: admin\_general, admin\_regional,
+    utilisateur\_auth, visiteur.
+\end{itemize}
+
+\noindent\textbf{Forces~:}
+\begin{itemize}[itemsep=2pt, topsep=4pt, leftmargin=1.5cm]
+  \item Première implémentation fonctionnelle de la cartographie EEC, validant
+    la faisabilité de l'approche Django + Leaflet~;
+  \item Module d'import Excel opérationnel avec logique de dépivoter des données
+    d'œuvres sociales~;
+  \item Chatbot IA innovant permettant des requêtes en langage naturel sur les
+    données institutionnelles.
+\end{itemize}
+
+\noindent\textbf{Faiblesses et limites~:}
+\begin{itemize}[itemsep=2pt, topsep=4pt, leftmargin=1.5cm]
+  \item GeoJSON statique~: les couches géographiques des régions synodales ne
+    sont pas gérées par un serveur cartographique OGC~; tout changement de
+    couche nécessite un redéploiement du frontend~;
+  \item Authentification JWT~: les tokens transmis côté client sont plus
+    vulnérables aux attaques XSS qu'une authentification par sessions
+    \textit{HttpOnly}~;
+  \item Absence de journal d'audit~: aucune traçabilité des modifications
+    apportées aux données institutionnelles~;
+  \item Déploiement non conteneurisé~: dépendances système non isolées,
+    portabilité et maintenance complexes~;
+  \item RBAC non aligné sur la hiérarchie synodale réelle~: les quatre rôles
+    ne correspondent pas aux périmètres district et paroissial de l'EEC~;
+  \item Absence de standards OGC~: interopérabilité cartographique limitée, pas
+    de WMS ni de WFS exploitables depuis des clients tiers.
+\end{itemize}
+
+\subsection{ArcGIS Online (Esri)}
+
+ArcGIS Online est la plateforme SIG en nuage de la société Esri, leader mondial
+du logiciel géographique. Elle permet la création, la publication et l'analyse de
+cartes interactives depuis un navigateur web, sans installation de logiciel, en
+s'appuyant sur une infrastructure cloud hautement disponible. La plateforme intègre
+des outils d'analyse spatiale avancée, de gestion de couches de données, de
+création de tableaux de bord et de collaboration entre
+équipes~\cite{arcgisonline2024}. Elle est largement déployée dans des organisations
+gouvernementales, des ONG et des institutions académiques.
+
+\begin{figure}[H]
+  \centering
+  \fbox{\parbox{0.72\textwidth}{\centering\vspace{1.8cm}
+    \textit{[Capture d'écran à intégrer~: Interface ArcGIS Online]}
+    \vspace{1.8cm}}}
+  \caption{Plateforme cartographique ArcGIS Online (Esri, 2024)}
+  \label{fig:arcgis-online}
+\end{figure}
+
+\noindent\textbf{Fonctionnalités principales~:}
+\begin{itemize}[itemsep=2pt, topsep=4pt, leftmargin=1.5cm]
+  \item Carte web interactive avec accès à de nombreux fonds de carte et couches
+    de données mondiales~;
+  \item Outils d'analyse spatiale avancés~: zones tampons, interpolations, analyses
+    de réseaux, clustering~;
+  \item Tableau de bord configurable avec indicateurs actualisables en temps réel~;
+  \item Contrôle des permissions sur les couches (lecture, édition, partage)~;
+  \item Applications mobiles intégrées pour la collecte de données terrain~;
+  \item APIs REST compatibles avec les standards OGC WMS et WFS.
+\end{itemize}
+
+\noindent\textbf{Forces~:}
+\begin{itemize}[itemsep=2pt, topsep=4pt, leftmargin=1.5cm]
+  \item Plateforme mature avec un très large éventail de fonctionnalités SIG~;
+  \item Interface utilisateur intuitive, accessible aux utilisateurs non
+    techniciens~;
+  \item Infrastructure cloud scalable avec haute disponibilité et support
+    professionnel.
+\end{itemize}
+
+\noindent\textbf{Faiblesses et limites~:}
+\begin{itemize}[itemsep=2pt, topsep=4pt, leftmargin=1.5cm]
+  \item Licence commerciale onéreuse~: les abonnements annuels ArcGIS Online sont
+    prohibitifs pour une institution confessionnelle à ressources limitées~;
+  \item Aucune logique hiérarchique institutionnelle configurable~: pas de notion
+    de périmètre synodal, de district ou de paroisse dans le modèle d'accès~;
+  \item Données hébergées sur les serveurs d'Esri (États-Unis)~: dépendance à une
+    infrastructure cloud étrangère, souveraineté des données compromise~;
+  \item Absence de gestion intégrée des données métier EEC~: ouvriers
+    ecclésiastiques, œuvres sociales et statistiques annuelles ne peuvent être
+    gérés nativement.
+\end{itemize}
+
+\subsection{Google Maps Platform}
+
+Google Maps Platform est l'ensemble des APIs cartographiques de Google, permettant
+d'intégrer des cartes interactives, des fonctionnalités de géocodage et des
+itinéraires dans des applications web et mobiles~\cite{googlemaps2024}. C'est la
+solution cartographique web la plus utilisée mondialement. Elle s'appuie sur le
+fond de carte Google, qui bénéficie d'une couverture très détaillée, y compris
+pour les villes et localités camerounaises.
+
+\begin{figure}[H]
+  \centering
+  \fbox{\parbox{0.72\textwidth}{\centering\vspace{1.8cm}
+    \textit{[Capture d'écran à intégrer~: Google Maps Platform]}
+    \vspace{1.8cm}}}
+  \caption{Google Maps Platform --- Documentation et console développeur (Google LLC, 2024)}
+  \label{fig:google-maps}
+\end{figure}
+
+\noindent\textbf{Fonctionnalités principales~:}
+\begin{itemize}[itemsep=2pt, topsep=4pt, leftmargin=1.5cm]
+  \item Cartographie interactive avec fond de carte Google haute résolution~;
+  \item Géocodage (conversion adresse vers coordonnées GPS et inversement)~;
+  \item Calcul d'itinéraires multimodaux~;
+  \item Marqueurs personnalisés et couches de données~;
+  \item APIs REST bien documentées, intégration simple pour les développeurs~;
+  \item SDK mobiles Android et iOS.
+\end{itemize}
+
+\noindent\textbf{Forces~:}
+\begin{itemize}[itemsep=2pt, topsep=4pt, leftmargin=1.5cm]
+  \item Couverture cartographique mondiale très détaillée, performante pour le
+    Cameroun~;
+  \item API simple à intégrer, documentation exhaustive, large communauté de
+    développeurs~;
+  \item Géocodage très performant pour localiser des adresses camerounaises.
+\end{itemize}
+
+\noindent\textbf{Faiblesses et limites~:}
+\begin{itemize}[itemsep=2pt, topsep=4pt, leftmargin=1.5cm]
+  \item Modèle de facturation à l'usage~: au-delà du quota gratuit mensuel, les
+    coûts peuvent devenir significatifs pour un usage institutionnel~;
+  \item Pas de serveur cartographique OGC~: impossible de publier des couches
+    propres en WMS ou WFS~;
+  \item Aucune gestion des entités institutionnelles ni de la hiérarchie
+    synodalo-ecclésiale~;
+  \item Données cartographiques propriétaires hébergées sur les serveurs de
+    Google~: dépendance totale et absence de souveraineté~;
+  \item Pas de gestion des rôles, de journal d'audit ni d'import de données
+    institutionnelles~;
+  \item Conformité aux obligations légales locales et souveraineté des données
+    problématiques pour une institution camerounaise.
+\end{itemize}
+
+\subsection{QGIS et OpenLayers}
+
+QGIS est un Système d'Information Géographique libre et open source parmi les
+plus utilisés au monde dans les secteurs académique, institutionnel et de la
+coopération internationale~\cite{qgis2024}. Il offre des fonctionnalités
+complètes d'édition, d'analyse et de visualisation cartographique depuis une
+application bureau. OpenLayers est une bibliothèque JavaScript open source
+permettant d'afficher des cartes interactives dans un navigateur web, avec support
+natif des standards OGC WMS et WFS.
+
+\begin{figure}[H]
+  \centering
+  \fbox{\parbox{0.72\textwidth}{\centering\vspace{1.8cm}
+    \textit{[Capture d'écran à intégrer~: Interface QGIS 3.x]}
+    \vspace{1.8cm}}}
+  \caption{Interface du logiciel SIG bureau QGIS (version 3.x)}
+  \label{fig:qgis}
+\end{figure}
+
+\noindent\textbf{Fonctionnalités principales~:}
+\begin{itemize}[itemsep=2pt, topsep=4pt, leftmargin=1.5cm]
+  \item Édition et analyse cartographique complète (QGIS)~;
+  \item Symbologie avancée et mise en page de cartes imprimées~;
+  \item Traitement géospatial avancé~: zones tampons, interpolations, analyses de
+    réseau, calculs rasters~;
+  \item Affichage de couches WMS et WFS dans le navigateur (OpenLayers)~;
+  \item Support natif des formats SHP, GeoJSON, PostGIS et GeoTIFF.
+\end{itemize}
+
+\noindent\textbf{Forces~:}
+\begin{itemize}[itemsep=2pt, topsep=4pt, leftmargin=1.5cm]
+  \item Open source, sans coût de licence, avec une large communauté active et
+    une documentation exhaustive~;
+  \item Fonctionnalités SIG professionnelles complètes~;
+  \item Haute interopérabilité grâce au support natif des standards OGC.
+\end{itemize}
+
+\noindent\textbf{Faiblesses et limites~:}
+\begin{itemize}[itemsep=2pt, topsep=4pt, leftmargin=1.5cm]
+  \item QGIS est une application bureau~: son déploiement en usage institutionnel
+    web partagé est impraticable~;
+  \item Aucun contrôle d'accès multi-utilisateurs basé sur des périmètres
+    institutionnels hiérarchisés~;
+  \item OpenLayers seul ne fournit ni backend, ni gestion de rôles, ni import de
+    données institutionnelles, ni statistiques~;
+  \item Nécessite des compétences SIG spécialisées~: inadapté aux administrateurs
+    régionaux et paroissiaux non techniciens de l'EEC~;
+  \item Déploiement complexe en environnement institutionnel à infrastructure
+    informatique limitée.
+\end{itemize}
+
+% ----
+\section{Bilan et Positionnement}
+\label{sec:bilan}
+
+\subsection{Tableau Comparatif des Solutions}
+
+Le tableau~\ref{tab:comparatif} confronte les quatre solutions analysées aux onze
+critères jugés déterminants pour une plateforme institutionnelle cartographique de
+l'EEC. Les symboles employés sont les suivants~: \oui~critère entièrement satisfait,
+\non~critère non satisfait, \partiel~critère partiellement satisfait, N/A~critère
+sans objet pour cette catégorie de solution.
+
+\begin{table}[H]
+\centering
+\caption{Tableau comparatif des solutions existantes et de la solution proposée}
+\label{tab:comparatif}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{>{\bfseries}m{4.8cm}
+                >{\centering\arraybackslash}m{2.0cm}
+                >{\centering\arraybackslash}m{2.1cm}
+                >{\centering\arraybackslash}m{2.1cm}
+                >{\centering\arraybackslash}m{2.0cm}
+                >{\centering\arraybackslash}m{2.2cm}}
+\toprule
+\textbf{Critère}
+  & \textbf{GeoEEC v1.0}
+  & \textbf{ArcGIS Online}
+  & \textbf{Google Maps}
+  & \textbf{QGIS / OL}
+  & \textbf{Notre solution} \\
+\midrule
+Plateforme web multi-utilisateurs
+  & \oui & \oui & \partiel & \non & \oui \\
+\addlinespace[3pt]
+Hiérarchie institutionnelle configurable
+  & \partiel & \non & \non & \non & \oui \\
+\addlinespace[3pt]
+Authentification sécurisée (sessions)
+  & \non & \oui & \oui & \non & \oui \\
+\addlinespace[3pt]
+RBAC à 4 niveaux synodaux
+  & \partiel & \non & \non & \non & \oui \\
+\addlinespace[3pt]
+Serveur cartographique OGC (WMS/WFS)
+  & \non & \oui & \non & \oui & \oui \\
+\addlinespace[3pt]
+Base de données spatiale (PostGIS)
+  & \partiel & \oui & \oui & \oui & \oui \\
+\addlinespace[3pt]
+Journal d'audit des modifications
+  & \non & \partiel & \non & \non & \oui \\
+\addlinespace[3pt]
+Import données Excel institutionnel
+  & \oui & \non & \non & \non & \oui \\
+\addlinespace[3pt]
+Déploiement conteneurisé (Docker)
+  & \non & N/A & N/A & \non & \oui \\
+\addlinespace[3pt]
+Logiciel libre / sans licence commerciale
+  & \oui & \non & \non & \oui & \oui \\
+\addlinespace[3pt]
+Adapté au contexte institutionnel EEC
+  & \partiel & \non & \non & \non & \oui \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\subsection{Positionnement de Notre Solution}
+
+L'analyse comparative met en évidence que notre solution est la seule à réunir
+simultanément l'ensemble des caractéristiques requises pour une plateforme
+institutionnelle cartographique au service de l'EEC.
+
+Les plateformes commerciales --- ArcGIS Online et Google Maps Platform --- offrent
+des capacités cartographiques puissantes mais ne répondent ni aux contraintes
+économiques de l'institution ni à ses exigences de hiérarchie institutionnelle.
+Leurs modèles de licences commerciales et leur dépendance à des infrastructures
+cloud étrangères les rendent inadaptées à une institution confessionnelle opérant
+au Cameroun. Elles ne proposent aucun mécanisme de gestion des données métier
+spécifiques à l'EEC --- ouvriers ecclésiastiques, œuvres sociales, statistiques
+annuelles des paroisses --- ni de contrôle d'accès structuré selon les périmètres
+synodaux.
+
+QGIS et OpenLayers, bien que techniquement solides et libres de droits, ne
+constituent pas une plateforme web institutionnelle multi-utilisateurs~: QGIS est
+une application bureau inadaptée aux administrateurs régionaux non techniciens, et
+OpenLayers est une bibliothèque de rendu client sans backend, sans gestion de
+données et sans contrôle d'accès.
+
+La plateforme GeoEEC v1.0 constitue le précédent le plus proche de notre contexte,
+mais présente des lacunes critiques identifiées lors de l'audit technique~:
+vulnérabilité de l'authentification JWT par rapport aux sessions HttpOnly, absence
+de journal d'audit, couches géographiques statiques non publiées via un serveur
+OGC, RBAC non aligné sur la hiérarchie synodale réelle à quatre niveaux, et absence
+de conteneurisation.
+
+Notre solution apporte une valeur ajoutée précise et documentée sur chacun de ces
+axes. Elle est la première à implémenter simultanément~: une architecture de services
+découplés et entièrement conteneurisée, un serveur cartographique OGC natif
+(GeoServer~2.26) publiant des couches WMS et WFS interopérables, une base de données
+spatiale PostGIS avec gestion des géométries institutionnelles, une authentification
+sécurisée par sessions Django (\textit{HttpOnly}, \textit{Secure},
+\textit{SameSite=Strict}) et un RBAC exactement aligné sur les quatre niveaux
+hiérarchiques de l'EEC, avec un journal d'audit complet et automatique de toutes
+les opérations d'écriture sur les données.
+
+\medskip
+\noindent\textbf{Bilan du chapitre.}
+Ce chapitre a établi les fondements théoriques du travail réalisé et mis en
+évidence, par une analyse comparative rigoureuse, la pertinence et l'originalité
+de l'approche proposée. Les six concepts fondamentaux --- SIG, standards OGC
+(WMS/WFS), PostGIS, architecture REST, RBAC et Docker --- constituent le socle sur
+lequel repose l'architecture décrite dans les chapitres suivants. L'état de l'art
+de quatre solutions existantes a démontré qu'aucune d'elles ne couvre simultanément
+l'ensemble des exigences institutionnelles de l'EEC. Le \textbf{Chapitre~2} procédera
+à l'analyse détaillée des besoins du système à travers les exigences fonctionnelles
+et non-fonctionnelles et les modélisations UML, puis présentera les décisions de
+conception de l'architecture technique retenue.
+
+\clearpage
+
+% ============================================================
+%  CHAPITRES SUIVANTS À AJOUTER ICI
+%  Chapitre 2 : Analyse et Conception
+%  Chapitre 3 : Implémentation et Résultats
+%  Conclusion Générale
+% ============================================================
+
+% ============================================================
+%  RÉFÉRENCES BIBLIOGRAPHIQUES
+% ============================================================
+\clearpage
+\printbibliography[heading=bibintoc, title={Références Bibliographiques}]
+
+\end{document}

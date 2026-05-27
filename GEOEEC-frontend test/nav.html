@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>EEC GEO · Toutes les pages</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="STYLESHEETS/styles.css"/>
+<style>
+  body { background: #08110B; min-height: 100vh; padding: 0; }
+
+  .nav-header {
+    display: flex; align-items: center; gap: 16px;
+    padding: 28px 56px 24px;
+    border-bottom: 1px solid var(--eec-line);
+  }
+  .nav-header .brand {
+    display: flex; align-items: center; gap: 14px;
+    font-family: var(--serif); font-size: 20px; font-weight: 500;
+  }
+  .nav-header .brand small {
+    display: block; font-family: var(--mono); font-size: 9.5px;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--eec-gold); margin-top: 3px;
+  }
+  .nav-header .status {
+    margin-left: auto;
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: 0.14em; color: #6FCB95;
+    padding: 5px 12px; border-radius: 999px;
+    border: 1px solid rgba(45,158,85,0.35);
+    background: rgba(45,158,85,0.08);
+  }
+  .status-dot { width:6px;height:6px;border-radius:50%;background:#6FCB95;box-shadow:0 0 8px #6FCB95;animation:pulse 2s ease-in-out infinite; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1px;
+    padding: 48px 56px 80px;
+    background: var(--eec-line);
+    border-top: 1px solid var(--eec-line);
+    margin-top: 40px;
+  }
+
+  .page-card {
+    background: linear-gradient(180deg, #0F1F16, #0A1610);
+    padding: 0;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(.2,.7,.3,1);
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    display: block;
+  }
+  .page-card:hover { background: #122218; transform: translateY(-2px); z-index: 2; }
+  .page-card:hover .thumb { filter: brightness(0.65); }
+
+  .thumb {
+    width: 100%; aspect-ratio: 16/9;
+    object-fit: cover;
+    filter: brightness(0.45) saturate(0.8) hue-rotate(55deg);
+    transition: filter 0.3s;
+    display: block;
+  }
+  .thumb-placeholder {
+    width: 100%; aspect-ratio: 16/9;
+    background: linear-gradient(135deg, #0F1F16, #142A1C);
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+  }
+  .thumb-placeholder::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(245,197,24,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(245,197,24,0.04) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  .thumb-placeholder svg { position: relative; z-index: 1; color: rgba(245,197,24,0.3); }
+  .thumb-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, transparent 40%, rgba(13,27,18,0.95) 100%);
+  }
+  .card-body {
+    padding: 22px 24px 24px;
+    border-top: 1px solid var(--eec-line);
+  }
+  .card-num {
+    font-family: var(--mono); font-size: 10.5px;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--eec-gold); margin-bottom: 8px;
+  }
+  .card-title {
+    font-family: var(--serif); font-size: 22px;
+    font-weight: 400; letter-spacing: -0.015em;
+    color: white; line-height: 1.1; margin: 0 0 8px;
+  }
+  .card-title em { color: var(--eec-gold); font-style: italic; font-weight: 300; }
+  .card-desc {
+    font-size: 13px; color: var(--eec-text-mute);
+    line-height: 1.5; margin-bottom: 18px;
+  }
+  .card-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .ctag {
+    font-family: var(--mono); font-size: 10px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    padding: 4px 9px; border-radius: 4px;
+    background: rgba(245,197,24,0.08);
+    color: var(--eec-gold);
+    border: 1px solid rgba(245,197,24,0.2);
+  }
+  .ctag.green { background: rgba(45,158,85,0.1); color: #6FCB95; border-color: rgba(45,158,85,0.25); }
+
+  .open-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--eec-gold); margin-top: 14px;
+    border: 1px solid rgba(245,197,24,0.3);
+    padding: 7px 14px; border-radius: 999px;
+    background: rgba(245,197,24,0.04);
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+  .open-btn:hover { background: var(--eec-gold); color: #0D1B12; }
+
+  .section-header {
+    padding: 14px 56px 0;
+    font-family: var(--mono); font-size: 10.5px;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--eec-gold);
+  }
+</style>
+</head>
+<body>
+
+<header class="nav-header">
+  <div class="brand">
+    <svg width="44" height="37" viewBox="0 0 240 200" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="sg3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#FFD93D"/><stop offset="100%" stop-color="#F5C518"/></linearGradient></defs>
+      <path d="M 18 32 Q 80 12 168 22 Q 152 90 144 168 Q 80 110 24 60 Q 14 46 18 32 Z" fill="url(#sg3)" stroke="#C99A0E" stroke-width="1.5"/>
+      <g fill="#0F5A2A" font-family="Georgia,serif" font-weight="900" font-style="italic" font-size="48" letter-spacing="-2">
+        <text x="44" y="92">E</text><text x="74" y="92">E</text><text x="104" y="92">C</text>
+      </g>
+      <g fill="#FFFFFF"><rect x="186" y="50" width="14" height="120" rx="1"/><rect x="166" y="78" width="54" height="14" rx="1"/></g>
+    </svg>
+    <div>EEC GEO · Cameroun <small>Plateforme SIG Synodale · 11 pages</small></div>
+  </div>
+  <div class="status"><span class="status-dot"></span>PROTOTYPE INTERACTIF · MAI 2026</div>
+</header>
+
+<div style="padding:40px 56px 0; max-width:740px;">
+  <div style="font-family:var(--serif);font-size:clamp(28px,3.5vw,46px);font-weight:400;letter-spacing:-0.022em;line-height:1.05;color:white;">
+    Toutes les pages du<br/><em style="color:var(--eec-gold);font-style:italic;font-weight:300;">prototype EEC GEO.</em>
+  </div>
+  <p style="font-size:15px;color:var(--eec-text-mute);line-height:1.6;margin-top:18px;max-width:560px;">
+    Cliquez sur une carte pour ouvrir la page. Chaque page est entièrement interactive.
+    Navigation croisée intégrée entre toutes les pages.
+  </p>
+</div>
+
+<div class="section-header" style="padding-top:48px;">— PAGES PUBLIQUES</div>
+<div class="grid" style="margin-top:0;grid-template-columns:repeat(auto-fill,minmax(340px,1fr))">
+
+  <a href="index.html" class="page-card">
+    <div style="position:relative">
+      <img src="assets/church.png" alt="" class="thumb"/>
+      <div class="thumb-overlay"></div>
+    </div>
+    <div class="card-body">
+      <div class="card-num">01 · Landing Page</div>
+      <div class="card-title">Accueil <em>public.</em></div>
+      <div class="card-desc">Hero full-bleed avec image de crucifixion, carte stylisée du Cameroun animée, bande scripture avec parallax, galerie bento, statistiques et direction.</div>
+      <div class="card-tags">
+        <span class="ctag">Cinématique</span>
+        <span class="ctag green">Scroll animé</span>
+        <span class="ctag">Tweaks</span>
+      </div>
+      <span class="open-btn">Ouvrir → </span>
+    </div>
+  </a>
+
+  <a href="carte.html" class="page-card">
+    <div class="thumb-placeholder">
+      <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.8"><path d="m9 4-6 2v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/></svg>
+      <div class="thumb-overlay"></div>
+    </div>
+    <div class="card-body">
+      <div class="card-num">02 · SIG Interactif</div>
+      <div class="card-title">Carte <em>des paroisses.</em></div>
+      <div class="card-desc">546 paroisses générées sur la carte SVG du Cameroun. Filtres par région, niveau, œuvres, fidèles. Modes : Points, Clusters, Densité. Popover au survol.</div>
+      <div class="card-tags">
+        <span class="ctag">546 paroisses</span>
+        <span class="ctag green">Filtres live</span>
+        <span class="ctag">3 couches</span>
+      </div>
+      <span class="open-btn">Ouvrir → </span>
+    </div>
+  </a>
+
+  <a href="paroisse.html" class="page-card">
+    <div style="position:relative">
+      <img src="assets/crucifix.jpg" alt="" class="thumb"/>
+      <div class="thumb-overlay"></div>
+    </div>
+    <div class="card-body">
+      <div class="card-num">03 · Fiche Paroisse</div>
+      <div class="card-title">Bafang <em>Centre.</em></div>
+      <div class="card-desc">Hero cinématique avec stats flottantes. Mini-carte GPS. Ouvriers ecclésiastiques. Œuvres sociales. Galerie photos. Fiche identité avec historique.</div>
+      <div class="card-tags">
+        <span class="ctag">Fiche complète</span>
+        <span class="ctag green">Mini-carte</span>
+        <span class="ctag">Galerie</span>
+      </div>
+      <span class="open-btn">Ouvrir → </span>
+    </div>
+  </a>
+
+</div>
+
+
+
+<div class="section-header" style="margin-top:8px;">— ESPACE ADMINISTRATION</div>
+<div class="grid" style="margin-top:0;">
+
+  <a href="login.html" class="page-card">
+    <div style="position:relative">
+      <img src="assets/crucifix.jpg" alt="" class="thumb"/>
+      <div class="thumb-overlay"></div>
+    </div>
+    <div class="card-body">
+      <div class="card-num">04 · Connexion</div>
+      <div class="card-title">Accès <em>sécurisé.</em></div>
+      <div class="card-desc">Split-screen cinématique. Ken Burns sur crucifixion. Validation email + animation shake. Simulation de connexion vers dashboard. SSO synodal.</div>
+      <div class="card-tags">
+        <span class="ctag">Validation live</span>
+        <span class="ctag green">Animation</span>
+      </div>
+      <span class="open-btn">Ouvrir → </span>
+    </div>
+  </a>
+
+  <a href="dashboard.html" class="page-card">
+    <div class="thumb-placeholder">
+      <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.8"><path d="M3 21V3M3 21h18M7 17v-6M11 17V8M15 17v-9M19 17v-4"/></svg>
+      <div class="thumb-overlay"></div>
+    </div>
+    <div class="card-body">
+      <div class="card-num">05 · Dashboard Admin</div>
+      <div class="card-title">Console <em>synodale.</em></div>
+      <div class="card-desc">Sidebar complète, 4 KPIs animés, graphique de croissance interactif, donut des œuvres, mini-carte, tableau des régions, fil d'activité.</div>
+      <div class="card-tags">
+        <span class="ctag">KPIs animés</span>
+        <span class="ctag green">Graphique SVG</span>
+        <span class="ctag">Tableau</span>
+      </div>
+      <span class="open-btn">Ouvrir → </span>
+    </div>
+  </a>
+
+  <a href="dashboards.html" class="page-card">
+    <div class="thumb-placeholder">
+      <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+      <div class="thumb-overlay"></div>
+    </div>
+    <div class="card-body">
+      <div class="card-num">06–08 · Dashboards hiérarchiques</div>
+      <div class="card-title">Régional / District / <em>Paroissial.</em></div>
+      <div class="card-desc">3 niveaux en un seul écran avec switcher. Vue régionale (MIFI), vue district (Bafoussam I), vue paroissiale (Bafang Centre). Chaque niveau avec ses KPIs et listes.</div>
+      <div class="card-tags">
+        <span class="ctag">3 niveaux</span>
+        <span class="ctag green">Switcher live</span>
+        <span class="ctag">Anneaux</span>
+      </div>
+      <span class="open-btn">Ouvrir → </span>
+    </div>
+  </a>
+
+  <a href="admin-paroisses.html" class="page-card">
+    <div class="thumb-placeholder">
+      <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="rgba(245,197,24,0.3)" stroke-width="0.8"><path d="M3 9l9-7 9 7v11H5z"/><path d="M9 22V12h6v10"/></svg>
+      <div class="thumb-overlay"></div>
+    </div>
+    <div class="card-body">
+      <div class="card-num">10 · Gestion des paroisses</div>
+      <div class="card-title">546 <em>paroisses.</em></div>
+      <div class="card-desc">Tableau complet avec vue liste + grille, filtres par région/niveau/statut, pagination, drawer de détail avec complétion du profil.</div>
+      <div class="card-tags">
+        <span class="ctag">Tableau + Grille</span>
+        <span class="ctag green">Drawer détail</span>
+        <span class="ctag">Pagination</span>
+      </div>
+      <span class="open-btn">Ouvrir → </span>
+    </div>
+  </a>
+
+  <a href="admin-rapports.html" class="page-card">
+    <div class="thumb-placeholder">
+      <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="rgba(245,197,24,0.3)" stroke-width="0.8"><path d="M14 3H6v18h12V7l-4-4zM14 3v4h4M8 12h8M8 16h8"/></svg>
+      <div class="thumb-overlay"></div>
+    </div>
+    <div class="card-body">
+      <div class="card-num">11 · Rapports & exports</div>
+      <div class="card-title">Rapports <em>synodaux.</em></div>
+      <div class="card-desc">6 types de rapports (synodal, régional, ouvriers, œuvres, GPS, audit). Génération animée avec barre de progression. Historique téléchargeable.</div>
+      <div class="card-tags">
+        <span class="ctag">6 types</span>
+        <span class="ctag green">Génération animée</span>
+        <span class="ctag">PDF/XLSX/CSV</span>
+      </div>
+      <span class="open-btn">Ouvrir → </span>
+    </div>
+  </a>
+
+  <a href="admin-parametres.html" class="page-card">
+    <div class="thumb-placeholder">
+      <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="rgba(245,197,24,0.3)" stroke-width="0.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h.1a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v.1a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      <div class="thumb-overlay"></div>
+    </div>
+    <div class="card-body">
+      <div class="card-num">12 · Paramètres</div>
+      <div class="card-title">Profil & <em>configuration.</em></div>
+      <div class="card-desc">6 sections : Profil, Sécurité (sessions actives), Notifications, Affichage (thème + taille), Système & données, Zone de danger. Barre de sauvegarde sticky.</div>
+      <div class="card-tags">
+        <span class="ctag">6 sections</span>
+        <span class="ctag green">Sessions live</span>
+        <span class="ctag">Save sticky</span>
+      </div>
+      <span class="open-btn">Ouvrir → </span>
+    </div>
+  </a>
+
+  <a href="comptes.html" class="page-card">
+    <div class="thumb-placeholder">
+      <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.8"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5M15 20c0-2 2-4 4-4s2 2 2 4"/></svg>
+      <div class="thumb-overlay"></div>
+    </div>
+    <div class="card-body">
+      <div class="card-num">09 · Gestion des comptes</div>
+      <div class="card-title">Administrateurs <em>& rôles.</em></div>
+      <div class="card-desc">Tableau de 12 comptes filtrables (Synode/Région/District/Paroisse). Drawer de création en 3 étapes : identité, rôle & affectation, permissions.</div>
+      <div class="card-tags">
+        <span class="ctag">Drawer 3 étapes</span>
+        <span class="ctag green">Filtres rôles</span>
+        <span class="ctag">Permissions</span>
+      </div>
+      <span class="open-btn">Ouvrir → </span>
+    </div>
+  </a>
+
+</div>
+
+<div style="padding:0 56px 60px; font-family:var(--mono); font-size:11px; color:var(--eec-text-mute); letter-spacing:0.1em; border-top:1px solid var(--eec-line); margin:40px 56px 0; padding-top:24px; display:flex; justify-content:space-between;">
+  <span>ÉGLISE ÉVANGÉLIQUE DU CAMEROUN · PROTOTYPE SIG · 2026</span>
+  <span>11 PAGES · DESIGN PREMIUM CINÉMATIQUE</span>
+</div>
+</body>
+</html>

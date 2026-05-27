@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>EEC · Paramètres</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Inter:wght@300;400;450;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="STYLESHEETS/styles.css"/>
+<link rel="stylesheet" href="STYLESHEETS/dashboard.css"/>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+.settings-shell{display:grid;grid-template-columns:240px 1fr;gap:0;min-height:calc(100vh - 57px)}
+.settings-nav{background:#08110B;border-right:1px solid var(--eec-line);padding:20px 0}
+.sn-link{display:flex;align-items:center;gap:12px;padding:11px 20px;color:var(--eec-text-mute);font-size:13.5px;font-weight:450;cursor:pointer;transition:all .15s;border-left:2px solid transparent}
+.sn-link:hover{color:var(--eec-text);background:rgba(245,197,24,.03)}
+.sn-link.active{color:var(--eec-gold);border-left-color:var(--eec-gold);background:rgba(245,197,24,.05);font-weight:500}
+.sn-link svg{width:16px;height:16px;flex:0 0 16px}
+.sn-sep{padding:18px 20px 6px;font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(245,197,24,.4)}
+
+.settings-body{padding:36px 40px 80px;overflow-y:auto}
+.s-section{margin-bottom:40px}
+.s-section-head{margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--eec-line)}
+.s-section-head h2{font-family:var(--serif);font-size:24px;font-weight:400;letter-spacing:-.015em;margin:6px 0 4px;color:white}
+.s-section-head p{font-size:13.5px;color:var(--eec-text-mute);margin:0}
+.s-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--eec-gold);display:block;margin-bottom:4px}
+
+/* Profile card */
+.profile-card{display:flex;align-items:center;gap:24px;background:linear-gradient(135deg,rgba(27,107,53,.25),rgba(245,197,24,.06));border:1px solid var(--eec-line);border-radius:8px;padding:24px 28px;margin-bottom:24px}
+.profile-avatar-lg{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--eec-gold),var(--eec-green));display:grid;place-items:center;font-family:var(--serif);font-size:26px;font-weight:600;color:var(--eec-green-deep);flex:0 0 72px;box-shadow:0 4px 16px rgba(245,197,24,.2)}
+.profile-card h3{font-family:var(--serif);font-size:22px;font-weight:500;color:white;margin:0 0 4px}
+.profile-card .role-line{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--eec-gold);margin-bottom:8px}
+.profile-card .since{font-size:12.5px;color:var(--eec-text-mute)}
+
+/* Form grid */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+.form-grid.full{grid-template-columns:1fr}
+.f-field{display:flex;flex-direction:column;gap:7px}
+.f-field label{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--eec-gold);font-weight:500}
+.f-field label .req{color:#E8856B;margin-left:4px}
+.f-field input,.f-field select,.f-field textarea{background:rgba(255,255,255,.025);border:1px solid var(--eec-line);border-radius:6px;padding:11px 14px;color:var(--eec-text);font:13.5px var(--sans);outline:none;transition:all .2s;resize:vertical}
+.f-field input:focus,.f-field select:focus,.f-field textarea:focus{border-color:var(--eec-gold);background:rgba(245,197,24,.04)}
+.f-field .hint{font-size:11.5px;color:var(--eec-text-mute);line-height:1.4}
+.f-input-icon{position:relative}
+.f-input-icon input{padding-right:42px}
+.f-input-icon .eye-btn{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--eec-text-mute);cursor:pointer;transition:color .15s}
+.f-input-icon .eye-btn:hover{color:var(--eec-gold)}
+
+/* Toggle row */
+.toggle-section{border:1px solid var(--eec-line);border-radius:8px;overflow:hidden}
+.t-row{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid rgba(245,197,24,.05);gap:20px}
+.t-row:last-child{border-bottom:0}
+.t-row:hover{background:rgba(245,197,24,.025)}
+.t-row .t-info b{display:block;font-size:13.5px;font-weight:500;color:white;margin-bottom:2px}
+.t-row .t-info small{font-size:12px;color:var(--eec-text-mute);line-height:1.4}
+.t-pill{width:42px;height:24px;border-radius:12px;cursor:pointer;position:relative;transition:background .2s;flex:0 0 42px;border:0}
+.t-pill.off{background:rgba(255,255,255,.1)}
+.t-pill.on{background:var(--eec-gold)}
+.t-pill::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;background:white;border-radius:50%;transition:transform .2s}
+.t-pill.on::after{transform:translateX(18px);background:var(--eec-green-deep)}
+
+/* Notification types */
+.notif-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.notif-card{border:1px solid var(--eec-line);border-radius:8px;padding:16px 18px;background:rgba(255,255,255,.02);display:flex;justify-content:space-between;align-items:start;gap:14px;transition:border-color .2s}
+.notif-card:hover{border-color:rgba(245,197,24,.25)}
+.notif-card h5{margin:0 0 3px;font-size:13.5px;font-weight:500;color:white}
+.notif-card p{margin:0;font-size:12px;color:var(--eec-text-mute);line-height:1.4}
+
+/* Theme picker */
+.theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.theme-tile{border:1px solid var(--eec-line);border-radius:8px;overflow:hidden;cursor:pointer;transition:all .2s}
+.theme-tile:hover{border-color:rgba(245,197,24,.35);transform:translateY(-1px)}
+.theme-tile.active{border-color:var(--eec-gold);box-shadow:0 0 0 2px rgba(245,197,24,.15)}
+.theme-preview{height:70px;position:relative}
+.theme-tile-label{padding:10px 14px;background:rgba(255,255,255,.02)}
+.theme-tile-label b{display:block;font-size:12.5px;font-weight:500;color:white}
+.theme-tile-label small{font-size:11px;color:var(--eec-text-mute)}
+
+/* Danger zone */
+.danger-zone{border:1px solid rgba(232,80,60,.25);border-radius:8px;padding:22px 24px;background:rgba(232,80,60,.04)}
+.danger-zone h4{font-family:var(--serif);font-size:18px;font-weight:500;color:#E8856B;margin:0 0 6px}
+.danger-zone p{font-size:13px;color:var(--eec-text-mute);line-height:1.5;margin:0 0 16px;max-width:480px}
+
+/* Save bar */
+.save-bar{position:sticky;bottom:0;background:rgba(8,17,11,.9);backdrop-filter:blur(14px);border-top:1px solid var(--eec-line);padding:14px 40px;display:flex;align-items:center;justify-content:space-between;z-index:10}
+.save-bar .unsaved{font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--eec-gold);display:flex;align-items:center;gap:8px}
+.save-bar .unsaved .dot{width:6px;height:6px;border-radius:50%;background:var(--eec-gold);box-shadow:0 0 8px var(--eec-gold);animation:pulse 2s ease-in-out infinite}
+
+/* Security log */
+.sec-row{display:grid;grid-template-columns:auto 1fr auto;gap:14px;padding:13px 0;border-bottom:1px solid rgba(245,197,24,.05);align-items:center;font-size:13px}
+.sec-row:last-child{border-bottom:0}
+.sec-dot{width:8px;height:8px;border-radius:50%;flex:0 0 8px}
+.sec-device b{display:block;color:white;font-weight:500;margin-bottom:2px}
+.sec-device small{font-family:var(--mono);font-size:10.5px;color:var(--eec-text-mute);letter-spacing:.08em}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="SCRIPTS/data.js"></script>
+<script type="text/babel" src="COMPONENTS/dash-core.jsx"></script>
+<script type="text/babel">
+const { useState } = React;
+const { Sidebar, Topbar } = window.DashboardCore;
+
+const NAV_ITEMS = [
+  { id:'profil',   label:'Profil & compte',    icon:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"/></svg> },
+  { id:'securite', label:'Sécurité',           icon:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M12 2 3 7v5c0 5.5 3.8 10.7 9 12 5.2-1.3 9-6.5 9-12V7z"/></svg> },
+  { id:'notifs',   label:'Notifications',      icon:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M6 8a6 6 0 0 1 12 0v5l2 3H4l2-3V8zM10 19a2 2 0 0 0 4 0"/></svg> },
+  { id:'affichage',label:'Affichage & thème',  icon:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2"/></svg> },
+  { id:'systeme',  label:'Système & données',  icon:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg> },
+  { id:'danger',   label:'Zone de danger',     icon:<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M12 4 2 20h20zM12 10v4M12 18v.01"/></svg> },
+];
+
+function Toggle({ on, onChange }) {
+  return <button className={`t-pill ${on ? 'on' : 'off'}`} onClick={() => onChange(!on)} />;
+}
+
+function SettingsApp() {
+  const [section, setSection] = useState('profil');
+  const [dirty, setDirty] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const mark = () => { setDirty(true); setSaved(false); };
+  const save = () => { setDirty(false); setSaved(true); setTimeout(() => setSaved(false), 2500); };
+
+  const [notifs, setNotifs] = useState({
+    email: true, sms: false, push: true, nouvParoisse: true,
+    maj: true, rapport: true, alerte: true, connexion: false,
+  });
+  const [theme, setTheme] = useState('dark');
+  const [lang, setLang] = useState('fr');
+  const [fontSize, setFontSize] = useState('normal');
+  const [twofa, setTwofa] = useState(false);
+  const [sessions, setSessions] = useState(true);
+
+  const SESSIONS = [
+    { device: 'MacBook Pro · Yaoundé', ip:'105.235.142.18', last:'En ce moment', current:true, os:'macOS 14 · Chrome' },
+    { device: 'iPhone 14 · Bafoussam', ip:'105.233.88.44', last:'Il y a 3 h', current:false, os:'iOS 17 · Safari' },
+    { device: 'Windows PC · Douala', ip:'196.1.230.12', last:'Hier, 18:42', current:false, os:'Windows 11 · Firefox' },
+  ];
+
+  return (
+    <div className="app-shell">
+      <Sidebar/>
+      <main className="main">
+        <Topbar/>
+        <div className="settings-shell">
+
+          {/* Settings nav */}
+          <nav className="settings-nav">
+            <div className="sn-sep">Paramètres du compte</div>
+            {NAV_ITEMS.map(it => (
+              <div key={it.id} className={`sn-link ${section===it.id?'active':''}`}
+                   onClick={()=>setSection(it.id)}
+                   style={it.id==='danger'?{color:section===it.id?'#E8856B':'rgba(232,134,107,.5)',marginTop:8}:{}}>
+                {it.icon}
+                {it.label}
+              </div>
+            ))}
+          </nav>
+
+          {/* Settings body */}
+          <div className="settings-body">
+
+            {/* PROFIL */}
+            {section === 'profil' && (
+              <div className="s-section">
+                <div className="s-section-head">
+                  <span className="s-eyebrow">— 01 / Profil</span>
+                  <h2>Profil & compte</h2>
+                  <p>Informations personnelles et coordonnées affichées dans la console.</p>
+                </div>
+                <div className="profile-card">
+                  <div className="profile-avatar-lg">JA</div>
+                  <div style={{flex:1}}>
+                    <h3>Pasteur ATABA Joël</h3>
+                    <div className="role-line">Président du Synode Général · EEC Cameroun</div>
+                    <div className="since">Compte créé le 3 janvier 2023 · Dernière connexion il y a 2 min</div>
+                  </div>
+                  <button className="btn btn-ghost" style={{fontSize:13}}>Changer la photo</button>
+                </div>
+                <div className="form-grid" onChange={mark}>
+                  <div className="f-field"><label>Prénom <span className="req">*</span></label><input defaultValue="Joël"/></div>
+                  <div className="f-field"><label>Nom <span className="req">*</span></label><input defaultValue="ATABA"/></div>
+                  <div className="f-field"><label>Titre / Fonction</label><input defaultValue="Pasteur · Président du Synode Général"/></div>
+                  <div className="f-field"><label>Email <span className="req">*</span></label><input type="email" defaultValue="j.ataba@eec.cm"/></div>
+                  <div className="f-field"><label>Téléphone</label><input defaultValue="+237 677 123 456"/></div>
+                  <div className="f-field"><label>Région d'affectation</label><select defaultValue="yaoundé"><option>Yaoundé — Synode Général</option>{window.EEC_DATA.regions.map(r=><option key={r.code}>{r.name}</option>)}</select></div>
+                </div>
+                <div className="form-grid full" onChange={mark}>
+                  <div className="f-field"><label>Bio / Note</label><textarea rows={3} defaultValue="Pasteur président depuis 2023. Responsable de la coordination nationale de l'EEC Cameroun."/></div>
+                </div>
+              </div>
+            )}
+
+            {/* SECURITE */}
+            {section === 'securite' && (
+              <div className="s-section">
+                <div className="s-section-head">
+                  <span className="s-eyebrow">— 02 / Sécurité</span>
+                  <h2>Sécurité du compte</h2>
+                  <p>Mot de passe, double authentification et sessions actives.</p>
+                </div>
+                <div style={{marginBottom:28}}>
+                  <div style={{fontFamily:'var(--mono)',fontSize:'10.5px',letterSpacing:'.2em',textTransform:'uppercase',color:'var(--eec-gold)',marginBottom:14}}>Changer le mot de passe</div>
+                  <div className="form-grid">
+                    <div className="f-field">
+                      <label>Mot de passe actuel</label>
+                      <div className="f-input-icon">
+                        <input type="password" defaultValue="••••••••••" onChange={mark}/>
+                        <button className="eye-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                      </div>
+                    </div>
+                    <div style={{}}></div>
+                    <div className="f-field">
+                      <label>Nouveau mot de passe</label>
+                      <div className="f-input-icon">
+                        <input type="password" placeholder="Minimum 12 caractères" onChange={mark}/>
+                        <button className="eye-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                      </div>
+                    </div>
+                    <div className="f-field">
+                      <label>Confirmer</label>
+                      <input type="password" placeholder="Répéter le mot de passe" onChange={mark}/>
+                    </div>
+                  </div>
+                  <div style={{padding:'12px 16px',background:'rgba(45,158,85,.08)',border:'1px solid rgba(45,158,85,.2)',borderRadius:6,fontSize:'12.5px',color:'rgba(240,244,241,.7)',display:'flex',gap:10,alignItems:'center'}}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6FCB95" strokeWidth="2"><path d="M12 2 3 7v5c0 5.5 3.8 10.7 9 12 5.2-1.3 9-6.5 9-12V7z"/></svg>
+                    Votre mot de passe est fort. Changement recommandé tous les 6 mois.
+                  </div>
+                </div>
+                <div style={{marginBottom:28}}>
+                  <div style={{fontFamily:'var(--mono)',fontSize:'10.5px',letterSpacing:'.2em',textTransform:'uppercase',color:'var(--eec-gold)',marginBottom:14}}>Double authentification</div>
+                  <div className="toggle-section">
+                    <div className="t-row">
+                      <div className="t-info"><b>Authentification à deux facteurs (2FA)</b><small>Recevoir un code par SMS ou email à chaque connexion.</small></div>
+                      <Toggle on={twofa} onChange={v=>{setTwofa(v);mark();}}/>
+                    </div>
+                    <div className="t-row">
+                      <div className="t-info"><b>Alerte de connexion inhabituelle</b><small>Notification si une connexion depuis un nouveau pays est détectée.</small></div>
+                      <Toggle on={sessions} onChange={v=>{setSessions(v);mark();}}/>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <div style={{fontFamily:'var(--mono)',fontSize:'10.5px',letterSpacing:'.2em',textTransform:'uppercase',color:'var(--eec-gold)',marginBottom:14}}>Sessions actives</div>
+                  <div className="card">
+                    {SESSIONS.map((s,i)=>(
+                      <div className="sec-row" key={i} style={{padding:'13px 20px',borderBottom:i<SESSIONS.length-1?'1px solid rgba(245,197,24,.05)':'0'}}>
+                        <span className="sec-dot" style={{background:s.current?'#6FCB95':'rgba(255,255,255,.2)',boxShadow:s.current?'0 0 8px #6FCB95':'none'}}/>
+                        <div className="sec-device"><b>{s.device}</b><small>{s.os} · {s.ip}</small></div>
+                        <div style={{textAlign:'right'}}>
+                          <div style={{fontFamily:'var(--mono)',fontSize:'10.5px',color:s.current?'#6FCB95':'var(--eec-text-mute)',letterSpacing:'.08em'}}>{s.last}</div>
+                          {!s.current && <button style={{marginTop:4,fontFamily:'var(--mono)',fontSize:'10px',letterSpacing:'.1em',color:'#E8856B',background:'transparent',border:'1px solid rgba(232,80,60,.25)',borderRadius:4,padding:'3px 9px',cursor:'pointer'}}>Déconnecter</button>}
+                          {s.current && <span style={{fontFamily:'var(--mono)',fontSize:'10px',color:'#6FCB95',letterSpacing:'.1em'}}>SESSION ACTUELLE</span>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* NOTIFICATIONS */}
+            {section === 'notifs' && (
+              <div className="s-section">
+                <div className="s-section-head">
+                  <span className="s-eyebrow">— 03 / Notifications</span>
+                  <h2>Préférences de notification</h2>
+                  <p>Choisissez comment et quand être notifié des événements synodaux.</p>
+                </div>
+                <div style={{marginBottom:24}}>
+                  <div style={{fontFamily:'var(--mono)',fontSize:'10.5px',letterSpacing:'.2em',textTransform:'uppercase',color:'var(--eec-gold)',marginBottom:14}}>Canaux</div>
+                  <div className="toggle-section">
+                    {[
+                      {k:'email',t:'Notifications par email',d:'Recevoir les alertes sur j.ataba@eec.cm'},
+                      {k:'sms',t:'Notifications par SMS',d:'Recevoir les alertes urgentes par SMS'},
+                      {k:'push',t:'Notifications push (navigateur)',d:'Alertes en temps réel dans la console'},
+                    ].map(it=>(
+                      <div className="t-row" key={it.k}>
+                        <div className="t-info"><b>{it.t}</b><small>{it.d}</small></div>
+                        <Toggle on={notifs[it.k]} onChange={v=>{setNotifs({...notifs,[it.k]:v});mark();}}/>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <div style={{fontFamily:'var(--mono)',fontSize:'10.5px',letterSpacing:'.2em',textTransform:'uppercase',color:'var(--eec-gold)',marginBottom:14}}>Événements</div>
+                  <div className="notif-grid">
+                    {[
+                      {k:'nouvParoisse',t:'Nouvelle paroisse',d:'Création d\'une paroisse dans votre périmètre'},
+                      {k:'maj',t:'Mise à jour importante',d:'Modification de données GPS ou d\'identité'},
+                      {k:'rapport',t:'Rapport disponible',d:'Un nouveau rapport synodal est publié'},
+                      {k:'alerte',t:'Alerte de données manquantes',d:'Paroisses sans GPS ou sans responsable'},
+                      {k:'connexion',t:'Nouvelle connexion',d:'Un administrateur se connecte'},
+                    ].map(it=>(
+                      <div className="notif-card" key={it.k}>
+                        <div><h5>{it.t}</h5><p>{it.d}</p></div>
+                        <Toggle on={notifs[it.k]} onChange={v=>{setNotifs({...notifs,[it.k]:v});mark();}}/>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* AFFICHAGE */}
+            {section === 'affichage' && (
+              <div className="s-section">
+                <div className="s-section-head">
+                  <span className="s-eyebrow">— 04 / Affichage</span>
+                  <h2>Affichage & thème</h2>
+                  <p>Personnalisez l'apparence de la console synodale.</p>
+                </div>
+                <div style={{marginBottom:28}}>
+                  <div style={{fontFamily:'var(--mono)',fontSize:'10.5px',letterSpacing:'.2em',textTransform:'uppercase',color:'var(--eec-gold)',marginBottom:14}}>Thème</div>
+                  <div className="theme-grid">
+                    {[
+                      {id:'dark',label:'Sombre',sub:'Fond vert nuit · or',colors:['#0D1B12','#1B6B35','#F5C518']},
+                      {id:'light',label:'Clair',sub:'Fond blanc · vert · or',colors:['#FFFFFF','#1B6B35','#B8860B']},
+                      {id:'highc',label:'Contraste élevé',sub:'Accessibilité · seniors',colors:['#000000','#00AA55','#FFCC00']},
+                    ].map(t=>(
+                      <div key={t.id} className={`theme-tile ${theme===t.id?'active':''}`} onClick={()=>{setTheme(t.id);mark();}}>
+                        <div className="theme-preview" style={{background:t.colors[0],display:'flex',alignItems:'flex-end',padding:10,gap:4}}>
+                          {t.colors.map((c,i)=><div key={i} style={{flex:1,height:[40,28,18][i],background:c,borderRadius:3,opacity:.9}}/>)}
+                          {theme===t.id && <div style={{position:'absolute',top:8,right:8,width:20,height:20,borderRadius:'50%',background:'var(--eec-gold)',display:'grid',placeItems:'center',fontSize:12,color:'var(--eec-green-deep)',fontWeight:700}}>✓</div>}
+                        </div>
+                        <div className="theme-tile-label"><b>{t.label}</b><small>{t.sub}</small></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div style={{marginBottom:24}}>
+                  <div style={{fontFamily:'var(--mono)',fontSize:'10.5px',letterSpacing:'.2em',textTransform:'uppercase',color:'var(--eec-gold)',marginBottom:14}}>Taille du texte</div>
+                  <div style={{display:'flex',gap:8}}>
+                    {['Petite','Normale','Grande','Très grande'].map(s=>(
+                      <button key={s} className={`filter-chip ${fontSize===(s==='Normale'?'normal':s==='Grande'?'large':s==='Très grande'?'xl':'small')?'active':''}`}
+                              onClick={()=>{setFontSize(s==='Normale'?'normal':s==='Grande'?'large':s==='Très grande'?'xl':'small');mark();}}>
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="hint" style={{marginTop:8,fontSize:'12px',color:'var(--eec-text-mute)'}}>Recommandé : Grande ou Très grande pour les utilisateurs seniors.</div>
+                </div>
+                <div style={{marginBottom:24}}>
+                  <div style={{fontFamily:'var(--mono)',fontSize:'10.5px',letterSpacing:'.2em',textTransform:'uppercase',color:'var(--eec-gold)',marginBottom:14}}>Langue</div>
+                  <div style={{display:'flex',gap:8}}>
+                    {[{v:'fr',l:'Français'},{v:'en',l:'English'}].map(({v,l})=>(
+                      <button key={v} className={`filter-chip ${lang===v?'active':''}`} onClick={()=>{setLang(v);mark();}}>{l}</button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <div style={{fontFamily:'var(--mono)',fontSize:'10.5px',letterSpacing:'.2em',textTransform:'uppercase',color:'var(--eec-gold)',marginBottom:14}}>Options d'accessibilité</div>
+                  <div className="toggle-section">
+                    {[
+                      {t:'Réduire les animations',d:'Désactive les effets de transition pour les utilisateurs sensibles'},
+                      {t:'Mode haute lisibilité',d:'Augmente les contrastes et l\'espacement des textes'},
+                      {t:'Afficher les libellés sur les icônes',d:'Affiche le texte sous chaque icône de navigation'},
+                    ].map((it,i)=>(
+                      <div className="t-row" key={i}>
+                        <div className="t-info"><b>{it.t}</b><small>{it.d}</small></div>
+                        <Toggle on={i===0} onChange={mark}/>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* SYSTEME */}
+            {section === 'systeme' && (
+              <div className="s-section">
+                <div className="s-section-head">
+                  <span className="s-eyebrow">— 05 / Système</span>
+                  <h2>Système & données</h2>
+                  <p>Synchronisation, exports, sauvegardes et intégrations.</p>
+                </div>
+                <div style={{marginBottom:24}}>
+                  <div style={{fontFamily:'var(--mono)',fontSize:'10.5px',letterSpacing:'.2em',textTransform:'uppercase',color:'var(--eec-gold)',marginBottom:14}}>État du système</div>
+                  {[
+                    {label:'Base de données',status:'Opérationnel',color:'#6FCB95',detail:'546 paroisses · Dernière sync: il y a 2 min'},
+                    {label:'Serveur SIG / cartographie',status:'Opérationnel',color:'#6FCB95',detail:'Tuiles servies · Latence: 42ms'},
+                    {label:'Service d\'email',status:'Opérationnel',color:'#6FCB95',detail:'Dernière livraison: il y a 18 min'},
+                    {label:'Stockage fichiers & photos',status:'75% utilisé',color:'#E0A914',detail:'18.4 GB / 25 GB'},
+                    {label:'API externe GPS',status:'Opérationnel',color:'#6FCB95',detail:'Google Maps API · Quota: 62%'},
+                  ].map((s,i)=>(
+                    <div key={i} style={{display:'flex',alignItems:'center',gap:16,padding:'12px 0',borderBottom:'1px solid rgba(245,197,24,.05)'}}>
+                      <span style={{width:9,height:9,borderRadius:'50%',background:s.color,boxShadow:`0 0 8px ${s.color}`,flex:'0 0 9px'}}/>
+                      <div style={{flex:1}}>
+                        <b style={{fontSize:'13.5px',color:'white',fontWeight:500}}>{s.label}</b>
+                        <div style={{fontFamily:'var(--mono)',fontSize:'10.5px',color:'var(--eec-text-mute)',marginTop:2,letterSpacing:'.08em'}}>{s.detail}</div>
+                      </div>
+                      <span style={{fontFamily:'var(--mono)',fontSize:'11px',color:s.color,letterSpacing:'.1em'}}>{s.status}</span>
+                    </div>
+                  ))}
+                </div>
+                <div style={{marginBottom:24}}>
+                  <div style={{fontFamily:'var(--mono)',fontSize:'10.5px',letterSpacing:'.2em',textTransform:'uppercase',color:'var(--eec-gold)',marginBottom:14}}>Sauvegarde & export global</div>
+                  <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
+                    <button className="btn btn-gold" style={{fontSize:13}}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+                      Exporter toutes les données (JSON)
+                    </button>
+                    <button className="btn btn-ghost" style={{fontSize:13}}>Sauvegarde complète (ZIP)</button>
+                    <button className="btn btn-ghost" style={{fontSize:13}}>Exporter GeoJSON SIG</button>
+                  </div>
+                  <div style={{marginTop:10,fontFamily:'var(--mono)',fontSize:'10.5px',color:'var(--eec-text-mute)',letterSpacing:'.08em'}}>Dernière sauvegarde automatique : 12 mai 2026 à 03:00 · 24.1 MB</div>
+                </div>
+                <div>
+                  <div style={{fontFamily:'var(--mono)',fontSize:'10.5px',letterSpacing:'.2em',textTransform:'uppercase',color:'var(--eec-gold)',marginBottom:14}}>Synchronisation auto</div>
+                  <div className="toggle-section">
+                    {[
+                      {t:'Synchronisation automatique des données',d:'Sync toutes les 5 min avec le serveur central'},
+                      {t:'Alertes de données manquantes',d:'Notification hebdomadaire des profils incomplets'},
+                      {t:'Mise à jour automatique des tuiles cartographiques',d:'Rafraîchit les tuiles SIG chaque nuit'},
+                    ].map((it,i)=>(
+                      <div className="t-row" key={i}>
+                        <div className="t-info"><b>{it.t}</b><small>{it.d}</small></div>
+                        <Toggle on={i<2} onChange={mark}/>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* DANGER */}
+            {section === 'danger' && (
+              <div className="s-section">
+                <div className="s-section-head">
+                  <span className="s-eyebrow" style={{color:'#E8856B'}}>— 06 / Zone sensible</span>
+                  <h2 style={{color:'#E8856B'}}>Zone de danger</h2>
+                  <p>Ces actions sont irréversibles. Agissez avec prudence.</p>
+                </div>
+                {[
+                  {t:'Réinitialiser toutes les sessions',d:'Déconnecte tous les appareils connectés à ce compte, y compris celui-ci.',btn:'Déconnecter tout',level:'warn'},
+                  {t:'Réinitialiser les préférences',d:'Remet tous les paramètres d\'affichage, notifications et préférences aux valeurs par défaut.',btn:'Réinitialiser',level:'warn'},
+                  {t:'Exporter et supprimer mon compte',d:'Télécharge une copie de vos données puis supprime définitivement votre compte de la plateforme EEC GEO.',btn:'Demander la suppression',level:'danger'},
+                ].map((z,i)=>(
+                  <div className="danger-zone" key={i} style={{marginBottom:14,borderColor:z.level==='danger'?'rgba(232,80,60,.4)':'rgba(232,80,60,.2)',background:z.level==='danger'?'rgba(232,80,60,.07)':'rgba(232,80,60,.03)'}}>
+                    <h4>{z.t}</h4>
+                    <p>{z.d}</p>
+                    <button className="btn" style={{background:'transparent',color:'#E8856B',border:'1px solid rgba(232,80,60,.4)',fontSize:13}}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 4 2 20h20zM12 10v4M12 18v.01"/></svg>
+                      {z.btn}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+          </div>
+        </div>
+
+        {/* Save bar */}
+        {(dirty || saved) && (
+          <div className="save-bar">
+            <div className="unsaved">
+              {!saved && <><span className="dot"></span>Modifications non enregistrées</>}
+              {saved && <span style={{color:'#6FCB95'}}>✓ Modifications enregistrées</span>}
+            </div>
+            <div style={{display:'flex',gap:10}}>
+              <button className="btn btn-ghost" style={{fontSize:13}} onClick={()=>setDirty(false)}>Annuler</button>
+              <button className="btn btn-gold" style={{fontSize:13}} onClick={save}>Enregistrer les modifications</button>
+            </div>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<SettingsApp/>);
+</script>
+</body>
+</html>

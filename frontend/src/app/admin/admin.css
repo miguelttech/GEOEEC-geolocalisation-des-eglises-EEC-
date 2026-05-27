@@ -1,0 +1,333 @@
+/* =======================================================================
+   EEC Console Synodale — Admin CSS
+   Scoped under .admin-shell to avoid conflicts with globals.css
+   ======================================================================= */
+
+.admin-shell {
+  --canvas: #0D1B12;
+  --chrome: #08110B;
+  --surface: rgba(255,255,255,0.04);
+  --surface-hover: rgba(255,255,255,0.07);
+  --surface-strong: rgba(255,255,255,0.06);
+  --border: rgba(245,197,24,0.13);
+  --border-strong: rgba(245,197,24,0.30);
+  --border-soft: rgba(245,197,24,0.08);
+  --text: #F0F4F1;
+  --text-2: rgba(240,244,241,0.58);
+  --text-3: rgba(240,244,241,0.30);
+  --green: #2E9744;
+  --gold: #FFD600;
+  --red: #C62828;
+  --orange: #E65100;
+  --blue: #1565C0;
+  --purple: #6A1B9A;
+  --slate: #455A64;
+
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--canvas);
+  color: var(--text);
+  font-family: var(--font-inter, 'Inter', sans-serif);
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.admin-shell ::selection { background: rgba(46,151,68,0.35); }
+
+/* Scrollbars */
+.admin-shell ::-webkit-scrollbar { width: 10px; height: 10px; }
+.admin-shell ::-webkit-scrollbar-track { background: transparent; }
+.admin-shell ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 10px; border: 2px solid #0D1B12; }
+.admin-shell ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.16); }
+
+/* Typography */
+.admin-shell .sg  { font-family: var(--font-space, 'Space Grotesk', sans-serif); font-weight: 700; letter-spacing: -0.03em; }
+.admin-shell .sg-md { font-family: var(--font-space, 'Space Grotesk', sans-serif); font-weight: 600; letter-spacing: -0.02em; }
+.admin-shell .fr  { font-family: var(--font-fraunces, 'Fraunces', serif); font-weight: 500; }
+.admin-shell .mono { font-family: var(--font-mono, 'JetBrains Mono', monospace); }
+
+/* Leaflet dark tweaks */
+.admin-shell .leaflet-container { background: #0a160e; font-family: var(--font-inter, 'Inter', sans-serif); }
+.admin-shell .leaflet-control-attribution { background: rgba(8,17,11,0.7) !important; color: rgba(240,244,241,0.45) !important; font-size: 9px !important; }
+.admin-shell .leaflet-control-attribution a { color: rgba(240,244,241,0.65) !important; }
+.admin-shell .leaflet-control-zoom a { background: #0D1B12 !important; color: var(--text) !important; border-color: var(--border-soft) !important; }
+.admin-shell .leaflet-tooltip { background: #1B2E1F !important; border: 1px solid rgba(245,197,24,0.20) !important; color: var(--text) !important; font-family: var(--font-inter, 'Inter', sans-serif) !important; box-shadow: 0 8px 24px rgba(0,0,0,0.5) !important; }
+.admin-shell .leaflet-tooltip-top:before { border-top-color: #1B2E1F !important; }
+
+/* Pills */
+.admin-shell .pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 99px; font-size: 10px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; border: 1px solid transparent; white-space: nowrap; }
+.admin-shell .pill-green  { background: rgba(46,151,68,0.15);  color: #5AC472; border-color: rgba(46,151,68,0.30); }
+.admin-shell .pill-gold   { background: rgba(255,214,0,0.15);  color: var(--gold); border-color: rgba(255,214,0,0.40); }
+.admin-shell .pill-red    { background: rgba(198,40,40,0.15);  color: #E55B5B; border-color: rgba(198,40,40,0.30); }
+.admin-shell .pill-orange { background: rgba(230,81,0,0.15);   color: #FF8A3D; border-color: rgba(230,81,0,0.30); }
+.admin-shell .pill-blue   { background: rgba(21,101,192,0.15); color: #5B9BD5; border-color: rgba(21,101,192,0.30); }
+.admin-shell .pill-gray   { background: rgba(255,255,255,0.06); color: var(--text-2); border-color: rgba(255,255,255,0.10); }
+.admin-shell .pill-purple { background: rgba(106,27,154,0.18); color: #B377D9; border-color: rgba(106,27,154,0.35); }
+
+/* Card */
+.admin-shell .card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; }
+.admin-shell .card-hover:hover { border-color: var(--border-strong); background: rgba(255,255,255,0.05); }
+
+/* Buttons */
+.admin-shell .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; font-family: var(--font-inter, 'Inter', sans-serif); border: 1px solid transparent; cursor: pointer; transition: background 200ms ease, border-color 200ms ease, color 200ms ease; white-space: nowrap; line-height: 1; }
+.admin-shell .btn-primary      { background: var(--green); color: #fff; border-color: var(--green); }
+.admin-shell .btn-primary:hover { background: #37AC4F; border-color: #37AC4F; }
+.admin-shell .btn-outline      { background: transparent; color: var(--text); border-color: rgba(255,255,255,0.14); }
+.admin-shell .btn-outline:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.25); }
+.admin-shell .btn-outline-green { background: transparent; color: #5AC472; border-color: rgba(46,151,68,0.40); }
+.admin-shell .btn-outline-green:hover { background: rgba(46,151,68,0.08); border-color: rgba(46,151,68,0.60); }
+.admin-shell .btn-ghost       { background: transparent; color: var(--text-2); border-color: transparent; }
+.admin-shell .btn-ghost:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+.admin-shell .btn-danger      { background: var(--red); color: #fff; border-color: var(--red); }
+.admin-shell .btn-danger:hover { background: #D63A3A; }
+.admin-shell .icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 5px; color: var(--text-2); cursor: pointer; transition: background 200ms ease, color 200ms ease; background: transparent; border: 0; }
+.admin-shell .icon-btn:hover { background: rgba(255,255,255,0.06); color: var(--text); }
+.admin-shell .icon-btn.green:hover { color: #5AC472; background: rgba(46,151,68,0.10); }
+
+/* Input */
+.admin-shell .input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(245,197,24,0.15); border-radius: 6px; padding: 10px 14px; font-size: 14px; font-family: var(--font-inter, 'Inter', sans-serif); color: var(--text); transition: border-color 200ms ease, box-shadow 200ms ease; outline: none; }
+.admin-shell .input::placeholder { color: rgba(240,244,241,0.35); }
+.admin-shell .input:focus { border-color: rgba(46,151,68,0.60); box-shadow: 0 0 0 3px rgba(46,151,68,0.10); }
+.admin-shell .input:disabled { opacity: 0.5; cursor: not-allowed; }
+.admin-shell .label { display: block; font-size: 12px; font-weight: 500; color: rgba(240,244,241,0.70); margin-bottom: 6px; }
+.admin-shell .label .req { color: #E55B5B; margin-left: 2px; }
+.admin-shell .checkbox { appearance: none; width: 16px; height: 16px; border: 1px solid rgba(245,197,24,0.30); border-radius: 3px; background: rgba(255,255,255,0.03); cursor: pointer; position: relative; flex-shrink: 0; transition: background 200ms ease, border-color 200ms ease; }
+.admin-shell .checkbox:checked { background: var(--green); border-color: var(--green); }
+.admin-shell .checkbox:checked::after { content: ''; position: absolute; left: 4px; top: 1px; width: 5px; height: 9px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+
+/* Hover row */
+.admin-shell .row-hover:hover { background: rgba(255,255,255,0.04); }
+
+/* Animations */
+.admin-shell .anim-in    { animation: a-fade-up 320ms cubic-bezier(0.4,0,0.2,1) both; }
+.admin-shell .anim-fade  { animation: a-fade 200ms ease both; }
+.admin-shell .pulse-orange { animation: a-pulse-o 1.6s ease-in-out infinite; }
+
+@keyframes a-fade-up   { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+@keyframes a-fade      { from { opacity:0; } to { opacity:1; } }
+@keyframes a-pulse-o   { 0%,100% { box-shadow:0 0 0 0 rgba(230,81,0,0); } 50% { box-shadow:0 0 0 4px rgba(230,81,0,0.10); } }
+@keyframes a-cascade   { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
+@keyframes a-slide-in  { from { transform:translateX(100%); } to { transform:translateX(0); } }
+@keyframes a-toast-in  { from { transform:translateX(120%); opacity:0; } to { transform:translateX(0); opacity:1; } }
+@keyframes a-float-up  { from { transform:translate(-50%,12px); opacity:0; } to { transform:translate(-50%,0); opacity:1; } }
+@keyframes a-spin      { to { transform:rotate(360deg); } }
+@keyframes a-shimmer   { 0% { background-position:200% 0; } 100% { background-position:-200% 0; } }
+
+/* Spinner / Shimmer */
+.admin-shell .spinner { width:14px; height:14px; border:2px solid rgba(255,255,255,0.15); border-top-color:var(--text); border-radius:50%; animation:a-spin 0.7s linear infinite; }
+.admin-shell .skel    { background:linear-gradient(90deg,rgba(255,255,255,0.06) 0%,rgba(255,255,255,0.12) 50%,rgba(255,255,255,0.06) 100%); background-size:200% 100%; animation:a-shimmer 1.5s linear infinite; border-radius:4px; }
+
+/* Tooltip */
+.admin-shell [data-tip] { position: relative; }
+.admin-shell [data-tip]:hover::after { content:attr(data-tip); position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%); background:#1B2E1F; border:1px solid rgba(245,197,24,0.20); color:var(--text); padding:6px 10px; border-radius:5px; font-size:11px; white-space:nowrap; z-index:1000; pointer-events:none; box-shadow:0 6px 18px rgba(0,0,0,0.45); }
+
+/* Sidebar nav */
+.admin-shell .nav-group-label { font-size:10px; text-transform:uppercase; letter-spacing:0.10em; color:rgba(255,255,255,0.30); padding:18px 16px 6px; font-weight:600; }
+.admin-shell .nav-item { display:flex; align-items:center; gap:11px; padding:10px 16px; color:rgba(255,255,255,0.65); font-size:13px; font-weight:500; cursor:pointer; transition:background 200ms ease, color 200ms ease; border-left:3px solid transparent; position:relative; }
+.admin-shell .nav-item .ni-icon { color:rgba(255,255,255,0.55); display:flex; align-items:center; justify-content:center; width:18px; height:18px; transition:color 200ms ease; }
+.admin-shell .nav-item:hover { background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.92); }
+.admin-shell .nav-item:hover .ni-icon { color:rgba(255,255,255,0.85); }
+.admin-shell .nav-item.active { background:linear-gradient(90deg,rgba(255,214,0,0.06),rgba(255,255,255,0.06)); color:#fff; font-weight:600; border-left-color:var(--gold); }
+.admin-shell .nav-item.active .ni-icon { color:var(--gold); }
+.admin-shell .nav-item.danger { color:rgba(220,53,69,0.80); }
+.admin-shell .nav-item.danger:hover { color:#FF5C6E; background:rgba(220,53,69,0.06); }
+.admin-shell .nav-item.danger .ni-icon { color:rgba(220,53,69,0.70); }
+
+/* Stat card */
+.admin-shell .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:20px; display:flex; flex-direction:column; gap:8px; transition:border-color 200ms ease, background 200ms ease; cursor:default; }
+.admin-shell .stat-card:hover { border-color:rgba(245,197,24,0.28); background:rgba(255,255,255,0.05); }
+.admin-shell .stat-card .sc-head { display:flex; align-items:center; justify-content:space-between; color:rgba(240,244,241,0.50); font-size:11px; font-weight:500; text-transform:uppercase; letter-spacing:0.06em; }
+.admin-shell .stat-card .sc-num  { font-family:var(--font-space,'Space Grotesk',sans-serif); font-weight:700; letter-spacing:-0.03em; font-size:36px; line-height:1; color:var(--text); margin-top:4px; }
+.admin-shell .stat-card .sc-label { font-size:13px; color:var(--text-2); }
+.admin-shell .stat-card .sc-delta { font-size:12px; display:flex; align-items:center; gap:5px; margin-top:auto; padding-top:6px; }
+
+/* Tables */
+.admin-shell table.data { width:100%; border-collapse:collapse; font-size:13px; }
+.admin-shell table.data thead th { text-align:left; padding:12px 14px; font-weight:600; font-size:11px; color:var(--text-2); text-transform:uppercase; letter-spacing:0.05em; border-bottom:1px solid rgba(245,197,24,0.10); background:rgba(255,255,255,0.02); user-select:none; }
+.admin-shell table.data thead th.sortable { cursor:pointer; }
+.admin-shell table.data thead th.sortable:hover { color:var(--text); }
+.admin-shell table.data tbody td { padding:14px 14px; border-bottom:1px solid rgba(255,255,255,0.04); vertical-align:middle; height:52px; }
+.admin-shell table.data tbody tr:hover { background:rgba(255,255,255,0.04); }
+.admin-shell table.data tbody tr:last-child td { border-bottom:none; }
+
+/* Tabs */
+.admin-shell .tabs-bar { display:flex; gap:0; border-bottom:1px solid var(--border-soft); background:transparent; }
+.admin-shell .tab { display:flex; align-items:center; gap:8px; padding:11px 18px; font-size:13px; color:var(--text-2); font-weight:500; cursor:pointer; border-bottom:2px solid transparent; transition:all 200ms ease; background:transparent; border-left:0; border-right:0; border-top:0; }
+.admin-shell .tab:hover { color:var(--text); }
+.admin-shell .tab.active { color:#fff; font-weight:600; background:rgba(46,151,68,0.10); border-bottom-color:var(--green); }
+.admin-shell .tab .ok  { color:#5AC472; }
+.admin-shell .tab .err { width:6px; height:6px; background:#E55B5B; border-radius:50%; }
+
+/* Segment buttons */
+.admin-shell .seg { display:inline-flex; background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:6px; padding:3px; gap:2px; }
+.admin-shell .seg button { padding:7px 14px; font-size:12px; font-weight:500; font-family:var(--font-inter,'Inter',sans-serif); background:transparent; border:0; color:var(--text-2); border-radius:4px; cursor:pointer; transition:all 200ms ease; }
+.admin-shell .seg button:hover { color:var(--text); }
+.admin-shell .seg button.on { background:var(--green); color:#fff; font-weight:600; }
+
+/* Toggle */
+.admin-shell .toggle { position:relative; width:38px; height:22px; background:rgba(255,255,255,0.10); border-radius:99px; cursor:pointer; border:1px solid rgba(255,255,255,0.10); transition:background 200ms ease; }
+.admin-shell .toggle::after { content:''; position:absolute; top:2px; left:2px; width:16px; height:16px; background:#fff; border-radius:50%; transition:transform 200ms ease; }
+.admin-shell .toggle.on { background:var(--green); border-color:var(--green); }
+.admin-shell .toggle.on::after { transform:translateX(16px); }
+
+/* Progress completeness bar */
+.admin-shell .complete { display:flex; align-items:center; gap:8px; }
+.admin-shell .complete .bar { width:64px; height:8px; border-radius:4px; background:rgba(255,255,255,0.10); overflow:hidden; position:relative; }
+.admin-shell .complete .fill { height:100%; border-radius:4px; transition:width 400ms ease; }
+.admin-shell .complete .pct { font-size:12px; color:var(--text-2); font-variant-numeric:tabular-nums; min-width:32px; }
+
+/* Avatar */
+.admin-shell .avatar { display:inline-flex; align-items:center; justify-content:center; border-radius:50%; font-family:var(--font-space,'Space Grotesk',sans-serif); font-weight:700; letter-spacing:-0.02em; flex-shrink:0; text-transform:uppercase; }
+
+/* Slide panel */
+.admin-shell .overlay { position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:90; backdrop-filter:blur(2px); animation:a-fade 300ms ease; }
+.admin-shell .slide-panel { position:fixed; top:0; right:0; height:100vh; width:480px; background:var(--canvas); border-left:1px solid rgba(245,197,24,0.20); z-index:100; display:flex; flex-direction:column; animation:a-slide-in 350ms cubic-bezier(0.4,0,0.2,1); }
+
+/* Modal */
+.admin-shell .modal { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:120; background:rgba(0,0,0,0.60); animation:a-fade 200ms ease; }
+.admin-shell .modal-panel { background:var(--canvas); border:1px solid rgba(245,197,24,0.20); border-radius:8px; width:440px; padding:24px; box-shadow:0 24px 64px rgba(0,0,0,0.6); animation:a-fade-up 240ms cubic-bezier(0.4,0,0.2,1); }
+
+/* Toast */
+.admin-shell .toast-stack { position:fixed; top:20px; right:20px; z-index:150; display:flex; flex-direction:column; gap:10px; width:320px; }
+.admin-shell .toast { background:var(--canvas); border:1px solid var(--border); border-left:3px solid var(--green); border-radius:6px; padding:12px 16px; display:flex; gap:10px; align-items:flex-start; box-shadow:0 12px 32px rgba(0,0,0,0.5); animation:a-toast-in 300ms cubic-bezier(0.4,0,0.2,1); }
+.admin-shell .toast.success { background:rgba(46,151,68,0.12); border-left-color:#2E9744; }
+.admin-shell .toast.error   { background:rgba(198,40,40,0.12); border-left-color:#C62828; }
+.admin-shell .toast.warn    { background:rgba(230,81,0,0.12);  border-left-color:#E65100; }
+.admin-shell .toast.info    { background:rgba(21,101,192,0.12);border-left-color:#1565C0; }
+
+/* Float bar */
+.admin-shell .float-bar { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:#0D1B12; border:1px solid rgba(245,197,24,0.30); border-radius:8px; padding:10px 14px; display:flex; align-items:center; gap:10px; z-index:80; box-shadow:0 16px 48px rgba(0,0,0,0.6); animation:a-float-up 280ms cubic-bezier(0.4,0,0.2,1); }
+
+/* Cascade animation */
+.admin-shell .cascade { animation:a-cascade 200ms ease both; }
+
+/* Step indicator */
+.admin-shell .step-dot { width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; border:1px solid; transition:all 200ms ease; font-family:var(--font-space,'Space Grotesk',sans-serif); }
+.admin-shell .step-dot.future  { border-color:rgba(255,255,255,0.20); color:var(--text-3); background:transparent; }
+.admin-shell .step-dot.current { background:var(--green); border-color:var(--green); color:#fff; }
+.admin-shell .step-dot.done    { background:rgba(46,151,68,0.40); border-color:rgba(46,151,68,0.60); color:#fff; }
+.admin-shell .step-line      { flex:1; height:1px; background:rgba(255,255,255,0.10); position:relative; margin:0 6px; }
+.admin-shell .step-line.done { background:rgba(46,151,68,0.40); }
+
+/* Donut center */
+.admin-shell .donut-center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none; }
+
+/* Code chip */
+.admin-shell .code-chip { display:inline-flex; align-items:center; padding:6px 10px; border-radius:5px; background:rgba(255,214,0,0.06); border:1px dashed rgba(255,214,0,0.30); font-family:var(--font-mono,'JetBrains Mono',monospace); font-size:12px; color:#FFE066; letter-spacing:0.04em; }
+
+/* Map markers */
+.admin-shell .map-marker  { width:14px; height:14px; border-radius:50%; background:var(--green); border:2px solid #fff; box-shadow:0 0 0 3px rgba(46,151,68,0.30),0 0 14px rgba(46,151,68,0.6); }
+.admin-shell .map-cluster { display:flex; align-items:center; justify-content:center; color:#fff; font-family:var(--font-space,'Space Grotesk',sans-serif); font-weight:700; font-size:12px; border-radius:50%; background:rgba(46,151,68,0.85); border:2px solid #2E9744; box-shadow:0 0 0 6px rgba(46,151,68,0.18); }
+
+/* Dropdown / menu */
+.admin-shell .menu { position:absolute; background:#0F1F15; border:1px solid rgba(245,197,24,0.20); border-radius:6px; box-shadow:0 18px 48px rgba(0,0,0,0.6); min-width:180px; padding:4px; z-index:50; animation:a-cascade 150ms ease both; }
+.admin-shell .menu button { display:flex; align-items:center; gap:10px; width:100%; padding:8px 10px; background:transparent; border:0; color:var(--text); font-size:13px; font-family:var(--font-inter,'Inter',sans-serif); cursor:pointer; border-radius:4px; text-align:left; }
+.admin-shell .menu button:hover { background:rgba(255,255,255,0.06); }
+.admin-shell .menu button.danger { color:#FF6B6B; }
+.admin-shell .menu button.danger:hover { background:rgba(198,40,40,0.10); }
+.admin-shell .menu hr { border:0; height:1px; background:rgba(255,255,255,0.06); margin:4px 0; }
+
+/* Accordion */
+.admin-shell .accordion { border:1px solid var(--border); border-radius:6px; overflow:hidden; }
+.admin-shell .accordion-head { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; cursor:pointer; background:rgba(255,255,255,0.02); user-select:none; }
+.admin-shell .accordion-head:hover { background:rgba(255,255,255,0.04); }
+.admin-shell .accordion-body { padding:18px; border-top:1px solid var(--border); }
+
+/* Admin content area */
+.admin-shell .admin-main { flex:1; min-width:0; display:flex; flex-direction:column; overflow:hidden; }
+.admin-shell .admin-content { flex:1; overflow-y:auto; padding:28px 32px; background:var(--canvas); }
+
+/* List row helpers (entity lists) */
+.admin-shell .list-row-admin { display:grid; align-items:center; gap:12px; padding:14px 16px; border-bottom:1px solid rgba(255,255,255,0.05); }
+.admin-shell .list-row-admin:hover { background:rgba(255,255,255,0.03); }
+.admin-shell .lr-main { display:flex; flex-direction:column; gap:3px; min-width:0; }
+.admin-shell .lr-actions { display:flex; align-items:center; gap:4px; }
+.admin-shell .act-btn { display:inline-flex; align-items:center; gap:5px; padding:5px 10px; border-radius:5px; font-size:12px; font-weight:500; cursor:pointer; border:0; transition:background 200ms; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LIGHT THEME  —  appliqué via .admin-shell.light
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Remplacement des variables CSS : tout ce qui utilise var(--canvas), var(--chrome), etc. hérite ici */
+.admin-shell.light {
+  --canvas:        #DDE6DF;          /* fond du contenu : vert-gris doux, moins agressif */
+  --chrome:        #1A5E30;          /* sidebar + topbar : vert lisible */
+  --surface:       rgba(0,0,0,0.04); /* fond des cards */
+  --border:        rgba(0,0,0,0.10); /* bordures légères */
+  --border-strong: rgba(0,0,0,0.22);
+  --text:          #0A1710;          /* texte principal : légèrement plus foncé */
+  --text-2:        rgba(10,23,16,0.68);
+  --text-3:        rgba(10,23,16,0.38);
+  --green:         #1F8A38;
+  --gold:          #8C6200;
+  background: var(--canvas);
+  color: var(--text);
+}
+
+/* ── Inputs ─────────────────────────────────────────────────────────────── */
+.admin-shell.light .input                 { background:#EBF2EC; border-color:rgba(0,0,0,0.15); color:var(--text); }
+.admin-shell.light .input::placeholder   { color:rgba(13,27,18,0.32); }
+.admin-shell.light .input:focus          { border-color:rgba(31,138,56,0.55); box-shadow:0 0 0 3px rgba(31,138,56,0.10); }
+.admin-shell.light .label                { color:rgba(13,27,18,0.65); }
+
+/* ── Dropdown trigger (classe ajoutée sur le bouton dans atoms.tsx) ──────── */
+.admin-shell.light .dropdown-btn         { background:#EBF2EC !important; border-color:rgba(0,0,0,0.15) !important; color:var(--text) !important; }
+.admin-shell.light .dropdown-btn:focus   { border-color:rgba(31,138,56,0.55) !important; box-shadow:0 0 0 3px rgba(31,138,56,0.10) !important; }
+
+/* ── Cards ──────────────────────────────────────────────────────────────── */
+.admin-shell.light .card                 { background:#E8F0EA; border-color:rgba(0,0,0,0.09); }
+.admin-shell.light .card-hover:hover     { background:#DFE9E1; border-color:rgba(0,0,0,0.18); }
+.admin-shell.light .stat-card            { background:#E8F0EA; border-color:rgba(0,0,0,0.09); }
+.admin-shell.light .stat-card .sc-head  { color:rgba(10,23,16,0.48); }
+.admin-shell.light .stat-card:hover      { background:#DFE9E1; border-color:rgba(0,0,0,0.18); }
+
+/* ── Tableaux ────────────────────────────────────────────────────────────── */
+.admin-shell.light table.data thead th  { background:rgba(0,0,0,0.03); border-bottom-color:rgba(0,0,0,0.08); }
+.admin-shell.light table.data tbody td  { border-bottom-color:rgba(0,0,0,0.06); }
+.admin-shell.light table.data tbody tr:hover { background:rgba(0,0,0,0.03) !important; }
+
+/* ── Boutons ─────────────────────────────────────────────────────────────── */
+.admin-shell.light .btn-outline          { border-color:rgba(0,0,0,0.18); color:var(--text); }
+.admin-shell.light .btn-outline:hover    { background:rgba(0,0,0,0.05); border-color:rgba(0,0,0,0.28); }
+.admin-shell.light .btn-ghost            { color:rgba(13,27,18,0.55); }
+.admin-shell.light .btn-ghost:hover      { background:rgba(0,0,0,0.05); color:var(--text); }
+.admin-shell.light .icon-btn             { color:rgba(13,27,18,0.55); }
+.admin-shell.light .icon-btn:hover       { background:rgba(0,0,0,0.07); color:var(--text); }
+.admin-shell.light .icon-btn.green       { color:#1F8A38; }
+
+/* ── Segment buttons ────────────────────────────────────────────────────── */
+.admin-shell.light .seg                  { background:rgba(0,0,0,0.05); border-color:rgba(0,0,0,0.10); }
+.admin-shell.light .seg button           { color:rgba(13,27,18,0.55); }
+.admin-shell.light .seg button.on        { background:#FFFFFF; color:var(--text); box-shadow:0 1px 4px rgba(0,0,0,0.12); }
+
+/* ── Onglets ─────────────────────────────────────────────────────────────── */
+.admin-shell.light .tabs-bar             { border-bottom-color:rgba(0,0,0,0.10); }
+.admin-shell.light .tab                  { color:rgba(13,27,18,0.50); }
+.admin-shell.light .tab:hover            { color:var(--text); }
+.admin-shell.light .tab.active           { color:var(--green); background:rgba(31,138,56,0.08); border-bottom-color:var(--green); }
+
+/* ── Menu déroulant ─────────────────────────────────────────────────────── */
+.admin-shell.light .menu                 { background:#FFFFFF; border-color:rgba(0,0,0,0.12); box-shadow:0 8px 28px rgba(0,0,0,0.12); }
+.admin-shell.light .menu button          { color:var(--text); }
+.admin-shell.light .menu button:hover    { background:rgba(0,0,0,0.05); }
+.admin-shell.light .menu button.danger   { color:var(--red); }
+.admin-shell.light .menu hr              { border-color:rgba(0,0,0,0.08); }
+
+/* ── Panneau coulissant + modal ─────────────────────────────────────────── */
+.admin-shell.light .slide-panel          { background:#E0EAE2; }
+.admin-shell.light .modal                { background:#E8F0EA; border-color:rgba(0,0,0,0.10); }
+.admin-shell.light .overlay              { background:rgba(0,0,0,0.30); }
+
+/* ── Toast ───────────────────────────────────────────────────────────────── */
+.admin-shell.light .toast                { background:#E8F0EA; border-color:rgba(0,0,0,0.10); }
+
+/* ── Float bar (reste sombre pour le contraste des actions bulk) ─────────── */
+.admin-shell.light .float-bar            { background:rgba(13,27,18,0.88); }
+
+/* ── Complete bar (barre de progression) ────────────────────────────────── */
+.admin-shell.light .complete             { background:rgba(0,0,0,0.10); }
+
+/* ── Checkbox ────────────────────────────────────────────────────────────── */
+.admin-shell.light .checkbox             { accent-color:var(--green); }
