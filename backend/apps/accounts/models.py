@@ -8,6 +8,7 @@ class User(AbstractUser):
         ("REGION",   "Administrateur Régional"),
         ("DISTRICT", "Administrateur District"),
         ("PAROISSE", "Administrateur Paroissial"),
+        ("VISITEUR", "Visiteur Authentifié"),
     ]
 
     role = models.CharField(max_length=10, choices=ROLES, default="PAROISSE")
@@ -60,6 +61,15 @@ class User(AbstractUser):
     @property
     def is_paroisse_admin(self):
         return self.role == "PAROISSE"
+
+    @property
+    def is_visiteur(self):
+        return self.role == "VISITEUR"
+
+    @property
+    def is_admin(self):
+        """True pour tous les rôles administrateurs (excl. VISITEUR)."""
+        return self.role in ("SUPER", "REGION", "DISTRICT", "PAROISSE")
 
     def has_custom_perm(self, perm_key):
         return bool(self.permissions_custom.get(perm_key, False))

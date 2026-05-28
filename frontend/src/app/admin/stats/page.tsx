@@ -1,6 +1,5 @@
 'use client';
 import React from 'react';
-import 'leaflet/dist/leaflet.css';
 import { I } from '@/components/admin/icons';
 import { CompleteBar, Dropdown } from '@/components/admin/atoms';
 import { statsByRegion } from '@/components/admin/data';

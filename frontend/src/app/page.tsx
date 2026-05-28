@@ -1,5 +1,5 @@
-import EECAppLoader from '@/components/eec/EECAppLoader';
+import LandingPage from '@/components/landing/LandingPage';
 
 export default function Home() {
-  return <EECAppLoader />;
+  return <LandingPage />;
 }

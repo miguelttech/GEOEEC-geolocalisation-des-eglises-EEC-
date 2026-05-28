@@ -18,16 +18,16 @@
   --eec-yellow-tint: #FFFBE5;
 
   /* === Neutrals (light) === */
-  --canvas: #FFFFFF;
-  --navbar-bg: #FFFFFF;
+  --canvas: #F8F9FA;
+  --navbar-bg: #F8F9FA;
   --rail-bg: linear-gradient(180deg, #1F7331 0%, #2E9744 50%, #1F7331 100%);
   --rail-tab-color: #FFFFFF;
   --rail-tab-active-bg: rgba(255, 214, 0, 0.18);
   --rail-tab-active-color: #FFD600;
   --rail-tab-hover-bg: rgba(255,255,255,0.10);
-  --panel-bg: #FFFFFF;
-  --legend-bg: #FFFFFF;
-  --surface-1: #FFFFFF;
+  --panel-bg: #F8F9FA;
+  --legend-bg: #F8F9FA;
+  --surface-1: #F8F9FA;
   --surface-2: #F8F9FA;
   --surface-3: #F1F3F4;
   --border: #DADCE0;
@@ -213,7 +213,7 @@ button { font-family: inherit; cursor: pointer; }
 [data-theme="dark"] .brand-logo {
   mix-blend-mode: normal;
   filter: drop-shadow(0 1px 3px rgba(0,0,0,.50));
-  background: rgba(255,255,255,0.96);
+  background: rgba(248,249,250,0.96);
   padding: 4px;
   border-radius: 8px;
 }

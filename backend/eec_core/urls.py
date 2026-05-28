@@ -26,6 +26,9 @@ from apps.accounts.auth_views import (
     dashboard_stats,
 )
 
+# Vues visitors + analytics
+from apps.visitors.urls import visitor_patterns, analytics_patterns
+
 # Vues exports
 from apps.exports.views import (
     export_paroisses_excel,
@@ -110,6 +113,12 @@ urlpatterns = [
 
     # API Imports
     path("api/imports/",         include(import_patterns)),
+
+    # API Visiteurs authentifiés
+    path("api/visitor/",         include(visitor_patterns)),
+
+    # API Analytics visiteurs (SUPER + REGION)
+    path("api/analytics/",       include(analytics_patterns)),
 
     # Documentation OpenAPI
     path("api/schema/",          SpectacularAPIView.as_view(),                             name="schema"),
