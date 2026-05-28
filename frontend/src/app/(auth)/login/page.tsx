@@ -192,6 +192,8 @@ export default function LoginPage() {
               Contacter le Secrétariat Général
             </a>
             <br />
+            <Link href="/register">Visiteur ? Créer un compte →</Link>
+            <br />
             <Link href="/">← Retour au site public</Link>
           </p>
         </div>

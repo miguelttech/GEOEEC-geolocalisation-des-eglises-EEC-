@@ -2252,6 +2252,19 @@ button { font-family: inherit; cursor: pointer; }
   font-size: 13px; color: #f08070;
 }
 
+/* Succès inscription */
+.ls-success {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 14px 16px;
+  background: rgba(46,151,68,.12);
+  border: 1px solid rgba(46,151,68,.3);
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 13px; color: #5AC472;
+}
+.ls-success svg { flex-shrink: 0; margin-top: 1px; }
+.ls-success strong { color: #6BD47E; }
+
 /* Champ */
 .ls-field {
   display: flex; flex-direction: column; gap: 6px;

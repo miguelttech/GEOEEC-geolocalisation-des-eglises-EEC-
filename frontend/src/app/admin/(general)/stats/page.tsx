@@ -74,6 +74,7 @@ export default function StatsPage() {
           <button className={view === 'tableau' ? 'on' : ''} onClick={() => setView('tableau')}><I.list size={12} style={{ marginRight: 6, verticalAlign: -2 }}/>Vue tableau</button>
           <button className={view === 'carte' ? 'on' : ''} onClick={() => setView('carte')}><I.map size={12} style={{ marginRight: 6, verticalAlign: -2 }}/>Vue carte</button>
           <button className={view === 'region' ? 'on' : ''} onClick={() => setView('region')}><I.compass size={12} style={{ marginRight: 6, verticalAlign: -2 }}/>Par région</button>
+          <button className={view === 'visiteurs' ? 'on' : ''} onClick={() => setView('visiteurs')}><I.users size={12} style={{ marginRight: 6, verticalAlign: -2 }}/>Visiteurs</button>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <Dropdown value={`Année ${year}`} options={['Année 2025','Année 2024','Année 2023']} onChange={v => setYear(v.split(' ')[1])} width={130} />
@@ -147,6 +148,7 @@ export default function StatsPage() {
 
       {view === 'carte' && <ChoroplethStats />}
       {view === 'region' && <RegionTree />}
+      {view === 'visiteurs' && <VisiteursStats />}
 
       {viewPanel && <RegionStatsPanel region={viewPanel} onClose={() => setViewPanel(null)}/>}
       <ToastStack toasts={toasts}/>
@@ -262,6 +264,133 @@ function RegionTree() {
           </div>
         );
       })}
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   Statistiques Visiteurs
+   ───────────────────────────────────────────── */
+interface VisiteurStat {
+  total: number; actifs7j: number; nouveauxMois: number; actifsMois: number;
+}
+interface TopParoisse { name: string; vues: number; }
+interface ActivitePoint { date: string; count: number; }
+
+function VisiteursStats() {
+  const [stats, setStats] = React.useState<VisiteurStat | null>(null);
+  const [top, setTop] = React.useState<TopParoisse[]>([]);
+  const [courbe, setCourbe] = React.useState<ActivitePoint[]>([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    Promise.all([
+      fetch('/api/analytics/visiteurs/stats/', { credentials: 'include' }).then(r => r.ok ? r.json() : null),
+      fetch('/api/analytics/paroisses/top/', { credentials: 'include' }).then(r => r.ok ? r.json() : []),
+      fetch('/api/analytics/activite/courbe/', { credentials: 'include' }).then(r => r.ok ? r.json() : []),
+    ]).then(([s, t, c]) => {
+      setStats(s);
+      setTop(Array.isArray(t) ? t : []);
+      setCourbe(Array.isArray(c) ? c : []);
+    }).finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}>
+        <div style={{ width: 28, height: 28, border: '2px solid rgba(93,191,122,0.2)', borderTopColor: '#5AC472', borderRadius: '50%', animation: 'spin 0.75s linear infinite' }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
+
+  const kpis = stats ? [
+    { label: 'Visiteurs inscrits',     value: stats.total.toLocaleString('fr'),          icon: <I.users size={18} />,  color: '#5AC472' },
+    { label: 'Actifs (7 derniers j.)', value: stats.actifs7j.toLocaleString('fr'),       icon: <I.bolt size={18} />,   color: '#5B9BD5' },
+    { label: 'Nouveaux ce mois',       value: stats.nouveauxMois.toLocaleString('fr'),   icon: <I.plus size={18} />,   color: '#F5C518' },
+    { label: 'Actifs ce mois',         value: stats.actifsMois.toLocaleString('fr'),     icon: <I.globe size={18} />,  color: '#A78BFA' },
+  ] : [];
+
+  const maxVues   = top.length    ? Math.max(...top.map(p => p.vues), 1)    : 1;
+  const maxCourbe = courbe.length ? Math.max(...courbe.map(p => p.count), 1) : 1;
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+      {stats ? (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12 }}>
+          {kpis.map(k => (
+            <div key={k.label} className="card" style={{ padding: '18px 20px', display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+              <div style={{ width: 38, height: 38, borderRadius: 8, background: `${k.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: k.color, flexShrink: 0 }}>
+                {k.icon}
+              </div>
+              <div>
+                <div className="mono sg-md" style={{ fontSize: 22, color: k.color }}>{k.value}</div>
+                <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 2 }}>{k.label}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="card" style={{ padding: 20, color: 'var(--text-3)', fontSize: 13, textAlign: 'center' }}>
+          Données non disponibles — API analytics non connectée.
+        </div>
+      )}
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+
+        <div className="card" style={{ padding: '16px 20px' }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 16 }}>
+            Activité — 30 derniers jours
+          </div>
+          {courbe.length ? (
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: 80 }}>
+              {courbe.map((pt, i) => (
+                <div key={i} title={`${pt.date}: ${pt.count} connexions`} style={{
+                  flex: 1, borderRadius: '2px 2px 0 0',
+                  height: `${Math.max(4, Math.round((pt.count / maxCourbe) * 80))}px`,
+                  background: `rgba(90,196,114,${0.3 + (pt.count / maxCourbe) * 0.7})`,
+                  cursor: 'default',
+                }} />
+              ))}
+            </div>
+          ) : (
+            <div style={{ height: 80, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-3)', fontSize: 12 }}>
+              Aucune donnée
+            </div>
+          )}
+          {courbe.length >= 2 && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, fontSize: 10, color: 'var(--text-3)', fontFamily: 'var(--font-mono)' }}>
+              <span>{courbe[0].date}</span>
+              <span>{courbe[courbe.length - 1].date}</span>
+            </div>
+          )}
+        </div>
+
+        <div className="card" style={{ padding: '16px 20px' }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 14 }}>
+            Top paroisses vues
+          </div>
+          {top.length ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {top.slice(0, 8).map((p, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span className="mono" style={{ fontSize: 10, color: 'var(--text-3)', width: 16, textAlign: 'right' }}>{i + 1}</span>
+                  <span style={{ fontSize: 13, color: 'var(--text)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</span>
+                  <div style={{ width: 80, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+                    <div style={{ width: `${Math.round((p.vues / maxVues) * 100)}%`, height: '100%', background: '#5AC472', borderRadius: 2 }} />
+                  </div>
+                  <span className="mono" style={{ fontSize: 11, color: 'var(--text-2)', width: 32, textAlign: 'right' }}>{p.vues}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ height: 80, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-3)', fontSize: 12 }}>
+              Aucune donnée
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
