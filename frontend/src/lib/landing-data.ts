@@ -40,8 +40,32 @@ export const EEC_REGIONS: Region[] = [
 ];
 
 export const EEC_DIRECTION = [
-  { name: 'Rév. Pasteur Dr. ATABA Joël', titre: 'Président du Synode Général',  region: 'Yaoundé'   },
-  { name: 'Rév. Pasteur MBOUNA André',   titre: 'Vice-Président',               region: 'Douala'    },
-  { name: 'Rév. Pasteur Dr. NGAH Émile', titre: 'Secrétaire Général',           region: 'Bafoussam' },
-  { name: 'Mme. KAMENI Esther',          titre: 'Trésorière Générale',          region: 'Dschang'   },
+  {
+    grade:  'Révérend Pasteur',
+    name:   'BILLA MBENGA Alexandre',
+    titre:  'Président du Synode Général',
+    region: 'Douala · Wouri',
+    image:  '/images/dir-president.webp',
+  },
+  {
+    grade:  'Révérend Dr',
+    name:   'NJOUENWET KOPP Bernard',
+    titre:  '1er Vice-Président',
+    region: 'Bafoussam · Mifi',
+    image:  '/images/dir-vice-president.webp',
+  },
+  {
+    grade:  'Révérende Pasteure',
+    name:   'MEMIAFOH SOBJIO Abestine',
+    titre:  'Secrétaire Générale',
+    region: 'Bafoussam · Ouest',
+    image:  '/images/dir-secretaire.webp',
+  },
+  {
+    grade:  'Ancien d\'Église',
+    name:   'FOCHIVE Édouard',
+    titre:  'Trésorier Général',
+    region: 'Bafoussam · Noun',
+    image:  '/images/dir-tresorier.webp',
+  },
 ];

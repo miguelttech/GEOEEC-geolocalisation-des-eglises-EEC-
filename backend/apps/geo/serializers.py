@@ -37,12 +37,9 @@ SERIALIZERS DÉFINIS ICI :
 
 # rest_framework.serializers : bibliothèque principale de DRF pour créer des serializers
 from rest_framework import serializers
-
-# GeoFeatureModelSerializer : serializer spécial qui produit du GeoJSON
-# Utilisé pour les modèles qui ont un champ géographique (PointField, MultiPolygonField)
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
+from django.contrib.gis.geos import Point
 
-# On importe les modèles Django dont on veut sérialiser les données
 from .models import RegionSynodale, District, Paroisse
 
 
@@ -88,24 +85,17 @@ class RegionSynodaleSerializer(GeoFeatureModelSerializer):
 # =============================================================================
 class RegionSynodaleListSerializer(serializers.ModelSerializer):
     """
-    Version allégée de RegionSynodaleSerializer.
-
-    POURQUOI AVOIR DEUX SERIALIZERS POUR LA MÊME TABLE ?
-    - Version complète : utilisée pour la carte (besoin du polygone)
-    - Version légère  : utilisée pour les menus déroulants, les filtres,
-                        les listes de régions sans la lourde donnée géométrique
-
-    Le polygone d'une région peut peser plusieurs kilooctets en JSON.
-    Pour un menu déroulant avec 22 régions, on n'a besoin que de id/nom/code.
-    Cette version légère est 100x plus rapide à transférer.
-
-    Hérite de ModelSerializer (pas GeoFeatureModelSerializer) car pas de géométrie.
+    Version sans géométrie de RegionSynodaleSerializer.
+    Utilisée pour les menus déroulants et le tableau admin des régions.
+    nb_districts et nb_paroisses sont fournis via annotate() dans la view.
     """
+
+    nb_districts = serializers.IntegerField(read_only=True, default=0)
+    nb_paroisses = serializers.IntegerField(read_only=True, default=0)
 
     class Meta:
         model = RegionSynodale
-        # Seulement 3 champs légers, pas de géométrie
-        fields = ["id", "nom", "code"]
+        fields = ["id", "nom", "code", "nb_districts", "nb_paroisses"]
 
 
 # =============================================================================
@@ -131,84 +121,50 @@ class DistrictSerializer(serializers.ModelSerializer):
     C'est beaucoup plus utile pour l'affichage !
     """
 
-    # CharField(source="region.nom") : traverser la FK pour lire region.nom
-    # read_only=True : ce champ est calculé, pas modifiable
-    region_nom = serializers.CharField(source="region.nom", read_only=True)
-
-    # IntegerField(source="region.id") : l'ID numérique de la région parente
-    region_id  = serializers.IntegerField(source="region.id",  read_only=True)
-
-    # nb_paroisses : calculé via annotate() dans la view (voir geo/views.py)
-    nb_paroisses = serializers.IntegerField(read_only=True)
+    region_nom   = serializers.CharField(source="region.nom", read_only=True)
+    region_id    = serializers.IntegerField(source="region.id", read_only=True)
+    nb_paroisses = serializers.IntegerField(read_only=True, default=0)
+    region       = serializers.PrimaryKeyRelatedField(
+        queryset=RegionSynodale.objects.all(), write_only=True
+    )
 
     class Meta:
         model = District
-        fields = ["id", "nom", "region_id", "region_nom", "nb_paroisses"]
+        fields = ["id", "nom", "region", "region_id", "region_nom", "nb_paroisses"]
 
 
 # =============================================================================
-# SERIALIZER 4 : Paroisses (version liste = GeoJSON pour la carte)
+# SERIALIZER 4 : Paroisses (version liste = JSON paginé pour le tableau admin)
 # =============================================================================
-class ParoisseListSerializer(GeoFeatureModelSerializer):
+class ParoisseListSerializer(serializers.ModelSerializer):
     """
-    Convertit une Paroisse en GeoJSON avec son point GPS.
-
-    C'EST LE SERIALIZER LE PLUS IMPORTANT DU PROJET.
-    Il produit les données que Leaflet.js utilisera pour placer
-    les 402 markers de paroisses sur la carte.
-
-    FORMAT DE SORTIE (GeoJSON Feature) :
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [10.056422, 5.444976]   ← [longitude, latitude]
-      },
-      "properties": {
-        "id": 1,
-        "nom": "Jourdain de beka hossere",
-        "adresse": "250",
-        "district_id": 1,
-        "district_nom": "NGAOUNDERE",
-        "region_id": 10,
-        "region_nom": "ADAMAOUA"
-      }
-    }
-
-    COMMENT UTILISER DANS LEAFLET.JS ?
-    const geojson = response.data.results;  // GeoJSON FeatureCollection
-    L.geoJSON(geojson, {
-      onEachFeature: (feature, layer) => {
-        layer.bindPopup(feature.properties.nom);  // popup avec le nom
-      }
-    }).addTo(map);
-
-    RELATIONS TRAVERSÉES :
-    paroisse → district → region (deux niveaux de FK)
+    Version complète pour le tableau d'administration (liste paginée).
+    Retourne un objet JSON plat compatible avec PagedResult<Paroisse> côté frontend.
+    Pour la carte GeoJSON, utiliser un endpoint dédié /geojson/ à créer ultérieurement.
     """
 
-    # Traverser la relation paroisse→district pour avoir le nom du district
     district_nom = serializers.CharField(source="district.nom",          read_only=True)
-
-    # Traverser deux niveaux : paroisse→district→region pour avoir le nom de la région
     region_nom   = serializers.CharField(source="district.region.nom",   read_only=True)
-
-    # Les IDs numériques pour les filtres frontend
     district_id  = serializers.IntegerField(source="district.id",        read_only=True)
     region_id    = serializers.IntegerField(source="district.region.id", read_only=True)
+    latitude     = serializers.SerializerMethodField()
+    longitude    = serializers.SerializerMethodField()
+
+    def get_latitude(self, obj):
+        return obj.position.y if obj.position else None
+
+    def get_longitude(self, obj):
+        return obj.position.x if obj.position else None
 
     class Meta:
         model = Paroisse
-
-        # geo_field : le champ PointField à convertir en geometry GeoJSON
-        # position est un Point(longitude, latitude, srid=4326) stocké en PostGIS
-        geo_field = "position"
-
         fields = [
-            "id", "nom", "adresse",
+            "id", "nom", "adresse", "niveau",
             "district_id", "district_nom",
             "region_id", "region_nom",
-            "position",   # → sera mis dans "geometry" du GeoJSON
+            "latitude", "longitude",
+            "est_active", "nombre_fideles", "telephone", "email",
+            "annee_creation", "created_at", "updated_at",
         ]
 
 
@@ -264,8 +220,49 @@ class ParoisseDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Paroisse
         fields = [
-            "id", "nom", "adresse",
+            "id", "nom", "adresse", "niveau",
             "district_id", "district_nom",
             "region_id", "region_nom",
-            "latitude", "longitude",  # coordonnées extraites séparément
+            "latitude", "longitude",
+            "est_active", "nombre_fideles", "telephone", "email",
+            "annee_creation", "created_at", "updated_at",
         ]
+
+
+# =============================================================================
+# SERIALIZER 6 : Paroisses (version écriture — create / update)
+# =============================================================================
+class ParoisseWriteSerializer(serializers.ModelSerializer):
+    """
+    Serializer pour créer ou modifier une paroisse via l'API.
+
+    Accepte latitude et longitude séparément (comme le frontend les envoie)
+    et les convertit en Point(longitude, latitude) pour PostGIS.
+    Le champ `district` est un PrimaryKeyRelatedField pour accepter un ID.
+    """
+
+    latitude  = serializers.FloatField(required=False, allow_null=True, write_only=True)
+    longitude = serializers.FloatField(required=False, allow_null=True, write_only=True)
+
+    class Meta:
+        model = Paroisse
+        fields = [
+            "id", "nom", "adresse", "niveau",
+            "district",
+            "latitude", "longitude",
+            "est_active", "nombre_fideles", "telephone", "email",
+            "annee_creation",
+        ]
+
+    def validate(self, attrs):
+        lat = attrs.pop("latitude", None)
+        lng = attrs.pop("longitude", None)
+        if lat is not None and lng is not None:
+            attrs["position"] = Point(lng, lat, srid=4326)
+        elif lat is None and lng is None:
+            attrs.setdefault("position", None)
+        else:
+            raise serializers.ValidationError(
+                "Il faut fournir latitude ET longitude (ou aucun des deux)."
+            )
+        return attrs

@@ -14,8 +14,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" className={`${inter.variable} ${jetbrainsMono.variable} ${fraunces.variable} ${spaceGrotesk.variable}`}>
-      <body>{children}</body>
+    <html lang="fr" suppressHydrationWarning className={`${inter.variable} ${jetbrainsMono.variable} ${fraunces.variable} ${spaceGrotesk.variable}`}>
+      <body suppressHydrationWarning>{children}</body>
     </html>
   );
 }

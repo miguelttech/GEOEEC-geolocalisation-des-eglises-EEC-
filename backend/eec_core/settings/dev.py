@@ -2,7 +2,7 @@ from .base import *
 
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0", "backend"]
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
@@ -19,4 +19,5 @@ CSRF_TRUSTED_ORIGINS = [
 CORS_ALLOW_CREDENTIALS = True
 
 SESSION_COOKIE_SECURE = False
+SESSION_COOKIE_SAMESITE = "Lax"
 

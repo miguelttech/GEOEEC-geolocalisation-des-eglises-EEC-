@@ -1,15 +1,19 @@
 'use client';
 import React from 'react';
+import { getCsrf, api, LogEntry, PagedResult } from '@/lib/api';
 import { I } from '@/components/admin/icons';
-import { NiveauPill } from '@/components/admin/atoms';
 
-interface Toast { id: number; type: 'success'|'warn'|'info'|'error'; title: string; body?: string; }
+const BACKEND = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api')
+  .replace(/\/api\/?$/, '');
+
+/* ─── Toast ────────────────────────────────────────────────────────────── */
+interface Toast { id: number; type: 'success' | 'warn' | 'info' | 'error'; title: string; body?: string; }
 function useToast() {
   const [toasts, setToasts] = React.useState<Toast[]>([]);
   const add = (t: Omit<Toast, 'id'>) => {
     const id = Date.now();
     setToasts(p => [...p, { ...t, id }]);
-    setTimeout(() => setToasts(p => p.filter(x => x.id !== id)), 4000);
+    setTimeout(() => setToasts(p => p.filter(x => x.id !== id)), 5500);
   };
   return { toasts, add };
 }
@@ -18,224 +22,639 @@ function ToastStack({ toasts }: { toasts: Toast[] }) {
     <div className="toast-stack">
       {toasts.map(t => (
         <div key={t.id} className={`toast ${t.type}`}>
-          <div>
-            <div style={{ fontWeight: 600, fontSize: 13 }}>{t.title}</div>
-            {t.body && <div style={{ fontSize: 12, color: 'var(--text-2)', marginTop: 2 }}>{t.body}</div>}
-          </div>
+          <div style={{ fontWeight: 600, fontSize: 13 }}>{t.title}</div>
+          {t.body && <div style={{ fontSize: 12, color: 'var(--text-2)', marginTop: 2 }}>{t.body}</div>}
         </div>
       ))}
     </div>
   );
 }
 
-export default function IOPage() {
-  const { toasts, add: addToast } = useToast();
-  const [tab, setTab] = React.useState('paroisses');
-  const [step, setStep] = React.useState(3);
-  const [importing, setImporting] = React.useState(false);
-  const [progress, setProgress] = React.useState(68);
-  const [exportOpen, setExportOpen] = React.useState(false);
+/* ─── Types ────────────────────────────────────────────────────────────── */
+interface ImportResult {
+  created: number;
+  updated: number;
+  errors_count: number;
+  errors: Array<{ ligne: number; erreur: string }>;
+  total_lignes: number;
+  preview?: ParoissePreviewRow[];
+}
 
-  React.useEffect(() => {
-    if (!importing) return;
-    const i = setInterval(() => setProgress(p => Math.min(100, p + 0.6)), 150);
-    return () => clearInterval(i);
-  }, [importing]);
+interface ParoissePreviewRow {
+  nom: string;
+  niveau: string;
+  region: string;
+  district: string;
+  adresse: string;
+  gps: boolean;
+  communiants: number;
+  non_communiants: number;
+  statut: string;
+}
 
-  const tabs = [
-    { k:'paroisses', l:'Import Paroisses' },
-    { k:'ouvriers',  l:'Import Ouvriers' },
-    { k:'oeuvres',   l:'Import Œuvres' },
-    { k:'shapefile', l:'Import Shapefile' },
-    { k:'historique',l:'Historique' },
-  ];
+type ImportTab = 'paroisses' | 'ouvriers' | 'oeuvres';
+
+/* ─── Download helper ──────────────────────────────────────────────────── */
+function triggerDownload(url: string, filename?: string) {
+  const a = document.createElement('a');
+  a.href = url;
+  if (filename) a.download = filename;
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+/* ─── Progress bar ──────────────────────────────────────────────────────── */
+function ProgressBar({ value }: { value: number }) {
+  return (
+    <div style={{ width: '100%', height: 6, background: 'rgba(255,255,255,0.08)', borderRadius: 4, overflow: 'hidden' }}>
+      <div style={{
+        height: '100%', width: `${value}%`, borderRadius: 4,
+        background: 'linear-gradient(90deg, #2E9744, #5AC472)',
+        transition: 'width 0.3s ease',
+      }} />
+    </div>
+  );
+}
+
+/* ─── Config import ─────────────────────────────────────────────────────── */
+const IMPORT_CONFIG: Record<ImportTab, {
+  label: string; templateUrl: string; importUrl: string; icon: keyof typeof I;
+  columns: string[];
+}> = {
+  paroisses: {
+    label: 'Paroisses',
+    templateUrl: `${BACKEND}/api/exports/templates/paroisses/`,
+    importUrl:   `${BACKEND}/api/imports/paroisses/`,
+    icon: 'cross',
+    columns: ['Niveau', 'Région Synodale *', 'District', 'Nom Paroisse *', 'Quartier/Adresse', 'Communiants', 'Non-Comm.', 'Ouvriers', 'Coord. X', 'Coord. Y', 'Altitude'],
+  },
+  ouvriers: {
+    label: 'Ouvriers',
+    templateUrl: `${BACKEND}/api/exports/templates/ouvriers/`,
+    importUrl:   `${BACKEND}/api/imports/ouvriers/`,
+    icon: 'user',
+    columns: ['Nom *', 'Prénom *', 'Sexe *', 'Grade', 'Paroisse *', 'Statut', 'Téléphone'],
+  },
+  oeuvres: {
+    label: 'Œuvres',
+    templateUrl: `${BACKEND}/api/exports/templates/oeuvres/`,
+    importUrl:   `${BACKEND}/api/imports/oeuvres/`,
+    icon: 'hexagon',
+    columns: ['Nom *', 'Type *', 'Paroisse', 'District', 'Région', 'Adresse', 'Latitude', 'Longitude', 'Capacité'],
+  },
+};
+
+/* ─── Import panel ──────────────────────────────────────────────────────── */
+function ImportPanel({ tab, onDone }: { tab: ImportTab; onDone: () => void }) {
+  const [step, setStep]       = React.useState<1 | 2 | 3>(1);
+  const [file, setFile]       = React.useState<File | null>(null);
+  const [progress, setProgress] = React.useState(0);
+  const [loading, setLoad]    = React.useState(false);
+  const [result, setResult]   = React.useState<ImportResult | null>(null);
+  const [error, setError]     = React.useState('');
+  const [dragOver, setDragOver] = React.useState(false);
+  const fileInputRef          = React.useRef<HTMLInputElement>(null);
+  const cfg                   = IMPORT_CONFIG[tab];
+
+  React.useEffect(() => { setStep(1); setFile(null); setResult(null); setError(''); setProgress(0); }, [tab]);
+
+  function pickFile(f: File) {
+    setFile(f);
+    setError('');
+    setStep(2);
+  }
+
+  async function runImport() {
+    if (!file) return;
+    setLoad(true);
+    setError('');
+    setProgress(0);
+
+    try {
+      const csrf = await getCsrf();
+      const form = new FormData();
+      form.append('file', file);
+
+      // XHR pour les events de progression
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', cfg.importUrl);
+        xhr.withCredentials = true;
+        xhr.setRequestHeader('X-CSRFToken', csrf);
+
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) setProgress(Math.round((e.loaded / e.total) * 80));
+        };
+
+        xhr.onload = () => {
+          setProgress(100);
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              const data: ImportResult = JSON.parse(xhr.responseText);
+              setResult(data);
+              setStep(3);
+              onDone();
+              resolve();
+            } catch {
+              reject(new Error('Réponse invalide du serveur.'));
+            }
+          } else {
+            try {
+              const err = JSON.parse(xhr.responseText);
+              reject(new Error(err.detail || `Erreur ${xhr.status}`));
+            } catch {
+              reject(new Error(`Erreur ${xhr.status}`));
+            }
+          }
+        };
+
+        xhr.onerror = () => reject(new Error('Erreur réseau. Vérifiez votre connexion.'));
+        xhr.send(form);
+      });
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Erreur inconnue');
+      setProgress(0);
+    } finally {
+      setLoad(false);
+    }
+  }
+
+  const steps = [{ n: 1, l: 'Gabarit' }, { n: 2, l: 'Fichier' }, { n: 3, l: 'Résultat' }];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <div className="tabs-bar" style={{ borderBottom: '1px solid var(--border)' }}>
-        {tabs.map(t => (
-          <button key={t.k} className={'tab' + (tab === t.k ? ' active' : '')} onClick={() => setTab(t.k)}>{t.l}</button>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+      {/* Stepper */}
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        {steps.map((s, i) => (
+          <React.Fragment key={s.n}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div className={`step-dot ${step > s.n ? 'done' : step === s.n ? 'current' : 'future'}`}>
+                {step > s.n ? <I.check size={12} /> : s.n}
+              </div>
+              <span style={{ fontSize: 12, fontWeight: 600, color: step >= s.n ? 'var(--text)' : 'var(--text-3)' }}>{s.l}</span>
+            </div>
+            {i < steps.length - 1 && (
+              <div className={`step-line ${step > s.n ? 'done' : ''}`} style={{ flex: 1, minWidth: 40 }} />
+            )}
+          </React.Fragment>
         ))}
-        <div style={{ marginLeft: 'auto', padding: '8px 0' }}>
-          <button className="btn btn-outline-green" onClick={() => setExportOpen(o => !o)}><I.download size={13}/>{exportOpen ? 'Fermer Export' : 'Section Export'}</button>
-        </div>
       </div>
 
-      {tab !== 'historique' && (
-        <div className="card" style={{ padding: 24 }}>
-          {/* Stepper */}
-          <div style={{ display: 'flex', alignItems: 'center', marginBottom: 24 }}>
-            {[{n:1,l:'Modèle'},{n:2,l:'Chargement'},{n:3,l:'Prévisualisation'},{n:4,l:'Import'}].map((s, i) => (
-              <React.Fragment key={s.n}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }} onClick={() => setStep(s.n)}>
-                  <div className={`step-dot ${step > s.n ? 'done' : step === s.n ? 'current' : 'future'}`}>
-                    {step > s.n ? <I.check size={12}/> : s.n}
-                  </div>
-                  <span style={{ fontSize: 12, color: step >= s.n ? 'var(--text)' : 'var(--text-3)', fontWeight: 600 }}>{s.l}</span>
-                </div>
-                {i < 3 && <div className={`step-line ${step > s.n ? 'done' : ''}`} style={{ minWidth: 50 }} />}
-              </React.Fragment>
-            ))}
+      {/* ── Step 1 — Gabarit ─────────────────────────────────────────── */}
+      {step === 1 && (
+        <div className="card" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 18 }}>
+          <div>
+            <h3 className="sg" style={{ fontSize: 15, margin: '0 0 6px' }}>
+              Étape 1 — Télécharger le gabarit {cfg.label}
+            </h3>
+            <p style={{ fontSize: 13, color: 'var(--text-2)', margin: 0, lineHeight: 1.6 }}>
+              Téléchargez le gabarit Excel officiel EEC, remplissez vos données ligne par ligne
+              en respectant les colonnes, puis revenez pour importer votre fichier.
+            </p>
           </div>
 
-          {step === 1 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 720 }}>
-              <h3 className="sg" style={{ fontSize: 18, margin: 0 }}>Étape 1 — Télécharger le modèle</h3>
-              <p style={{ fontSize: 13, color: 'var(--text-2)', margin: 0, lineHeight: 1.5 }}>Téléchargez le modèle Excel pour préparer vos données. Le fichier contient les colonnes obligatoires, exemples et instructions par colonne.</p>
-              <div style={{ display: 'flex', gap: 12 }}>
-                <button className="btn btn-primary"><I.download size={14}/>Télécharger le modèle Excel</button>
-                <button className="btn btn-outline"><I.externLink size={13}/>Documentation des colonnes</button>
+          {/* Colonnes du gabarit */}
+          <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 6, padding: '12px 14px' }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
+              Colonnes du gabarit
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {cfg.columns.map((col, idx) => {
+                const required = col.includes('*');
+                return (
+                  <span key={idx} style={{
+                    fontSize: 11, padding: '3px 8px', borderRadius: 4,
+                    background: required ? 'rgba(46,151,68,0.12)' : 'rgba(255,255,255,0.06)',
+                    color: required ? '#5AC472' : 'var(--text-2)',
+                    border: `1px solid ${required ? 'rgba(46,151,68,0.25)' : 'rgba(255,255,255,0.08)'}`,
+                    fontFamily: 'var(--font-mono, monospace)',
+                  }}>
+                    {String.fromCharCode(65 + idx)}. {col}
+                  </span>
+                );
+              })}
+            </div>
+            <div style={{ fontSize: 10, color: 'var(--text-3)', marginTop: 8 }}>
+              <span style={{ color: '#5AC472' }}>■</span> Champs obligatoires &nbsp;·&nbsp;
+              <span style={{ color: 'var(--text-3)' }}>■</span> Champs optionnels (laisser vide si inconnu)
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <button className="btn btn-primary" onClick={() => triggerDownload(cfg.templateUrl)}>
+              <I.download size={14} /> Télécharger le gabarit .xlsx
+            </button>
+            <button className="btn btn-outline" onClick={() => setStep(2)}>
+              J'ai déjà mon fichier →
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Step 2 — Upload ─────────────────────────────────────────────── */}
+      {step === 2 && (
+        <div className="card" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <h3 className="sg" style={{ fontSize: 15, margin: 0 }}>
+            Étape 2 — Sélectionner le fichier à importer
+          </h3>
+
+          {/* Zone de drop */}
+          <div
+            onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={e => {
+              e.preventDefault(); setDragOver(false);
+              const f = e.dataTransfer.files[0];
+              if (f) pickFile(f);
+            }}
+            onClick={() => fileInputRef.current?.click()}
+            style={{
+              background: dragOver ? 'rgba(46,151,68,0.08)' : 'rgba(255,255,255,0.03)',
+              border: `2px dashed ${dragOver ? 'rgba(90,196,114,0.70)' : file ? 'rgba(90,196,114,0.50)' : 'rgba(245,197,24,0.30)'}`,
+              borderRadius: 10, padding: '44px 24px', textAlign: 'center', cursor: 'pointer',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".xlsx,.xls"
+              style={{ display: 'none' }}
+              onChange={e => { const f = e.target.files?.[0]; if (f) pickFile(f); }}
+            />
+            <div style={{
+              display: 'inline-flex', width: 56, height: 56, borderRadius: 14,
+              background: file ? 'rgba(46,151,68,0.15)' : 'rgba(245,197,24,0.10)',
+              alignItems: 'center', justifyContent: 'center',
+              color: file ? '#5AC472' : '#F5C518', marginBottom: 12,
+            }}>
+              {file ? <I.check size={26} /> : <I.upload size={26} />}
+            </div>
+            {file ? (
+              <>
+                <div style={{ fontSize: 14, fontWeight: 600, color: '#5AC472' }}>{file.name}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 4 }}>
+                  {(file.size / 1024).toFixed(1)} Ko · Cliquez pour changer de fichier
+                </div>
+              </>
+            ) : (
+              <>
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>
+                  Déposez votre fichier Excel ici
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--text-2)', marginTop: 4 }}>
+                  ou cliquez pour parcourir · Formats acceptés : .xlsx, .xls
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Barre de progression */}
+          {loading && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-2)' }}>
+                <span>{progress < 80 ? 'Envoi du fichier…' : 'Traitement en cours…'}</span>
+                <span style={{ fontFamily: 'var(--font-mono, monospace)', color: '#5AC472' }}>{progress}%</span>
               </div>
+              <ProgressBar value={progress} />
             </div>
           )}
 
-          {step === 2 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <h3 className="sg" style={{ fontSize: 18, margin: 0 }}>Étape 2 — Charger le fichier</h3>
-              <div style={{ background: 'rgba(255,255,255,0.03)', border: '2px dashed rgba(245,197,24,0.30)', borderRadius: 8, padding: '50px 24px', textAlign: 'center' }}>
-                <div style={{ display: 'inline-flex', width: 56, height: 56, borderRadius: 12, background: 'rgba(46,151,68,0.12)', alignItems: 'center', justifyContent: 'center', color: '#5AC472', marginBottom: 12 }}><I.upload size={26}/></div>
-                <div style={{ fontSize: 15, fontWeight: 600 }}>Déposez votre fichier Excel ici</div>
-                <div style={{ fontSize: 12, color: 'var(--text-2)', marginTop: 4 }}>.xlsx · 10 Mo max</div>
-              </div>
+          {error && (
+            <div style={{
+              background: 'rgba(198,40,40,0.08)', border: '1px solid rgba(198,40,40,0.30)',
+              borderRadius: 6, padding: '10px 14px', fontSize: 12, color: '#FF8A7A',
+              display: 'flex', gap: 8, alignItems: 'flex-start',
+            }}>
+              <I.alert size={14} style={{ marginTop: 1, flexShrink: 0 }} /> {error}
             </div>
           )}
 
-          {step === 3 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <h3 className="sg" style={{ fontSize: 18, margin: 0 }}>Étape 3 — Prévisualisation</h3>
-                <span style={{ fontSize: 12, color: 'var(--text-2)' }} className="mono">paroisses_2026.xlsx · 1.4 Mo</span>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
-                <div className="card" style={{ padding: 14 }}><div className="sg" style={{ fontSize: 22, color: '#5AC472' }}>1 003</div><div style={{ fontSize: 12, color: 'var(--text-2)' }}>Lignes à traiter</div></div>
-                <div className="card" style={{ padding: 14 }}><div className="sg" style={{ fontSize: 22, color: '#FFD600' }}>87</div><div style={{ fontSize: 12, color: 'var(--text-2)' }}>Mises à jour détectées</div></div>
-                <div className="card" style={{ padding: 14 }}><div className="sg" style={{ fontSize: 22, color: '#FF6B6B' }}>3</div><div style={{ fontSize: 12, color: 'var(--text-2)' }}>Erreurs de validation</div></div>
-              </div>
-              <div style={{ background: 'rgba(198,40,40,0.08)', border: '1px solid rgba(198,40,40,0.25)', borderRadius: 6, padding: '10px 14px', fontSize: 12, color: '#FF8A7A', display: 'flex', gap: 8 }}>
-                <I.alert size={14} style={{ marginTop: 2 }}/>
-                <div>
-                  <b>3 erreurs détectées :</b> ligne 247 (région inexistante), ligne 412 (GPS hors Cameroun), ligne 829 (district manquant).
-                  <a style={{ color: '#FF8A7A', textDecoration: 'underline', marginLeft: 8, cursor: 'pointer' }}>Voir le rapport →</a>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'space-between', alignItems: 'center' }}>
+            <button className="btn btn-ghost" disabled={loading} onClick={() => { setFile(null); setStep(1); }}>
+              ← Retour au gabarit
+            </button>
+            <button
+              className="btn btn-primary"
+              disabled={!file || loading}
+              style={{ opacity: (!file || loading) ? 0.5 : 1, minWidth: 160 }}
+              onClick={runImport}
+            >
+              {loading
+                ? <><I.refresh size={13} style={{ animation: 'spin 1s linear infinite' }} /> Import en cours…</>
+                : <><I.upload size={13} /> Lancer l'import</>
+              }
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Step 3 — Résultat + Aperçu ───────────────────────────────────── */}
+      {step === 3 && result && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+          {/* Compteurs résumé */}
+          <div className="card" style={{ padding: 20 }}>
+            <h3 className="sg" style={{ fontSize: 15, margin: '0 0 14px' }}>Résultat de l'import</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+              {[
+                { label: 'Total lignes',  value: result.total_lignes,  color: 'var(--text)'   },
+                { label: 'Créés',         value: result.created,       color: '#34D399'        },
+                { label: 'Mis à jour',    value: result.updated,       color: '#FBBF24'        },
+                { label: 'Erreurs',       value: result.errors_count,  color: result.errors_count > 0 ? '#F87171' : 'var(--text-3)' },
+              ].map(s => (
+                <div key={s.label} className="card" style={{ padding: '12px 14px' }}>
+                  <div style={{ fontSize: 10, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>{s.label}</div>
+                  <div className="sg" style={{ fontSize: 28, color: s.color, marginTop: 4 }}>{s.value}</div>
+                </div>
+              ))}
+            </div>
+
+            {result.errors.length > 0 && (
+              <div style={{ marginTop: 16, background: 'rgba(198,40,40,0.06)', border: '1px solid rgba(198,40,40,0.22)', borderRadius: 6, overflow: 'hidden' }}>
+                <div style={{ padding: '8px 14px', borderBottom: '1px solid rgba(198,40,40,0.15)', fontSize: 12, color: '#FF8A7A', fontWeight: 600, display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <I.alert size={13} /> {result.errors_count} erreur{result.errors_count > 1 ? 's' : ''} détectée{result.errors_count > 1 ? 's' : ''}
+                  {result.errors_count > 50 && <span style={{ fontWeight: 400, opacity: 0.7 }}>(50 premières affichées)</span>}
+                </div>
+                <div style={{ maxHeight: 200, overflowY: 'auto' }}>
+                  <table className="data" style={{ fontSize: 12 }}>
+                    <thead><tr><th style={{ width: 80 }}>Ligne</th><th>Erreur</th></tr></thead>
+                    <tbody>
+                      {result.errors.map((err, i) => (
+                        <tr key={i}>
+                          <td className="mono" style={{ color: '#FF8A7A' }}>L.{err.ligne}</td>
+                          <td style={{ color: 'var(--text-2)' }}>{err.erreur}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
-              <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-                <table className="data">
-                  <thead><tr><th>Nom</th><th>Région</th><th>District</th><th>Niveau</th><th>Lat</th><th>Lng</th><th>Statut</th></tr></thead>
+            )}
+
+            <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
+              <button className="btn btn-outline" onClick={() => { setStep(1); setFile(null); setResult(null); setError(''); setProgress(0); }}>
+                <I.plus size={13} /> Nouvel import
+              </button>
+            </div>
+          </div>
+
+          {/* Aperçu des données importées */}
+          {result.preview && result.preview.length > 0 && (
+            <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+              <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>
+                    Aperçu des données importées
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 2 }}>
+                    {result.preview.length} enregistrement{result.preview.length > 1 ? 's' : ''} affiché{result.preview.length > 1 ? 's' : ''}
+                    {result.total_lignes > result.preview.length && ` sur ${result.total_lignes} total`}
+                  </div>
+                </div>
+                <span style={{ fontSize: 11, color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 5 }}>
+                  <I.eye size={13} /> Glissez horizontalement pour voir toutes les colonnes
+                </span>
+              </div>
+              <div style={{ overflowX: 'auto' }}>
+                <table className="data" style={{ fontSize: 12, minWidth: 900 }}>
+                  <thead>
+                    <tr>
+                      <th>Statut</th>
+                      <th>Nom de la Paroisse</th>
+                      <th>Niveau</th>
+                      <th>Région Synodale</th>
+                      <th>District</th>
+                      <th>Adresse</th>
+                      <th style={{ textAlign: 'right' }}>Communiants</th>
+                      <th style={{ textAlign: 'right' }}>Non-Comm.</th>
+                      <th style={{ textAlign: 'center' }}>GPS</th>
+                    </tr>
+                  </thead>
                   <tbody>
-                    {[
-                      {n:'Baham-Sud',          r:'MIFI',          d:'BAHAM',         niv:'PAROISSE', lat:'5.435', lng:'10.367', ok:true},
-                      {n:'Yaoundé-Mokolo',     r:'CENTRE SUD 1',  d:'YAOUNDE CENTRE',niv:'STATION',  lat:'3.880', lng:'11.502', ok:true},
-                      {n:'Erreur ligne 247',   r:'???',           d:'???',            niv:'PAROISSE', lat:'—',     lng:'—',      ok:false},
-                      {n:'Bafang-Ouest',       r:'HAUT-NKAM',    d:'BAFANG',         niv:'PAROISSE', lat:'5.155', lng:'10.180', ok:true},
-                      {n:'Douala-Bonapriso',   r:'WOURI CENTRE',  d:'DOUALA CENTRE', niv:'ANNEXE',   lat:'4.041', lng:'9.703',  ok:true},
-                    ].map((r, i) => (
-                      <tr key={i} style={{ background: r.ok ? 'transparent' : 'rgba(198,40,40,0.06)' }}>
-                        <td style={{ fontWeight: 500 }}>{r.n}</td>
-                        <td style={{ color: 'var(--text-2)' }}>{r.r}</td>
-                        <td style={{ color: 'var(--text-2)' }}>{r.d}</td>
-                        <td><NiveauPill niveau={r.niv as 'PAROISSE'|'STATION'|'ANNEXE'}/></td>
-                        <td className="mono" style={{ color: 'var(--text-2)' }}>{r.lat}</td>
-                        <td className="mono" style={{ color: 'var(--text-2)' }}>{r.lng}</td>
-                        <td>{r.ok ? <span className="pill pill-green">OK</span> : <span className="pill pill-red">Erreur</span>}</td>
+                    {result.preview.map((row, i) => (
+                      <tr key={i}>
+                        <td>
+                          <span style={{
+                            fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 3,
+                            background: row.statut === 'Créé' ? 'rgba(52,211,153,0.12)' : 'rgba(251,191,36,0.12)',
+                            color: row.statut === 'Créé' ? '#34D399' : '#FBBF24',
+                          }}>
+                            {row.statut}
+                          </span>
+                        </td>
+                        <td style={{ fontWeight: 500, maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {row.nom}
+                        </td>
+                        <td>
+                          <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 3, background: 'rgba(255,255,255,0.06)', color: 'var(--text-2)' }}>
+                            {row.niveau}
+                          </span>
+                        </td>
+                        <td style={{ color: 'var(--text-2)', fontSize: 11 }}>{row.region}</td>
+                        <td style={{ color: 'var(--text-2)', fontSize: 11 }}>{row.district}</td>
+                        <td style={{ color: 'var(--text-3)', fontSize: 11, maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {row.adresse || '—'}
+                        </td>
+                        <td className="mono" style={{ textAlign: 'right', color: row.communiants > 0 ? 'var(--text)' : 'var(--text-3)' }}>
+                          {row.communiants > 0 ? row.communiants.toLocaleString('fr') : '—'}
+                        </td>
+                        <td className="mono" style={{ textAlign: 'right', color: row.non_communiants > 0 ? 'var(--text)' : 'var(--text-3)' }}>
+                          {row.non_communiants > 0 ? row.non_communiants.toLocaleString('fr') : '—'}
+                        </td>
+                        <td style={{ textAlign: 'center' }}>
+                          {row.gps
+                            ? <span style={{ color: '#34D399' }}>●</span>
+                            : <span style={{ color: 'var(--text-3)' }}>○</span>}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
-              <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-                <button className="btn btn-outline"><I.download size={13}/>Rapport de validation</button>
-                <button className="btn btn-primary" onClick={() => { setStep(4); setImporting(true); }}>Lancer l'import →</button>
-              </div>
-            </div>
-          )}
-
-          {step === 4 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <h3 className="sg" style={{ fontSize: 18, margin: 0 }}>Import en cours</h3>
-              <div style={{ fontSize: 12, color: 'var(--text-2)' }} className="mono">paroisses_2026.xlsx</div>
-              <div style={{ width: '100%', height: 10, background: 'rgba(255,255,255,0.10)', borderRadius: 100, overflow: 'hidden' }}>
-                <div style={{ width: progress + '%', height: '100%', background: 'linear-gradient(90deg, #2E9744, #5AC472)', borderRadius: 100, transition: 'width 200ms ease', boxShadow: '0 0 12px rgba(46,151,68,0.4)' }}/>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12, color: 'var(--text-2)' }}>
-                <span>Ligne <span className="mono" style={{ color: 'var(--text)' }}>{Math.round(progress * 10)}</span> / <span className="mono">1 003</span></span>
-                <span><span className="sg" style={{ fontSize: 14, color: '#5AC472' }}>{Math.round(progress)}%</span></span>
-                <span style={{ color: '#FF8A7A' }}>Erreurs : 2</span>
-              </div>
-              <div style={{ display: 'flex', gap: 10 }}>
-                <button className="btn btn-outline" disabled={progress < 100}>Voir rapport partiel</button>
-                <button className="btn btn-outline" style={{ color: '#FF6B6B', borderColor: 'rgba(198,40,40,0.40)' }} onClick={() => { setImporting(false); setStep(3); setProgress(0); }}>Annuler l'import</button>
-                {progress >= 100 && <button className="btn btn-primary" onClick={() => { addToast({ type:'success', title:'Import terminé · 1 001 paroisses' }); setImporting(false); setStep(3); }}>Terminer</button>}
-              </div>
             </div>
           )}
         </div>
       )}
+    </div>
+  );
+}
 
-      {tab === 'historique' && (
-        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-          <table className="data">
-            <thead><tr><th>Date</th><th>Fichier</th><th>Type</th><th>Importé par</th><th style={{textAlign:'right'}}>Lignes OK</th><th style={{textAlign:'right'}}>Erreurs</th><th>Rapport</th></tr></thead>
-            <tbody>
-              {[
-                {d:'26/05 14:18',f:'paroisses_CSUD1.xlsx',  t:'Paroisses',by:'Marie-Claire BIYA',    ok:91,  err:3},
-                {d:'24/05 11:02',f:'ouvriers_2026.xlsx',    t:'Ouvriers', by:'Paul ATEBA',            ok:128, err:0},
-                {d:'22/05 09:47',f:'oeuvres_full.xlsx',     t:'Œuvres',   by:'Jean-Paul ESSOMBA',    ok:311, err:5},
-                {d:'18/05 16:33',f:'shapefile_regions.zip', t:'Shapefile',by:'Jean-Paul ESSOMBA',    ok:22,  err:0},
-              ].map((r, i) => (
-                <tr key={i}>
-                  <td className="mono" style={{ color: 'var(--text-2)' }}>{r.d}</td>
-                  <td style={{ fontWeight: 500 }}>{r.f}</td>
-                  <td><span className="pill pill-blue">{r.t}</span></td>
-                  <td>{r.by}</td>
-                  <td className="mono" style={{ textAlign: 'right', color: '#5AC472' }}>{r.ok}</td>
-                  <td className="mono" style={{ textAlign: 'right', color: r.err > 0 ? '#FF8A7A' : 'var(--text-3)' }}>{r.err}</td>
-                  <td><button className="btn btn-ghost" style={{ padding: '4px 8px', fontSize: 11 }}><I.download size={12}/>PDF</button></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+/* ─── Main page ─────────────────────────────────────────────────────────── */
+export default function IOPage() {
+  const { toasts, add: addToast } = useToast();
+  const [tab, setTab]             = React.useState<'import' | 'export' | 'historique'>('import');
+  const [importTab, setImportTab] = React.useState<ImportTab>('paroisses');
+  const [importKey, setImportKey] = React.useState(0);
 
-      {exportOpen && (
-        <div className="card anim-fade" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 18 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <h3 className="sg" style={{ fontSize: 18, margin: 0 }}>Section Export</h3>
-            <button className="icon-btn" onClick={() => setExportOpen(false)}><I.x size={16}/></button>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
-            {[
-              { label: 'Toutes les paroisses', desc: '553 paroisses · GPS · stats 2025', icon: 'cross', formats: ['xlsx','pdf','csv'] },
-              { label: 'Tous les ouvriers', desc: '685 ouvriers · tous grades', icon: 'user', formats: ['xlsx','pdf'] },
-              { label: 'Toutes les œuvres', desc: '311 œuvres · tous types', icon: 'hexagon', formats: ['xlsx','csv'] },
-              { label: 'Statistiques nationales', desc: 'Rapport agrégé 2025', icon: 'list', formats: ['pdf','xlsx'] },
-              { label: 'Régions synodales', desc: 'Shapefile + données associées', icon: 'compass', formats: ['zip','xlsx'] },
-              { label: 'Districts', desc: '137 districts · admins', icon: 'network', formats: ['xlsx'] },
-            ].map(item => {
-              const Ic = I[item.icon as keyof typeof I];
+  const [history, setHistory]   = React.useState<LogEntry[]>([]);
+  const [histLoad, setHistLoad] = React.useState(false);
+
+  React.useEffect(() => {
+    if (tab !== 'historique') return;
+    setHistLoad(true);
+    Promise.all([
+      api.get<PagedResult<LogEntry>>('/api/audit/journal/?action=IMPORT&page_size=100'),
+      api.get<PagedResult<LogEntry>>('/api/audit/journal/?action=EXPORT&page_size=100'),
+    ])
+      .then(([imp, exp]) => {
+        setHistory([...imp.results, ...exp.results]
+          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
+      })
+      .catch(() => {})
+      .finally(() => setHistLoad(false));
+  }, [tab, importKey]);
+
+  const EXPORTS = [
+    { key: 'paroisses-excel', label: 'Paroisses',          desc: 'Toutes les paroisses avec GPS',    icon: 'cross'   as keyof typeof I, url: `${BACKEND}/api/exports/paroisses/excel/`    },
+    { key: 'ouvriers-excel',  label: 'Ouvriers',           desc: 'Tous les ouvriers, tous grades',   icon: 'user'    as keyof typeof I, url: `${BACKEND}/api/exports/ouvriers/excel/`     },
+    { key: 'oeuvres-excel',   label: 'Œuvres',             desc: 'Toutes les œuvres sociales EEC',   icon: 'hexagon' as keyof typeof I, url: `${BACKEND}/api/exports/oeuvres/excel/`      },
+    { key: 'stats-excel',     label: 'Statistiques .xlsx', desc: 'Rapport annuel agrégé',            icon: 'list'    as keyof typeof I, url: `${BACKEND}/api/exports/statistiques/excel/` },
+    { key: 'stats-pdf',       label: 'Statistiques .pdf',  desc: 'Rapport PDF imprimable A4',        icon: 'list'    as keyof typeof I, url: `${BACKEND}/api/exports/statistiques/pdf/`   },
+  ];
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+      {/* Onglets principaux */}
+      <div className="tabs-bar" style={{ borderBottom: '1px solid var(--border)' }}>
+        {[
+          { k: 'import',     l: 'Import de données', ic: 'upload'   as keyof typeof I },
+          { k: 'export',     l: 'Export de données', ic: 'download' as keyof typeof I },
+          { k: 'historique', l: 'Historique',        ic: 'list'     as keyof typeof I },
+        ].map(t => {
+          const Ic = I[t.ic];
+          return (
+            <button key={t.k} className={`tab${tab === t.k ? ' active' : ''}`}
+              onClick={() => setTab(t.k as typeof tab)}>
+              <Ic size={13} /> {t.l}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* ── IMPORT ────────────────────────────────────────────────────── */}
+      {tab === 'import' && (
+        <>
+          {/* Sélecteur de type */}
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {(['paroisses', 'ouvriers', 'oeuvres'] as ImportTab[]).map(k => {
+              const cfg = IMPORT_CONFIG[k];
+              const Ic  = I[cfg.icon];
               return (
-                <div key={item.label} className="card" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    {Ic && <Ic size={16} style={{ color: '#5AC472' }}/>}
-                    <span style={{ fontWeight: 600, fontSize: 13 }}>{item.label}</span>
+                <button key={k}
+                  className={`btn ${importTab === k ? 'btn-primary' : 'btn-outline'}`}
+                  onClick={() => { setImportTab(k); setImportKey(n => n + 1); }}
+                  style={{ gap: 7 }}>
+                  <Ic size={13} /> {cfg.label}
+                </button>
+              );
+            })}
+          </div>
+
+          <ImportPanel
+            key={`${importTab}-${importKey}`}
+            tab={importTab}
+            onDone={() => setImportKey(k => k + 1)}
+          />
+        </>
+      )}
+
+      {/* ── EXPORT ─────────────────────────────────────────────────────── */}
+      {tab === 'export' && (
+        <div className="card" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <div>
+            <h3 className="sg" style={{ fontSize: 16, margin: '0 0 6px' }}>Exports de données</h3>
+            <p style={{ fontSize: 13, color: 'var(--text-2)', margin: 0 }}>
+              Téléchargez les données de votre périmètre en un clic. Les fichiers sont générés à la demande avec les données actuelles de la base.
+            </p>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 14 }}>
+            {EXPORTS.map(ex => {
+              const Ic = I[ex.icon];
+              return (
+                <div key={ex.key} className="card" style={{ padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(90,196,114,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#5AC472' }}>
+                      <Ic size={18} />
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: 13 }}>{ex.label}</div>
+                      <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{ex.desc}</div>
+                    </div>
                   </div>
-                  <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{item.desc}</div>
-                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 4 }}>
-                    {item.formats.map(fmt => (
-                      <button key={fmt} className="btn btn-outline" style={{ padding: '5px 10px', fontSize: 11, textTransform: 'uppercase' }}
-                        onClick={() => addToast({ type:'success', title:`Export ${item.label} (${fmt}) lancé`, body:'Le fichier sera disponible dans quelques secondes.' })}>
-                        <I.download size={11}/>{fmt}
-                      </button>
-                    ))}
-                  </div>
+                  <button className="btn btn-outline" style={{ justifyContent: 'center', fontSize: 12 }}
+                    onClick={() => {
+                      triggerDownload(ex.url);
+                      addToast({ type: 'info', title: `Export ${ex.label} lancé`, body: 'Le fichier se télécharge depuis le serveur…' });
+                    }}>
+                    <I.download size={13} /> Télécharger
+                  </button>
                 </div>
               );
             })}
           </div>
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center', paddingTop: 8, borderTop: '1px solid var(--border)', fontSize: 12, color: 'var(--text-2)' }}>
-            <I.alert size={13}/>
-            Les exports volumineux sont préparés en arrière-plan et envoyés par email à l'administrateur connecté.
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text-3)', paddingTop: 8, borderTop: '1px solid var(--border)' }}>
+            <I.alert size={13} />
+            Les exports sont filtrés selon votre périmètre administratif (région, district ou paroisse selon votre rôle).
           </div>
+        </div>
+      )}
+
+      {/* ── HISTORIQUE ─────────────────────────────────────────────────── */}
+      {tab === 'historique' && (
+        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+          {histLoad ? (
+            <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-3)', gap: 10, fontSize: 13 }}>
+              <I.refresh size={16} style={{ opacity: 0.5 }} /> Chargement…
+            </div>
+          ) : history.length === 0 ? (
+            <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12 }}>
+              <I.list size={36} style={{ opacity: 0.18 }} />
+              <div className="sg-md" style={{ fontSize: 14 }}>Aucun import ou export enregistré</div>
+            </div>
+          ) : (
+            <table className="data">
+              <thead>
+                <tr>
+                  <th>Date / Heure</th>
+                  <th>Type</th>
+                  <th>Utilisateur</th>
+                  <th>Entité</th>
+                  <th>Détail</th>
+                </tr>
+              </thead>
+              <tbody>
+                {history.map(e => {
+                  const d    = new Date(e.created_at);
+                  const date = d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: '2-digit' });
+                  const time = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+                  const isImp = e.action === 'IMPORT';
+                  return (
+                    <tr key={e.id}>
+                      <td className="mono" style={{ whiteSpace: 'nowrap' }}>
+                        <div style={{ fontSize: 12, fontWeight: 500 }}>{date}</div>
+                        <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{time}</div>
+                      </td>
+                      <td>
+                        <span className={`pill ${isImp ? 'pill-blue' : 'pill-green'}`} style={{ fontSize: 11 }}>
+                          {isImp ? 'Import' : 'Export'}
+                        </span>
+                      </td>
+                      <td style={{ fontSize: 13, fontWeight: 500 }}>{e.utilisateur_nom}</td>
+                      <td style={{ fontSize: 12, color: 'var(--text-2)' }}>{e.type_objet || '—'}</td>
+                      <td style={{ fontSize: 12, color: 'var(--text-2)', maxWidth: 320, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {e.description || '—'}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
         </div>
       )}
 

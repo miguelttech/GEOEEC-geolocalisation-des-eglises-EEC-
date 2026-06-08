@@ -9,6 +9,7 @@ function Particles({ n = 18 }: { n?: number }) {
     const dx       = ((i % 3) - 1) * 80;
     const size     = 2 + (i % 3);
     const isGreen  = i % 3 === 0;
+    
     return (
       <span
         key={i}
@@ -35,11 +36,11 @@ export default function Hero() {
     <section className="hero" id="hero">
       <div className="hero-bg">
         <Image
-          src="/landing/crucifix.jpg"
+          src="/landing/eglise_beau.png"
           alt=""
           fill
           priority
-          style={{ objectFit: 'cover', objectPosition: 'center 35%' }}
+          style={{ objectFit: 'cover', objectPosition: 'center center' }}
           className="hero-bg-img"
         />
         <div className="hero-bg-vignette" />
@@ -54,8 +55,8 @@ export default function Hero() {
             Plateforme officielle · Église Évangélique du Cameroun
           </span>
           <h1>
-            La carte vivante <br />
-            <em>de notre Église</em><br />
+            Geolocaliser<br />
+            <em>votre Église</em><br />
             <span className="underline">à travers le Cameroun.</span>
           </h1>
           <p className="lede">
@@ -80,7 +81,7 @@ export default function Hero() {
               <div className="num">553</div>
               <div className="lbl">
                 Paroisses cartographiées<br />
-                <span className="lp-mono" style={{ fontSize: '10.5px', letterSpacing: '0.16em', color: 'rgba(245,197,24,0.7)' }}>
+                <span className="lp-mono" style={{ fontSize: '10.5px', letterSpacing: '0.16em', color: 'rgba(245,197,24,0.65)' }}>
                   402 GÉOLOCALISÉES · 151 EN COURS
                 </span>
               </div>
@@ -89,7 +90,7 @@ export default function Hero() {
               <div className="num">685</div>
               <div className="lbl">
                 Ouvriers ecclésiastiques<br />
-                <span className="lp-mono" style={{ fontSize: '10.5px', letterSpacing: '0.16em', color: 'rgba(245,197,24,0.7)' }}>
+                <span className="lp-mono" style={{ fontSize: '10.5px', letterSpacing: '0.16em', color: 'rgba(245,197,24,0.65)' }}>
                   PASTEURS · ÉVANGÉLISTES · DÉLÉGUÉS
                 </span>
               </div>
@@ -98,7 +99,7 @@ export default function Hero() {
               <div className="num">22<sup>·</sup></div>
               <div className="lbl">
                 Régions synodales<br />
-                <span className="lp-mono" style={{ fontSize: '10.5px', letterSpacing: '0.16em', color: 'rgba(245,197,24,0.7)' }}>
+                <span className="lp-mono" style={{ fontSize: '10.5px', letterSpacing: '0.16em', color: 'rgba(245,197,24,0.65)' }}>
                   RÉPARTIES SUR 137 DISTRICTS
                 </span>
               </div>

@@ -10,7 +10,7 @@ export default function Footer() {
             <EECLogo size={56} />
             <p className="footer-brand-text">
               <em>EEC Cameroun.</em><br />
-              La carte vivante de notre Église, pour la marche ensemble.
+              Geolocaliser votre Église, pour la marche ensemble.
             </p>
             <div className="footer-meta">
               SIÈGE · BP 89 BAFOUSSAM<br />
@@ -22,29 +22,29 @@ export default function Footer() {
             <h6>Plateforme</h6>
             <ul>
               <li><Link href="/carte">Carte interactive</Link></li>
-              <li><Link href="/carte">Statistiques</Link></li>
+              <li><Link href="/#stats">Statistiques</Link></li>
               <li><Link href="/carte">Annuaire des paroisses</Link></li>
-              <li><Link href="/admin">Connexion admin</Link></li>
+              <li><Link href="/login">Connexion admin</Link></li>
             </ul>
           </div>
 
           <div>
             <h6>L&apos;Église</h6>
             <ul>
-              <li>Notre histoire</li>
-              <li>Direction</li>
-              <li>Œuvres sociales</li>
-              <li>Théologie</li>
+              <li><a href="#about">Notre histoire</a></li>
+              <li><a href="#direction">Direction</a></li>
+              <li><a href="#oeuvres">Œuvres sociales</a></li>
+              <li><a href="#about">Théologie</a></li>
             </ul>
           </div>
 
           <div>
             <h6>Contact</h6>
             <ul>
-              <li>Synode Général</li>
-              <li>Régions synodales</li>
-              <li>Presse &amp; médias</li>
-              <li>Faire un don</li>
+              <li><a href="mailto:secretariat@eec-cameroun.org">Synode Général</a></li>
+              <li><a href="mailto:regions@eec-cameroun.org">Régions synodales</a></li>
+              <li><a href="mailto:presse@eec-cameroun.org">Presse &amp; médias</a></li>
+              <li><a href="mailto:dons@eec-cameroun.org">Faire un don</a></li>
             </ul>
           </div>
         </div>

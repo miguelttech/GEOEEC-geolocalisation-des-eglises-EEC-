@@ -131,6 +131,11 @@ body {
   transition: background 240ms ease;
 }
 button { font-family: inherit; cursor: pointer; }
+
+/* Pages d'authentification : autoriser le scroll (override du overflow:hidden global) */
+body:has(.ls-root) {
+  overflow: auto !important;
+}
 ::selection { background: var(--eec-yellow); color: #1A1A1A; }
 
 /* Subtle dark mode futuristic background animated gradient + grid */

@@ -20,6 +20,9 @@ export interface MapUser {
   id: number; first_name: string; last_name: string; email: string; role: string;
 }
 
+const BACKEND = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api')
+  .replace(/\/api\/?$/, '');
+
 type AnyItem = typeof ALL_ITEMS[number] | Region | District;
 type Region   = typeof REGIONS[number];
 type District = typeof DISTRICTS[number];
@@ -982,7 +985,7 @@ const QUICK_CHIPS = [
 /* ============================================================
    MAIN COMPONENT
    ============================================================ */
-export default function EECMapApp({ mode, user }: { mode: MapMode; user: MapUser | null }) {
+export default function EECMapApp({ mode, user, embedded = false }: { mode: MapMode; user: MapUser | null; embedded?: boolean }) {
   const [view, setView]               = useState<'map' | 'list'>('map');
   const [theme, setTheme]             = useState<string>('dark');
   const [activeTab, setActiveTab]     = useState<string | null>('search');
@@ -998,7 +1001,11 @@ export default function EECMapApp({ mode, user }: { mode: MapMode; user: MapUser
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const [showCTA, setShowCTA]         = useState(mode === 'public');
 
-  useEffect(() => { document.documentElement.setAttribute('data-theme', theme); }, [theme]);
+  useEffect(() => {
+    if (embedded) return; // Admin shell gère son propre thème
+    document.documentElement.setAttribute('data-theme', theme);
+    return () => { document.documentElement.removeAttribute('data-theme'); };
+  }, [theme, embedded]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -1080,7 +1087,12 @@ export default function EECMapApp({ mode, user }: { mode: MapMode; user: MapUser
 
   const handleLogout = useCallback(async () => {
     try {
-      await fetch('/api/auth/logout/', { method: 'POST', credentials: 'include' });
+      const csrf = await fetch(`${BACKEND}/api/auth/csrf/`, { credentials: 'include' })
+        .then(r => r.json()).then(d => d.csrfToken ?? '').catch(() => '');
+      await fetch(`${BACKEND}/api/auth/logout/`, {
+        method: 'POST', credentials: 'include',
+        headers: { 'X-CSRFToken': csrf, 'Content-Type': 'application/json' },
+      });
     } finally {
       window.location.href = '/';
     }
@@ -1100,10 +1112,13 @@ export default function EECMapApp({ mode, user }: { mode: MapMode; user: MapUser
   const recenter = () => mapRef.current?.flyToBounds(CAMEROON_BOUNDS, { duration: 0.7 } as L.FitBoundsOptions);
 
   return (
-    <div className={'app' + (fullscreen ? ' fs' : '')}>
+    <div
+      className={'app' + (fullscreen ? ' fs' : '')}
+      style={embedded ? { height: '100%', gridTemplateRows: `1fr var(--legend-h)` } : undefined}
+    >
       {showLoginPrompt && <LoginPrompt onClose={() => setShowLoginPrompt(false)} />}
 
-      {!fullscreen && (
+      {!fullscreen && !embedded && (
         <MapNavbar view={view} setView={setView} stats={stats} theme={theme} setTheme={setTheme}
           user={user} mode={mode} onLogout={handleLogout} />
       )}

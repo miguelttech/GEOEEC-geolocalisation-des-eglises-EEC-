@@ -1,13 +1,22 @@
 import type { NextConfig } from "next";
 
+const backendUrl = process.env.BACKEND_INTERNAL_URL ?? "http://localhost:8000";
+
 const nextConfig: NextConfig = {
-  // Proxy toutes les requêtes /api/* vers le backend Django (port 8000)
-  // Ça évite les problèmes CORS et permet de partager les cookies de session
+  // Empêche Next.js de faire une redirection 308 qui enlève le slash final
+  // Django exige le slash final sur toutes ses routes (/api/auth/login/ pas /api/auth/login)
+  skipTrailingSlashRedirect: true,
+
+  // Proxy /api/* → backend Django
   async rewrites() {
     return [
       {
+        source: "/api/:path*/",
+        destination: `${backendUrl}/api/:path*/`,
+      },
+      {
         source: "/api/:path*",
-        destination: `${process.env.BACKEND_INTERNAL_URL ?? "http://localhost:8000"}/api/:path*`,
+        destination: `${backendUrl}/api/:path*`,
       },
     ];
   },

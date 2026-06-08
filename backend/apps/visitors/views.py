@@ -3,6 +3,8 @@ import math
 from django.contrib.auth import login
 from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance
+from django.core.mail import send_mail
+from django.conf import settings
 from django.db import IntegrityError
 
 from rest_framework.decorators import api_view, permission_classes
@@ -12,6 +14,34 @@ from rest_framework import status
 
 from apps.accounts.models import User
 from apps.geo.models import Paroisse
+
+
+def _send_welcome_email(user):
+    """Email de bienvenue envoyé à chaque nouvel inscrit visiteur."""
+    prenom = user.first_name or user.username
+    try:
+        send_mail(
+            subject="Bienvenue sur GÉOEEC — Église Évangélique du Cameroun",
+            message=(
+                f"Bonjour {prenom},\n\n"
+                f"Votre compte visiteur sur la plateforme GÉOEEC a été créé avec succès.\n\n"
+                f"Vous pouvez maintenant accéder à la carte interactive des paroisses,\n"
+                f"districts et régions synodales de l'EEC Cameroun :\n"
+                f"{settings.FRONTEND_URL}/carte\n\n"
+                f"Fonctionnalités disponibles avec votre compte :\n"
+                f"  • Localisation des paroisses les plus proches\n"
+                f"  • Enregistrement de paroisses favorites\n"
+                f"  • Historique de navigation\n"
+                f"  • Calcul d'itinéraires\n\n"
+                f"Que Dieu vous bénisse dans votre exploration.\n\n"
+                f"— L'équipe GÉOEEC · EEC Cameroun"
+            ),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            fail_silently=True,
+        )
+    except Exception:
+        pass
 
 from .models import (
     ProfilVisiteur, ParoisseVue, RechercheHistorique,
@@ -97,6 +127,8 @@ def register_visitor(request):
         force_password_change=False,
     )
     # ProfilVisiteur créé via signal (voir signals.py)
+    # Email de bienvenue (fail_silently — ne bloque pas l'inscription si SMTP indisponible)
+    _send_welcome_email(user)
     # Connexion immédiate après inscription
     login(request, user)
 

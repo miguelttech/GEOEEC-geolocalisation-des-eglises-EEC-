@@ -1,13 +1,20 @@
 'use client';
-import React from 'react';
+import 'leaflet/dist/leaflet.css';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { api, TypeOeuvre, Oeuvre, PagedResult, RegionSynodale, District, Paroisse } from '@/lib/api';
 import { I } from '@/components/admin/icons';
-import { Dropdown, StatusPill, useOutside } from '@/components/admin/atoms';
-import { sampleOeuvres, OEUVRE_TYPES, REGIONS_22, DISTRICTS_BY_REGION } from '@/components/admin/data';
+import { GpsCell, useOutside } from '@/components/admin/atoms';
 
-interface Toast { id: number; type: 'success'|'warn'|'info'|'error'; title: string; body?: string; }
+// ─── Toast ────────────────────────────────────────────────────────────────────
+interface Toast { id: number; type: 'success'|'warn'|'error'; title: string; body?: string; }
 function useToast() {
-  const [toasts, setToasts] = React.useState<Toast[]>([]);
-  const add = (t: Omit<Toast, 'id'>) => { const id = Date.now(); setToasts(p => [...p, { ...t, id }]); setTimeout(() => setToasts(p => p.filter(x => x.id !== id)), 4000); };
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  const remove = useCallback((id: number) => setToasts(p => p.filter(x => x.id !== id)), []);
+  const add    = useCallback((t: Omit<Toast,'id'>) => {
+    const id = Date.now();
+    setToasts(p => [...p, { ...t, id }]);
+    setTimeout(() => remove(id), 4000);
+  }, [remove]);
   return { toasts, add };
 }
 function ToastStack({ toasts }: { toasts: Toast[] }) {
@@ -23,29 +30,27 @@ function ToastStack({ toasts }: { toasts: Toast[] }) {
   );
 }
 
-const TypePill = ({ type }: { type: string }) => {
-  const t = OEUVRE_TYPES.find(x => x.key === type);
-  const color = t?.color || '#5B9BD5';
-  return <span className="pill" style={{ background: color + '22', color, borderColor: color + '55' }}>{type}</span>;
-};
+// ─── Type pill ────────────────────────────────────────────────────────────────
+function TypePill({ label, couleur }: { label: string; couleur: string }) {
+  return (
+    <span className="pill" style={{ background: couleur + '22', color: couleur, borderColor: couleur + '55', fontSize: 11.5 }}>
+      {label}
+    </span>
+  );
+}
 
-const totalByType = OEUVRE_TYPES.map(t => ({
-  ...t,
-  count: ({Scolaire:124, Médical:62, Universitaire:18, Agropastoral:47, Immeuble:35, Terrain:18, Autre:7} as Record<string,number>)[t.key] || 0
-}));
-
-function RowMenuOeuvre({ onEdit, onDelete }: { onEdit: () => void; onDelete: () => void }) {
-  const [open, setOpen] = React.useState(false);
-  const ref = React.useRef<HTMLDivElement>(null);
+// ─── Row menu ─────────────────────────────────────────────────────────────────
+function RowMenu({ onView, onEdit, onDelete }: { onView: () => void; onEdit: () => void; onDelete: () => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
   useOutside(ref, () => setOpen(false));
   return (
     <div ref={ref} style={{ position: 'relative', display: 'inline-block' }}>
       <button className="icon-btn" onClick={() => setOpen(o => !o)}><I.more size={15}/></button>
       {open && (
-        <div className="menu" style={{ top: 'calc(100% + 4px)', right: 0, minWidth: 180 }}>
+        <div className="menu" style={{ top: 'calc(100% + 4px)', right: 0, minWidth: 160 }}>
+          <button onClick={() => { setOpen(false); onView(); }}><I.eye size={13}/>Voir la fiche</button>
           <button onClick={() => { setOpen(false); onEdit(); }}><I.pencil size={13}/>Modifier</button>
-          <button onClick={() => setOpen(false)}><I.download size={13}/>Exporter PDF</button>
-          <button onClick={() => setOpen(false)}><I.lock size={13}/>Désactiver</button>
           <hr/>
           <button className="danger" onClick={() => { setOpen(false); onDelete(); }}><I.trash size={13}/>Supprimer</button>
         </div>
@@ -54,19 +59,29 @@ function RowMenuOeuvre({ onEdit, onDelete }: { onEdit: () => void; onDelete: () 
   );
 }
 
-// ── View Panel ────────────────────────────────────────────────────────────────
-function OeuvreViewPanel({ oeuvre, onClose, onEdit }: { oeuvre: any; onClose: () => void; onEdit: () => void }) {
-  const t = OEUVRE_TYPES.find(x => x.key === oeuvre.type);
-  const color = t?.color || '#5B9BD5';
+// ─── Localisation label ───────────────────────────────────────────────────────
+function LocalisationCell({ o }: { o: Oeuvre }) {
+  if (o.paroisse_nom)  return <span style={{ fontSize: 12 }}><span style={{ color: 'var(--text-3)' }}>Paroisse </span>{o.paroisse_nom}</span>;
+  if (o.district_nom)  return <span style={{ fontSize: 12 }}><span style={{ color: 'var(--text-3)' }}>District </span>{o.district_nom}</span>;
+  if (o.region_nom)    return <span style={{ fontSize: 12 }}><span style={{ color: 'var(--text-3)' }}>Région </span>{o.region_nom}</span>;
+  return <span style={{ color: 'var(--text-3)', fontSize: 12 }}>—</span>;
+}
+
+// ─── View Panel ───────────────────────────────────────────────────────────────
+function OeuvreViewPanel({ oeuvre: o, onClose, onEdit }: {
+  oeuvre: Oeuvre; onClose: () => void; onEdit: () => void;
+}) {
   return (
     <div className="overlay" onClick={onClose}>
-      <div className="slide-panel" style={{ width: 460 }} onClick={e => e.stopPropagation()}>
+      <div className="slide-panel" style={{ width: 480 }} onClick={e => e.stopPropagation()}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 22px', borderBottom: '1px solid var(--border)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 36, height: 36, borderRadius: 8, background: color + '22', color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><I.hexagon size={18}/></div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ width: 38, height: 38, borderRadius: 8, background: o.type_oeuvre_couleur + '22', color: o.type_oeuvre_couleur, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <I.building size={18}/>
+            </div>
             <div>
-              <h2 className="sg-md" style={{ fontSize: 15, margin: 0 }}>{oeuvre.nom}</h2>
-              <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 1 }}>{oeuvre.region} · {oeuvre.district}</div>
+              <h2 className="sg-md" style={{ fontSize: 15, margin: 0 }}>{o.nom}</h2>
+              <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 2 }}>ID-{String(o.id).padStart(4,'0')} · {o.type_oeuvre_label}</div>
             </div>
           </div>
           <div style={{ display: 'flex', gap: 6 }}>
@@ -75,127 +90,409 @@ function OeuvreViewPanel({ oeuvre, onClose, onEdit }: { oeuvre: any; onClose: ()
           </div>
         </div>
 
-        <div style={{ padding: '20px 22px', overflowY: 'auto', height: 'calc(100% - 72px)', display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div style={{ padding: '20px 22px', overflowY: 'auto', height: 'calc(100% - 72px)', display: 'flex', flexDirection: 'column', gap: 14 }}>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <TypePill type={oeuvre.type}/>
-            <StatusPill statut={oeuvre.statut}/>
+            <TypePill label={o.type_oeuvre_label} couleur={o.type_oeuvre_couleur}/>
+            {o.est_active
+              ? <span className="pill pill-green">Active</span>
+              : <span className="pill pill-gray">Inactive</span>}
+            <GpsCell ok={!!(o.latitude && o.longitude)}/>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          <div className="card" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ fontSize: 11, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Localisation</div>
             {[
-              { label: 'Bénéficiaires', value: oeuvre.beneficiaires ? oeuvre.beneficiaires.toLocaleString('fr') : '—', color: color },
-              { label: 'Année', value: oeuvre.annee, color: 'var(--text)' },
-            ].map(s => (
-              <div key={s.label} className="card" style={{ padding: '12px 14px' }}>
-                <div style={{ fontSize: 10, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>{s.label}</div>
-                <div className="sg-md" style={{ fontSize: 20, marginTop: 4, color: s.color }}>{s.value}</div>
+              { label: 'Paroisse',  value: o.paroisse_nom  || '—' },
+              { label: 'District',  value: o.district_nom  || '—' },
+              { label: 'Région',    value: o.region_nom    || '—' },
+              { label: 'Adresse',   value: o.adresse       || '—' },
+            ].map(f => (
+              <div key={f.label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, gap: 12 }}>
+                <span style={{ color: 'var(--text-3)', flexShrink: 0 }}>{f.label}</span>
+                <span style={{ fontWeight: 500, textAlign: 'right' }}>{f.value}</span>
               </div>
             ))}
           </div>
 
           <div className="card" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <div style={{ fontSize: 11, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Rattachement</div>
+            <div style={{ fontSize: 11, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Informations</div>
             {[
-              { label: 'Région', value: oeuvre.region },
-              { label: 'District', value: oeuvre.district },
-              { label: 'Paroisse', value: oeuvre.paroisse },
-              { label: 'Responsable', value: oeuvre.responsable },
+              { label: 'Capacité',         value: o.capacite     ? String(o.capacite)      : '—' },
+              { label: 'Année création',   value: o.annee_creation ? String(o.annee_creation) : '—' },
+              { label: 'Téléphone',        value: o.telephone    || '—' },
+              { label: 'Email',            value: o.email        || '—' },
             ].map(f => (
-              <div key={f.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 13 }}>
+              <div key={f.label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
                 <span style={{ color: 'var(--text-3)' }}>{f.label}</span>
                 <span style={{ fontWeight: 500 }}>{f.value}</span>
               </div>
             ))}
           </div>
+
+          {o.description && (
+            <div className="card" style={{ padding: '12px 14px', fontSize: 13, color: 'var(--text-2)' }}>
+              <div style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Description</div>
+              {o.description}
+            </div>
+          )}
+
+          {(o.latitude && o.longitude) && (
+            <div className="card" style={{ padding: '12px 14px', fontSize: 12, color: 'var(--text-2)' }}>
+              <I.pin size={13} style={{ marginRight: 6, color: 'var(--green)' }}/>
+              GPS : {o.latitude.toFixed(5)}, {o.longitude.toFixed(5)}
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
 }
 
-// ── Form Panel ────────────────────────────────────────────────────────────────
-function OeuvreFormPanel({ mode, oeuvre, onClose, onSave }: {
-  mode: 'create'|'edit'; oeuvre?: any; onClose: () => void; onSave: (d: any) => void;
+// ─── Form state ───────────────────────────────────────────────────────────────
+type GeoLevel = 'paroisse' | 'district' | 'region';
+interface FormState {
+  nom: string; adresse: string; description: string;
+  type_oeuvre: string; est_active: boolean;
+  capacite: string; annee_creation: string;
+  telephone: string; email: string;
+  latitude: string; longitude: string;
+  geo_level: GeoLevel;
+  region: string; district: string; paroisse: string;
+}
+function emptyForm(): FormState {
+  return {
+    nom: '', adresse: '', description: '', type_oeuvre: '',
+    est_active: true, capacite: '', annee_creation: '',
+    telephone: '', email: '', latitude: '', longitude: '',
+    geo_level: 'paroisse', region: '', district: '', paroisse: '',
+  };
+}
+function formFromOeuvre(o: Oeuvre): FormState {
+  const geo_level: GeoLevel = o.paroisse_id ? 'paroisse' : o.district_id ? 'district' : 'region';
+  return {
+    nom: o.nom, adresse: o.adresse, description: o.description,
+    type_oeuvre: String(o.type_oeuvre_id), est_active: o.est_active,
+    capacite: o.capacite ? String(o.capacite) : '',
+    annee_creation: o.annee_creation ? String(o.annee_creation) : '',
+    telephone: o.telephone, email: o.email,
+    latitude:  o.latitude  ? String(o.latitude)  : '',
+    longitude: o.longitude ? String(o.longitude) : '',
+    geo_level,
+    region:   String(o.region_id   || ''),
+    district: String(o.district_id || ''),
+    paroisse: String(o.paroisse_id || ''),
+  };
+}
+
+// ─── GPS Map Picker ──────────────────────────────────────────────────────────
+function GpsMapPicker({ lat, lng, onChange }: { lat: number|null; lng: number|null; onChange: (la: number, lo: number) => void }) {
+  const mapDiv  = useRef<HTMLDivElement>(null);
+  const mapInst = useRef<any>(null);
+  const marker  = useRef<any>(null);
+  useEffect(() => {
+    if (!mapDiv.current || mapInst.current) return;
+    let cancelled = false;
+    import('leaflet').then(({ default: L }) => {
+      if (cancelled || !mapDiv.current || mapInst.current) return;
+      const initLat = lat ?? 4.5, initLng = lng ?? 12.5;
+      const map = L.map(mapDiv.current, { center: [initLat, initLng], zoom: lat ? 11 : 6 });
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: '© OSM · CartoDB', maxZoom: 19, subdomains: 'abcd' }).addTo(map);
+      const mkIcon = (L: any) => L.divIcon({ html: `<div style="width:16px;height:16px;background:#5B9BD5;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.4)"></div>`, iconSize:[16,16], iconAnchor:[8,8], className:'' });
+      if (lat !== null && lng !== null) { marker.current = L.marker([lat,lng],{icon:mkIcon(L)}).addTo(map); }
+      map.on('click', (e: any) => {
+        const {lat:la,lng:lo} = e.latlng;
+        if (marker.current) marker.current.setLatLng([la,lo]);
+        else { marker.current = L.marker([la,lo],{icon:mkIcon(L)}).addTo(map); }
+        onChange(parseFloat(la.toFixed(6)), parseFloat(lo.toFixed(6)));
+      });
+      mapInst.current = map;
+    });
+    return () => { cancelled=true; if(mapInst.current){mapInst.current.remove();mapInst.current=null;marker.current=null;} };
+  }, []); // eslint-disable-line
+  useEffect(() => {
+    if (!mapInst.current || lat===null || lng===null) return;
+    import('leaflet').then(({default:L}) => {
+      if(!mapInst.current) return;
+      const mkIcon = (L:any) => L.divIcon({html:`<div style="width:16px;height:16px;background:#5B9BD5;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.4)"></div>`,iconSize:[16,16],iconAnchor:[8,8],className:''});
+      if (marker.current) marker.current.setLatLng([lat,lng]);
+      else { marker.current = L.marker([lat,lng],{icon:mkIcon(L)}).addTo(mapInst.current); }
+      mapInst.current.panTo([lat,lng]);
+    });
+  }, [lat, lng]);
+  return <div ref={mapDiv} style={{ height:280, borderRadius:8, overflow:'hidden', zIndex:0, border:'1px solid rgba(91,155,213,0.30)' }} />;
+}
+
+// ─── Form Tabs ────────────────────────────────────────────────────────────────
+const FORM_TABS_OEU = [
+  { label: 'Identité',      icon: 'hexagon'  as const },
+  { label: 'Localisation',  icon: 'pin'      as const },
+  { label: 'GPS & Contact', icon: 'map'      as const },
+];
+
+// ─── Form Panel ───────────────────────────────────────────────────────────────
+function OeuvreFormPanel({ mode, oeuvre, types, onClose, onSaved }: {
+  mode: 'create' | 'edit'; oeuvre?: Oeuvre; types: TypeOeuvre[];
+  onClose: () => void; onSaved: (nom: string) => void;
 }) {
-  const [form, setForm] = React.useState({
-    nom: oeuvre?.nom || '',
-    type: oeuvre?.type || 'Scolaire',
-    region: oeuvre?.region || '',
-    district: oeuvre?.district || '',
-    paroisse: oeuvre?.paroisse || '',
-    responsable: oeuvre?.responsable || '',
-    beneficiaires: oeuvre?.beneficiaires ? String(oeuvre.beneficiaires) : '',
-    annee: oeuvre?.annee ? String(oeuvre.annee) : '2025',
-    statut: oeuvre?.statut || 'actif',
-    description: '',
-  });
-  const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
-  const districts = DISTRICTS_BY_REGION[form.region] || [];
+  const [tab, setTab] = useState(0);
+  const [form, setForm] = useState<FormState>(oeuvre ? formFromOeuvre(oeuvre) : emptyForm());
+  const [regions, setRegions]     = useState<RegionSynodale[]>([]);
+  const [districts, setDistricts] = useState<District[]>([]);
+  const [paroisses, setParoisses] = useState<Paroisse[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [error, setError]   = useState('');
+
+  const set = <K extends keyof FormState>(k: K, v: FormState[K]) => setForm(f => ({ ...f, [k]: v }));
+
+  useEffect(() => {
+    api.get<RegionSynodale[]>('/api/geo/regions/liste/').then(setRegions).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!form.region) { setDistricts([]); return; }
+    api.get<PagedResult<District>>(`/api/geo/districts/?region=${form.region}`)
+      .then(r => setDistricts(r.results)).catch(() => {});
+  }, [form.region]);
+
+  useEffect(() => {
+    if (!form.district || form.geo_level !== 'paroisse') { setParoisses([]); return; }
+    api.get<PagedResult<Paroisse>>(`/api/geo/paroisses/?district=${form.district}`)
+      .then(r => setParoisses(r.results)).catch(() => {});
+  }, [form.district, form.geo_level]);
+
+  function changeLevel(level: GeoLevel) {
+    setForm(f => ({ ...f, geo_level: level, district: '', paroisse: '' }));
+  }
+
+  async function handleSave() {
+    if (!form.nom.trim() || !form.type_oeuvre) {
+      setError('Nom et type sont obligatoires.'); return;
+    }
+    if (form.geo_level === 'paroisse' && !form.paroisse) { setError('Sélectionner une paroisse.'); return; }
+    if (form.geo_level === 'district' && !form.district) { setError('Sélectionner un district.'); return; }
+    if (form.geo_level === 'region'   && !form.region)   { setError('Sélectionner une région.');   return; }
+
+    setSaving(true); setError('');
+    try {
+      const lat = form.latitude  ? parseFloat(form.latitude)  : null;
+      const lng = form.longitude ? parseFloat(form.longitude) : null;
+      const payload: Record<string, unknown> = {
+        nom: form.nom.trim(), adresse: form.adresse, description: form.description,
+        type_oeuvre: Number(form.type_oeuvre), est_active: form.est_active,
+        capacite:       form.capacite       ? Number(form.capacite)       : null,
+        annee_creation: form.annee_creation ? Number(form.annee_creation) : null,
+        telephone: form.telephone, email: form.email,
+        paroisse: form.geo_level === 'paroisse' ? Number(form.paroisse) : null,
+        district: form.geo_level === 'district' ? Number(form.district) : null,
+        region:   form.geo_level === 'region'   ? Number(form.region)   : null,
+      };
+      if (lat !== null && lng !== null) { payload.latitude = lat; payload.longitude = lng; }
+      if (mode === 'create') {
+        await api.post('/api/oeuvres/oeuvres/', payload);
+      } else {
+        await api.patch(`/api/oeuvres/oeuvres/${oeuvre!.id}/`, payload);
+      }
+      onSaved(form.nom);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Erreur lors de l\'enregistrement.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const latNum = parseFloat(form.latitude);
+  const lngNum = parseFloat(form.longitude);
+  const gpsValid = !isNaN(latNum) && !isNaN(lngNum) && form.latitude && form.longitude;
+
+  const tabDone = [
+    !!(form.nom.trim() && form.type_oeuvre),
+    !!(form.geo_level === 'paroisse' ? form.paroisse : form.geo_level === 'district' ? form.district : form.region),
+    !!(form.latitude && form.longitude),
+  ];
+
+  const Lbl = { fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 6, display: 'block' as const };
 
   return (
     <div className="overlay" onClick={onClose}>
-      <div className="slide-panel" style={{ width: 580 }} onClick={e => e.stopPropagation()}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 22px', borderBottom: '1px solid var(--border)', background: 'var(--chrome)' }}>
+      <div className="slide-panel" style={{ width: 820 }} onClick={e => e.stopPropagation()}>
+
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px', borderBottom: '1px solid var(--border)', background: 'var(--chrome)', flexShrink: 0 }}>
           <div>
-            <h2 className="sg-md" style={{ fontSize: 18, margin: 0, color: '#F0F4F1' }}>{mode === 'create' ? 'Nouvelle œuvre' : `Modifier — ${oeuvre?.nom}`}</h2>
-            <div style={{ fontSize: 11, color: 'rgba(240,244,241,0.50)', marginTop: 2 }}>Console Synodale · EEC Cameroun</div>
+            <h2 className="sg-md" style={{ fontSize: 19, margin: 0 }}>
+              {mode === 'create' ? '+ Nouvelle œuvre EEC' : `Modifier — ${oeuvre?.nom}`}
+            </h2>
+            <div style={{ fontSize: 11, color: 'rgba(240,244,241,0.50)', marginTop: 2 }}>Étape {tab + 1} / {FORM_TABS_OEU.length} · {FORM_TABS_OEU[tab].label}</div>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
-            <button className="btn btn-outline" style={{ padding: '7px 14px', fontSize: 12, color: 'rgba(240,244,241,0.80)', borderColor: 'rgba(255,255,255,0.20)' }} onClick={onClose}>Annuler</button>
-            <button className="btn btn-primary" style={{ padding: '7px 14px', fontSize: 12 }} onClick={() => onSave(form)}>Enregistrer</button>
-            <button className="icon-btn" style={{ color: 'rgba(240,244,241,0.60)' }} onClick={onClose}><I.x size={16}/></button>
+            <button className="btn btn-outline" style={{ padding: '7px 14px', fontSize: 12 }} onClick={onClose} disabled={saving}>Annuler</button>
+            <button className="btn btn-primary" style={{ padding: '7px 18px', fontSize: 12, minWidth: 130 }} onClick={handleSave} disabled={saving}>
+              {saving ? <span className="ls-spinner" /> : <><I.check size={14} />{mode === 'create' ? 'Créer l\'œuvre' : 'Enregistrer'}</>}
+            </button>
+            <button className="icon-btn" style={{ color: 'rgba(240,244,241,0.60)' }} onClick={onClose}><I.x size={16} /></button>
           </div>
         </div>
 
-        <div style={{ padding: '22px 22px', overflowY: 'auto', height: 'calc(100% - 72px)', display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-            <div style={{ gridColumn: '1/-1' }}>
-              <div className="label">Nom de l'œuvre *</div>
-              <input className="input" placeholder="Ex. École primaire EPC Dschang" value={form.nom} onChange={e => set('nom', e.target.value)}/>
-            </div>
-            <div>
-              <div className="label">Type *</div>
-              <Dropdown value={form.type} options={OEUVRE_TYPES.map(t => t.key)} onChange={v => set('type', v)}/>
-            </div>
-            <div>
-              <div className="label">Statut</div>
-              <Dropdown value={form.statut} options={['actif','inactif']} onChange={v => set('statut', v)}/>
-            </div>
-            <div>
-              <div className="label">Région synodale *</div>
-              <Dropdown value={form.region || 'Sélectionner'} options={[...REGIONS_22]} onChange={v => { set('region', v); set('district', ''); }}/>
-            </div>
-            <div>
-              <div className="label">District *</div>
-              <Dropdown value={form.district || 'Sélectionner'} options={districts.length ? districts : ['— sélectionner une région']} onChange={v => set('district', v)} disabled={!form.region || districts.length === 0}/>
-            </div>
-            <div style={{ gridColumn: '1/-1' }}>
-              <div className="label">Paroisse rattachée</div>
-              <input className="input" placeholder="Nom de la paroisse" value={form.paroisse} onChange={e => set('paroisse', e.target.value)}/>
-            </div>
-            <div>
-              <div className="label">Responsable</div>
-              <input className="input" placeholder="Nom du responsable" value={form.responsable} onChange={e => set('responsable', e.target.value)}/>
-            </div>
-            <div>
-              <div className="label">Bénéficiaires</div>
-              <input className="input mono" type="number" min="0" placeholder="0" value={form.beneficiaires} onChange={e => set('beneficiaires', e.target.value)}/>
-            </div>
-            <div>
-              <div className="label">Année de création</div>
-              <input className="input mono" type="number" min="1900" max="2030" placeholder="2025" value={form.annee} onChange={e => set('annee', e.target.value)}/>
-            </div>
+        {error && (
+          <div style={{ background: '#FEF2F2', borderBottom: '1px solid #FECACA', padding: '10px 24px', fontSize: 12.5, color: '#DC2626', display: 'flex', gap: 8, flexShrink: 0 }}>
+            <I.alert size={14} /> {error}
           </div>
-          <div>
-            <div className="label">Description / observations</div>
-            <textarea className="input" rows={3} placeholder="Notes sur l'œuvre..." style={{ resize: 'vertical', lineHeight: 1.5 }} value={form.description} onChange={e => set('description', e.target.value)}/>
-          </div>
+        )}
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, paddingTop: 12, borderTop: '1px solid var(--border)', marginTop: 4 }}>
-            <button className="btn btn-ghost" onClick={onClose}>Annuler</button>
-            <button className="btn btn-primary" onClick={() => onSave(form)} disabled={!form.nom || !form.region} style={{ opacity: (!form.nom || !form.region) ? 0.5 : 1 }}>
-              {mode === 'create' ? 'Créer l\'œuvre' : 'Enregistrer'}
+        {/* Tab bar */}
+        <div style={{ display: 'flex', borderBottom: '2px solid #E5E7EB', background: '#F9FAFB', flexShrink: 0 }}>
+          {FORM_TABS_OEU.map((t, i) => {
+            const Ic = I[t.icon];
+            const isActive = tab === i, isDone = tabDone[i];
+            return (
+              <button key={i} onClick={() => setTab(i)} style={{
+                padding: '12px 20px', fontSize: 12.5, fontWeight: isActive ? 700 : 500,
+                color: isActive ? '#1E3A5F' : isDone ? '#1D4ED8' : '#374151',
+                background: isActive ? '#fff' : 'transparent',
+                borderBottom: isActive ? '2px solid #3B82F6' : '2px solid transparent',
+                borderTop: 'none', borderLeft: 'none', borderRight: 'none',
+                cursor: 'pointer', fontFamily: 'inherit',
+                display: 'flex', alignItems: 'center', gap: 7, marginBottom: -2,
+              }}>
+                <div style={{ width: 20, height: 20, borderRadius: '50%', flexShrink: 0, background: isActive ? '#3B82F6' : isDone ? '#DBEAFE' : '#E5E7EB', color: isActive ? '#fff' : isDone ? '#1D4ED8' : '#6B7280', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700 }}>
+                  {isDone && !isActive ? <I.check size={10} /> : i + 1}
+                </div>
+                <Ic size={13} /> {t.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Content */}
+        <div style={{ padding: '24px', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: 18 }}>
+
+          {/* Tab 1 — Identité */}
+          {tab === 0 && (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <div style={{ gridColumn: '1/-1' }}>
+                <label style={Lbl}>Nom de l'œuvre *</label>
+                <input className="input" placeholder="Ex. École Primaire de Bonanjo" value={form.nom} onChange={e => set('nom', e.target.value)} style={{ color: '#111827', fontSize: 15, fontWeight: 600 }} autoFocus />
+              </div>
+              <div>
+                <label style={Lbl}>Type d'œuvre *</label>
+                <select className="input" style={{ color: '#111827' }} value={form.type_oeuvre} onChange={e => set('type_oeuvre', e.target.value)}>
+                  <option value="">— Choisir un type —</option>
+                  {types.map(t => <option key={t.id} value={String(t.id)}>{t.nom}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={Lbl}>Statut</label>
+                <select className="input" style={{ color: '#111827' }} value={form.est_active ? '1' : '0'} onChange={e => set('est_active', e.target.value === '1')}>
+                  <option value="1">Active</option>
+                  <option value="0">Inactive</option>
+                </select>
+              </div>
+              <div style={{ gridColumn: '1/-1' }}>
+                <label style={Lbl}>Description</label>
+                <textarea className="input" rows={3} placeholder="Historique, état actuel, particularités…" value={form.description} onChange={e => set('description', e.target.value)} style={{ resize: 'vertical', color: '#111827' }} />
+              </div>
+            </div>
+          )}
+
+          {/* Tab 2 — Localisation */}
+          {tab === 1 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {/* Niveau */}
+              <div>
+                <label style={Lbl}>Niveau de rattachement *</label>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {(['paroisse', 'district', 'region'] as GeoLevel[]).map(lvl => (
+                    <button key={lvl} className={`btn ${form.geo_level === lvl ? 'btn-primary' : 'btn-outline'}`}
+                      style={{ fontSize: 13, padding: '7px 18px' }} onClick={() => changeLevel(lvl)}>
+                      {lvl === 'paroisse' ? 'Paroisse' : lvl === 'district' ? 'District' : 'Région'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                <div>
+                  <label style={Lbl}>Région synodiale{form.geo_level === 'region' ? ' *' : ''}</label>
+                  <select className="input" style={{ color: '#111827' }} value={form.region} onChange={e => setForm(f => ({ ...f, region: e.target.value, district: '', paroisse: '' }))}>
+                    <option value="">— Choisir —</option>
+                    {regions.map(r => <option key={r.id} value={String(r.id)}>{r.nom}</option>)}
+                  </select>
+                </div>
+                {form.geo_level !== 'region' && (
+                  <div>
+                    <label style={Lbl}>District{form.geo_level === 'district' ? ' *' : ''}</label>
+                    <select className="input" style={{ color: '#111827' }} value={form.district} onChange={e => setForm(f => ({ ...f, district: e.target.value, paroisse: '' }))} disabled={!form.region}>
+                      <option value="">— Choisir —</option>
+                      {districts.map(d => <option key={d.id} value={String(d.id)}>{d.nom}</option>)}
+                    </select>
+                  </div>
+                )}
+                {form.geo_level === 'paroisse' && (
+                  <div style={{ gridColumn: '1/-1' }}>
+                    <label style={Lbl}>Paroisse *</label>
+                    <select className="input" style={{ color: '#111827' }} value={form.paroisse} onChange={e => set('paroisse', e.target.value)} disabled={!form.district}>
+                      <option value="">— Choisir une paroisse —</option>
+                      {paroisses.map(p => <option key={p.id} value={String(p.id)}>{p.nom}</option>)}
+                    </select>
+                  </div>
+                )}
+                <div style={{ gridColumn: '1/-1' }}>
+                  <label style={Lbl}>Adresse</label>
+                  <input className="input" placeholder="Quartier, ville…" value={form.adresse} onChange={e => set('adresse', e.target.value)} style={{ color: '#111827' }} />
+                </div>
+                <div>
+                  <label style={Lbl}>Capacité (personnes)</label>
+                  <input className="input mono" type="number" placeholder="Ex. 500" value={form.capacite} onChange={e => set('capacite', e.target.value)} style={{ color: '#111827' }} />
+                </div>
+                <div>
+                  <label style={Lbl}>Année de création</label>
+                  <input className="input mono" type="number" placeholder="Ex. 1985" value={form.annee_creation} onChange={e => set('annee_creation', e.target.value)} style={{ color: '#111827' }} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Tab 3 — GPS & Contact */}
+          {tab === 2 && (
+            <>
+              <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: 8, padding: '10px 14px', fontSize: 12.5, color: '#1D4ED8', display: 'flex', gap: 8, alignItems: 'center' }}>
+                <I.pin size={14} /> Cliquez sur la carte pour géolocaliser l'œuvre.
+              </div>
+              <GpsMapPicker lat={gpsValid ? latNum : null} lng={gpsValid ? lngNum : null}
+                onChange={(la, lo) => { set('latitude', String(la)); set('longitude', String(lo)); }} />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14 }}>
+                <div>
+                  <label style={Lbl}>Coord. Y — Latitude</label>
+                  <input className="input mono" placeholder="Ex. 4.0511" value={form.latitude} onChange={e => set('latitude', e.target.value)} style={{ color: '#111827' }} />
+                </div>
+                <div>
+                  <label style={Lbl}>Coord. X — Longitude</label>
+                  <input className="input mono" placeholder="Ex. 9.7085" value={form.longitude} onChange={e => set('longitude', e.target.value)} style={{ color: '#111827' }} />
+                </div>
+                <div>
+                  <label style={Lbl}>Téléphone</label>
+                  <input className="input mono" placeholder="+237 6XX…" value={form.telephone} onChange={e => set('telephone', e.target.value)} style={{ color: '#111827' }} />
+                </div>
+                <div style={{ gridColumn: '1/-1' }}>
+                  <label style={Lbl}>Email</label>
+                  <input className="input" type="email" placeholder="oeuvre@eec.cm" value={form.email} onChange={e => set('email', e.target.value)} style={{ color: '#111827' }} />
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Navigation */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 12, borderTop: '1px solid #E5E7EB', marginTop: 'auto' }}>
+            <button className="btn btn-ghost" onClick={() => setTab(t => Math.max(0, t - 1))} disabled={tab === 0} style={{ opacity: tab === 0 ? 0.3 : 1, color: '#374151' }}>
+              <I.chevL size={14} /> Précédent
             </button>
+            <span style={{ fontSize: 11, color: '#9CA3AF', alignSelf: 'center' }}>{tab + 1} / {FORM_TABS_OEU.length}</span>
+            {tab < FORM_TABS_OEU.length - 1 ? (
+              <button className="btn btn-outline" onClick={() => setTab(t => t + 1)} style={{ color: '#374151', borderColor: '#D1D5DB' }}>Suivant <I.chevR size={14} /></button>
+            ) : (
+              <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
+                {saving ? <span className="ls-spinner" /> : <><I.check size={14} />{mode === 'create' ? 'Créer l\'œuvre' : 'Enregistrer'}</>}
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -203,54 +500,174 @@ function OeuvreFormPanel({ mode, oeuvre, onClose, onSave }: {
   );
 }
 
-// ── Main page ─────────────────────────────────────────────────────────────────
+// ─── Delete Modal ─────────────────────────────────────────────────────────────
+function DeleteModal({ oeuvre, onClose, onDeleted }: {
+  oeuvre: Oeuvre; onClose: () => void; onDeleted: () => void;
+}) {
+  const [confirm, setConfirm] = useState('');
+  const [deleting, setDeleting] = useState(false);
+  const [error, setError] = useState('');
+
+  async function handleDelete() {
+    setDeleting(true); setError('');
+    try {
+      await api.delete(`/api/oeuvres/oeuvres/${oeuvre.id}/`);
+      onDeleted();
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Erreur lors de la suppression.');
+      setDeleting(false);
+    }
+  }
+
+  return (
+    <div className="overlay" onClick={onClose}>
+      <div className="modal" onClick={e => e.stopPropagation()}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+          <div style={{ width: 38, height: 38, borderRadius: 8, background: 'rgba(198,40,40,0.15)', color: '#FF8A7A', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <I.trash size={18}/>
+          </div>
+          <div>
+            <div className="sg-md" style={{ fontSize: 16 }}>Supprimer l'œuvre</div>
+            <div style={{ fontSize: 12, color: 'var(--text-3)' }}>Action irréversible</div>
+          </div>
+        </div>
+        <p style={{ fontSize: 13, color: 'var(--text-2)', marginBottom: 16 }}>
+          Pour confirmer, saisissez le nom exact :<br/>
+          <strong style={{ color: 'var(--text)' }}>{oeuvre.nom}</strong>
+        </p>
+        <input className="input" placeholder={oeuvre.nom} value={confirm} onChange={e => setConfirm(e.target.value)}/>
+        {error && <div style={{ marginTop: 8, fontSize: 12, color: '#FF8A7A' }}>{error}</div>}
+        <div style={{ display: 'flex', gap: 10, marginTop: 18, justifyContent: 'flex-end' }}>
+          <button className="btn btn-ghost" onClick={onClose} disabled={deleting}>Annuler</button>
+          <button className="btn" style={{ background: '#C62828', color: '#fff', opacity: confirm === oeuvre.nom ? 1 : 0.4 }}
+            onClick={handleDelete} disabled={confirm !== oeuvre.nom || deleting}>
+            {deleting ? 'Suppression…' : 'Supprimer définitivement'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Page ────────────────────────────────────────────────────────────────
 export default function OeuvresPage() {
   const { toasts, add: addToast } = useToast();
-  const [search, setSearch] = React.useState('');
-  const [type, setType] = React.useState('Tous types');
-  const [region, setRegion] = React.useState('Toutes régions');
-  const [statut, setStatut] = React.useState('Tous statuts');
-  const [selection, setSelection] = React.useState(new Set<number>());
-  const [viewPanel, setViewPanel] = React.useState<any>(null);
-  const [formPanel, setFormPanel] = React.useState<{ mode: 'create'|'edit'; oeuvre?: any } | null>(null);
+  const [types, setTypes]       = useState<TypeOeuvre[]>([]);
+  const [oeuvres, setOeuvres]   = useState<Oeuvre[]>([]);
+  const [total, setTotal]       = useState(0);
+  const [loading, setLoading]   = useState(true);
+  const [page, setPage]         = useState(1);
+  const [searchInput, setSearchInput] = useState('');
+  const [search, setSearch]           = useState('');
+  const [filterType, setFilterType]   = useState('');
+  const [filterRegion, setFilterRegion] = useState('');
+  const [filterActive, setFilterActive] = useState('');
+  const [filterGps, setFilterGps]       = useState('');
+  const [refresh, setRefresh]   = useState(0);
+  const [viewPanel, setViewPanel]   = useState<Oeuvre | null>(null);
+  const [formPanel, setFormPanel]   = useState<{ mode: 'create'|'edit'; oeuvre?: Oeuvre } | null>(null);
+  const [deleteModal, setDeleteModal] = useState<Oeuvre | null>(null);
+  const [regions, setRegions] = useState<RegionSynodale[]>([]);
 
-  let data = sampleOeuvres as typeof sampleOeuvres;
-  if (search) data = data.filter(o => o.nom.toLowerCase().includes(search.toLowerCase()));
-  if (type !== 'Tous types') data = data.filter(o => o.type === type);
-  if (region !== 'Toutes régions') data = data.filter(o => o.region === region);
-  if (statut !== 'Tous statuts') data = data.filter(o => o.statut === statut.toLowerCase());
+  const PAGE_SIZE = 50;
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+  function doRefresh() { setPage(1); setRefresh(r => r + 1); }
 
-  const hasFilter = !!(search || type !== 'Tous types' || region !== 'Toutes régions' || statut !== 'Tous statuts');
-  const reset = () => { setSearch(''); setType('Tous types'); setRegion('Toutes régions'); setStatut('Tous statuts'); };
+  // Load types + regions (static reference data)
+  useEffect(() => {
+    api.get<PagedResult<TypeOeuvre>>('/api/oeuvres/types/?page_size=100')
+      .then(r => setTypes(Array.isArray(r) ? r : (r as any).results ?? []))
+      .catch(() => {});
+    api.get<RegionSynodale[]>('/api/geo/regions/liste/').then(setRegions).catch(() => {});
+  }, []);
 
-  function toggle(id: number) { const s = new Set(selection); s.has(id) ? s.delete(id) : s.add(id); setSelection(s); }
-  function toggleAll() { setSelection(selection.size === data.length ? new Set() : new Set(data.map(d => d.id))); }
+  // Debounce search
+  useEffect(() => {
+    const t = setTimeout(() => { setSearch(searchInput); setPage(1); }, 400);
+    return () => clearTimeout(t);
+  }, [searchInput]);
+
+  // Fetch oeuvres
+  useEffect(() => {
+    setLoading(true);
+    const params = new URLSearchParams({ page: String(page) });
+    if (search)        params.set('search', search);
+    if (filterType)    params.set('type', filterType);
+    if (filterRegion)  params.set('region', filterRegion);
+    if (filterActive === '1') params.set('active', '1');
+    if (filterActive === '0') params.set('active', '0');
+    if (filterGps === 'avec') params.set('avec_gps', '1');
+    if (filterGps === 'sans') params.set('sans_gps', '1');
+    api.get<PagedResult<Oeuvre>>(`/api/oeuvres/oeuvres/?${params}`)
+      .then(r => { setOeuvres(r.results); setTotal(r.count); })
+      .catch(() => { addToast({ type: 'error', title: 'Erreur de chargement des œuvres.' }); })
+      .finally(() => setLoading(false));
+  }, [page, search, filterType, filterRegion, filterActive, filterGps, refresh]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const hasFilter = !!(search || filterType || filterRegion || filterActive || filterGps);
+  function resetFilters() {
+    setSearchInput(''); setSearch('');
+    setFilterType(''); setFilterRegion(''); setFilterActive(''); setFilterGps('');
+    setPage(1);
+  }
+
+  function handleSaved(nom: string) {
+    setFormPanel(null);
+    addToast({ type: 'success', title: formPanel?.mode === 'create' ? `Œuvre "${nom}" créée.` : 'Modifications enregistrées.', body: nom });
+    doRefresh();
+  }
+
+  function handleDeleted() {
+    const nom = deleteModal?.nom || '';
+    setDeleteModal(null);
+    addToast({ type: 'warn', title: `Œuvre "${nom}" supprimée.` });
+    doRefresh();
+  }
+
+  // Counts by type from loaded data (approximation — only current page)
+  const typeCounts: Record<number, number> = {};
+  oeuvres.forEach(o => { typeCounts[o.type_oeuvre_id] = (typeCounts[o.type_oeuvre_id] || 0) + 1; });
+
+  const pageBtns: (number | '…')[] = [];
+  if (totalPages <= 7) { for (let i = 1; i <= totalPages; i++) pageBtns.push(i); }
+  else {
+    pageBtns.push(1);
+    if (page > 3) pageBtns.push('…');
+    for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) pageBtns.push(i);
+    if (page < totalPages - 2) pageBtns.push('…');
+    pageBtns.push(totalPages);
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      {/* Mini-stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 10 }}>
-        {totalByType.map(t => (
-          <div key={t.key} className="card" style={{ padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ width: 8, height: 8, borderRadius: 2, background: t.color }}/>
-              <span style={{ fontSize: 10, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600 }}>{t.key}</span>
+
+      {/* Type stats */}
+      {types.length > 0 && (
+        <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(types.length, 7)}, 1fr)`, gap: 10 }}>
+          {types.map(t => (
+            <div key={t.id} className="card" style={{ padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 4, cursor: 'pointer', outline: filterType === String(t.id) ? `2px solid ${t.couleur}` : 'none' }}
+              onClick={() => setFilterType(filterType === String(t.id) ? '' : String(t.id))}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: t.couleur }}/>
+                <span style={{ fontSize: 10, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.nom}</span>
+              </div>
+              <div className="sg" style={{ fontSize: 22, color: t.couleur, lineHeight: 1, marginTop: 2 }}>{t.nb_oeuvres}</div>
             </div>
-            <div className="sg" style={{ fontSize: 22, color: t.color, lineHeight: 1, marginTop: 2 }}>{t.count}</div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Toolbar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <h2 className="sg-md" style={{ margin: 0, fontSize: 16 }}>311 œuvres</h2>
-          <span style={{ fontSize: 12, color: 'var(--text-3)' }}>14 régions sur 22 ont des œuvres déclarées</span>
+          <h2 className="sg-md" style={{ margin: 0, fontSize: 16 }}>
+            {loading ? '—' : total.toLocaleString('fr')} œuvre{total !== 1 ? 's' : ''}
+          </h2>
+          <span style={{ fontSize: 12, color: 'var(--text-3)' }}>écoles, hôpitaux, terrains, fermes…</span>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button className="btn btn-outline" onClick={() => addToast({ type:'info', title:'Téléchargement du modèle Excel...' })}><I.upload size={14}/>Importer Excel</button>
-          <button className="btn btn-outline" onClick={() => addToast({ type:'info', title:'Export en cours...', body:'311 œuvres → .xlsx' })}><I.download size={14}/>Exporter</button>
-          <button className="btn btn-primary" onClick={() => setFormPanel({ mode: 'create' })}><I.plus size={14}/>Créer une œuvre</button>
+          <button className="btn btn-outline"><I.download size={14}/>Exporter</button>
+          <button className="btn btn-primary" onClick={() => setFormPanel({ mode: 'create' })}><I.plus size={14}/>Nouvelle œuvre</button>
         </div>
       </div>
 
@@ -259,122 +676,157 @@ export default function OeuvresPage() {
         <div style={{ flex: 1, minWidth: 220, position: 'relative' }}>
           <div className="label">Rechercher</div>
           <I.search size={14} style={{ position: 'absolute', top: 33, left: 11, color: 'var(--text-3)' }}/>
-          <input className="input" placeholder="Nom d'œuvre..." style={{ paddingLeft: 34, fontSize: 13 }} value={search} onChange={e => setSearch(e.target.value)} />
+          <input className="input" placeholder="Nom d'œuvre…" style={{ paddingLeft: 34, fontSize: 13 }}
+            value={searchInput} onChange={e => setSearchInput(e.target.value)}/>
         </div>
-        <div style={{ width: 180 }}><Dropdown label="Type" value={type} options={['Tous types', ...OEUVRE_TYPES.map(t => t.key)]} onChange={setType}/></div>
-        <div style={{ width: 200 }}><Dropdown label="Région" value={region} options={['Toutes régions', ...REGIONS_22]} onChange={setRegion}/></div>
-        <div style={{ width: 140 }}><Dropdown label="Statut" value={statut} options={['Tous statuts','Actif','Inactif']} onChange={setStatut}/></div>
-        {hasFilter && <button className="btn btn-ghost" onClick={reset}><I.refresh size={13}/>Réinitialiser</button>}
+        <div style={{ minWidth: 160 }}>
+          <div className="label">Type</div>
+          <select className="input" value={filterType} onChange={e => { setFilterType(e.target.value); setPage(1); }}>
+            <option value="">Tous types</option>
+            {types.map(t => <option key={t.id} value={String(t.id)}>{t.nom}</option>)}
+          </select>
+        </div>
+        <div style={{ minWidth: 180 }}>
+          <div className="label">Région</div>
+          <select className="input" value={filterRegion} onChange={e => { setFilterRegion(e.target.value); setPage(1); }}>
+            <option value="">Toutes régions</option>
+            {regions.map(r => <option key={r.id} value={String(r.id)}>{r.nom}</option>)}
+          </select>
+        </div>
+        <div style={{ minWidth: 120 }}>
+          <div className="label">Statut</div>
+          <select className="input" value={filterActive} onChange={e => { setFilterActive(e.target.value); setPage(1); }}>
+            <option value="">Tous</option>
+            <option value="1">Active</option>
+            <option value="0">Inactive</option>
+          </select>
+        </div>
+        <div style={{ minWidth: 120 }}>
+          <div className="label">GPS</div>
+          <select className="input" value={filterGps} onChange={e => { setFilterGps(e.target.value); setPage(1); }}>
+            <option value="">Tous</option>
+            <option value="avec">Avec GPS</option>
+            <option value="sans">Sans GPS</option>
+          </select>
+        </div>
+        {hasFilter && <button className="btn btn-ghost" onClick={resetFilters} style={{ alignSelf: 'flex-end' }}><I.refresh size={13}/>Réinitialiser</button>}
       </div>
 
       {hasFilter && (
-        <div className="anim-fade" style={{ background: 'rgba(21,101,192,0.08)', border: '1px solid rgba(21,101,192,0.30)', borderRadius: 6, padding: '8px 14px', fontSize: 12, color: '#7FB2E8', display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ background: 'rgba(21,101,192,0.08)', border: '1px solid rgba(21,101,192,0.30)', borderRadius: 6, padding: '8px 14px', fontSize: 12, color: '#7FB2E8', display: 'flex', alignItems: 'center', gap: 8 }}>
           <I.filter size={13}/>
-          <span><b style={{ color: '#A4CFF0' }}>{data.length}</b> œuvres trouvées sur 311</span>
+          <span><b style={{ color: '#A4CFF0' }}>{total.toLocaleString('fr')}</b> œuvre{total !== 1 ? 's' : ''} trouvée{total !== 1 ? 's' : ''}</span>
         </div>
       )}
 
       {/* Table */}
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-        <div style={{ overflowX: 'auto' }}>
-          <table className="data">
-            <thead>
-              <tr>
-                <th style={{ width: 36 }}><input type="checkbox" className="checkbox" checked={data.length > 0 && selection.size === data.length} onChange={toggleAll}/></th>
-                <th style={{ width: 40 }}>#</th>
-                <th className="sortable">Nom de l'œuvre</th>
-                <th>Type</th>
-                <th>Région</th>
-                <th>District</th>
-                <th>Paroisse rattachée</th>
-                <th className="sortable" style={{ textAlign: 'right' }}>Bénéficiaires</th>
-                <th style={{ textAlign: 'right' }}>Année</th>
-                <th>Responsable</th>
-                <th>Statut</th>
-                <th style={{ width: 110 }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.length === 0 && (
-                <tr><td colSpan={12} style={{ height: 280, textAlign: 'center' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
-                    <I.hexagon size={48} style={{ opacity: 0.25 }}/>
-                    <div className="sg-md" style={{ fontSize: 16 }}>Aucune œuvre trouvée</div>
-                    <div style={{ color: 'var(--text-2)', fontSize: 13 }}>Modifiez vos filtres ou créez une nouvelle œuvre.</div>
-                    <div style={{ display: 'flex', gap: 10 }}>
-                      <button className="btn btn-outline" onClick={reset}>Réinitialiser</button>
-                      <button className="btn btn-primary" onClick={() => setFormPanel({ mode: 'create' })}><I.plus size={14}/>Créer une œuvre</button>
-                    </div>
-                  </div>
-                </td></tr>
-              )}
-              {data.map((o, i) => {
-                const ot = OEUVRE_TYPES.find(x => x.key === o.type);
-                return (
-                  <tr key={o.id} style={{ background: selection.has(o.id) ? 'rgba(46,151,68,0.06)' : 'transparent' }}>
-                    <td><input type="checkbox" className="checkbox" checked={selection.has(o.id)} onChange={() => toggle(o.id)}/></td>
-                    <td className="mono" style={{ color: 'var(--text-3)', fontSize: 11.5 }}>{String(i+1).padStart(3,'0')}</td>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <div style={{ width: 32, height: 32, borderRadius: 6, background: (ot?.color || '#888') + '22', color: ot?.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><I.hexagon size={15}/></div>
-                        <span style={{ fontWeight: 500, fontSize: 14 }}>{o.nom}</span>
-                      </div>
-                    </td>
-                    <td><TypePill type={o.type}/></td>
-                    <td style={{ color: 'var(--text-2)', fontSize: 12 }}>{o.region}</td>
-                    <td style={{ color: 'var(--text-2)', fontSize: 12 }}>{o.district}</td>
-                    <td style={{ color: 'var(--text-2)', fontSize: 12 }}>{o.paroisse}</td>
-                    <td className="mono" style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{o.beneficiaires ? o.beneficiaires.toLocaleString('fr') : <span style={{ color: 'var(--text-3)' }}>—</span>}</td>
-                    <td className="mono" style={{ textAlign: 'right', color: 'var(--text-2)' }}>{o.annee}</td>
-                    <td style={{ fontSize: 12.5 }}>{o.responsable}</td>
-                    <td><StatusPill statut={o.statut}/></td>
-                    <td>
-                      <div style={{ display: 'flex', gap: 2 }}>
-                        <button className="icon-btn" onClick={() => setViewPanel(o)}><I.eye size={15}/></button>
-                        <button className="icon-btn green" onClick={() => setFormPanel({ mode: 'edit', oeuvre: o })}><I.pencil size={15}/></button>
-                        <RowMenuOeuvre onEdit={() => setFormPanel({ mode: 'edit', oeuvre: o })} onDelete={() => addToast({ type: 'warn', title: `Œuvre "${o.nom}" supprimée.` })}/>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-        {data.length > 0 && (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderTop: '1px solid rgba(255,255,255,0.05)', fontSize: 12, color: 'var(--text-2)' }}>
-            <span>Affichage <span style={{ color: 'var(--text)' }}>1 à {data.length}</span> sur <span style={{ color: 'var(--text)' }}>311</span></span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <button className="icon-btn"><I.chevL size={14}/></button>
-              {[1,2,3].map(n => <button key={n} style={{ width:28,height:28,border:0,borderRadius:5,background:n===1?'var(--green)':'transparent',color:n===1?'#fff':'var(--text-2)',fontSize:12,fontWeight:600,cursor:'pointer' }}>{n}</button>)}
-              <span style={{ color:'var(--text-3)' }}>…</span>
-              <button style={{ width:28,height:28,border:0,borderRadius:5,background:'transparent',color:'var(--text-2)',fontSize:12,fontWeight:600,cursor:'pointer' }}>32</button>
-              <button className="icon-btn"><I.chevR size={14}/></button>
-            </div>
+        {loading ? (
+          <div style={{ height: 280, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 14, color: 'var(--text-3)' }}>
+            <span className="ls-spinner" style={{ width: 32, height: 32 }}/>
+            <span style={{ fontSize: 13 }}>Chargement des œuvres…</span>
           </div>
+        ) : (
+          <>
+            <div style={{ overflowX: 'auto' }}>
+              <table className="data">
+                <thead>
+                  <tr>
+                    <th style={{ width: 40 }}>#</th>
+                    <th className="sortable">Œuvre</th>
+                    <th>Type</th>
+                    <th>Localisation</th>
+                    <th>Région</th>
+                    <th>Adresse</th>
+                    <th style={{ width: 90, textAlign: 'center' }}>GPS</th>
+                    <th style={{ width: 80, textAlign: 'center' }}>Statut</th>
+                    <th style={{ width: 80 }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {oeuvres.length === 0 && (
+                    <tr><td colSpan={9} style={{ height: 280, textAlign: 'center' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+                        <I.building size={48} style={{ opacity: 0.25 }}/>
+                        <div className="sg-md" style={{ fontSize: 16 }}>Aucune œuvre trouvée</div>
+                        {hasFilter && <button className="btn btn-outline" onClick={resetFilters}>Réinitialiser les filtres</button>}
+                      </div>
+                    </td></tr>
+                  )}
+                  {oeuvres.map((o, idx) => (
+                    <tr key={o.id}>
+                      <td className="mono" style={{ color: 'var(--text-3)', fontSize: 11.5 }}>
+                        {String((page - 1) * PAGE_SIZE + idx + 1).padStart(3, '0')}
+                      </td>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <div style={{ width: 32, height: 32, borderRadius: 6, background: o.type_oeuvre_couleur + '22', color: o.type_oeuvre_couleur, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <I.building size={15}/>
+                          </div>
+                          <div>
+                            <div style={{ fontWeight: 600, fontSize: 13.5 }}>{o.nom}</div>
+                            <div style={{ fontSize: 11, color: 'var(--text-3)' }}>ID-{String(o.id).padStart(4,'0')}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <TypePill label={o.type_oeuvre_label} couleur={o.type_oeuvre_couleur}/>
+                      </td>
+                      <td><LocalisationCell o={o}/></td>
+                      <td style={{ color: 'var(--text-2)', fontSize: 12 }}>{o.region_nom || '—'}</td>
+                      <td style={{ fontSize: 12, color: 'var(--text-3)', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{o.adresse || '—'}</td>
+                      <td style={{ textAlign: 'center' }}><GpsCell ok={!!(o.latitude && o.longitude)}/></td>
+                      <td style={{ textAlign: 'center' }}>
+                        {o.est_active
+                          ? <span className="pill pill-green" style={{ fontSize: 11 }}>Active</span>
+                          : <span className="pill pill-gray" style={{ fontSize: 11 }}>Inactive</span>}
+                      </td>
+                      <td>
+                        <div style={{ display: 'flex', gap: 2 }}>
+                          <button className="icon-btn" onClick={() => setViewPanel(o)}><I.eye size={15}/></button>
+                          <button className="icon-btn green" onClick={() => setFormPanel({ mode: 'edit', oeuvre: o })}><I.pencil size={15}/></button>
+                          <RowMenu
+                            onView={() => setViewPanel(o)}
+                            onEdit={() => setFormPanel({ mode: 'edit', oeuvre: o })}
+                            onDelete={() => setDeleteModal(o)}
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {totalPages > 1 && (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderTop: '1px solid rgba(255,255,255,0.05)', fontSize: 12, color: 'var(--text-2)' }}>
+                <span>Page <b style={{ color: 'var(--text)' }}>{page}</b> sur <b style={{ color: 'var(--text)' }}>{totalPages}</b> — {total.toLocaleString('fr')} œuvres</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <button className="icon-btn" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}><I.chevL size={14}/></button>
+                  {pageBtns.map((btn, i) => btn === '…'
+                    ? <span key={i} style={{ padding: '0 4px', color: 'var(--text-3)' }}>…</span>
+                    : <button key={btn} onClick={() => setPage(btn as number)} style={{ width: 28, height: 28, border: 0, borderRadius: 5, background: page === btn ? 'var(--green)' : 'transparent', color: page === btn ? '#fff' : 'var(--text-2)', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>{btn}</button>
+                  )}
+                  <button className="icon-btn" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}><I.chevR size={14}/></button>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
-      {selection.size > 0 && (
-        <div className="float-bar">
-          <span style={{ fontSize: 13, fontWeight: 600 }}>{selection.size} œuvre{selection.size > 1 ? 's' : ''} sélectionnée{selection.size > 1 ? 's' : ''}</span>
-          <span style={{ width: 1, height: 18, background: 'rgba(255,255,255,0.10)' }}/>
-          <button className="btn btn-outline" style={{ padding: '6px 10px', fontSize: 12 }}><I.download size={13}/>Excel</button>
-          <button className="btn btn-outline" style={{ padding: '6px 10px', fontSize: 12 }}><I.lock size={13}/>Désactiver</button>
-          <button className="btn btn-ghost" style={{ padding: '6px 10px', fontSize: 12 }} onClick={() => setSelection(new Set())}>Annuler</button>
-        </div>
-      )}
-
       {viewPanel && (
         <OeuvreViewPanel oeuvre={viewPanel} onClose={() => setViewPanel(null)}
-          onEdit={() => { setFormPanel({ mode: 'edit', oeuvre: viewPanel }); setViewPanel(null); }}/>
+          onEdit={() => { setFormPanel({ mode: 'edit', oeuvre: viewPanel! }); setViewPanel(null); }}/>
       )}
       {formPanel && (
-        <OeuvreFormPanel mode={formPanel.mode} oeuvre={formPanel.oeuvre} onClose={() => setFormPanel(null)}
-          onSave={(d) => { setFormPanel(null); addToast({ type: 'success', title: formPanel.mode === 'create' ? 'Œuvre créée avec succès.' : 'Modifications enregistrées.', body: d.nom || formPanel.oeuvre?.nom }); }}/>
+        <OeuvreFormPanel mode={formPanel.mode} oeuvre={formPanel.oeuvre} types={types}
+          onClose={() => setFormPanel(null)} onSaved={handleSaved}/>
       )}
-
-      <ToastStack toasts={toasts} />
+      {deleteModal && (
+        <DeleteModal oeuvre={deleteModal} onClose={() => setDeleteModal(null)} onDeleted={handleDeleted}/>
+      )}
+      <ToastStack toasts={toasts}/>
     </div>
   );
 }

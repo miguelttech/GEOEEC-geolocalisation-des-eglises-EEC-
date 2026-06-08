@@ -34,7 +34,7 @@ export default function Navbar() {
         <Link href="/register" className="nav-inscription">
           S&apos;inscrire
         </Link>
-        <Link href="/admin" className="lp-btn lp-btn-ghost">
+        <Link href="/login" className="lp-btn lp-btn-ghost">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3" />
           </svg>

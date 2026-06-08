@@ -31,19 +31,20 @@ class StatistiqueAnnuelleSerializer(serializers.ModelSerializer):
 # ---------------------------------------------------------------------------
 
 class UserSerializer(serializers.ModelSerializer):
-    scope_label = serializers.SerializerMethodField()
-    region_nom  = serializers.CharField(source="region.nom",   read_only=True, default=None)
+    scope_label  = serializers.SerializerMethodField()
+    role_display = serializers.SerializerMethodField()
+    region_nom   = serializers.CharField(source="region.nom",   read_only=True, default=None)
     district_nom = serializers.CharField(source="district.nom", read_only=True, default=None)
     paroisse_nom = serializers.CharField(source="paroisse.nom", read_only=True, default=None)
 
-    def get_scope_label(self, obj):
-        return obj.get_scope_label()
+    def get_scope_label(self, obj):  return obj.get_scope_label()
+    def get_role_display(self, obj): return obj.get_role_display()
 
     class Meta:
         model = User
         fields = [
             "id", "username", "email", "first_name", "last_name",
-            "telephone", "role", "is_active",
+            "telephone", "role", "role_display", "is_active",
             "region", "region_nom",
             "district", "district_nom",
             "paroisse", "paroisse_nom",

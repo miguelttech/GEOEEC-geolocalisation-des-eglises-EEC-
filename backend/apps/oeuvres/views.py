@@ -1,9 +1,11 @@
+from django.db.models import Count
+
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from .models import TypeOeuvre, Oeuvre
-from .serializers import TypeOeuvreSerializer, OeuvreListSerializer, OeuvreDetailSerializer
+from .serializers import TypeOeuvreSerializer, OeuvreListSerializer, OeuvreWriteSerializer
 from apps.accounts.permissions import (
     ReadPublicWriteAdmin,
     filter_oeuvres_by_scope,
@@ -16,8 +18,10 @@ from apps.accounts.permissions import (
 
 class TypeOeuvreViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.AllowAny]
-    queryset = TypeOeuvre.objects.order_by("nom")
     serializer_class = TypeOeuvreSerializer
+
+    def get_queryset(self):
+        return TypeOeuvre.objects.annotate(nb_oeuvres=Count("oeuvres")).order_by("nom")
 
 
 # ---------------------------------------------------------------------------
@@ -78,8 +82,8 @@ class OeuvreViewSet(viewsets.ModelViewSet):
         return qs
 
     def get_serializer_class(self):
-        if self.action in ("retrieve", "create", "update", "partial_update"):
-            return OeuvreDetailSerializer
+        if self.action in ("create", "update", "partial_update"):
+            return OeuvreWriteSerializer
         return OeuvreListSerializer
 
     def perform_create(self, serializer):

@@ -381,20 +381,87 @@ def export_statistiques_pdf(request):
 @permission_classes([IsAuthenticated])
 def template_paroisses(request):
     """GET /api/exports/templates/paroisses/"""
+    from openpyxl.styles import PatternFill as PF
+    from openpyxl.comments import Comment
+
     wb = openpyxl.Workbook()
     ws = wb.active
-    ws.title = "Gabarit Paroisses"
+    ws.title = "Gabarit Paroisses EEC"
 
-    headers = ["Nom de la Paroisse *", "Nom du District *", "Adresse", "Latitude", "Longitude"]
+    # --- En-têtes -----------------------------------------------------------
+    headers = [
+        "Niveau",
+        "Région Synodale *",
+        "District",
+        "Nom de la Paroisse *",
+        "Quartier / Adresse",
+        "Communiants",
+        "Non-Communiants",
+        "Nombre Ouvriers",
+        "Coord. X (Longitude)",
+        "Coord. Y (Latitude)",
+        "Altitude (m)",
+    ]
     ws.append(headers)
     _apply_header(ws, 1, len(headers))
-    ws.append(["Paroisse Exemple", "WOURI", "Quartier Akwa, Douala", "4.0500", "9.7000"])
-    _apply_row(ws, 2, len(headers))
-    note = ws.cell(row=4, column=1, value="* = champ obligatoire  |  Le District doit exister en base  |  Latitude/Longitude : décimales, point comme séparateur")
-    note.font = Font(italic=True, color="666666", size=9)
 
-    _set_col_widths(ws, [40, 25, 35, 12, 12])
-    return _excel_response(wb, "gabarit_paroisses.xlsx")
+    # --- Ligne d'exemple ----------------------------------------------------
+    ws.append([
+        "PAROISSE",
+        "WOURI CENTRE",
+        "WOURI",
+        "Paroisse de Bonanjo",
+        "Quartier Bonanjo, Douala",
+        1200,
+        430,
+        3,
+        "9.7000",
+        "4.0500",
+        12,
+    ])
+    _apply_row(ws, 2, len(headers))
+
+    # --- Ligne d'explication ------------------------------------------------
+    ws.append([
+        "PAROISSE / STATION / ANNEXE",
+        "Nom exact de la région synodiale",
+        "Nom exact du district (optionnel si région fournie)",
+        "Obligatoire",
+        "Optionnel",
+        "Entier ≥ 0",
+        "Entier ≥ 0",
+        "Entier ≥ 0",
+        "Décimal ex: 9.7000",
+        "Décimal ex: 4.0500",
+        "En mètres (optionnel)",
+    ])
+    row3_fill = PF("solid", fgColor="FFF9C4")
+    for col in range(1, len(headers) + 1):
+        cell = ws.cell(row=3, column=col)
+        cell.fill = row3_fill
+        cell.font = Font(italic=True, color="555555", size=9)
+
+    # --- Note globale -------------------------------------------------------
+    note = ws.cell(row=5, column=1,
+        value=(
+            "RÈGLES D'IMPORT :  "
+            "* = champ obligatoire  |  "
+            "Région Synodale et Nom de la Paroisse sont les seuls champs OBLIGATOIRES.  |  "
+            "Le District est recommandé mais optionnel (la première correspondance dans la région sera utilisée).  |  "
+            "Niveau par défaut : PAROISSE  |  "
+            "Coord. X = Longitude, Coord. Y = Latitude (système WGS-84, décimales, point comme séparateur).  |  "
+            "Les communiants et non-communiants créent automatiquement une statistique annuelle pour l'année en cours."
+        )
+    )
+    note.font = Font(italic=True, color="1B5E20", size=9, bold=False)
+    ws.merge_cells(start_row=5, start_column=1, end_row=5, end_column=len(headers))
+
+    _set_col_widths(ws, [18, 28, 22, 36, 32, 14, 16, 16, 20, 20, 14])
+    ws.freeze_panes = "A2"
+    ws.row_dimensions[1].height = 30
+    ws.row_dimensions[5].height = 50
+
+    return _excel_response(wb, "gabarit_paroisses_EEC.xlsx")
 
 
 @api_view(["GET"])
@@ -459,14 +526,21 @@ def import_paroisses(request):
     POST /api/imports/paroisses/
     Body : multipart/form-data, champ « file » (.xlsx)
 
-    Colonnes (ligne 1 = entête ignorée) :
-      A  Nom de la paroisse  (obligatoire)
-      B  Nom du district     (obligatoire, doit exister en base)
-      C  Adresse             (optionnel)
-      D  Latitude            (optionnel)
-      E  Longitude           (optionnel)
+    Colonnes (ligne 1 = en-tête ignorée) :
+      A  Niveau              (optionnel : PAROISSE/STATION/ANNEXE, défaut PAROISSE)
+      B  Région Synodale     (OBLIGATOIRE)
+      C  District            (optionnel — fallback : premier district de la région)
+      D  Nom de la Paroisse  (OBLIGATOIRE)
+      E  Quartier/Adresse    (optionnel)
+      F  Communiants         (optionnel — crée/met à jour StatistiqueAnnuelle année courante)
+      G  Non-Communiants     (optionnel)
+      H  Nombre Ouvriers     (optionnel — informatif uniquement)
+      I  Coord. X (Longitude)(optionnel)
+      J  Coord. Y (Latitude) (optionnel)
+      K  Altitude            (optionnel — non stocké)
     """
     from apps.audit.utils import log_action
+    from datetime import date as _date
 
     if request.user.role not in ("SUPER", "REGION", "DISTRICT"):
         return Response({"detail": "Permission refusée."}, status=status.HTTP_403_FORBIDDEN)
@@ -483,56 +557,147 @@ def import_paroisses(request):
     except Exception as exc:
         return Response({"detail": f"Impossible de lire le fichier : {exc}"}, status=status.HTTP_400_BAD_REQUEST)
 
-    districts_cache = {d.nom.strip().upper(): d for d in District.objects.select_related("region")}
+    # Caches pour éviter N+1 queries
+    regions_cache   = {r.nom.strip().upper(): r for r in RegionSynodale.objects.all()}
+    districts_cache = {(d.nom.strip().upper(), d.region_id): d
+                       for d in District.objects.select_related("region")}
+    # Index districts par région : region_id → [district, ...]
+    from collections import defaultdict
+    districts_by_region: dict = defaultdict(list)
+    for (dnom, rid), d in districts_cache.items():
+        districts_by_region[rid].append(d)
+
+    NIVEAUX_VALIDES = {"PAROISSE", "STATION", "ANNEXE"}
+    annee_courante  = _date.today().year
+
+    def _str(val, default=""):
+        return str(val).strip() if val not in (None, "") else default
+
+    def _int_or_none(val):
+        try:
+            return max(0, int(float(str(val).replace(",", ".").strip())))
+        except (ValueError, TypeError):
+            return None
 
     created = updated = 0
     errors  = []
     rows    = list(ws.iter_rows(min_row=2, values_only=True))
+    preview = []  # lignes importées pour l'aperçu
 
     for i, row in enumerate(rows, start=2):
-        if not row or not row[0]:
+        if not row or all(v is None or str(v).strip() == "" for v in row):
             continue
 
-        nom_paroisse = str(row[0]).strip()          if row[0]                           else ""
-        nom_district = str(row[1]).strip()          if len(row) > 1 and row[1]          else ""
-        adresse      = str(row[2]).strip()          if len(row) > 2 and row[2]          else ""
-        lat_raw      = row[3]                        if len(row) > 3                     else None
-        lon_raw      = row[4]                        if len(row) > 4                     else None
+        # --- Lecture des colonnes -------------------------------------------
+        niveau_raw   = _str(row[0] if len(row) > 0 else None)
+        nom_region   = _str(row[1] if len(row) > 1 else None)
+        nom_district = _str(row[2] if len(row) > 2 else None)
+        nom_paroisse = _str(row[3] if len(row) > 3 else None)
+        adresse      = _str(row[4] if len(row) > 4 else None)
+        communiants  = _int_or_none(row[5] if len(row) > 5 else None)
+        non_comm     = _int_or_none(row[6] if len(row) > 6 else None)
+        # ouvriers (col H) = informatif, non importé
+        lon_raw      = row[8] if len(row) > 8 else None
+        lat_raw      = row[9] if len(row) > 9 else None
+        # altitude (col K) = non stockée
 
+        # --- Validation des champs obligatoires ----------------------------
         if not nom_paroisse:
-            errors.append({"ligne": i, "erreur": "Nom de paroisse vide"}); continue
-        if not nom_district:
-            errors.append({"ligne": i, "erreur": "Nom de district vide"}); continue
+            errors.append({"ligne": i, "erreur": "Nom de paroisse vide (colonne D obligatoire)"}); continue
+        if not nom_region:
+            errors.append({"ligne": i, "erreur": "Région synodiale vide (colonne B obligatoire)"}); continue
 
-        district = districts_cache.get(nom_district.upper())
-        if not district:
-            errors.append({"ligne": i, "erreur": f"District '{nom_district}' introuvable"}); continue
+        # --- Résolution de la région ---------------------------------------
+        region = regions_cache.get(nom_region.upper())
+        if not region:
+            errors.append({"ligne": i, "erreur": f"Région '{nom_region}' introuvable en base"}); continue
 
-        # RBAC : vérification du scope de l'admin
-        if request.user.role == "REGION" and district.region_id != request.user.region_id:
-            errors.append({"ligne": i, "erreur": f"District '{nom_district}' hors de votre région"}); continue
+        # RBAC région
+        if request.user.role == "REGION" and region.id != request.user.region_id:
+            errors.append({"ligne": i, "erreur": f"Région '{nom_region}' hors de votre périmètre"}); continue
+
+        # --- Résolution du district ----------------------------------------
+        district = None
+        if nom_district:
+            district = districts_cache.get((nom_district.upper(), region.id))
+            if not district:
+                # Tolérance : chercher par nom seul dans toute la région
+                for (dn, rid), d in districts_cache.items():
+                    if dn == nom_district.upper() and rid == region.id:
+                        district = d; break
+            if not district:
+                errors.append({"ligne": i, "erreur": f"District '{nom_district}' introuvable dans la région '{nom_region}'"}); continue
+        else:
+            # Fallback : premier district alphabétique de la région
+            candidats = sorted(districts_by_region.get(region.id, []), key=lambda d: d.nom)
+            if not candidats:
+                errors.append({"ligne": i, "erreur": f"Aucun district trouvé dans la région '{nom_region}'"}); continue
+            district = candidats[0]
+
+        # RBAC district
         if request.user.role == "DISTRICT" and district.id != request.user.district_id:
-            errors.append({"ligne": i, "erreur": f"District '{nom_district}' hors de votre district"}); continue
+            errors.append({"ligne": i, "erreur": f"District hors de votre périmètre"}); continue
 
+        # --- Niveau --------------------------------------------------------
+        niveau = niveau_raw.upper() if niveau_raw.upper() in NIVEAUX_VALIDES else "PAROISSE"
+
+        # --- GPS -----------------------------------------------------------
         position = _parse_gps(lat_raw, lon_raw)
 
+        # --- Création / mise à jour Paroisse -------------------------------
         paroisse, was_created = Paroisse.objects.get_or_create(
-            nom=nom_paroisse,
+            nom__iexact=nom_paroisse,
             district=district,
-            defaults={"adresse": adresse, "position": position},
+            defaults={
+                "nom":      nom_paroisse,
+                "adresse":  adresse,
+                "niveau":   niveau,
+                "position": position,
+                "est_active": True,
+            },
         )
 
         if was_created:
             created += 1
         else:
-            changed_fields = []
-            if adresse and not paroisse.adresse:
-                paroisse.adresse  = adresse;  changed_fields.append("adresse")
-            if position and not paroisse.position:
-                paroisse.position = position; changed_fields.append("position")
-            if changed_fields:
-                paroisse.save(update_fields=changed_fields)
+            changed = []
+            if adresse  and not paroisse.adresse:   paroisse.adresse  = adresse;  changed.append("adresse")
+            if position and not paroisse.position:  paroisse.position = position; changed.append("position")
+            if niveau   and paroisse.niveau != niveau: paroisse.niveau = niveau;  changed.append("niveau")
+            if changed:
+                paroisse.save(update_fields=changed)
                 updated += 1
+
+        # --- Statistiques annuelles (si communiants fournis) ---------------
+        if communiants is not None or non_comm is not None:
+            stat, _ = StatistiqueAnnuelle.objects.get_or_create(
+                paroisse=paroisse, annee=annee_courante,
+                defaults={
+                    "communiants":     communiants or 0,
+                    "non_communiants": non_comm    or 0,
+                },
+            )
+            if not _:  # existait déjà → mise à jour si plus complet
+                changed = False
+                if communiants is not None and stat.communiants == 0:
+                    stat.communiants = communiants; changed = True
+                if non_comm is not None and stat.non_communiants == 0:
+                    stat.non_communiants = non_comm; changed = True
+                if changed:
+                    stat.save(update_fields=["communiants", "non_communiants"])
+
+        # --- Aperçu --------------------------------------------------------
+        preview.append({
+            "nom":      paroisse.nom,
+            "niveau":   paroisse.niveau,
+            "region":   region.nom,
+            "district": district.nom,
+            "adresse":  paroisse.adresse or "",
+            "gps":      position is not None,
+            "communiants": communiants or 0,
+            "non_communiants": non_comm or 0,
+            "statut":   "Créé" if was_created else "Mis à jour",
+        })
 
     log_action(
         request, "IMPORT", "paroisse",
@@ -544,6 +709,7 @@ def import_paroisses(request):
         "errors_count": len(errors),
         "errors":       errors[:50],
         "total_lignes": len(rows),
+        "preview":      preview[:100],  # Aperçu des 100 premières lignes importées
     })
 
 

@@ -83,16 +83,18 @@ services:
       dockerfile: Dockerfile
     container_name: eec_frontend_dev
     restart: unless-stopped
-    command: npm run dev -- -p 3004
+    command: npm run dev
     volumes:
       - ./frontend:/app
       - /app/node_modules
     ports:
       - "3004:3004"
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api
       - NEXT_PUBLIC_GEOSERVER_URL=http://localhost:8080/geoserver
       - BACKEND_INTERNAL_URL=http://backend:8000
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
     depends_on:
       - backend
     networks: [eecnet]

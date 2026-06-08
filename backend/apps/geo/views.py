@@ -11,6 +11,7 @@ from .serializers import (
     DistrictSerializer,
     ParoisseListSerializer,
     ParoisseDetailSerializer,
+    ParoisseWriteSerializer,
 )
 from apps.accounts.permissions import (
     ReadPublicWriteAdmin,
@@ -41,8 +42,15 @@ class RegionSynodaleViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=False, url_path="liste")
     def liste(self, request):
-        """GET /api/geo/regions/liste/ — sans géométrie, pour les dropdowns."""
-        qs = RegionSynodale.objects.order_by("nom")
+        """GET /api/geo/regions/liste/ — sans géométrie, pour dropdowns et tableau admin."""
+        qs = (
+            RegionSynodale.objects
+            .annotate(
+                nb_districts=Count("districts", distinct=True),
+                nb_paroisses=Count("districts__paroisses", distinct=True),
+            )
+            .order_by("nom")
+        )
         return Response(RegionSynodaleListSerializer(qs, many=True).data)
 
 
@@ -78,11 +86,6 @@ class DistrictViewSet(viewsets.ModelViewSet):
 # ---------------------------------------------------------------------------
 # Paroisses — lecture publique, CRUD complet avec RBAC
 # ---------------------------------------------------------------------------
-
-class ParoisseWriteSerializer(ParoisseDetailSerializer):
-    """Serializer pour les opérations d'écriture (sans GeoJSON wrapper)."""
-    pass
-
 
 class ParoisseViewSet(viewsets.ModelViewSet):
     permission_classes = [ReadPublicWriteAdmin]
@@ -124,7 +127,9 @@ class ParoisseViewSet(viewsets.ModelViewSet):
         return qs
 
     def get_serializer_class(self):
-        if self.action == "retrieve" or self.action in ("create", "update", "partial_update"):
+        if self.action in ("create", "update", "partial_update"):
+            return ParoisseWriteSerializer
+        if self.action == "retrieve":
             return ParoisseDetailSerializer
         return ParoisseListSerializer
 

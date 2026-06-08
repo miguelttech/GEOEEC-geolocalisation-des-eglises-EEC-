@@ -3,24 +3,21 @@ import type { NextRequest } from 'next/server';
 
 /**
  * Protège toutes les routes /admin/*.
- * Vérifie la présence du cookie de session Django (sessionid).
- * Si absent → redirection vers /login avec le paramètre ?next=<url>.
- *
- * Note : la validation réelle de la session est assurée par le backend
- * (IsAuthenticated sur chaque endpoint). Ce middleware est un garde UX.
+ * Le guard pathname.startsWith est explicite car Turbopack (--turbo) a un comportement
+ * non-standard avec les matchers : le middleware peut s'exécuter sur toutes les routes
+ * même quand le matcher spécifie /admin/:path*.
  */
 export function middleware(request: NextRequest) {
-  // Bypass auth in dev to allow UI testing before the login page is built
-  if (process.env.NODE_ENV === 'development') {
+  const { pathname } = request.nextUrl;
+
+  // Guard explicite : uniquement les routes /admin/* et /admin
+  if (!pathname.startsWith('/admin')) {
     return NextResponse.next();
   }
 
-  const { pathname } = request.nextUrl;
-  const session = request.cookies.get('sessionid');
-
+  const session = request.cookies.get('eec_sessionid');
   if (!session) {
-    const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = '/login';
+    const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('next', pathname);
     return NextResponse.redirect(loginUrl);
   }

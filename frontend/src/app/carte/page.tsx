@@ -6,6 +6,9 @@ import type { MapUser } from '@/components/eec/EECMapApp';
 
 const EECMapApp = dynamic(() => import('@/components/eec/EECMapApp'), { ssr: false });
 
+const BACKEND = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api')
+  .replace(/\/api\/?$/, '');
+
 type AuthState = 'loading' | 'visitor' | 'public';
 
 export default function CartePage() {
@@ -13,10 +16,12 @@ export default function CartePage() {
   const [user, setUser] = useState<MapUser | null>(null);
 
   useEffect(() => {
-    fetch('/api/auth/me/', { credentials: 'include' })
+    fetch(`${BACKEND}/api/auth/me/`, { credentials: 'include' })
       .then(r => (r.ok ? r.json() : Promise.reject()))
       .then((d: MapUser) => {
         setUser(d);
+        // Seul le rôle VISITEUR voit la carte débloquée
+        // Les admins restent en mode public sur la carte publique (leur outil = l'admin dashboard)
         setState(d.role === 'VISITEUR' ? 'visitor' : 'public');
       })
       .catch(() => setState('public'));

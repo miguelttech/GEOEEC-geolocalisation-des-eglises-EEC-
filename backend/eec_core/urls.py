@@ -24,6 +24,8 @@ from apps.accounts.auth_views import (
     toggle_user_active,
     reset_user_password,
     dashboard_stats,
+    password_reset_request,
+    password_reset_confirm,
 )
 
 # Vues visitors + analytics
@@ -66,6 +68,8 @@ auth_patterns = [
     path("logout/",                          logout_view),
     path("me/",                              me_view),
     path("change-password/",                 change_password),
+    path("password-reset/",                  password_reset_request),
+    path("password-reset/confirm/",          password_reset_confirm),
     path("dashboard-stats/",                 dashboard_stats),
     path("users/",                           list_users),
     path("users/create/",                    create_user),

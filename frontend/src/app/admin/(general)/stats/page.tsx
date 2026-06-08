@@ -1,13 +1,14 @@
 'use client';
 import React from 'react';
+import { api, StatistiqueAnnuelle, PagedResult } from '@/lib/api';
 import { I } from '@/components/admin/icons';
-import { CompleteBar, Dropdown } from '@/components/admin/atoms';
-import { statsByRegion } from '@/components/admin/data';
+import { CompleteBar } from '@/components/admin/atoms';
 
+/* ─── Toast ─────────────────────────────────────────────────────────── */
 interface Toast { id: number; type: 'success'|'warn'|'info'|'error'; title: string; body?: string; }
 function useToast() {
   const [toasts, setToasts] = React.useState<Toast[]>([]);
-  const add = (t: Omit<Toast, 'id'>) => { const id = Date.now(); setToasts(p => [...p, { ...t, id }]); setTimeout(() => setToasts(p => p.filter(x => x.id !== id)), 4000); };
+  const add = (t: Omit<Toast,'id'>) => { const id = Date.now(); setToasts(p => [...p, { ...t, id }]); setTimeout(() => setToasts(p => p.filter(x => x.id !== id)), 4000); };
   return { toasts, add };
 }
 function ToastStack({ toasts }: { toasts: Toast[] }) {
@@ -23,26 +24,63 @@ function ToastStack({ toasts }: { toasts: Toast[] }) {
   );
 }
 
-function RegionStatsPanel({ region, onClose }: { region: any; onClose: () => void }) {
+/* ─── Aggregated region row ──────────────────────────────────────────── */
+interface RegionRow {
+  region: string;
+  paroisses: number;
+  communiants: number;
+  non_communiants: number;
+  total_fideles: number;
+  baptemes: number;
+  confirmations: number;
+  mariages: number;
+  deces: number;
+  non_validee: number;
+}
+
+function aggregateByRegion(stats: StatistiqueAnnuelle[]): RegionRow[] {
+  const map = new Map<string, RegionRow>();
+  for (const s of stats) {
+    const nom = s.region_nom || 'Inconnue';
+    const row = map.get(nom) ?? { region: nom, paroisses: 0, communiants: 0, non_communiants: 0, total_fideles: 0, baptemes: 0, confirmations: 0, mariages: 0, deces: 0, non_validee: 0 };
+    row.paroisses      += 1;
+    row.communiants    += s.communiants    || 0;
+    row.non_communiants+= s.non_communiants|| 0;
+    row.total_fideles  += s.total_fideles  || 0;
+    row.baptemes       += s.baptemes       || 0;
+    row.confirmations  += s.confirmations  || 0;
+    row.mariages       += s.mariages       || 0;
+    row.deces          += s.deces          || 0;
+    if (!s.validee) row.non_validee += 1;
+    map.set(nom, row);
+  }
+  return Array.from(map.values()).sort((a, b) => b.total_fideles - a.total_fideles);
+}
+
+/* ─── Detail panel ──────────────────────────────────────────────────── */
+function RegionDetailPanel({ row, stats, onClose }: { row: RegionRow; stats: StatistiqueAnnuelle[]; onClose: () => void }) {
+  const paroisseStats = stats.filter(s => s.region_nom === row.region);
+  const maxFideles = Math.max(...paroisseStats.map(s => s.total_fideles || 0), 1);
+
   return (
     <div className="overlay" onClick={onClose}>
-      <div className="slide-panel" style={{ width: 460 }} onClick={e => e.stopPropagation()}>
+      <div className="slide-panel" style={{ width: 500 }} onClick={e => e.stopPropagation()}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 22px', borderBottom: '1px solid var(--border)' }}>
           <div>
-            <h2 className="sg-md" style={{ fontSize: 15, margin: 0 }}>{region.region}</h2>
-            <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 1 }}>Statistiques {region.annee || '2025'} · {region.paroisses} paroisses</div>
+            <h2 className="sg-md" style={{ fontSize: 15, margin: 0 }}>{row.region}</h2>
+            <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 2 }}>{row.paroisses} paroisses · {row.non_validee > 0 ? `${row.non_validee} non validées` : 'Toutes validées'}</div>
           </div>
           <button className="icon-btn" onClick={onClose}><I.x size={16}/></button>
         </div>
-        <div style={{ padding: '20px 22px', overflowY: 'auto', height: 'calc(100% - 72px)', display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <div style={{ padding: '20px 22px', overflowY: 'auto', height: 'calc(100% - 72px)', display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             {[
-              { label: 'Communiants', value: region.communiants.toLocaleString('fr'), color: '#5AC472' },
-              { label: 'Non-communiants', value: region.noncomm.toLocaleString('fr'), color: 'var(--text-2)' },
-              { label: 'Total fidèles', value: region.total.toLocaleString('fr'), color: '#5AC472' },
-              { label: 'Ouvriers', value: region.ouvriers, color: 'var(--text)' },
-              { label: 'Baptêmes', value: region.baptemes, color: 'var(--text)' },
-              { label: 'Mariages', value: region.mariages, color: 'var(--text)' },
+              { label: 'Communiants',     value: row.communiants.toLocaleString('fr'),     color: '#5AC472' },
+              { label: 'Non-communiants', value: row.non_communiants.toLocaleString('fr'), color: 'var(--text-2)' },
+              { label: 'Total fidèles',   value: row.total_fideles.toLocaleString('fr'),   color: '#5AC472' },
+              { label: 'Baptêmes',        value: row.baptemes.toString(),                  color: 'var(--text)' },
+              { label: 'Confirmations',   value: row.confirmations.toString(),              color: 'var(--text)' },
+              { label: 'Mariages',        value: row.mariages.toString(),                  color: 'var(--text)' },
             ].map(s => (
               <div key={s.label} className="card" style={{ padding: '12px 14px' }}>
                 <div style={{ fontSize: 10, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>{s.label}</div>
@@ -51,346 +89,270 @@ function RegionStatsPanel({ region, onClose }: { region: any; onClose: () => voi
             ))}
           </div>
           <div className="card" style={{ padding: '14px 16px' }}>
-            <div style={{ fontSize: 11, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Score de performance</div>
-            <CompleteBar pct={region.score}/>
+            <div style={{ fontSize: 11, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>
+              Top paroisses par fidèles
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {paroisseStats
+                .sort((a, b) => (b.total_fideles||0) - (a.total_fideles||0))
+                .slice(0, 6)
+                .map(s => (
+                  <div key={s.id}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 4 }}>
+                      <span style={{ color: 'var(--text-2)', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.paroisse_nom}</span>
+                      <span className="mono" style={{ color: 'var(--text)', fontWeight: 600 }}>{(s.total_fideles||0).toLocaleString('fr')}</span>
+                    </div>
+                    <div style={{ height: 4, background: 'rgba(255,255,255,0.08)', borderRadius: 2, overflow: 'hidden' }}>
+                      <div style={{ width: `${Math.round(((s.total_fideles||0)/maxFideles)*100)}%`, height: '100%', background: '#5AC472', borderRadius: 2 }}/>
+                    </div>
+                  </div>
+                ))
+              }
+            </div>
           </div>
-          <button className="btn btn-outline" style={{ justifyContent: 'center', gap: 10 }}><I.download size={14}/>Exporter fiche région PDF</button>
         </div>
       </div>
     </div>
   );
 }
 
-export default function StatsPage() {
-  const { toasts, add: addToast } = useToast();
-  const [view, setView] = React.useState('tableau');
-  const [year, setYear] = React.useState('2025');
-  const [viewPanel, setViewPanel] = React.useState<any>(null);
+/* ─── Paroisse table view ───────────────────────────────────────────── */
+function ParoisseTable({ stats, loading }: { stats: StatistiqueAnnuelle[]; loading: boolean }) {
+  const [search, setSearch] = React.useState('');
+  const filtered = search
+    ? stats.filter(s => s.paroisse_nom.toLowerCase().includes(search.toLowerCase()) || s.region_nom?.toLowerCase().includes(search.toLowerCase()))
+    : stats;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div className="seg">
-          <button className={view === 'tableau' ? 'on' : ''} onClick={() => setView('tableau')}><I.list size={12} style={{ marginRight: 6, verticalAlign: -2 }}/>Vue tableau</button>
-          <button className={view === 'carte' ? 'on' : ''} onClick={() => setView('carte')}><I.map size={12} style={{ marginRight: 6, verticalAlign: -2 }}/>Vue carte</button>
-          <button className={view === 'region' ? 'on' : ''} onClick={() => setView('region')}><I.compass size={12} style={{ marginRight: 6, verticalAlign: -2 }}/>Par région</button>
-          <button className={view === 'visiteurs' ? 'on' : ''} onClick={() => setView('visiteurs')}><I.users size={12} style={{ marginRight: 6, verticalAlign: -2 }}/>Visiteurs</button>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <Dropdown value={`Année ${year}`} options={['Année 2025','Année 2024','Année 2023']} onChange={v => setYear(v.split(' ')[1])} width={130} />
-          <button className="btn btn-outline" onClick={() => addToast({ type:'info', title:'Export PDF en cours...', body:'Statistiques nationales 2025' })}><I.download size={13}/>PDF</button>
-          <button className="btn btn-outline" onClick={() => addToast({ type:'info', title:'Export Excel en cours...', body:'Statistiques nationales 2025 → .xlsx' })}><I.download size={13}/>Excel</button>
-          <button className="btn btn-outline" onClick={() => addToast({ type:'info', title:'Export CSV en cours...', body:'Statistiques nationales 2025 → .csv' })}><I.download size={13}/>CSV</button>
-        </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div style={{ position: 'relative', maxWidth: 320 }}>
+        <I.search size={14} style={{ position: 'absolute', top: 10, left: 11, color: 'var(--text-3)' }}/>
+        <input className="input" placeholder="Rechercher une paroisse…" style={{ paddingLeft: 34, fontSize: 13 }}
+          value={search} onChange={e => setSearch(e.target.value)}/>
       </div>
-
-      {view === 'tableau' && (
-        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+        {loading ? (
+          <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-3)', gap: 10, fontSize: 13 }}>
+            <I.refresh size={16} style={{ opacity: 0.5 }}/>Chargement…
+          </div>
+        ) : (
           <div style={{ overflowX: 'auto' }}>
             <table className="data">
               <thead>
                 <tr>
-                  <th style={{ width: 40 }}>#</th>
-                  <th className="sortable">Région synodale</th>
-                  <th className="sortable" style={{ textAlign: 'right' }}>Communiants</th>
-                  <th className="sortable" style={{ textAlign: 'right' }}>Non-comm.</th>
-                  <th className="sortable" style={{ textAlign: 'right' }}>Total fidèles</th>
+                  <th>#</th>
+                  <th>Paroisse</th>
+                  <th>District / Région</th>
+                  <th style={{ textAlign: 'right' }}>Communiants</th>
+                  <th style={{ textAlign: 'right' }}>Non-comm.</th>
+                  <th style={{ textAlign: 'right' }}>Total</th>
                   <th style={{ textAlign: 'right' }}>Baptêmes</th>
                   <th style={{ textAlign: 'right' }}>Mariages</th>
                   <th style={{ textAlign: 'right' }}>Décès</th>
-                  <th style={{ textAlign: 'right' }}>Ouvriers</th>
-                  <th className="sortable">Score perf.</th>
-                  <th style={{ width: 90 }}>Actions</th>
+                  <th>Validée</th>
                 </tr>
               </thead>
               <tbody>
-                {statsByRegion.map((r, i) => (
-                  <tr key={i}>
-                    <td className="mono" style={{ color: 'var(--text-3)', fontSize: 11.5 }}>{String(i+1).padStart(2,'0')}</td>
-                    <td>
-                      <span style={{ fontWeight: 500, fontSize: 13 }}>{r.region}</span>
-                      <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{r.paroisses} paroisses</div>
+                {filtered.length === 0 ? (
+                  <tr><td colSpan={10} style={{ height: 180, textAlign: 'center', color: 'var(--text-3)', fontSize: 13 }}>
+                    Aucune donnée
+                  </td></tr>
+                ) : filtered.map((s, i) => (
+                  <tr key={s.id}>
+                    <td className="mono" style={{ color: 'var(--text-3)', fontSize: 11.5 }}>{String(i+1).padStart(3,'0')}</td>
+                    <td style={{ fontWeight: 500, fontSize: 13 }}>{s.paroisse_nom}</td>
+                    <td style={{ color: 'var(--text-2)', fontSize: 12 }}>
+                      <div>{s.district_nom}</div>
+                      <div style={{ color: 'var(--text-3)', fontSize: 11 }}>{s.region_nom}</div>
                     </td>
-                    <td className="mono" style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{r.communiants.toLocaleString('fr')}</td>
-                    <td className="mono" style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums', color: 'var(--text-2)' }}>{r.noncomm.toLocaleString('fr')}</td>
-                    <td className="mono sg-md" style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontSize: 14 }}>{r.total.toLocaleString('fr')}</td>
-                    <td className="mono" style={{ textAlign: 'right', color: 'var(--text-2)' }}>{r.baptemes}</td>
-                    <td className="mono" style={{ textAlign: 'right', color: 'var(--text-2)' }}>{r.mariages}</td>
-                    <td className="mono" style={{ textAlign: 'right', color: 'var(--text-2)' }}>{r.deces}</td>
-                    <td className="mono" style={{ textAlign: 'right', color: 'var(--text-2)' }}>{r.ouvriers}</td>
-                    <td><CompleteBar pct={r.score} /></td>
+                    <td className="mono" style={{ textAlign: 'right' }}>{(s.communiants||0).toLocaleString('fr')}</td>
+                    <td className="mono" style={{ textAlign: 'right', color: 'var(--text-2)' }}>{(s.non_communiants||0).toLocaleString('fr')}</td>
+                    <td className="mono sg-md" style={{ textAlign: 'right', fontSize: 13 }}>{(s.total_fideles||0).toLocaleString('fr')}</td>
+                    <td className="mono" style={{ textAlign: 'right', color: 'var(--text-2)' }}>{s.baptemes||0}</td>
+                    <td className="mono" style={{ textAlign: 'right', color: 'var(--text-2)' }}>{s.mariages||0}</td>
+                    <td className="mono" style={{ textAlign: 'right', color: 'var(--text-2)' }}>{s.deces||0}</td>
                     <td>
-                      <div style={{ display: 'flex', gap: 2 }}>
-                        <button className="icon-btn" onClick={() => setViewPanel(r)}><I.eye size={15}/></button>
-                        <button className="icon-btn" onClick={() => addToast({ type:'info', title:`Export ${r.region}...`, body:'Fiche région → PDF' })}><I.download size={15}/></button>
-                      </div>
+                      {s.validee
+                        ? <span className="pill pill-green" style={{ fontSize: 11 }}>Validée</span>
+                        : <span className="pill pill-yellow" style={{ fontSize: 11 }}>En attente</span>}
                     </td>
                   </tr>
                 ))}
               </tbody>
-              <tfoot>
-                <tr style={{ background: 'rgba(46,151,68,0.06)', borderTop: '2px solid rgba(46,151,68,0.30)' }}>
-                  <td colSpan={2} style={{ padding: 14, fontWeight: 700, color: 'var(--text)' }} className="sg-md">Totaux nationaux</td>
-                  <td className="mono sg-md" style={{ textAlign: 'right', padding: 14 }}>89 450</td>
-                  <td className="mono sg-md" style={{ textAlign: 'right', padding: 14 }}>58 382</td>
-                  <td className="mono sg" style={{ textAlign: 'right', padding: 14, color: '#5AC472', fontSize: 15 }}>147 832</td>
-                  <td className="mono sg-md" style={{ textAlign: 'right', padding: 14 }}>2 684</td>
-                  <td className="mono sg-md" style={{ textAlign: 'right', padding: 14 }}>1 073</td>
-                  <td className="mono sg-md" style={{ textAlign: 'right', padding: 14 }}>716</td>
-                  <td className="mono sg-md" style={{ textAlign: 'right', padding: 14 }}>685</td>
-                  <td colSpan={2}></td>
-                </tr>
-              </tfoot>
             </table>
           </div>
-        </div>
-      )}
-
-      {view === 'carte' && <ChoroplethStats />}
-      {view === 'region' && <RegionTree />}
-      {view === 'visiteurs' && <VisiteursStats />}
-
-      {viewPanel && <RegionStatsPanel region={viewPanel} onClose={() => setViewPanel(null)}/>}
-      <ToastStack toasts={toasts}/>
-    </div>
-  );
-}
-
-function ChoroplethStats() {
-  const ref = React.useRef<HTMLDivElement>(null);
-  React.useEffect(() => {
-    if (!ref.current || (ref.current as any)._init) return;
-    (ref.current as any)._init = true;
-    import('leaflet').then(({ default: L }) => {
-      if (!ref.current) return;
-      const map = L.map(ref.current, { attributionControl: true }).setView([6.4, 12.3], 6);
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
-        attribution: '© OpenStreetMap · © CartoDB', maxZoom: 19, subdomains: 'abcd',
-      }).addTo(map);
-      const items = [
-        { lat: 3.866, lng: 11.516, val: 18200, name: 'CENTRE SUD 1' },
-        { lat: 4.061, lng: 9.787,  val: 16450, name: 'WOURI CENTRE' },
-        { lat: 5.475, lng: 10.418, val: 12450, name: 'MIFI' },
-        { lat: 5.448, lng: 10.057, val: 9820,  name: 'MENOUA' },
-        { lat: 7.323, lng: 13.583, val: 5800,  name: 'ADAMAOUA' },
-        { lat: 4.578, lng: 13.685, val: 6420,  name: 'EST' },
-        { lat: 10.595,lng: 14.323, val: 5400,  name: 'NORD & EXT. NORD' },
-        { lat: 2.928, lng: 11.158, val: 11200, name: 'CENTRE SUD 2' },
-        { lat: 5.140, lng: 10.273, val: 7200,  name: 'HAUT-NKAM' },
-        { lat: 5.466, lng: 10.892, val: 7800,  name: 'NOUN NORD' },
-        { lat: 4.453, lng: 9.985,  val: 7920,  name: 'MOUNGO CENTRE' },
-        { lat: 4.020, lng: 9.700,  val: 9100,  name: 'WOURI SUD' },
-      ];
-      const max = Math.max(...items.map(i => i.val));
-      items.forEach(item => {
-        const intensity = item.val / max;
-        const color = `rgba(46,151,68,${0.25 + intensity * 0.65})`;
-        L.circle([item.lat, item.lng], { radius: 40000 + intensity * 80000, color: '#2E9744', fillColor: color, fillOpacity: 0.8, weight: 1.5 })
-          .bindTooltip(`<b>${item.name}</b><br>${item.val.toLocaleString('fr')} fidèles`, { direction: 'top', offset: [0, -8] })
-          .addTo(map);
-      });
-    });
-  }, []);
-
-  return (
-    <div className="card" style={{ padding: 0, overflow: 'hidden', position: 'relative' }}>
-      <div ref={ref} style={{ height: 580, width: '100%' }} />
-      <div style={{ position: 'absolute', bottom: 16, right: 16, background: 'rgba(8,17,11,0.92)', border: '1px solid var(--border)', borderRadius: 6, padding: 14, fontSize: 11, color: 'var(--text-2)', zIndex: 1000, backdropFilter: 'blur(6px)' }}>
-        <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text)', fontWeight: 600, marginBottom: 8 }}>Fidèles par région</div>
-        <div style={{ width: 180, height: 12, background: 'linear-gradient(90deg, rgba(46,151,68,0.25), rgba(46,151,68,0.90))', borderRadius: 2 }}/>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4, fontFamily: 'var(--font-mono)', fontSize: 10 }}><span>0</span><span>18 200</span></div>
+        )}
       </div>
     </div>
   );
 }
 
-function RegionTree() {
-  const [expanded, setExpanded] = React.useState(new Set(['MIFI']));
-  const tree = [
-    { region: 'CENTRE SUD 1', fideles: 18200, paroisses: 95, districts: [
-      { name: 'YAOUNDE CENTRE', fideles: 8400, paroisses: 35, parois: [{n:'Yaoundé-Centre',f:1247},{n:'Yaoundé-Bastos',f:982},{n:'Yaoundé-Tsinga',f:778}] },
-      { name: 'YAOUNDE NORD',   fideles: 4800, paroisses: 28, parois: [] },
-      { name: 'YAOUNDE SUD',    fideles: 5000, paroisses: 32, parois: [] },
-    ]},
-    { region: 'MIFI', fideles: 12450, paroisses: 48, districts: [
-      { name: 'BAHAM',           fideles: 3200, paroisses: 12, parois: [{n:'Baham-Centre',f:320},{n:'Baham-Nord',f:185},{n:'Baham-Est',f:142}] },
-      { name: 'BAFOUSSAM NORD',  fideles: 4100, paroisses: 14, parois: [{n:'Bafoussam-Nord',f:892},{n:'Bafoussam-Plateau',f:421}] },
-      { name: 'NKAM',            fideles: 2800, paroisses: 9,  parois: [] },
-    ]},
-    { region: 'WOURI CENTRE', fideles: 16450, paroisses: 72, districts: [] },
-    { region: 'MENOUA',       fideles: 9820,  paroisses: 41, districts: [] },
-  ];
+/* ─── Main page ─────────────────────────────────────────────────────── */
+const CURRENT_YEAR = new Date().getFullYear();
+const YEAR_OPTIONS = [CURRENT_YEAR, CURRENT_YEAR-1, CURRENT_YEAR-2, CURRENT_YEAR-3];
 
-  const toggle = (k: string) => {
-    const s = new Set(expanded);
-    s.has(k) ? s.delete(k) : s.add(k);
-    setExpanded(s);
-  };
-
-  return (
-    <div className="card" style={{ padding: 8 }}>
-      {tree.map((r, ri) => {
-        const open = expanded.has(r.region);
-        return (
-          <div key={ri}>
-            <div onClick={() => toggle(r.region)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', cursor: 'pointer', borderRadius: 5, background: open ? 'rgba(255,255,255,0.04)' : 'transparent' }}>
-              {open ? <I.chevD size={14} /> : <I.chevR size={14} />}
-              <I.compass size={15} style={{ color: 'var(--gold)' }} />
-              <span style={{ fontWeight: 600, fontSize: 14 }}>{r.region}</span>
-              <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-2)' }}>{r.fideles.toLocaleString('fr')} fidèles · {r.paroisses} paroisses</span>
-            </div>
-            {open && r.districts.map((d, di) => {
-              const dkey = r.region + '/' + d.name;
-              const dopen = expanded.has(dkey);
-              return (
-                <div key={di} style={{ marginLeft: 28 }}>
-                  <div onClick={() => toggle(dkey)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', cursor: 'pointer', borderRadius: 5, background: dopen ? 'rgba(255,255,255,0.03)' : 'transparent' }}>
-                    {dopen ? <I.chevD size={13} /> : <I.chevR size={13} />}
-                    <I.network size={14} style={{ color: '#5B9BD5' }}/>
-                    <span style={{ fontWeight: 500, fontSize: 13 }}>{d.name}</span>
-                    <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-2)' }}>{d.fideles.toLocaleString('fr')} fidèles · {d.paroisses} paroisses</span>
-                  </div>
-                  {dopen && d.parois.map((p, pi) => (
-                    <div key={pi} style={{ marginLeft: 28, display: 'flex', alignItems: 'center', gap: 10, padding: '8px 14px', borderRadius: 5 }} className="row-hover">
-                      <I.church size={12} style={{ color: '#5AC472', opacity: 0.7 }}/>
-                      <span style={{ fontSize: 13, color: 'var(--text-2)' }}>{p.n}</span>
-                      <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-2)', fontVariantNumeric: 'tabular-nums' }} className="mono">{p.f} fidèles</span>
-                      <button className="btn btn-ghost" style={{ padding: '3px 8px', fontSize: 11 }}>Stats</button>
-                    </div>
-                  ))}
-                </div>
-              );
-            })}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-/* ─────────────────────────────────────────────
-   Statistiques Visiteurs
-   ───────────────────────────────────────────── */
-interface VisiteurStat {
-  total: number; actifs7j: number; nouveauxMois: number; actifsMois: number;
-}
-interface TopParoisse { name: string; vues: number; }
-interface ActivitePoint { date: string; count: number; }
-
-function VisiteursStats() {
-  const [stats, setStats] = React.useState<VisiteurStat | null>(null);
-  const [top, setTop] = React.useState<TopParoisse[]>([]);
-  const [courbe, setCourbe] = React.useState<ActivitePoint[]>([]);
-  const [loading, setLoading] = React.useState(true);
+export default function StatsPage() {
+  const { toasts, add: addToast } = useToast();
+  const [view, setView]           = React.useState<'regions'|'paroisses'>('regions');
+  const [year, setYear]           = React.useState(CURRENT_YEAR);
+  const [stats, setStats]         = React.useState<StatistiqueAnnuelle[]>([]);
+  const [loading, setLoading]     = React.useState(true);
+  const [viewPanel, setViewPanel] = React.useState<RegionRow|null>(null);
 
   React.useEffect(() => {
-    Promise.all([
-      fetch('/api/analytics/visiteurs/stats/', { credentials: 'include' }).then(r => r.ok ? r.json() : null),
-      fetch('/api/analytics/paroisses/top/', { credentials: 'include' }).then(r => r.ok ? r.json() : []),
-      fetch('/api/analytics/activite/courbe/', { credentials: 'include' }).then(r => r.ok ? r.json() : []),
-    ]).then(([s, t, c]) => {
-      setStats(s);
-      setTop(Array.isArray(t) ? t : []);
-      setCourbe(Array.isArray(c) ? c : []);
-    }).finally(() => setLoading(false));
-  }, []);
+    setLoading(true);
+    // Fetch all stats for the year (up to 1000 paroisses)
+    api.get<PagedResult<StatistiqueAnnuelle>>(`/api/statistiques/?annee=${year}&page_size=1000`)
+      .then(d => setStats(d.results))
+      .catch(() => setStats([]))
+      .finally(() => setLoading(false));
+  }, [year]);
 
-  if (loading) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}>
-        <div style={{ width: 28, height: 28, border: '2px solid rgba(93,191,122,0.2)', borderTopColor: '#5AC472', borderRadius: '50%', animation: 'spin 0.75s linear infinite' }} />
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-      </div>
-    );
-  }
+  const rows = aggregateByRegion(stats);
 
-  const kpis = stats ? [
-    { label: 'Visiteurs inscrits',     value: stats.total.toLocaleString('fr'),          icon: <I.users size={18} />,  color: '#5AC472' },
-    { label: 'Actifs (7 derniers j.)', value: stats.actifs7j.toLocaleString('fr'),       icon: <I.bolt size={18} />,   color: '#5B9BD5' },
-    { label: 'Nouveaux ce mois',       value: stats.nouveauxMois.toLocaleString('fr'),   icon: <I.plus size={18} />,   color: '#F5C518' },
-    { label: 'Actifs ce mois',         value: stats.actifsMois.toLocaleString('fr'),     icon: <I.globe size={18} />,  color: '#A78BFA' },
-  ] : [];
+  const totals = stats.reduce((acc, s) => ({
+    communiants:     acc.communiants     + (s.communiants     || 0),
+    non_communiants: acc.non_communiants + (s.non_communiants || 0),
+    total_fideles:   acc.total_fideles   + (s.total_fideles   || 0),
+    baptemes:        acc.baptemes        + (s.baptemes        || 0),
+    confirmations:   acc.confirmations   + (s.confirmations   || 0),
+    mariages:        acc.mariages        + (s.mariages        || 0),
+    deces:           acc.deces           + (s.deces           || 0),
+  }), { communiants: 0, non_communiants: 0, total_fideles: 0, baptemes: 0, confirmations: 0, mariages: 0, deces: 0 });
 
-  const maxVues   = top.length    ? Math.max(...top.map(p => p.vues), 1)    : 1;
-  const maxCourbe = courbe.length ? Math.max(...courbe.map(p => p.count), 1) : 1;
+  const maxTotal = Math.max(...rows.map(r => r.total_fideles), 1);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-      {stats ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12 }}>
-          {kpis.map(k => (
-            <div key={k.label} className="card" style={{ padding: '18px 20px', display: 'flex', alignItems: 'flex-start', gap: 14 }}>
-              <div style={{ width: 38, height: 38, borderRadius: 8, background: `${k.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: k.color, flexShrink: 0 }}>
-                {k.icon}
-              </div>
-              <div>
-                <div className="mono sg-md" style={{ fontSize: 22, color: k.color }}>{k.value}</div>
-                <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 2 }}>{k.label}</div>
-              </div>
+      {/* Toolbar */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div className="seg">
+            <button className={view === 'regions'   ? 'on' : ''} onClick={() => setView('regions')}>
+              <I.compass size={12} style={{ marginRight: 6, verticalAlign: -2 }}/>Par région
+            </button>
+            <button className={view === 'paroisses' ? 'on' : ''} onClick={() => setView('paroisses')}>
+              <I.list size={12} style={{ marginRight: 6, verticalAlign: -2 }}/>Par paroisse
+            </button>
+          </div>
+          <select className="input mono" value={year} style={{ width: 110, fontSize: 13 }}
+            onChange={e => setYear(Number(e.target.value))}>
+            {YEAR_OPTIONS.map(y => <option key={y} value={y}>Année {y}</option>)}
+          </select>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className="btn btn-outline"
+            onClick={() => { window.open('/api/exports/statistiques/pdf/', '_blank'); addToast({ type:'info', title:'Export PDF lancé' }); }}>
+            <I.download size={13}/>PDF
+          </button>
+          <button className="btn btn-outline"
+            onClick={() => { window.open('/api/exports/statistiques/excel/', '_blank'); addToast({ type:'info', title:'Export Excel lancé' }); }}>
+            <I.download size={13}/>Excel
+          </button>
+        </div>
+      </div>
+
+      {/* Summary cards */}
+      {!loading && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 10 }}>
+          {[
+            { label: 'Total fidèles',       value: totals.total_fideles.toLocaleString('fr'),   color: '#5AC472' },
+            { label: 'Communiants',         value: totals.communiants.toLocaleString('fr'),      color: 'var(--text)' },
+            { label: 'Non-communiants',     value: totals.non_communiants.toLocaleString('fr'),  color: 'var(--text-2)' },
+            { label: 'Baptêmes',            value: totals.baptemes.toLocaleString('fr'),         color: 'var(--text)' },
+            { label: 'Confirmations',       value: totals.confirmations.toLocaleString('fr'),    color: 'var(--text)' },
+            { label: 'Mariages',            value: totals.mariages.toLocaleString('fr'),         color: 'var(--text)' },
+            { label: 'Décès',               value: totals.deces.toLocaleString('fr'),            color: 'var(--text-3)' },
+            { label: 'Paroisses avec stats',value: stats.length.toLocaleString('fr'),            color: 'var(--text-2)' },
+          ].map(c => (
+            <div key={c.label} className="card" style={{ padding: '12px 14px' }}>
+              <div style={{ fontSize: 10, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600, marginBottom: 4 }}>{c.label}</div>
+              <div className="sg" style={{ fontSize: 22, color: c.color }}>{c.value}</div>
             </div>
           ))}
         </div>
-      ) : (
-        <div className="card" style={{ padding: 20, color: 'var(--text-3)', fontSize: 13, textAlign: 'center' }}>
-          Données non disponibles — API analytics non connectée.
+      )}
+
+      {/* ── Vue par région ───────────────────────────────────────── */}
+      {view === 'regions' && (
+        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+          {loading ? (
+            <div style={{ height: 280, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-3)', gap: 10, fontSize: 13 }}>
+              <I.refresh size={16} style={{ opacity: 0.5 }}/>Chargement des statistiques…
+            </div>
+          ) : rows.length === 0 ? (
+            <div style={{ height: 280, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+              <I.list size={40} style={{ opacity: 0.18 }}/>
+              <div className="sg-md" style={{ fontSize: 15 }}>Aucune statistique pour {year}</div>
+            </div>
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <table className="data">
+                <thead>
+                  <tr>
+                    <th style={{ width: 36 }}>#</th>
+                    <th>Région synodale</th>
+                    <th style={{ textAlign: 'right' }}>Communiants</th>
+                    <th style={{ textAlign: 'right' }}>Non-comm.</th>
+                    <th style={{ textAlign: 'right' }}>Total fidèles</th>
+                    <th style={{ textAlign: 'right' }}>Baptêmes</th>
+                    <th style={{ textAlign: 'right' }}>Mariages</th>
+                    <th style={{ textAlign: 'right' }}>Décès</th>
+                    <th style={{ width: 120 }}>Progression</th>
+                    <th style={{ width: 60 }}></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((r, i) => (
+                    <tr key={r.region}>
+                      <td className="mono" style={{ color: 'var(--text-3)', fontSize: 11.5 }}>{String(i+1).padStart(2,'0')}</td>
+                      <td>
+                        <span style={{ fontWeight: 500, fontSize: 13 }}>{r.region}</span>
+                        <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{r.paroisses} paroisse{r.paroisses !== 1 ? 's' : ''}{r.non_validee > 0 ? ` · ${r.non_validee} non val.` : ''}</div>
+                      </td>
+                      <td className="mono" style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{r.communiants.toLocaleString('fr')}</td>
+                      <td className="mono" style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums', color: 'var(--text-2)' }}>{r.non_communiants.toLocaleString('fr')}</td>
+                      <td className="mono sg-md" style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontSize: 14 }}>{r.total_fideles.toLocaleString('fr')}</td>
+                      <td className="mono" style={{ textAlign: 'right', color: 'var(--text-2)' }}>{r.baptemes}</td>
+                      <td className="mono" style={{ textAlign: 'right', color: 'var(--text-2)' }}>{r.mariages}</td>
+                      <td className="mono" style={{ textAlign: 'right', color: 'var(--text-2)' }}>{r.deces}</td>
+                      <td>
+                        <CompleteBar pct={Math.round((r.total_fideles / maxTotal) * 100)}/>
+                      </td>
+                      <td>
+                        <button className="icon-btn" onClick={() => setViewPanel(r)}><I.eye size={15}/></button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr style={{ background: 'rgba(46,151,68,0.06)', borderTop: '2px solid rgba(46,151,68,0.30)' }}>
+                    <td colSpan={2} style={{ padding: 14, fontWeight: 700 }} className="sg-md">Totaux</td>
+                    <td className="mono sg-md" style={{ textAlign: 'right', padding: 14 }}>{totals.communiants.toLocaleString('fr')}</td>
+                    <td className="mono sg-md" style={{ textAlign: 'right', padding: 14 }}>{totals.non_communiants.toLocaleString('fr')}</td>
+                    <td className="mono sg" style={{ textAlign: 'right', padding: 14, color: '#5AC472', fontSize: 15 }}>{totals.total_fideles.toLocaleString('fr')}</td>
+                    <td className="mono sg-md" style={{ textAlign: 'right', padding: 14 }}>{totals.baptemes.toLocaleString('fr')}</td>
+                    <td className="mono sg-md" style={{ textAlign: 'right', padding: 14 }}>{totals.mariages.toLocaleString('fr')}</td>
+                    <td className="mono sg-md" style={{ textAlign: 'right', padding: 14 }}>{totals.deces.toLocaleString('fr')}</td>
+                    <td colSpan={2}></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          )}
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      {/* ── Vue par paroisse ─────────────────────────────────────── */}
+      {view === 'paroisses' && (
+        <ParoisseTable stats={stats} loading={loading}/>
+      )}
 
-        <div className="card" style={{ padding: '16px 20px' }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 16 }}>
-            Activité — 30 derniers jours
-          </div>
-          {courbe.length ? (
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: 80 }}>
-              {courbe.map((pt, i) => (
-                <div key={i} title={`${pt.date}: ${pt.count} connexions`} style={{
-                  flex: 1, borderRadius: '2px 2px 0 0',
-                  height: `${Math.max(4, Math.round((pt.count / maxCourbe) * 80))}px`,
-                  background: `rgba(90,196,114,${0.3 + (pt.count / maxCourbe) * 0.7})`,
-                  cursor: 'default',
-                }} />
-              ))}
-            </div>
-          ) : (
-            <div style={{ height: 80, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-3)', fontSize: 12 }}>
-              Aucune donnée
-            </div>
-          )}
-          {courbe.length >= 2 && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, fontSize: 10, color: 'var(--text-3)', fontFamily: 'var(--font-mono)' }}>
-              <span>{courbe[0].date}</span>
-              <span>{courbe[courbe.length - 1].date}</span>
-            </div>
-          )}
-        </div>
-
-        <div className="card" style={{ padding: '16px 20px' }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 14 }}>
-            Top paroisses vues
-          </div>
-          {top.length ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {top.slice(0, 8).map((p, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span className="mono" style={{ fontSize: 10, color: 'var(--text-3)', width: 16, textAlign: 'right' }}>{i + 1}</span>
-                  <span style={{ fontSize: 13, color: 'var(--text)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</span>
-                  <div style={{ width: 80, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
-                    <div style={{ width: `${Math.round((p.vues / maxVues) * 100)}%`, height: '100%', background: '#5AC472', borderRadius: 2 }} />
-                  </div>
-                  <span className="mono" style={{ fontSize: 11, color: 'var(--text-2)', width: 32, textAlign: 'right' }}>{p.vues}</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div style={{ height: 80, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-3)', fontSize: 12 }}>
-              Aucune donnée
-            </div>
-          )}
-        </div>
-      </div>
+      {viewPanel && (
+        <RegionDetailPanel row={viewPanel} stats={stats} onClose={() => setViewPanel(null)}/>
+      )}
+      <ToastStack toasts={toasts}/>
     </div>
   );
 }

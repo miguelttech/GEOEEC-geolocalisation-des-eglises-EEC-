@@ -36,6 +36,22 @@ const EECLogo = ({ size = 32 }: { size?: number }) => (
   </svg>
 );
 
+function LogoutBtn() {
+  const handleLogout = async () => {
+    try { await fetch('/api/auth/logout/', { method: 'POST', credentials: 'include' }); } finally {
+      window.location.href = '/login';
+    }
+  };
+  return (
+    <button onClick={handleLogout} style={{ width: '100%', background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }}>
+      <div className="nav-item danger" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: 6 }}>
+        <span className="ni-icon"><I.logout size={17} /></span>
+        <span>Déconnexion</span>
+      </div>
+    </button>
+  );
+}
+
 function activeKey(pathname: string): string {
   const seg = pathname.split('/').filter(Boolean);
   return seg[2] || 'dashboard';
@@ -102,12 +118,7 @@ export default function SidebarDistrict() {
               <span>Paramètres</span>
             </div>
           </Link>
-          <Link href="/api/auth/logout" style={{ textDecoration: 'none' }}>
-            <div className="nav-item danger" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: 6 }}>
-              <span className="ni-icon"><I.logout size={17} /></span>
-              <span>Déconnexion</span>
-            </div>
-          </Link>
+          <LogoutBtn />
         </div>
       </div>
     </aside>

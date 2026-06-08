@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from .models import Grade, Ouvrier
-from .serializers import GradeSerializer, OuvrierSerializer
+from .serializers import GradeSerializer, OuvrierListSerializer, OuvrierWriteSerializer
 from apps.accounts.permissions import (
     ReadPublicWriteAdmin,
     filter_ouvriers_by_scope,
@@ -35,7 +35,11 @@ class GradeViewSet(viewsets.ReadOnlyModelViewSet):
 
 class OuvrierViewSet(viewsets.ModelViewSet):
     permission_classes = [ReadPublicWriteAdmin]
-    serializer_class = OuvrierSerializer
+
+    def get_serializer_class(self):
+        if self.action in ("create", "update", "partial_update"):
+            return OuvrierWriteSerializer
+        return OuvrierListSerializer
 
     def get_queryset(self):
         qs = (

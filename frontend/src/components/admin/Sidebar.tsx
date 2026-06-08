@@ -5,6 +5,9 @@ import { usePathname } from 'next/navigation';
 import { I } from './icons';
 import { Avatar } from './atoms';
 
+const BACKEND = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api')
+  .replace(/\/api\/?$/, '');
+
 const NAV = [
   { group: 'Principal', items: [
     { key: 'dashboard', label: 'Tableau de bord',   icon: 'dashboard' },
@@ -18,7 +21,7 @@ const NAV = [
     { key: 'districts', label: 'Districts',          icon: 'network' },
   ]},
   { group: 'Rapports & données', items: [
-    { key: 'stats', label: 'Statistiques',  icon: 'chart' },
+    { key: 'stats', label: 'Statistiques',   icon: 'chart' },
     { key: 'io',    label: 'Import / Export', icon: 'swap' },
   ]},
   { group: 'Administration', items: [
@@ -36,6 +39,48 @@ const EECLogo = ({ size = 32 }: { size?: number }) => (
   </svg>
 );
 
+interface MeUser { first_name: string; last_name: string; email: string; role_display: string; }
+
+function getInitials(u: MeUser | null): string {
+  if (!u) return '–';
+  const f = (u.first_name || '').trim();
+  const l = (u.last_name  || '').trim();
+  if (f && l) return `${f[0]}${l[0]}`.toUpperCase();
+  if (f)      return f.slice(0, 2).toUpperCase();
+  return (u.email || '?')[0].toUpperCase();
+}
+
+function getDisplayName(u: MeUser | null): string {
+  if (!u) return '—';
+  const f = (u.first_name || '').trim();
+  const l = (u.last_name  || '').trim();
+  if (f && l) return `${f} ${l}`;
+  return f || u.email || '—';
+}
+
+function LogoutBtn() {
+  const handleLogout = async () => {
+    try {
+      const csrf = await fetch(`${BACKEND}/api/auth/csrf/`, { credentials: 'include' })
+        .then(r => r.json()).then(d => d.csrfToken ?? '').catch(() => '');
+      await fetch(`${BACKEND}/api/auth/logout/`, {
+        method: 'POST', credentials: 'include',
+        headers: { 'X-CSRFToken': csrf, 'Content-Type': 'application/json' },
+      });
+    } finally {
+      window.location.href = '/login';
+    }
+  };
+  return (
+    <button onClick={handleLogout} style={{ width: '100%', background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }}>
+      <div className="nav-item danger" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: 6 }}>
+        <span className="ni-icon"><I.logout size={17} /></span>
+        <span>Déconnexion</span>
+      </div>
+    </button>
+  );
+}
+
 function activeKey(pathname: string): string {
   const seg = pathname.split('/').filter(Boolean);
   return seg[1] || 'dashboard';
@@ -43,10 +88,18 @@ function activeKey(pathname: string): string {
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const active = activeKey(pathname);
+  const active   = activeKey(pathname);
+  const [me, setMe] = React.useState<MeUser | null>(null);
+
+  React.useEffect(() => {
+    fetch(`${BACKEND}/api/auth/me/`, { credentials: 'include' })
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(setMe)
+      .catch(() => {});
+  }, []);
 
   return (
-    <aside style={{
+    <aside suppressHydrationWarning style={{
       width: 240, flexShrink: 0, background: 'var(--chrome)',
       borderRight: '1px solid rgba(245,197,24,0.08)',
       height: '100vh', position: 'sticky', top: 0,
@@ -61,16 +114,20 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* Admin user */}
+      {/* Compte connecté */}
       <div style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: 12, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-        <Avatar initials="JE" size={38} bg="rgba(46,151,68,0.25)" color="#5AC472" ringColor="rgba(46,151,68,0.50)" />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 5, minWidth: 0 }}>
-          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Jean-Paul ESSOMBA</span>
-          <span className="pill pill-gold" style={{ alignSelf: 'flex-start', padding: '2px 6px' }}>Super Admin</span>
+        <Avatar initials={getInitials(me)} size={38} bg="rgba(46,151,68,0.25)" color="#5AC472" ringColor="rgba(46,151,68,0.50)" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {getDisplayName(me)}
+          </span>
+          <span className="pill pill-gold" style={{ alignSelf: 'flex-start', padding: '2px 6px', fontSize: 10 }}>
+            {me?.role_display ?? '—'}
+          </span>
         </div>
       </div>
 
-      {/* Nav */}
+      {/* Navigation */}
       <div style={{ flex: 1, padding: '4px 0 18px', overflowY: 'auto' }}>
         {NAV.map((g, gi) => (
           <div key={gi}>
@@ -99,12 +156,7 @@ export default function Sidebar() {
               <span>Paramètres</span>
             </div>
           </Link>
-          <Link href="/api/auth/logout" style={{ textDecoration: 'none' }}>
-            <div className="nav-item danger" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: 6 }}>
-              <span className="ni-icon"><I.logout size={17} /></span>
-              <span>Déconnexion</span>
-            </div>
-          </Link>
+          <LogoutBtn />
         </div>
       </div>
     </aside>

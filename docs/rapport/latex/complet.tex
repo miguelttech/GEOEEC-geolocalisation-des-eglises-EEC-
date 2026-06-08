@@ -20,6 +20,7 @@
 % ---- Couleurs ----
 \usepackage{xcolor}
 \definecolor{eecgreen}{RGB}{27,94,32}
+\definecolor{eccdarkgreen}{RGB}{17,60,20}
 \definecolor{eecyellow}{RGB}{249,168,37}
 \definecolor{eeclightgreen}{RGB}{232,245,233}
 \definecolor{bordergold}{RGB}{212,160,23}
@@ -50,36 +51,56 @@
 \renewcommand{\footrulewidth}{0pt}
 
 % ---- Titres de chapitre ----
-% Chapitres numérotés (Chapitre 1, 2, 3)
 \usepackage{titlesec}
-\titleformat{\chapter}[block]
-  {\normalfont\large\bfseries\color{eecgreen}}
-  {\MakeUppercase{\chaptertitlename}~\thechapter~:~}{0pt}{\MakeUppercase}
-  [\vspace{2pt}{\color{eecyellow}\hrule height 2pt}\vspace{4pt}]
-\titlespacing{\chapter}{0pt}{0pt}{8pt}
+% Chapitres numérotés — boîte décorative verte + numéro + titre en petites capitales
+\titleformat{\chapter}[display]{%
+  \normalfont%
+}{%
+  \begin{tikzpicture}[remember picture,overlay]%
+    \node[rotate=90, anchor=center,
+          text=eecgreen!80!black,
+          font=\footnotesize\bfseries\scshape,
+          inner sep=0pt]
+      at ([xshift=-72pt, yshift=-55pt]current page.north east)
+      {Chapitre};%
+    \fill[eecgreen]
+      ([xshift=-60pt, yshift=-10pt]current page.north east)
+      rectangle
+      ([xshift=0pt, yshift=-100pt]current page.north east);%
+    \node[text=white, font=\fontsize{68}{68}\selectfont\bfseries, anchor=center]
+      at ([xshift=-30pt, yshift=-55pt]current page.north east)
+      {\thechapter};%
+  \end{tikzpicture}%
+}{10pt}{%
+  \centering\normalfont\large\bfseries\scshape\color{eecgreen}%
+}[\vspace{2pt}{\color{eecyellow}\hrule height 2.5pt}\vspace{4pt}]
+\titlespacing{\chapter}{0pt}{26pt}{14pt}
 
-% Chapitres non numérotés (\chapter*) — style identique mais sans numéro
-\titleformat{name=\chapter,numberless}[block]
-  {\normalfont\large\bfseries\color{eecgreen}}
-  {}{0pt}{\MakeUppercase}
-  [\vspace{2pt}{\color{eecyellow}\hrule height 2pt}\vspace{4pt}]
-\titlespacing{name=\chapter,numberless}{0pt}{0pt}{8pt}
+% Chapitres non numérotés (\chapter*) — style simple sans décoration
+\titleformat{name=\chapter,numberless}[block]{%
+  \normalfont\Large\bfseries\color{eecgreen}%
+}{}{0pt}{\MakeUppercase}[%
+  \vspace{3pt}{\color{eecyellow}\hrule height 2.5pt}\vspace{5pt}%
+]
+\titlespacing{name=\chapter,numberless}{0pt}{0pt}{10pt}
 
-% Sections et sous-sections
+% Sections et sous-sections — hiérarchie verte grasse
 \titleformat{\section}
-  {\normalfont\normalsize\bfseries\color{eecgreen!85!black}}
-  {\thesection.}{6pt}{}
+  {\normalfont\large\bfseries\color{eccdarkgreen}}
+  {\thesection.}{8pt}{}
+  [\vspace{1pt}{\color{eecgreen!40!white}\hrule height 0.6pt}\vspace{2pt}]
 \titleformat{\subsection}
-  {\normalfont\normalsize\bfseries}
-  {\thesubsection.}{6pt}{}
+  {\normalfont\normalsize\bfseries\color{eecgreen}}
+  {\thesubsection.}{7pt}{}
 \titleformat{\subsubsection}
-  {\normalfont\normalsize\itshape}
+  {\normalfont\normalsize\bfseries\color{eecgreen!90!black}}
   {\thesubsubsection.}{6pt}{}
 
 % ---- Tableaux ----
 \usepackage{array}
 \usepackage{colortbl}
 \usepackage{booktabs}
+\usepackage{longtable}
 
 % ---- Figures et flottants ----
 \usepackage{graphicx}
@@ -87,6 +108,13 @@
 
 % ---- Listes ----
 \usepackage{enumitem}
+
+% ---- Lettrine (lettre ornée de début de chapitre) ----
+\usepackage{lettrine}
+\renewcommand{\LettrineFontHook}{\color{eecgreen}\bfseries}
+\setcounter{DefaultLines}{2}
+\setlength{\DefaultFindent}{4pt}
+\setlength{\DefaultNfindent}{0pt}
 
 % ---- Symboles ----
 \usepackage{pifont}
@@ -101,10 +129,41 @@
             bibencoding=utf8]{biblatex}
 \addbibresource{references.bib}
 
+% ---- Sommaire local par chapitre (minitoc — doit être APRÈS hyperref) ----
+\usepackage{minitoc}
+\mtcsettitle{minitoc}{\normalsize\bfseries\color{eecgreen}Sommaire}
+\setcounter{minitocdepth}{3}
+
 % ---- Symboles tableaux comparatifs ----
 \newcommand{\oui}{\textcolor{eecgreen}{\ding{51}}}
 \newcommand{\non}{\textcolor{red}{\ding{55}}}
 \newcommand{\partiel}{\textcolor{orange}{$\sim$}}
+
+% ---- Mots-clés techniques (premier emploi) ----
+\newcommand{\kw}[1]{\textbf{#1}}
+
+% ---- Plan de chapitre (boîte colorée en tête de chapitre) ----
+\newenvironment{chapplan}{%
+  \vspace{6pt}%
+  \noindent\colorbox{eeclightgreen!70}{%
+    \begin{minipage}[t]{\dimexpr\linewidth-2\fboxsep}%
+      \vspace{5pt}%
+      \noindent{\small\bfseries\color{eccdarkgreen}%
+        \ding{228}\quad Plan du chapitre}%
+      \vspace{3pt}\\%
+      {\color{eecgreen!60!white}\hrule height 0.5pt}%
+      \vspace{2pt}%
+      \begin{itemize}[%
+        leftmargin=1.4cm, itemsep=1pt, topsep=2pt, parsep=0pt,%
+        label={\small\color{eecgreen}\ding{118}}]%
+      \small%
+}{%
+      \end{itemize}%
+      \vspace{4pt}%
+    \end{minipage}%
+  }%
+  \vspace{8pt}%
+}
 
 % ============================================================
 \begin{document}
@@ -121,7 +180,7 @@
 \noindent
 L'Église Évangélique du Cameroun (EEC) regroupe 565~paroisses, 311~œuvres
 sociales et éducatives, ainsi que 685~ouvriers ecclésiastiques répartis dans
-22~Régions Synodales et 134~districts couvrant l'ensemble du territoire
+22~Régions Synodales et 137~districts couvrant l'ensemble du territoire
 national, sans que l'institution ne dispose d'aucun outil numérique centralisé
 permettant leur visualisation géographique ni leur administration hiérarchisée.
 Cette lacune compromet la capacité du Bureau National à piloter ses ressources
@@ -163,7 +222,7 @@ Django REST Framework, Leaflet.
 \noindent
 The Evangelical Church of Cameroon (EEC) encompasses 565~parishes,
 311~social and educational institutions, and 685~ordained workers spread across
-22~Synodal Regions and 134~districts covering the entire national territory,
+22~Synodal Regions and 137~districts covering the entire national territory,
 yet the institution lacks any centralized digital system for their geographic
 visualization or hierarchical administration. This gap undermines the National
 Bureau's ability to monitor its territorial resources, generate consolidated
@@ -374,6 +433,7 @@ JPEG correspondante, prête à être superposée sur la carte.
 % ============================================================
 %  TABLE DES MATIÈRES
 % ============================================================
+\dominitoc
 \tableofcontents
 \clearpage
 
@@ -441,7 +501,7 @@ missions protestantes bâloises et parisiennes, est l'une des plus grandes
 institutions protestantes d'Afrique centrale. Son organisation territoriale
 repose sur une hiérarchie administrative à quatre niveaux~: le Bureau National,
 qui assure la direction centrale de l'institution~; les 22~Régions Synodales, qui
-couvrent l'ensemble du territoire camerounais~; les 134~districts ecclésiaux, qui
+couvrent l'ensemble du territoire camerounais~; les 137~districts ecclésiaux, qui
 coordonnent les activités locales~; et les 565~paroisses, qui constituent le
 maillage de base de la présence de l'EEC sur le terrain. À ces entités s'ajoutent
 311~œuvres sociales et éducatives --- établissements scolaires, centres médicaux,
@@ -564,7 +624,7 @@ sécurité conformément aux recommandations OWASP~\cite{owasp2021}.
 
 \medskip
 
-La suite de ce mémoire est structurée comme suit. Le \textbf{Chapitre~1} présente
+La suite de ce rapport est structurée comme suit. Le \textbf{Chapitre~1} présente
 les concepts généraux fondamentaux --- SIG, standards OGC, architecture REST,
 contrôle d'accès basé sur les rôles --- et expose l'état de l'art des solutions
 de gestion cartographique institutionnelle existantes~; il conclut par un tableau
@@ -586,9 +646,21 @@ déploiement.
 % ============================================================
 \chapter{Concepts Généraux et État de l'Art}
 
-Ce chapitre pose les fondements théoriques et contextuels nécessaires à la
-compréhension du travail réalisé. La section~\ref{sec:concepts} présente les
-concepts généraux mobilisés tout au long de ce mémoire~: systèmes d'information
+\begin{chapplan}
+  \item \textbf{Section~\ref{sec:concepts} — Concepts Généraux}~: Système
+    d'Information Géographique, standards OGC (WMS\,/\,WFS), base de données
+    spatiale PostGIS, architecture REST, contrôle d'accès RBAC et conteneurisation Docker.
+  \item \textbf{Section~\ref{sec:etat-art} — État de l'Art}~: analyse comparative
+    de quatre solutions (GeoEEC~v1.0, ArcGIS~Online, Google~Maps~Platform,
+    QGIS\,/\,OpenLayers) selon un format homogène.
+  \item \textbf{Section~\ref{sec:bilan} — Bilan et Positionnement}~: tableau
+    comparatif multicritère et positionnement de notre solution par rapport à l'existant.
+\end{chapplan}
+
+\lettrine[lines=2, loversize=0.05]{C}{e chapitre} pose les fondements théoriques
+et contextuels nécessaires à la compréhension du travail réalisé.
+La section~\ref{sec:concepts} présente les
+concepts généraux mobilisés tout au long de ce rapport~: systèmes d'information
 géographique, standards de services cartographiques, base de données spatiale,
 architecture REST, contrôle d'accès basé sur les rôles et conteneurisation. La
 section~\ref{sec:etat-art} dresse un état de l'art de quatre solutions existantes
@@ -601,19 +673,19 @@ tableau comparatif et positionne notre solution par rapport à l'existant.
 
 \subsection{Système d'Information Géographique (SIG)}
 
-Un Système d'Information Géographique (SIG) est un système informatique conçu
-pour la collecte, le stockage, la manipulation, l'analyse et la représentation
-de données géoréférencées, c'est-à-dire de données auxquelles est associée une
+Un \kw{Système d'Information Géographique} (\kw{SIG}) est un système informatique
+conçu pour la collecte, le stockage, la manipulation, l'analyse et la représentation
+de données \kw{géoréférencées}, c'est-à-dire de données auxquelles est associée une
 position sur la surface terrestre~\cite{longley2015}. Cette définition, établie
 par Longley et al., est aujourd'hui l'une des plus citées dans la littérature
 géomatique internationale. Un SIG intègre trois grandes dimensions~: la dimension
-spatiale (coordonnées, géométries), la dimension attributaire (données descriptives
-associées aux entités géographiques) et la dimension temporelle (évolution des
-données dans le temps).
+\textbf{spatiale} (coordonnées, géométries), la dimension \textbf{attributaire}
+(données descriptives associées aux entités géographiques) et la dimension
+\textbf{temporelle} (évolution des données dans le temps).
 
 Dans le contexte de ce projet, le SIG constitue la couche centrale permettant de
-lier les 565~paroisses, 134~districts et 22~régions synodales de l'EEC à leurs
-coordonnées géographiques sur le territoire camerounais. Il permet non seulement
+lier les 553~paroisses importées, 137~districts et 22~régions synodales de l'EEC
+à leurs coordonnées géographiques sur le territoire camerounais. Il permet non seulement
 la visualisation cartographique de ces entités, mais aussi leur interrogation
 spatiale~: identification des paroisses proches d'une localité, calcul de densité
 pastorale par région, localisation des zones sous-dotées en ressources. Ces
@@ -621,12 +693,13 @@ opérations sont directement utiles au pilotage stratégique de l'institution.
 
 \subsection{Standards OGC et Services Cartographiques Web}
 
-L'Open Geospatial Consortium (OGC) est un organisme de normalisation
+L'\kw{Open Geospatial Consortium} (\kw{OGC}) est un organisme de normalisation
 international fondé en 1994, regroupant des industriels, des organismes
 gouvernementaux et des institutions académiques du domaine géospatial. Il
-publie des spécifications ouvertes pour les services géographiques sur le web,
-garantissant l'interopérabilité entre différents serveurs cartographiques et
-clients web, indépendamment des fournisseurs et des plateformes logicielles.
+publie des \textbf{spécifications ouvertes} pour les services géographiques sur
+le web, garantissant l'\textbf{interopérabilité} entre différents serveurs
+cartographiques et clients web, indépendamment des fournisseurs et des
+plateformes logicielles.
 
 \subsubsection{Web Map Service (WMS)}
 
@@ -654,16 +727,17 @@ géographiques dynamiques selon le périmètre de l'utilisateur connecté.
 
 \subsection{Base de Données Spatiale PostGIS}
 
-PostGIS est une extension spatiale open source pour le système de gestion de base
-de données relationnelle PostgreSQL~\cite{postgis2023}. Elle ajoute la prise en
-charge de types de données géographiques conformes aux spécifications OGC Simple
-Features --- géométries points (\texttt{PointField}), lignes
-(\texttt{LineStringField}) et polygones (\texttt{PolygonField},
-\texttt{MultiPolygonField}) --- ainsi que des opérateurs spatiaux (intersections,
-calcul de distances, recouvrements) et des fonctions de transformation de systèmes
-de coordonnées. PostGIS est le standard de facto pour les bases de données
-spatiales open source, utilisé des systèmes d'information institutionnels aux
-grandes applications de cartographie collaborative.
+\kw{PostGIS} est une extension spatiale open source pour le système de gestion de
+base de données relationnelle \kw{PostgreSQL}~\cite{postgis2023}. Elle ajoute la
+prise en charge de \textbf{types de données géographiques} conformes aux
+spécifications OGC Simple Features --- géométries points (\texttt{PointField}),
+lignes (\texttt{LineStringField}) et polygones (\texttt{PolygonField},
+\texttt{MultiPolygonField}) --- ainsi que des \textbf{opérateurs spatiaux}
+(intersections, calcul de distances, recouvrements) et des fonctions de
+transformation de systèmes de coordonnées. PostGIS est le \textbf{standard de
+facto} pour les bases de données spatiales open source, utilisé des systèmes
+d'information institutionnels aux grandes applications de cartographie
+collaborative.
 
 Dans ce projet, PostGIS stocke la géométrie point de chaque paroisse et les
 polygones des 22~régions synodales importés depuis le Shapefile source.
@@ -673,17 +747,18 @@ modèles Python et permet l'interrogation spatiale directement depuis l'ORM
 
 \subsection{Architecture REST et Interface de Programmation (API)}
 
-Le style architectural REST (\textit{Representational State Transfer}) est défini
-par Fielding comme un ensemble de contraintes architecturales pour les systèmes
-distribués~\cite{fielding2000}~: séparation client-serveur, absence d'état côté
-serveur (\textit{stateless}), mise en cache des réponses, interface uniforme et
-système de couches. Une API REST expose des ressources identifiées par des URI,
-accessibles via les méthodes HTTP standard (GET, POST, PUT, PATCH, DELETE), et
-retourne les données dans un format standardisé, généralement JSON. Ce style
-garantit la scalabilité, la maintenabilité et l'interopérabilité des services web.
+Le style architectural \kw{REST} (\textit{Representational State Transfer}) est
+défini par Fielding comme un ensemble de contraintes architecturales pour les
+systèmes distribués~\cite{fielding2000}~: séparation client-serveur, absence
+d'état côté serveur (\textit{stateless}), mise en cache des réponses, interface
+uniforme et système de couches. Une \kw{API REST} expose des ressources
+identifiées par des URI, accessibles via les méthodes HTTP standard
+(GET, POST, PUT, PATCH, DELETE), et retourne les données dans un format
+standardisé, généralement \textbf{JSON}. Ce style garantit la \textbf{scalabilité},
+la \textbf{maintenabilité} et l'\textbf{interopérabilité} des services web.
 
-Django REST Framework (DRF) est la bibliothèque de référence pour implémenter
-des API REST avec le framework Django~\cite{drf2024}. Dans ce projet, la couche
+\kw{Django REST Framework} (\kw{DRF}) est la bibliothèque de référence pour
+implémenter des API REST avec le framework Django~\cite{drf2024}. Dans ce projet, la couche
 API du backend expose l'ensemble des ressources institutionnelles de l'EEC ---
 paroisses, districts, régions, œuvres, ouvriers, statistiques, journaux d'audit
 --- consommées par le frontend Next.js~14. Cette séparation stricte entre backend
@@ -691,15 +766,15 @@ API et frontend constitue un pilier de l'architecture à services découplés re
 
 \subsection{Contrôle d'Accès Basé sur les Rôles (RBAC)}
 
-Le contrôle d'accès basé sur les rôles (\textit{Role-Based Access Control},
-RBAC) est un modèle de sécurité dans lequel les droits d'accès aux ressources
-d'un système sont accordés selon le rôle attribué à chaque utilisateur, et non
-selon son identité individuelle. Un rôle représente un ensemble cohérent de
-permissions correspondant à une fonction ou une responsabilité dans
-l'organisation. Ce modèle réduit la complexité administrative, minimise le risque
-d'escalade de privilèges et facilite l'audit de sécurité. L'OWASP le recommande
-comme mécanisme d'autorisation de référence pour les applications
-web~\cite{owasp2021}.
+Le \kw{contrôle d'accès basé sur les rôles} (\kw{RBAC} --- \textit{Role-Based
+Access Control}) est un modèle de sécurité dans lequel les droits d'accès aux
+ressources d'un système sont accordés selon le \textbf{rôle} attribué à chaque
+utilisateur, et non selon son identité individuelle. Un rôle représente un
+ensemble cohérent de \textbf{permissions} correspondant à une fonction ou une
+responsabilité dans l'organisation. Ce modèle réduit la complexité
+administrative, minimise le risque d'\textbf{escalade de privilèges} et facilite
+l'audit de sécurité. L'OWASP le recommande comme mécanisme d'autorisation de
+référence pour les applications web~\cite{owasp2021}.
 
 Dans ce projet, quatre rôles hiérarchiques alignés sur la structure synodale de
 l'EEC ont été définis~:
@@ -716,16 +791,17 @@ l'EEC ont été définis~:
 
 \subsection{Conteneurisation --- Docker et Docker Compose}
 
-La conteneurisation est une technique de virtualisation légère qui isole une
+La \kw{conteneurisation} est une technique de virtualisation légère qui isole une
 application et l'ensemble de ses dépendances dans une unité standardisée appelée
-conteneur. Contrairement à la virtualisation classique, un conteneur partage le
-noyau du système d'exploitation hôte tout en disposant de son propre système de
-fichiers, de ses processus et de sa pile réseau, le rendant bien plus léger et
-plus rapide à démarrer qu'une machine virtuelle. Docker est la plateforme de
-conteneurisation la plus répandue, avec plusieurs millions de déploiements en
-production à travers le monde~\cite{docker2024}. Docker Compose permet de définir
-et d'orchestrer des applications multi-conteneurs dans un fichier de configuration
-déclaratif (\texttt{docker-compose.yml}).
+\textbf{conteneur}. Contrairement à la virtualisation classique, un conteneur
+partage le noyau du système d'exploitation hôte tout en disposant de son propre
+système de fichiers, de ses processus et de sa pile réseau, le rendant bien plus
+léger et plus rapide à démarrer qu'une machine virtuelle. \kw{Docker} est la
+plateforme de conteneurisation la plus répandue, avec plusieurs millions de
+déploiements en production à travers le monde~\cite{docker2024}.
+\kw{Docker Compose} permet de définir et d'orchestrer des applications
+multi-conteneurs dans un fichier de configuration déclaratif
+(\texttt{docker-compose.yml}).
 
 Ce projet déploie cinq services orchestrés par Docker Compose~:
 \begin{enumerate}[itemsep=2pt, topsep=4pt, leftmargin=1.5cm]
@@ -756,7 +832,7 @@ principales, forces et faiblesses.
 \subsection{Plateforme GeoEEC v1.0 (Version Antérieure)}
 
 La plateforme GeoEEC v1.0 a été développée en 2025 dans le cadre d'un projet
-académique antérieur à ce mémoire. Elle constitue la référence la plus proche
+académique antérieur à ce rapport. Elle constitue la référence la plus proche
 de notre contexte puisqu'elle traite du même cas d'usage --- la cartographie des
 entités de l'EEC --- et a été conçue avec une partie du même stack technologique.
 Elle repose sur Django~5 (sans Docker), une authentification JWT
@@ -1095,10 +1171,929 @@ conception de l'architecture technique retenue.
 \clearpage
 
 % ============================================================
-%  CHAPITRES SUIVANTS À AJOUTER ICI
-%  Chapitre 2 : Analyse et Conception
-%  Chapitre 3 : Implémentation et Résultats
-%  Conclusion Générale
+%  CHAPITRE 2 — ANALYSE ET CONCEPTION
+% ============================================================
+\chapter{Analyse et Conception du Système de Géolocalisation EEC}
+\label{chap:analyse-conception}
+
+\begin{chapplan}
+  \item \textbf{Section~\ref{sec:analyse} --- Analyse des Besoins}~:
+    \begin{itemize}[noitemsep, topsep=3pt, leftmargin=1.2cm]
+      \item ingénierie des exigences~: 22~exigences fonctionnelles et 10~non-fonctionnelles~;
+      \item diagramme de contexte~: six acteurs externes identifiés~;
+      \item diagramme de packages~: trois couches (frontend, backend, infrastructure)~;
+      \item cas d'utilisation UC01--UC06 avec tableaux de description structurés~;
+      \item diagramme de classes métier~: huit entités du domaine institutionnel~;
+      \item diagramme d'activité~: flux d'import de données depuis Excel.
+    \end{itemize}
+  \item \textbf{Section~\ref{sec:conception} --- Conception du Système}~:
+    \begin{itemize}[noitemsep, topsep=3pt, leftmargin=1.2cm]
+      \item architecture technique~: cinq services Docker découplés et leurs communications~;
+      \item modèle de données~: quinze tables PostGIS avec champs géospatiaux~;
+      \item diagramme de séquence~: flux d'authentification sécurisée par sessions Django~;
+      \item diagramme de classes technique~: modèles Django et relations inter-classes.
+    \end{itemize}
+\end{chapplan}
+
+\lettrine[lines=2, loversize=0.05]{L}{a} compréhension précise des besoins et
+la définition rigoureuse d'une architecture sont les deux prérequis fondamentaux
+d'une implémentation réussie. Ce chapitre traduit les contraintes institutionnelles
+et techniques identifiées au Chapitre~1 en exigences mesurables et en décisions
+de conception concrètes. La section~\ref{sec:analyse} formalise les besoins du
+système à travers un tableau d'exigences fonctionnelles et non-fonctionnelles,
+puis une série de modèles UML couvrant les acteurs, les modules, les cas
+d'utilisation, les entités du domaine et les flux de traitement.
+La section~\ref{sec:conception} s'appuie sur cette analyse pour définir
+l'architecture technique retenue, le schéma de la base de données spatiale,
+les diagrammes de séquence et de classes de l'implémentation.
+
+%------------------------------------------------------------
+\section{Analyse des Besoins}
+\label{sec:analyse}
+%------------------------------------------------------------
+
+\subsection{Ingénierie des Exigences}
+\label{ssec:exigences}
+
+L'ingénierie des exigences consiste à identifier, formaliser et prioriser les
+propriétés que le système doit satisfaire avant toute activité de conception.
+Deux catégories sont distinguées~: les \textbf{exigences fonctionnelles}
+(\textbf{EF}), qui décrivent ce que le système doit réaliser, et les
+\textbf{exigences non-fonctionnelles} (\textbf{ENF}), qui portent sur les
+contraintes qualitatives de fonctionnement (sécurité, performance, portabilité,
+interopérabilité). Ces exigences sont directement dérivées des six objectifs
+formulés en Introduction Générale et des lacunes identifiées dans l'état de
+l'art du Chapitre~1.
+
+\subsubsection{Exigences Fonctionnelles}
+
+Le Tableau~\ref{tab:ef} recense les vingt-deux exigences fonctionnelles du système,
+organisées par domaine~: authentification et contrôle d'accès, cartographie,
+administration des entités, import/export, statistiques, traçabilité, gestion
+des comptes et services du visiteur authentifié (EF19--EF22).
+
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.22}
+\begin{longtable}{%
+  >{\bfseries\color{eccdarkgreen}}m{1.2cm}
+  m{7.8cm}
+  m{3.5cm}
+  >{\centering\arraybackslash\bfseries}m{1.7cm}}
+\caption{Exigences fonctionnelles du système}\label{tab:ef} \\
+\toprule
+\rowcolor{eecgreen}
+\multicolumn{1}{>{\bfseries\color{white}}m{1.2cm}}{ID} &
+\multicolumn{1}{>{\bfseries\color{white}}m{7.8cm}}{Description} &
+\multicolumn{1}{>{\bfseries\color{white}}m{3.5cm}}{Objectif} &
+\multicolumn{1}{>{\bfseries\color{white}\centering\arraybackslash}m{1.7cm}}{Priorité} \\
+\midrule
+\endfirsthead
+\caption[]{\textit{(suite)~Exigences fonctionnelles du système}} \\
+\toprule
+\rowcolor{eecgreen}
+\multicolumn{1}{>{\bfseries\color{white}}m{1.2cm}}{ID} &
+\multicolumn{1}{>{\bfseries\color{white}}m{7.8cm}}{Description} &
+\multicolumn{1}{>{\bfseries\color{white}}m{3.5cm}}{Objectif} &
+\multicolumn{1}{>{\bfseries\color{white}\centering\arraybackslash}m{1.7cm}}{Priorité} \\
+\midrule
+\endhead
+\midrule
+\multicolumn{4}{r}{\small\textit{(suite page suivante)}} \\
+\endfoot
+\bottomrule
+\endlastfoot
+\rowcolor{eeclightgreen!60}
+EF01 & Le système doit permettre à tout utilisateur d'accéder à un formulaire
+  de connexion sécurisé et de se déconnecter en invalidant la session active. &
+  Sécurité & Haute \\
+EF02 & Le système doit gérer cinq rôles hiérarchiques --- SUPER, REGION,
+  DISTRICT, PAROISSE, VISITEUR --- chacun disposant d'un périmètre d'accès
+  aux données strictement défini. & RBAC synodal & Haute \\
+\rowcolor{eeclightgreen!60}
+EF03 & Le système doit afficher une carte interactive Leaflet.js superposant
+  les couches institutionnelles publiées par GeoServer~: paroisses (points),
+  régions synodales (polygones) et œuvres (points). & Cartographie & Haute \\
+EF04 & La carte doit regrouper automatiquement les marqueurs proches en clusters
+  numériques, révélant les entités individuelles à mesure que l'utilisateur
+  zoome. & Cartographie & Haute \\
+\rowcolor{eeclightgreen!60}
+EF05 & La carte doit proposer des filtres hiérarchiques multicritères~:
+  sélection d'une région synodale, d'un district et d'un type d'entité
+  (paroisse, œuvre, ouvrier). & Cartographie & Haute \\
+EF06 & Un clic sur un marqueur de la carte doit ouvrir une popup affichant
+  les informations détaillées de l'entité (nom, type, contacts, statut GPS). &
+  Cartographie & Haute \\
+\rowcolor{eeclightgreen!60}
+EF07 & Les administrateurs autorisés doivent pouvoir créer, lire, modifier et
+  supprimer des paroisses dans les limites de leur périmètre synodal. &
+  Administration & Haute \\
+EF08 & Les administrateurs autorisés doivent pouvoir créer, lire, modifier et
+  supprimer des œuvres sociales et éducatives dans leur périmètre. &
+  Administration & Haute \\
+\rowcolor{eeclightgreen!60}
+EF09 & Les administrateurs autorisés doivent pouvoir créer, lire, modifier et
+  supprimer des ouvriers ecclésiastiques et gérer leurs affectations à une
+  paroisse. & Administration & Haute \\
+EF10 & Le système doit permettre l'import groupé des paroisses, ouvriers et
+  œuvres depuis des fichiers Excel fournis par l'EEC, avec validation des
+  données avant toute insertion en base de données. & Import & Haute \\
+\rowcolor{eeclightgreen!60}
+EF11 & Le système doit permettre l'export des listes d'entités au format
+  Excel (.xlsx) et PDF depuis l'interface d'administration. & Export & Moyenne \\
+EF12 & Le tableau de bord doit afficher des indicateurs synthétiques~:
+  nombre de paroisses, districts, ouvriers, œuvres et taux de couverture
+  GPS par région. & Statistiques & Haute \\
+\rowcolor{eeclightgreen!60}
+EF13 & Le système doit permettre la saisie, la modification et la
+  consultation des statistiques annuelles de chaque paroisse (membres,
+  baptisés, enfants, finances). & Statistiques & Haute \\
+EF14 & Toute opération d'écriture (création, modification, suppression) sur
+  les données institutionnelles doit être enregistrée automatiquement dans
+  un journal d'audit horodaté. & Traçabilité & Haute \\
+\rowcolor{eeclightgreen!60}
+EF15 & Le journal d'audit doit être consultable par le rôle SUPER, avec des
+  filtres par type d'action, entité concernée et période temporelle. &
+  Traçabilité & Moyenne \\
+EF16 & Le système doit proposer une recherche d'entités (paroisses, œuvres,
+  ouvriers) par nom depuis la carte et depuis l'interface d'administration. &
+  Ergonomie & Moyenne \\
+\rowcolor{eeclightgreen!60}
+EF17 & Les visiteurs non authentifiés doivent pouvoir consulter la carte
+  publique et les informations générales des paroisses sans accéder au module
+  d'administration. & Accès public & Moyenne \\
+EF18 & L'administrateur SUPER doit pouvoir créer, désactiver et paramétrer
+  les comptes utilisateurs (rôle, périmètre synodal, mot de passe). &
+  Gestion comptes & Haute \\
+\rowcolor{eeclightgreen!60}
+EF19 & Le système doit permettre à un visiteur de s'inscrire avec un email
+  et un mot de passe~; un profil visiteur est créé automatiquement à
+  l'inscription et persiste entre les sessions. &
+  Visiteur auth. & Haute \\
+EF20 & Le visiteur authentifié doit pouvoir enregistrer des paroisses en
+  favoris depuis la carte et les retrouver dans son espace personnel. &
+  Visiteur auth. & Haute \\
+\rowcolor{eeclightgreen!60}
+EF21 & Le système doit calculer et afficher l'itinéraire vers la paroisse
+  la plus proche du visiteur, avec distance (km) et durée estimée~; le calcul
+  utilise la fonction PostGIS \texttt{Distance()}. &
+  Visiteur auth. & Haute \\
+EF22 & Le système doit conserver l'historique des recherches géographiques
+  du visiteur authentifié et lui permettre de le consulter et de le vider
+  depuis son profil personnel. &
+  Visiteur auth. & Moyenne \\
+\end{longtable}
+
+\subsubsection{Exigences Non-Fonctionnelles}
+
+Le Tableau~\ref{tab:enf} liste les dix exigences non-fonctionnelles définissant
+les contraintes qualitatives de la plateforme sur les axes sécurité, performance,
+interopérabilité, portabilité et maintenabilité.
+
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.22}
+\begin{longtable}{%
+  >{\bfseries\color{eccdarkgreen}}m{1.2cm}
+  >{\bfseries}m{2.8cm}
+  m{8.2cm}
+  >{\centering\arraybackslash\bfseries}m{1.7cm}}
+\caption{Exigences non-fonctionnelles du système}\label{tab:enf} \\
+\toprule
+\rowcolor{eecgreen}
+\multicolumn{1}{>{\bfseries\color{white}}m{1.2cm}}{ID} &
+\multicolumn{1}{>{\bfseries\color{white}}m{2.8cm}}{Domaine} &
+\multicolumn{1}{>{\bfseries\color{white}}m{8.2cm}}{Description} &
+\multicolumn{1}{>{\bfseries\color{white}\centering\arraybackslash}m{1.7cm}}{Priorité} \\
+\midrule
+\endfirsthead
+\caption[]{\textit{(suite)~Exigences non-fonctionnelles du système}} \\
+\toprule
+\rowcolor{eecgreen}
+\multicolumn{1}{>{\bfseries\color{white}}m{1.2cm}}{ID} &
+\multicolumn{1}{>{\bfseries\color{white}}m{2.8cm}}{Domaine} &
+\multicolumn{1}{>{\bfseries\color{white}}m{8.2cm}}{Description} &
+\multicolumn{1}{>{\bfseries\color{white}\centering\arraybackslash}m{1.7cm}}{Priorité} \\
+\midrule
+\endhead
+\midrule
+\multicolumn{4}{r}{\small\textit{(suite page suivante)}} \\
+\endfoot
+\bottomrule
+\endlastfoot
+\rowcolor{eeclightgreen!60}
+ENF01 & Sécurité & Les sessions sont gérées par des cookies Django
+  \textit{HttpOnly}, \textit{Secure} et \textit{SameSite=Strict}. Chaque
+  requête modifiante est protégée par un token CSRF. Les mots de passe sont
+  hachés avec PBKDF2-SHA256. & Haute \\
+ENF02 & Performance & Le temps de réponse des requêtes API standard (liste,
+  détail) est inférieur à 2~secondes pour les jeux de données courants du
+  système. & Haute \\
+\rowcolor{eeclightgreen!60}
+ENF03 & Disponibilité & Le déploiement Docker Compose sur un serveur
+  institutionnel assure la continuité des services sans dépendance à une
+  infrastructure cloud tierce. & Haute \\
+ENF04 & Maintenabilité & L'architecture découplée (backend Django/DRF séparé
+  du frontend Next.js) permet la mise à jour indépendante de chaque couche
+  sans interruption des autres services. & Haute \\
+\rowcolor{eeclightgreen!60}
+ENF05 & Interopérabilité & Les couches géographiques sont publiées selon les
+  standards OGC WMS~1.3.0 et WFS~2.0.0, garantissant leur consommation par
+  tout client cartographique compatible. & Haute \\
+ENF06 & Portabilité & La plateforme complète (cinq services) est conteneurisée
+  avec Docker et Docker Compose, permettant le déploiement sur tout serveur
+  Linux disposant de Docker. & Haute \\
+\rowcolor{eeclightgreen!60}
+ENF07 & Intégrité & L'import Excel déclenche une validation systématique des
+  coordonnées GPS (plage territoire camerounais), du nommage des entités et
+  des relations hiérarchiques avant toute insertion. & Haute \\
+ENF08 & Traçabilité & Chaque entrée d'audit contient~: l'auteur, le type
+  d'action (CREATE / UPDATE / DELETE), l'entité cible, l'identifiant de
+  l'objet et l'horodatage UTC. & Haute \\
+\rowcolor{eeclightgreen!60}
+ENF09 & Ergonomie & L'interface d'administration est responsive et utilisable
+  sur écrans desktop et tablette (résolution minimale~:
+  1\,024~$\times$~768~px). & Moyenne \\
+ENF10 & Extensibilité & Le schéma de données et l'API REST sont conçus pour
+  accueillir de nouvelles régions synodales, types d'entités ou rôles sans
+  refactorisation majeure du cœur du système. & Basse \\
+\end{longtable}
+
+%------------------------------------------------------------
+\subsection{Diagramme de Contexte}
+\label{ssec:contexte}
+
+Le diagramme de contexte (Figure~\ref{fig:diag-contexte}) positionne la
+plateforme EEC~Géolocalisation dans son environnement en l'abordant comme une
+boîte noire~: il identifie les acteurs externes, la nature de leurs interactions
+avec le système et les flux d'information échangés, sans détailler les composants
+internes. Six acteurs externes sont identifiés.
+
+\begin{itemize}[itemsep=3pt, topsep=5pt, leftmargin=1.5cm]
+  \item \textbf{Administrateur SUPER} (Bureau National)~: acteur le plus
+    privilégié, il dispose d'un accès complet à toutes les données --- gestion
+    de toutes les entités institutionnelles, import/export, consultation du
+    journal d'audit, gestion des comptes utilisateurs et statistiques de
+    toutes les régions synodales~;
+  \item \textbf{Administrateur REGION}~: accède aux mêmes fonctions
+    d'administration que le SUPER, mais dans les limites strictes de sa
+    région synodale~; il peut également consulter les analytiques régionales~;
+  \item \textbf{Administrateurs DISTRICT et PAROISSE}~: accèdent aux fonctions
+    CRUD dans le périmètre de leur district ou paroisse respectif~;
+  \item \textbf{Visiteur Non Authentifié}~: accède uniquement à la carte
+    publique et aux informations générales des paroisses, sans aucun accès
+    au module d'administration ni aux services personnalisés~;
+  \item \textbf{Visiteur Authentifié}~: visiteur inscrit qui bénéficie de
+    services supplémentaires depuis la carte publique --- enregistrement de
+    paroisses en favoris, calcul d'itinéraire vers la paroisse la plus proche
+    (PostGIS \texttt{Distance()}), et historique de ses recherches~;
+  \item \textbf{GeoServer} (système cartographique)~: système externe qui reçoit
+    les données géographiques depuis le backend Django et répond aux requêtes
+    WMS~1.3.0 et WFS~2.0.0 émises par le frontend Leaflet.
+\end{itemize}
+
+\begin{figure}[H]
+  \centering
+  \fbox{\parbox{0.88\textwidth}{\centering\vspace{2.8cm}
+    \textit{[Diagramme de contexte --- à intégrer après génération draw.io]}%
+    \vspace{2.8cm}}}
+  \caption{Diagramme de contexte du système de géolocalisation EEC}
+  \label{fig:diag-contexte}
+\end{figure}
+
+%------------------------------------------------------------
+\subsection{Diagramme de Packages}
+\label{ssec:packages}
+
+Le diagramme de packages (Figure~\ref{fig:diag-packages}) décompose le système
+en grands modules et représente leurs dépendances. Trois couches principales
+sont identifiées.
+
+\noindent\textbf{Couche frontend (Next.js~14)~:}
+\begin{itemize}[itemsep=2pt, topsep=3pt, leftmargin=1.5cm]
+  \item \texttt{app/(public)}~: interface publique avec carte Leaflet, clustering,
+    filtres et panneau de détail~;
+  \item \texttt{app/admin/(general)}~: tableau de bord SUPER/REGION (paroisses,
+    districts, régions, œuvres, ouvriers, statistiques, audit, comptes,
+    import/export)~;
+  \item \texttt{app/admin/district}~: tableau de bord DISTRICT (accès restreint
+    au périmètre du district)~;
+  \item \texttt{app/admin/paroisse}~: tableau de bord PAROISSE (accès limité à
+    la paroisse de l'utilisateur).
+\end{itemize}
+
+\noindent\textbf{Couche backend (Django~5 + DRF)~:}
+\begin{itemize}[itemsep=2pt, topsep=3pt, leftmargin=1.5cm]
+  \item \texttt{apps/paroisses}, \texttt{apps/districts}, \texttt{apps/regions}~:
+    modèles géospatiaux, sérialiseurs et endpoints CRUD avec filtrage RBAC~;
+  \item \texttt{apps/oeuvres}, \texttt{apps/ouvriers}~: gestion des entités
+    sociales et du personnel ecclésiastique~;
+  \item \texttt{apps/statistiques}~: saisie et consultation des statistiques
+    annuelles par paroisse~;
+  \item \texttt{apps/comptes}~: gestion des comptes utilisateurs, authentification
+    par sessions Django et middleware RBAC~;
+  \item \texttt{apps/journal}~: enregistrement automatique via signaux Django
+    de toutes les opérations d'écriture~;
+  \item \texttt{apps/visiteurs}~: profil visiteur public, historique de
+    recherche et itinéraires personnels.
+\end{itemize}
+
+\noindent\textbf{Couche infrastructure~:} PostgreSQL~16 + PostGIS~3.4 (persistance
+spatiale), GeoServer~2.26 (publication WMS/WFS), Redis~7 (cache), Docker Compose
+(orchestration des cinq services).
+
+\begin{figure}[H]
+  \centering
+  \fbox{\parbox{0.88\textwidth}{\centering\vspace{2.8cm}
+    \textit{[Diagramme de packages --- à intégrer après génération draw.io]}%
+    \vspace{2.8cm}}}
+  \caption{Diagramme de packages du système de géolocalisation EEC}
+  \label{fig:diag-packages}
+\end{figure}
+
+%------------------------------------------------------------
+\subsection{Diagrammes de Cas d'Utilisation}
+\label{ssec:uc}
+
+Les diagrammes de cas d'utilisation modélisent les interactions entre les acteurs
+et le système du point de vue fonctionnel. La Figure~\ref{fig:diag-uc} présente
+le diagramme global consolidé de la plateforme, mettant en évidence les douze
+cas d'utilisation principaux et leur distribution selon les six acteurs identifiés.
+Les sous-sections suivantes détaillent les six cas d'utilisation les plus
+représentatifs à travers des tableaux de description structurés~: UC01
+(authentification), UC02 (carte interactive), UC03 (gestion des paroisses),
+UC04 (import Excel), UC05 (journal d'audit) et UC06 (espace visiteur
+authentifié).
+
+\begin{figure}[H]
+  \centering
+  \fbox{\parbox{0.88\textwidth}{\centering\vspace{3.5cm}
+    \textit{[Diagramme de cas d'utilisation global --- à intégrer après génération draw.io]}%
+    \vspace{3.5cm}}}
+  \caption{Diagramme global de cas d'utilisation de la plateforme EEC}
+  \label{fig:diag-uc}
+\end{figure}
+
+\subsubsection{UC01 --- S'authentifier}
+
+\begin{table}[H]
+\centering
+\caption{Description du cas d'utilisation UC01 --- S'authentifier}
+\label{tab:uc01}
+\small
+\renewcommand{\arraystretch}{1.45}
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{>{\bfseries\color{eccdarkgreen}}p{3.0cm} p{10.8cm}}
+\toprule
+\rowcolor{eecgreen}
+\multicolumn{2}{>{\bfseries\color{white}\centering\arraybackslash}p{13.8cm}}{UC01~--- S'authentifier} \\
+\midrule
+Acteurs & Tous les utilisateurs enregistrés~: SUPER, REGION, DISTRICT, PAROISSE, Visiteur Authentifié \\
+\rowcolor{eeclightgreen!60}
+Préconditions & Le compte de l'utilisateur existe et est actif dans le système \\
+Scénario principal &
+  1.~L'utilisateur navigue vers la page \texttt{/admin/login}.\newline
+  2.~Il saisit son nom d'utilisateur et son mot de passe.\newline
+  3.~Il soumet le formulaire de connexion.\newline
+  4.~Le frontend envoie les credentials à l'API \texttt{/api/auth/login/}.\newline
+  5.~Django vérifie les credentials, crée une session et transmet le cookie
+     \texttt{sessionid} (\textit{HttpOnly, SameSite=Strict}).\newline
+  6.~Le frontend redirige l'utilisateur vers le tableau de bord correspondant
+     à son rôle. \\
+\rowcolor{eeclightgreen!60}
+Scénarios alternatifs &
+  \textbf{Alt.~4a --- Credentials invalides}~: HTTP~401, message d'erreur
+  affiché, utilisateur maintenu sur la page de connexion.\newline
+  \textbf{Alt.~4b --- Compte désactivé}~: HTTP~403, message "Compte désactivé,
+  contacter l'administrateur". \\
+Postconditions & Session Django active, cookie \textit{HttpOnly} transmis,
+  utilisateur redirigé vers son tableau de bord selon son rôle. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{UC02 --- Consulter la Carte Interactive}
+
+\begin{table}[H]
+\centering
+\caption{Description du cas d'utilisation UC02 --- Consulter la carte interactive}
+\label{tab:uc02}
+\small
+\renewcommand{\arraystretch}{1.45}
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{>{\bfseries\color{eccdarkgreen}}p{3.0cm} p{10.8cm}}
+\toprule
+\rowcolor{eecgreen}
+\multicolumn{2}{>{\bfseries\color{white}\centering\arraybackslash}p{13.8cm}}{UC02~--- Consulter la carte interactive} \\
+\midrule
+Acteurs & Visiteur Non Authentifié, Visiteur Authentifié et tous les rôles administratifs (SUPER, REGION, DISTRICT, PAROISSE) \\
+\rowcolor{eeclightgreen!60}
+Préconditions & Aucune (accès public pour le VISITEUR) \\
+Scénario principal &
+  1.~L'utilisateur accède à la page de la carte (\texttt{/} ou
+     \texttt{/admin/map}).\newline
+  2.~Le frontend Leaflet charge le fond de carte OpenStreetMap.\newline
+  3.~Le frontend envoie des requêtes WMS à GeoServer pour les couches
+     institutionnelles.\newline
+  4.~Les marqueurs des paroisses et des œuvres s'affichent avec clustering
+     automatique.\newline
+  5.~L'utilisateur applique des filtres~: région synodale, district, type
+     d'entité.\newline
+  6.~La carte se met à jour dynamiquement selon les filtres sélectionnés.\newline
+  7.~L'utilisateur clique sur un marqueur~; une popup s'ouvre avec les
+     détails de l'entité. \\
+\rowcolor{eeclightgreen!60}
+Scénarios alternatifs &
+  \textbf{Alt.~3a --- GeoServer inaccessible}~: les couches OGC ne s'affichent
+  pas~; un avertissement est affiché~; le fond OpenStreetMap reste disponible.\newline
+  \textbf{Alt.~6a --- Aucune entité pour les filtres}~: la carte reste vide
+  avec un message informatif. \\
+Postconditions & Les entités correspondant aux filtres actifs sont affichées
+  sur la carte. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{UC03 --- Gérer une Paroisse (CRUD)}
+
+\begin{table}[H]
+\centering
+\caption{Description du cas d'utilisation UC03 --- Gérer une paroisse (CRUD)}
+\label{tab:uc03}
+\small
+\renewcommand{\arraystretch}{1.45}
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{>{\bfseries\color{eccdarkgreen}}p{3.0cm} p{10.8cm}}
+\toprule
+\rowcolor{eecgreen}
+\multicolumn{2}{>{\bfseries\color{white}\centering\arraybackslash}p{13.8cm}}{UC03~--- Gérer une paroisse (CRUD)} \\
+\midrule
+Acteurs & SUPER (toutes régions), REGION (sa région), DISTRICT (son district),
+  PAROISSE (sa paroisse uniquement) \\
+\rowcolor{eeclightgreen!60}
+Préconditions & Utilisateur authentifié avec droits d'écriture sur la paroisse
+  cible \\
+Scénario principal &
+  1.~L'administrateur accède à la liste des paroisses de son périmètre
+     (\texttt{/admin/paroisses}).\newline
+  2.~Il sélectionne l'action~: créer, modifier ou supprimer.\newline
+  \textit{Création}~: il remplit le formulaire (nom, district, coordonnées GPS,
+  statut) et soumet.\newline
+  \textit{Modification}~: il modifie les champs voulus et soumet.\newline
+  \textit{Suppression}~: il confirme l'action dans la boîte de dialogue.\newline
+  3.~Le frontend envoie la requête (POST\,/\,PATCH\,/\,DELETE) vers
+     \texttt{/api/paroisses/}.\newline
+  4.~Le backend valide les données et vérifie les droits RBAC.\newline
+  5.~L'opération est exécutée en base de données PostGIS.\newline
+  6.~Un signal Django déclenche l'enregistrement dans le journal d'audit.\newline
+  7.~Une réponse de succès est renvoyée~; la liste est actualisée. \\
+\rowcolor{eeclightgreen!60}
+Scénarios alternatifs &
+  \textbf{Alt.~4a --- Violation RBAC}~: HTTP~403, message "Action non autorisée
+  pour votre périmètre".\newline
+  \textbf{Alt.~4b --- Données invalides}~: HTTP~400 avec les champs en erreur.\newline
+  \textbf{Alt.~4c --- Coordonnées hors territoire}~: validation GPS échoue,
+  message explicatif. \\
+Postconditions & Paroisse créée/modifiée/supprimée en base~; action enregistrée
+  dans le journal d'audit. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{UC04 --- Importer des Données depuis Excel}
+
+\begin{table}[H]
+\centering
+\caption{Description du cas d'utilisation UC04 --- Importer des données depuis Excel}
+\label{tab:uc04}
+\small
+\renewcommand{\arraystretch}{1.45}
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{>{\bfseries\color{eccdarkgreen}}p{3.0cm} p{10.8cm}}
+\toprule
+\rowcolor{eecgreen}
+\multicolumn{2}{>{\bfseries\color{white}\centering\arraybackslash}p{13.8cm}}{UC04~--- Importer des données depuis Excel} \\
+\midrule
+Acteurs & SUPER (import global), REGION (import pour sa région) \\
+\rowcolor{eeclightgreen!60}
+Préconditions & Utilisateur authentifié SUPER ou REGION~; fichier Excel fourni
+  au format de l'EEC \\
+Scénario principal &
+  1.~L'administrateur accède au module d'import/export (\texttt{/admin/io}).\newline
+  2.~Il sélectionne le type d'import~: paroisses, ouvriers ou œuvres.\newline
+  3.~Il téléverse le fichier Excel (.xlsx) via le formulaire.\newline
+  4.~Le backend parse le fichier avec \texttt{openpyxl} et valide chaque
+     ligne~:\newline
+  \quad --- vérification du format des colonnes (Coord\_x~= latitude,
+     Coord\_y~= longitude)~;\newline
+  \quad --- validation de la plage GPS (territoire camerounais)~;\newline
+  \quad --- vérification de l'existence du district et de la région référencés~;\newline
+  \quad --- détection des doublons (même nom + même district).\newline
+  5.~Les lignes valides sont insérées en base de données~; les invalides sont
+     consignées.\newline
+  6.~Un rapport d'import est retourné~: lignes insérées, ignorées, erreurs
+     détaillées par ligne. \\
+\rowcolor{eeclightgreen!60}
+Scénarios alternatifs &
+  \textbf{Alt.~3a --- Format de fichier incorrect}~: HTTP~400, message "Format
+  non reconnu, utilisez le modèle fourni".\newline
+  \textbf{Alt.~5a --- Toutes les lignes invalides}~: aucune insertion~; rapport
+  d'erreurs complet retourné.\newline
+  \textbf{Alt.~5b --- Import partiel}~: les lignes valides sont insérées~; le
+  rapport liste les lignes rejetées avec raison. \\
+Postconditions & Entités valides enregistrées en base PostGIS~; entrée d'audit
+  synthétique créée~; rapport de résultats affiché. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{UC05 --- Consulter le Journal d'Audit}
+
+\begin{table}[H]
+\centering
+\caption{Description du cas d'utilisation UC05 --- Consulter le journal d'audit}
+\label{tab:uc05}
+\small
+\renewcommand{\arraystretch}{1.45}
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{>{\bfseries\color{eccdarkgreen}}p{3.0cm} p{10.8cm}}
+\toprule
+\rowcolor{eecgreen}
+\multicolumn{2}{>{\bfseries\color{white}\centering\arraybackslash}p{13.8cm}}{UC05~--- Consulter le journal d'audit} \\
+\midrule
+Acteurs & SUPER uniquement \\
+\rowcolor{eeclightgreen!60}
+Préconditions & Utilisateur authentifié avec le rôle SUPER \\
+Scénario principal &
+  1.~L'administrateur SUPER navigue vers \texttt{/admin/journal}.\newline
+  2.~La liste des entrées s'affiche~: auteur, type d'action, entité,
+     horodatage UTC.\newline
+  3.~Il applique des filtres~: type d'action (CREATE/UPDATE/DELETE), type
+     d'entité, période.\newline
+  4.~La liste filtrée se met à jour dynamiquement.\newline
+  5.~Il clique sur une entrée pour consulter le détail~: valeurs avant et
+     après la modification. \\
+\rowcolor{eeclightgreen!60}
+Scénarios alternatifs &
+  \textbf{Alt.~1a --- Accès depuis un rôle non SUPER}~: HTTP~403, redirection
+  vers le tableau de bord de l'utilisateur. \\
+Postconditions & Les entrées d'audit correspondant aux filtres sont affichées~;
+  aucune modification n'est apportée aux données. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{UC06 --- S'inscrire et Utiliser l'Espace Visiteur Authentifié}
+
+\begin{table}[htbp]
+\centering
+\caption{Description du cas d'utilisation UC06 --- Espace visiteur authentifié}
+\label{tab:uc06}
+\small
+\renewcommand{\arraystretch}{1.45}
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{>{\bfseries\color{eccdarkgreen}}p{3.0cm} p{10.8cm}}
+\toprule
+\rowcolor{eecgreen}
+\multicolumn{2}{>{\bfseries\color{white}\centering\arraybackslash}p{13.8cm}}{UC06~--- S'inscrire et utiliser l'espace visiteur authentifié} \\
+\midrule
+Acteurs & Visiteur Authentifié (inscrit via email/mot de passe) \\
+\rowcolor{eeclightgreen!60}
+Préconditions & Accès à la carte publique~; adresse email non encore enregistrée \\
+Scénario principal &
+  1.~Le visiteur clique sur «~S'inscrire~» depuis la carte publique.\newline
+  2.~Il saisit son email et son mot de passe dans le formulaire d'inscription.\newline
+  3.~Le frontend envoie les données à \texttt{/api/visiteurs/register/}.\newline
+  4.~Django crée le compte et génère automatiquement un
+     \textit{ProfilVisiteur} associé.\newline
+  5.~Le visiteur est connecté~; son profil personnel devient accessible
+     depuis la carte.\newline
+  6.~Sur la carte, il clique sur «~Paroisse la plus proche~»~: le backend
+     interroge PostGIS (\texttt{Distance()}) et retourne la paroisse la
+     plus proche avec distance (km) et durée estimée ($\approx$~60~km/h).\newline
+  7.~Il clique sur «~Enregistrer~» sur la fiche d'une paroisse~;
+     l'enregistrement est sauvegardé dans \textit{ParoisseEnregistree}
+     (\texttt{/api/visiteurs/paroisses/}).\newline
+  8.~Il consulte son espace personnel~: liste des paroisses enregistrées,
+     historique de ses recherches dans \textit{RechercheHistorique}. \\
+\rowcolor{eeclightgreen!60}
+Scénarios alternatifs &
+  \textbf{Alt.~3a --- Email déjà utilisé}~: HTTP~400, message «~Un compte
+  existe déjà avec cet email~».\newline
+  \textbf{Alt.~6a --- Localisation non partagée}~: message d'invitation à
+  activer la géolocalisation dans le navigateur~; fonctionnalité non disponible
+  sans position GPS.\newline
+  \textbf{Alt.~8a --- Vider l'historique}~: le visiteur supprime toutes les
+  entrées de \textit{RechercheHistorique} via DELETE \texttt{/api/visiteurs/historique/}. \\
+Postconditions & ProfilVisiteur créé~; paroisses enregistrées et historique
+  persistés en base~; session visiteur active. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%------------------------------------------------------------
+\subsection{Diagramme de Classes Métier}
+\label{ssec:classes-metier}
+
+Le diagramme de classes métier (Figure~\ref{fig:diag-classes-metier}) modélise
+les entités du domaine institutionnel de l'EEC et leurs relations, indépendamment
+de tout détail d'implémentation technique. Huit entités principales sont
+identifiées~:
+
+\begin{itemize}[itemsep=2pt, topsep=4pt, leftmargin=1.5cm]
+  \item \textbf{RegionSynodale}~: entité géographique de premier niveau, définie
+    par un nom, un siège et un polygone géospatial~;
+  \item \textbf{District}~: entité de second niveau, rattachée à une région
+    synodale~;
+  \item \textbf{Paroisse}~: entité de base de la présence de l'EEC, rattachée à
+    un district, localisée par des coordonnées GPS~;
+  \item \textbf{OEuvre}~: établissement social ou éducatif (école, centre
+    médical, exploitation agropastorale, immeuble), rattaché à une paroisse~;
+  \item \textbf{Ouvrier}~: personnel ecclésiastique (pasteur, évangéliste,
+    diacre), affecté à une paroisse~;
+  \item \textbf{StatistiqueAnnuelle}~: relevé chiffré annuel d'une paroisse
+    (membres, baptisés, enfants, indicateurs financiers)~;
+  \item \textbf{CompteUtilisateur}~: compte d'accès à la plateforme, associé
+    à un rôle et à un périmètre synodal (région, district ou paroisse)~;
+  \item \textbf{EntreeAudit}~: enregistrement immuable d'une opération
+    d'écriture, horodaté et lié à l'auteur.
+\end{itemize}
+
+\begin{figure}[H]
+  \centering
+  \fbox{\parbox{0.88\textwidth}{\centering\vspace{3.0cm}
+    \textit{[Diagramme de classes métier --- à intégrer après génération draw.io]}%
+    \vspace{3.0cm}}}
+  \caption{Diagramme de classes métier du domaine institutionnel EEC}
+  \label{fig:diag-classes-metier}
+\end{figure}
+
+%------------------------------------------------------------
+\subsection{Diagramme d'Activité}
+\label{ssec:activite}
+
+Le diagramme d'activité (Figure~\ref{fig:diag-activite}) modélise le flux de
+traitement du processus d'import de données depuis Excel --- le processus métier
+le plus critique et le plus complexe du système, car il constitue le seul point
+d'entrée de masse pour les données institutionnelles et implique une chaîne de
+validation multi-étapes avant toute persistance.
+
+Le flux se déroule en cinq phases~: (1)~téléversement et validation du format
+du fichier Excel~; (2)~extraction et validation ligne par ligne (coordonnées GPS,
+cohérence hiérarchique, doublons)~; (3)~insertion des lignes valides en base de
+données PostGIS~; (4)~enregistrement d'une entrée d'audit synthétique~;
+(5)~génération et affichage du rapport d'import détaillé.
+
+\begin{figure}[H]
+  \centering
+  \fbox{\parbox{0.88\textwidth}{\centering\vspace{3.0cm}
+    \textit{[Diagramme d'activité --- Import Excel --- à intégrer après génération draw.io]}%
+    \vspace{3.0cm}}}
+  \caption{Diagramme d'activité du processus d'import de données depuis Excel}
+  \label{fig:diag-activite}
+\end{figure}
+
+%============================================================
+\section{Conception du Système}
+\label{sec:conception}
+%============================================================
+
+\subsection{Architecture Technique}
+\label{ssec:archi}
+
+La Figure~\ref{fig:diag-archi} présente l'architecture technique retenue~: une
+architecture à cinq services découplés, orchestrés par Docker Compose sur un
+serveur unique. Chaque service est isolé dans son propre conteneur et communique
+avec les autres via le réseau Docker interne \texttt{eec\_network}.
+
+\noindent\textbf{Services et rôles~:}
+\begin{itemize}[itemsep=2pt, topsep=4pt, leftmargin=1.5cm]
+  \item \textbf{Frontend Next.js~16} (port~3004)~: application React côté
+    serveur avec App Router, TypeScript et Tailwind CSS. Sert la carte publique
+    Leaflet et les quatre interfaces d'administration. Communique avec le backend
+    exclusivement via l'API REST (\texttt{/api/}), sans accès direct à la base
+    de données~;
+  \item \textbf{Backend Django~5 + DRF} (port~8000)~: API REST de référence.
+    Expose 40+ endpoints (geo, auth, exports, imports, visiteurs, analytics,
+    audit). Applique le RBAC à chaque requête via un middleware dédié. Gère les
+    sessions dans Redis. Exécute les requêtes géospatiales via GeoDjango et
+    PostGIS~;
+  \item \textbf{PostgreSQL~16 + PostGIS~3.4} (port~5432)~: base de données
+    relationnelle et spatiale. Stocke l'intégralité des données institutionnelles
+    (paroisses avec \texttt{PointField}, régions avec \texttt{MultiPolygonField})
+    et les données métier (ouvriers, œuvres, statistiques, audit)~;
+  \item \textbf{GeoServer~2.26} (port~8080)~: serveur cartographique OGC. Publie
+    les couches géographiques de la base PostGIS en WMS~1.3.0 (images raster)
+    et WFS~2.0.0 (features vectorielles). Consommé directement par Leaflet dans
+    le frontend~;
+  \item \textbf{Redis~7} (port~6379)~: stockage en mémoire utilisé pour la
+    gestion des sessions Django (\texttt{SESSION\_ENGINE =
+    django.contrib.sessions.backends.cache}) et la mise en cache des requêtes
+    fréquentes.
+\end{itemize}
+
+\noindent\textbf{Flux de communication~:} Le frontend Next.js adresse ses
+requêtes API au backend Django. Le backend interroge PostgreSQL/PostGIS pour
+toutes les opérations de données et Redis pour les sessions. GeoServer accède
+directement à PostGIS via JDBC pour lire les couches géographiques et les
+servir au frontend Leaflet. Aucun service n'est exposé directement à Internet
+--- un reverse proxy (Nginx) centralise les accès externes en production.
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox{0.88\textwidth}{\centering\vspace{3.0cm}
+    \textit{[Diagramme d'architecture technique --- cinq services Docker
+    --- à intégrer après génération draw.io]}%
+    \vspace{3.0cm}}}
+  \caption{Architecture technique de la plateforme EEC Géolocalisation}
+  \label{fig:diag-archi}
+\end{figure}
+
+%------------------------------------------------------------
+\subsection{Modèle de Données}
+\label{ssec:modele-bd}
+
+Le modèle de données repose sur quinze tables PostGIS réparties en cinq
+domaines fonctionnels. Le Tableau~\ref{tab:modele-bd} synthétise les tables
+principales, leurs champs géospatiaux et leurs relations clés~; la
+Figure~\ref{fig:diag-modele-bd} en présente le schéma entité-relation.
+
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.22}
+\begin{longtable}{%
+  >{\bfseries\color{eccdarkgreen}}m{3.5cm}
+  m{4.5cm}
+  m{6.3cm}}
+\caption{Principales tables du modèle de données PostGIS}\label{tab:modele-bd} \\
+\toprule
+\rowcolor{eecgreen}
+\multicolumn{1}{>{\bfseries\color{white}}m{3.5cm}}{Table} &
+\multicolumn{1}{>{\bfseries\color{white}}m{4.5cm}}{Champ géospatial / clé} &
+\multicolumn{1}{>{\bfseries\color{white}}m{6.3cm}}{Rôle et relations principales} \\
+\midrule
+\endfirsthead
+\caption[]{\textit{(suite)~Modèle de données PostGIS}} \\
+\toprule
+\rowcolor{eecgreen}
+\multicolumn{1}{>{\bfseries\color{white}}m{3.5cm}}{Table} &
+\multicolumn{1}{>{\bfseries\color{white}}m{4.5cm}}{Champ géospatial / clé} &
+\multicolumn{1}{>{\bfseries\color{white}}m{6.3cm}}{Rôle et relations principales} \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{\small\textit{(suite page suivante)}} \\
+\endfoot
+\bottomrule
+\endlastfoot
+\rowcolor{eeclightgreen!60}
+geo\_regionsynodale & \texttt{polygone} MultiPolygonField (SRID=4326) & Entité de niveau 1~; racine de la hiérarchie synodale \\
+geo\_district & FK région (PROTECT) & Entité de niveau 2~; 137 districts \\
+\rowcolor{eeclightgreen!60}
+geo\_paroisse & \texttt{localisation} PointField (SRID=4326) & Entité de base~; FK district (PROTECT)~; 565 paroisses \\
+oeuvres\_oeuvre & \texttt{localisation} PointField (SRID=4326) & Établissements sociaux/éducatifs~; FK paroisse (SET\_NULL) \\
+\rowcolor{eeclightgreen!60}
+ouvriers\_ouvrier & --- & Personnel ecclésiastique~; FK paroisse (SET\_NULL) \\
+statistiques\_stat & --- & Relevé annuel par paroisse~; FK paroisse (CASCADE) \\
+\rowcolor{eeclightgreen!60}
+accounts\_utilisateur & --- & Étend AbstractUser~; champs role, region, district, paroisse \\
+accounts\_profil & --- & OneToOne vers Utilisateur~; informations de contact étendues \\
+\rowcolor{eeclightgreen!60}
+audit\_entreeaudit & --- & Journal immuable~; FK utilisateur (SET\_NULL) \\
+visitors\_profilvisiteur & --- & OneToOne vers User~; créé auto à l'inscription \\
+\rowcolor{eeclightgreen!60}
+visitors\_paroisseenreg & --- & M2M Visiteur × Paroisse~; date d'enregistrement \\
+visitors\_itineraire & \texttt{point\_depart} PointField & FK ProfilVisiteur (CASCADE)~; paroisse cible FK \\
+\rowcolor{eeclightgreen!60}
+visitors\_recherche & --- & Historique de recherche~; FK ProfilVisiteur (CASCADE) \\
+exports\_rapport & --- & Métadonnées des exports générés (PDF, XLSX) \\
+\rowcolor{eeclightgreen!60}
+geo\_paroissevue & --- & Compteur de vues par paroisse~; FK paroisse (CASCADE) \\
+\end{longtable}
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox{0.88\textwidth}{\centering\vspace{3.0cm}
+    \textit{[Schéma entité-relation (ERD) --- à intégrer après génération draw.io]}%
+    \vspace{3.0cm}}}
+  \caption{Modèle de données --- schéma entité-relation de la plateforme EEC}
+  \label{fig:diag-modele-bd}
+\end{figure}
+
+%------------------------------------------------------------
+\subsection{Diagramme de Séquence}
+\label{ssec:sequence}
+
+Le diagramme de séquence (Figure~\ref{fig:diag-sequence}) modélise le flux
+d'authentification sécurisée, scénario critique qui conditionne l'accès à
+l'ensemble des fonctionnalités protégées. Ce flux illustre les interactions
+entre le navigateur, le frontend Next.js, le middleware Django et la base
+de données Redis.
+
+Le flux se déroule en dix étapes~:
+\begin{enumerate}[itemsep=2pt, topsep=4pt, leftmargin=1.8cm]
+  \item Le navigateur émet \texttt{GET /admin/login} pour obtenir la page
+    de connexion~;
+  \item Next.js retourne la page et un token CSRF préchargé~;
+  \item L'utilisateur saisit ses identifiants et soumet le formulaire~;
+  \item Next.js émet \texttt{POST /api/auth/login/} avec les credentials
+    et le token CSRF dans l'en-tête~;
+  \item Le middleware Django valide le token CSRF~; en cas d'échec, HTTP~403~;
+  \item Django interroge la table \texttt{accounts\_utilisateur} et vérifie
+    le hash PBKDF2-SHA256 du mot de passe~;
+  \item Si les credentials sont corrects, Django crée une session dans Redis
+    (\texttt{SESSION\_ENGINE = django.contrib.sessions.backends.cache})~;
+  \item Django retourne HTTP~200 avec le cookie \texttt{sessionid}
+    (\textit{HttpOnly, SameSite=Strict})~;
+  \item Next.js stocke le cookie (géré automatiquement par le navigateur~;
+    jamais exposé à JavaScript)~;
+  \item Next.js redirige vers le tableau de bord correspondant au rôle de
+    l'utilisateur (\texttt{/admin/general}, \texttt{/admin/regional},
+    \texttt{/admin/district} ou \texttt{/admin/paroisse}).
+\end{enumerate}
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox{0.88\textwidth}{\centering\vspace{3.0cm}
+    \textit{[Diagramme de séquence --- Authentification sécurisée ---
+    à intégrer après génération draw.io]}%
+    \vspace{3.0cm}}}
+  \caption{Diagramme de séquence du flux d'authentification sécurisée}
+  \label{fig:diag-sequence}
+\end{figure}
+
+%------------------------------------------------------------
+\subsection{Diagramme de Classes Technique}
+\label{ssec:classes-tech}
+
+Le diagramme de classes technique (Figure~\ref{fig:diag-classes-tech})
+représente l'implémentation concrète des entités sous forme de modèles Django,
+avec leurs attributs, types Python/PostGIS et relations inter-classes.
+
+\noindent\textbf{Modèles principaux et attributs~:}
+\begin{itemize}[itemsep=2pt, topsep=4pt, leftmargin=1.5cm]
+  \item \textbf{Paroisse} (app \texttt{geo})~: \texttt{nom} (CharField),
+    \texttt{district} (FK → District, PROTECT), \texttt{localisation}
+    (PointField, SRID=4326, null=True), \texttt{statut} (CharField, choix
+    ACTIVE/INACTIVE), \texttt{has\_gps} (BooleanField)~;
+  \item \textbf{RegionSynodale} (app \texttt{geo})~: \texttt{nom} (CharField),
+    \texttt{siege} (CharField), \texttt{polygone} (MultiPolygonField,
+    SRID=4326)~;
+  \item \textbf{Utilisateur} (app \texttt{accounts})~: étend
+    \texttt{AbstractUser}~; \texttt{role} (CharField, choix SUPER/REGION/
+    DISTRICT/PAROISSE/VISITEUR), \texttt{region} (FK → RegionSynodale,
+    SET\_NULL), \texttt{district} (FK → District, SET\_NULL), \texttt{paroisse}
+    (FK → Paroisse, SET\_NULL)~;
+  \item \textbf{ProfilVisiteur} (app \texttt{visitors})~: \texttt{user}
+    (OneToOneField → Utilisateur, CASCADE), \texttt{date\_inscription}
+    (DateTimeField, auto), \texttt{derniere\_position} (PointField, null=True)~;
+  \item \textbf{ItinerairePersonnel} (app \texttt{visitors})~: \texttt{profil}
+    (FK → ProfilVisiteur, CASCADE), \texttt{paroisse\_cible} (FK → Paroisse,
+    CASCADE), \texttt{point\_depart} (PointField), \texttt{distance\_km}
+    (FloatField), \texttt{duree\_min} (IntegerField)~;
+  \item \textbf{EntreeAudit} (app \texttt{audit})~: \texttt{auteur} (FK →
+    Utilisateur, SET\_NULL), \texttt{action} (CharField, choix CREATE/UPDATE/
+    DELETE), \texttt{modele} (CharField), \texttt{objet\_id} (IntegerField),
+    \texttt{horodatage} (DateTimeField, auto\_now\_add).
+\end{itemize}
+
+\noindent\textbf{Relations inter-classes~:} la relation Paroisse → District →
+RegionSynodale forme la colonne vertébrale hiérarchique (PROTECT empêche la
+suppression en cascade). Les relations Oeuvre et Ouvrier vers Paroisse sont
+SET\_NULL (un ouvrier peut exister sans paroisse). EntreeAudit est reliée à
+Utilisateur en SET\_NULL pour conserver les logs même après suppression du
+compte. ProfilVisiteur est en OneToOne avec Utilisateur (CASCADE).
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\parbox{0.88\textwidth}{\centering\vspace{3.0cm}
+    \textit{[Diagramme de classes technique --- modèles Django ---
+    à intégrer après génération draw.io]}%
+    \vspace{3.0cm}}}
+  \caption{Diagramme de classes technique des modèles Django de la plateforme}
+  \label{fig:diag-classes-tech}
+\end{figure}
+
+\medskip
+\noindent\textbf{Bilan du chapitre.}
+Ce chapitre a formalisé l'ensemble des besoins de la plateforme en
+vingt-deux exigences fonctionnelles et dix exigences non-fonctionnelles,
+couvrant les domaines de l'authentification, de la cartographie, de
+l'administration des entités, de l'import/export, des statistiques, de la
+traçabilité et des services du visiteur authentifié. Les six modèles UML
+d'analyse --- contexte (six acteurs), packages, cas d'utilisation
+(UC01--UC06), classes métier et activité --- ont défini avec précision les
+acteurs, les modules, les interactions et les entités du domaine institutionnel.
+La section de conception a complété cette analyse en présentant l'architecture
+technique à cinq services Docker, le modèle de données PostGIS (quinze tables),
+le diagramme de séquence d'authentification sécurisée et le diagramme de
+classes technique des modèles Django.
+Le \textbf{Chapitre~3} présentera l'environnement de développement retenu,
+justifiera les choix technologiques et exposera les résultats concrets de
+l'implémentation.
+
+\clearpage
+
+% ============================================================
+%  CHAPITRE 3 — IMPLÉMENTATION ET RÉSULTATS (À VENIR)
+%  CONCLUSION GÉNÉRALE (À VENIR)
 % ============================================================
 
 % ============================================================

@@ -138,11 +138,20 @@ class Paroisse(models.Model):
                                             ↑longitude   ↑latitude
     """
 
+    NIVEAUX = [
+        ("PAROISSE", "Paroisse"),
+        ("STATION", "Station"),
+        ("ANNEXE", "Annexe"),
+    ]
+
     # Nom de la paroisse (ex: "PAROISSE DE BONANJO", "PAROISSE CENTRALE DE YAOUNDÉ")
     nom = models.CharField(max_length=200)
 
     # Code unique optionnel (ex: "PAR-001")
     code = models.CharField(max_length=20, unique=True, null=True, blank=True)
+
+    # Niveau hiérarchique : Paroisse > Station > Annexe
+    niveau = models.CharField(max_length=10, choices=NIVEAUX, default="PAROISSE")
 
     # District auquel appartient cette paroisse
     # on_delete=PROTECT : on ne peut pas supprimer un district avec des paroisses

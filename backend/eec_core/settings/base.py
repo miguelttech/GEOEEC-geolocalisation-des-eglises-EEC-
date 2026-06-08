@@ -144,7 +144,34 @@ CACHES = {
 
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "default"
+SESSION_COOKIE_NAME = "eec_sessionid"  # Unique pour éviter les conflits localhost
 SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SAMESITE = "Strict"
+SESSION_COOKIE_SAMESITE = "Lax" # Modifié pour le dev cross-origin par défaut
+
+# Configuration CSRF
+CSRF_COOKIE_NAME = "eec_csrftoken"     # Unique pour éviter les conflits localhost
+CSRF_USE_SESSIONS = False
+CSRF_COOKIE_HTTPONLY = False          # Permet au frontend de le lire si besoin
+CSRF_COOKIE_SAMESITE = "Lax"
 
 GEOSERVER_URL = os.environ.get("GEOSERVER_URL", "http://geoserver:8080/geoserver")
+
+# Email — SMTP si credentials fournis, sinon affichage console (logs Docker)
+EMAIL_HOST_USER     = os.environ.get("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+_smtp_ready = bool(EMAIL_HOST_USER and EMAIL_HOST_PASSWORD and "REMPLACER" not in EMAIL_HOST_PASSWORD)
+EMAIL_BACKEND = os.environ.get(
+    "EMAIL_BACKEND",
+    "django.core.mail.backends.smtp.EmailBackend" if _smtp_ready
+    else "django.core.mail.backends.console.EmailBackend",
+)
+EMAIL_HOST     = os.environ.get("EMAIL_HOST", "smtp.gmail.com")
+EMAIL_PORT     = int(os.environ.get("EMAIL_PORT", "587"))
+EMAIL_USE_TLS  = os.environ.get("EMAIL_USE_TLS", "True") == "True"
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "GÉOEEC EEC Cameroun <noreply@eec-cameroun.org>")
+
+# URL publique du frontend (pour les liens de reset dans les emails)
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3004")
+
+# Durée de validité des tokens de réinitialisation (en secondes) — 1 heure
+PASSWORD_RESET_TIMEOUT = 3600

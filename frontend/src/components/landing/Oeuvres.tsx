@@ -42,7 +42,7 @@ export default function Oeuvres() {
           </div>
 
           <div className="oeuvre-card span-3-tall">
-            <Image src="/landing/crucifix.jpg" alt="" fill style={{ objectFit: 'cover' }} />
+            <Image src="/landing/crucifix.png" alt="" fill style={{ objectFit: 'cover' }} />
             <div className="overlay" />
             <div className="lbl-wrap">
               <div className="lbl-kind">Patrimoine · CENTRE</div>
@@ -65,7 +65,7 @@ export default function Oeuvres() {
           </div>
 
           <div className="oeuvre-card span-3">
-            <Image src="/landing/church.png" alt="" fill style={{ objectFit: 'cover' }} />
+            <Image src="/landing/eglise_beau.png" alt="" fill style={{ objectFit: 'cover' }} />
             <div className="overlay" />
             <div className="lbl-wrap">
               <div className="lbl-kind">École · MÉNOUA</div>
@@ -74,7 +74,7 @@ export default function Oeuvres() {
           </div>
 
           <div className="oeuvre-card span-3">
-            <Image src="/landing/church.png" alt="" fill style={{ objectFit: 'cover' }} />
+            <Image src="/landing/EEC-14-1024x768.jpg" alt="" fill style={{ objectFit: 'cover' }} />
             <div className="overlay" />
             <div className="lbl-wrap">
               <div className="lbl-kind">Médical · LITTORAL</div>

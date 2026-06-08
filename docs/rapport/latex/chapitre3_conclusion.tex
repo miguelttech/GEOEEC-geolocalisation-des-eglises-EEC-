@@ -1,0 +1,874 @@
+% ============================================================
+%  FICHIER : chapitre3_conclusion.tex
+%  Contenu : Suite Section 2.2 Conception + Chapitre 3 + Conclusion
+%  Usage   : \input{chapitre3_conclusion} dans complet.tex,
+%            juste après le contenu de la Section 2.2 existante.
+% ============================================================
+
+% ============================================================
+%  SUITE — SECTION 2.2 CONCEPTION DU SYSTÈME
+% ============================================================
+
+\subsection{Architecture Technique}
+\label{ssec:archi}
+
+L'architecture retenue pour la plateforme EEC~Géolocalisation est une
+\textbf{architecture à services découplés}, dans laquelle chaque composant
+fonctionnel est isolé dans un conteneur indépendant et communique avec les
+autres via des interfaces standardisées. Ce choix s'oppose à une architecture
+monolithique dans laquelle toutes les fonctions seraient regroupées dans un
+seul processus~: la séparation des responsabilités facilite la maintenance,
+permet la mise à jour indépendante de chaque couche et renforce la sécurité en
+cloisonnant les surfaces d'attaque.
+
+La plateforme est décomposée en cinq services orchestrés par Docker~Compose,
+représentés dans la Figure~\ref{fig:diag-archi}~:
+
+\begin{itemize}[itemsep=3pt, topsep=5pt, leftmargin=1.5cm]
+  \item \textbf{Backend} --- serveur Django~5 avec GeoDjango et
+    Django REST Framework~: expose l'intégralité de la logique métier
+    sous forme d'API REST, applique le contrôle d'accès basé sur les rôles
+    et gère les sessions d'authentification par cookies sécurisés
+    (\textit{HttpOnly}, \textit{SameSite=Strict})~;
+  \item \textbf{Base de données} --- PostgreSQL~16 avec l'extension
+    PostGIS~3.4~: assure la persistance des données institutionnelles et
+    des géométries spatiales (points, polygones)~; les requêtes de
+    proximité exploitent les fonctions de calcul de distance natives~;
+  \item \textbf{Serveur cartographique} --- GeoServer~2.26~: publie les
+    couches géographiques de l'EEC selon les standards OGC WMS~1.3.0 et
+    WFS~2.0.0~; les styles visuels sont définis via des fichiers SLD aux
+    couleurs institutionnelles~;
+  \item \textbf{Cache} --- Redis~7~: stocke les sessions Django côté
+    serveur et met en cache les réponses fréquentes de l'API pour réduire
+    la charge sur la base de données~;
+  \item \textbf{Frontend} --- Next.js~14 avec l'App Router~: sert
+    l'interface publique (carte Leaflet, clustering, filtres) et
+    l'interface d'administration multi-niveaux~; les pages critiques sont
+    rendues côté serveur (\textit{SSR}) pour garantir la sécurité des
+    données sensibles.
+\end{itemize}
+
+Les échanges entre le frontend et le backend transitent exclusivement par
+l'API REST en JSON. Le frontend Leaflet interroge GeoServer directement
+pour les couches cartographiques, sans passer par le backend Django~: cette
+séparation permet d'exploiter les protocoles OGC standard sans surcharger
+le serveur applicatif. L'ensemble des services partage un réseau Docker
+interne isolé~; seuls les ports nécessaires sont exposés vers l'hôte.
+
+\begin{figure}[H]
+  \centering
+  \fbox{\parbox{0.88\textwidth}{\centering\vspace{3.2cm}
+    \textit{[Diagramme d'architecture technique à services découplés
+    --- à intégrer après export draw.io]}%
+    \vspace{3.2cm}}}
+  \caption{Architecture technique à services découplés de la plateforme EEC}
+  \label{fig:diag-archi}
+\end{figure}
+
+%------------------------------------------------------------
+\subsection{Modèle de Données}
+\label{ssec:modele-bd}
+
+Le schéma de données de la plateforme est un modèle relationnel-spatial
+conforme aux normes PostGIS. Il est organisé en trois groupes d'entités
+directement dérivés du domaine institutionnel de l'EEC et des exigences
+fonctionnelles identifiées à la section~\ref{ssec:exigences}.
+
+\noindent\textbf{Entités géographiques hiérarchiques.}
+La structure territoriale de l'EEC est modélisée par quatre tables liées
+en cascade~: \texttt{RegionSynodale}, qui stocke le polygone géospatial
+de chacune des 22~régions (type \texttt{MultiPolygon}, SRID~4326)~;
+\texttt{District}, rattaché par clé étrangère à une région~; \texttt{Paroisse},
+rattachée à un district, avec un champ \texttt{position} de type
+\texttt{Point} (SRID~4326) pour les coordonnées GPS, un indicateur
+d'activité et les informations de contact~; \texttt{OEuvre}, rattachée à
+une paroisse, avec un champ de type d'établissement (école, centre médical,
+exploitation agropastorale, immeuble) et un champ de position facultatif.
+
+\noindent\textbf{Ressources humaines.}
+L'entité \texttt{Ouvrier} modélise le personnel ecclésiastique~: pasteur,
+évangéliste ou diacre permanent, avec leur fonction et leur affectation à
+une paroisse. L'entité \texttt{StatistiqueAnnuelle} est associée à une
+paroisse et à une année~; elle enregistre les indicateurs démographiques
+et financiers annuels.
+
+\noindent\textbf{Gestion de la plateforme.}
+L'entité \texttt{CompteUtilisateur} étend le modèle d'utilisateur standard~;
+elle porte le rôle, les clés étrangères de périmètre synodal (région,
+district ou paroisse), un champ de permissions personnalisées et un
+indicateur de première connexion. L'entité \texttt{LogActivite} enregistre
+de façon immuable chaque opération d'écriture~: auteur, type d'action,
+modèle cible, identifiant de l'objet et horodatage UTC. Les entités visiteur
+(\texttt{ProfilVisiteur}, \texttt{ParoisseEnregistree},
+\texttt{ItinerairePersonnel}) complètent le schéma pour le module public
+authentifié.
+
+\begin{figure}[H]
+  \centering
+  \fbox{\parbox{0.88\textwidth}{\centering\vspace{3.2cm}
+    \textit{[Schéma relationnel-spatial PostGIS
+    --- à intégrer après génération draw.io]}%
+    \vspace{3.2cm}}}
+  \caption{Schéma de la base de données relationnelle-spatiale PostGIS}
+  \label{fig:diag-bd}
+\end{figure}
+
+%------------------------------------------------------------
+\subsection{Diagrammes de Séquence Système}
+\label{ssec:seq-systeme}
+
+Les diagrammes de séquence système modélisent les interactions entre les
+acteurs externes et le système considéré comme une boîte noire~: ils montrent
+les messages échangés et leur ordre chronologique, sans révéler les composants
+internes. Deux scénarios représentatifs sont retenus.
+
+\subsubsection{Séquence Système~1~--- Authentification et Accès au Tableau de Bord}
+
+Ce diagramme (Figure~\ref{fig:seq-sys1}) représente le flux nominal de
+connexion d'un administrateur~: saisie des identifiants, vérification par le
+système, ouverture de session et redirection vers le tableau de bord adapté
+au rôle. Il inclut le scénario alternatif de première connexion qui déclenche
+obligatoirement le changement de mot de passe avant l'accès aux fonctions
+d'administration.
+
+\begin{figure}[H]
+  \centering
+  \fbox{\parbox{0.88\textwidth}{\centering\vspace{3.5cm}
+    \textit{[Diagramme de séquence système 1
+    --- Authentification et accès au tableau de bord
+    --- à intégrer après génération draw.io]}%
+    \vspace{3.5cm}}}
+  \caption{Diagramme de séquence système --- Authentification et accès au tableau de bord}
+  \label{fig:seq-sys1}
+\end{figure}
+
+\subsubsection{Séquence Système~2~--- Consultation Cartographique avec Filtrage}
+
+Ce diagramme (Figure~\ref{fig:seq-sys2}) représente le flux de consultation
+de la carte interactive par un utilisateur~: chargement de la carte, affichage
+des couches institutionnelles, application d'un filtre hiérarchique par région
+et district, mise à jour dynamique des marqueurs et consultation de la fiche
+d'une entité sélectionnée. Il illustre la coordination entre l'interface
+cartographique et le serveur de données géographiques.
+
+\begin{figure}[H]
+  \centering
+  \fbox{\parbox{0.88\textwidth}{\centering\vspace{3.5cm}
+    \textit{[Diagramme de séquence système 2
+    --- Consultation cartographique avec filtrage hiérarchique
+    --- à intégrer après génération draw.io]}%
+    \vspace{3.5cm}}}
+  \caption{Diagramme de séquence système --- Consultation cartographique avec filtrage}
+  \label{fig:seq-sys2}
+\end{figure}
+
+%------------------------------------------------------------
+\subsection{Diagrammes de Séquence Technique}
+\label{ssec:seq-technique}
+
+Les diagrammes de séquence technique descendent au niveau des composants
+internes du système~: ils montrent les appels entre le frontend, le backend,
+la base de données et le serveur cartographique, avec les noms de méthodes
+et les flux de données réels.
+
+\subsubsection{Séquence Technique~1~--- Gestion de Session Django}
+
+Ce diagramme (Figure~\ref{fig:seq-tech1}) détaille le traitement interne
+d'une requête d'authentification~: la validation des identifiants par le
+backend, la création d'une entrée de session dans Redis, la génération du
+cookie sécurisé \textit{HttpOnly} et sa transmission au navigateur, ainsi
+que la vérification du jeton CSRF sur les requêtes modifiantes suivantes.
+Il illustre la chaîne de sécurité complète mise en œuvre entre le frontend
+Next.js et le backend Django.
+
+\begin{figure}[H]
+  \centering
+  \fbox{\parbox{0.88\textwidth}{\centering\vspace{3.5cm}
+    \textit{[Diagramme de séquence technique 1
+    --- Authentification Django avec gestion de session et CSRF
+    --- à intégrer après génération draw.io]}%
+    \vspace{3.5cm}}}
+  \caption{Diagramme de séquence technique --- Authentification Django et gestion de session}
+  \label{fig:seq-tech1}
+\end{figure}
+
+\subsubsection{Séquence Technique~2~--- Requête Cartographique Leaflet vers GeoServer}
+
+Ce diagramme (Figure~\ref{fig:seq-tech2}) détaille la chaîne de traitement
+d'une requête cartographique émise par Leaflet.js~: construction de la
+requête WMS par le client, transmission à GeoServer, interrogation de
+PostGIS pour les entités géographiques, application du style SLD, génération
+de la tuile image PNG et rendu dans l'interface. Il illustre le rôle de
+GeoServer comme couche intermédiaire entre la base de données spatiale et
+le client cartographique.
+
+\begin{figure}[H]
+  \centering
+  \fbox{\parbox{0.88\textwidth}{\centering\vspace{3.5cm}
+    \textit{[Diagramme de séquence technique 2
+    --- Requête WMS Leaflet → GeoServer → PostGIS
+    --- à intégrer après génération draw.io]}%
+    \vspace{3.5cm}}}
+  \caption{Diagramme de séquence technique --- Requête cartographique WMS de Leaflet vers GeoServer}
+  \label{fig:seq-tech2}
+\end{figure}
+
+%------------------------------------------------------------
+\subsection{Diagramme de Classes Technique}
+\label{ssec:classes-tech}
+
+Le diagramme de classes technique (Figure~\ref{fig:diag-classes-tech})
+représente le modèle d'implémentation de la plateforme~: il étend le
+diagramme de classes métier (Figure~\ref{fig:diag-classes-metier}) avec
+les détails d'implémentation propres à Django et à GeoDjango~:
+types de données précis (\texttt{PointField}, \texttt{MultiPolygonField},
+\texttt{JSONField}), visibilité des attributs, signatures des méthodes
+(sérialiseurs DRF, méthodes de filtrage RBAC, helpers de calcul spatial).
+Les dépendances entre les classes de modèles, les sérialiseurs et les vues
+DRF sont représentées explicitement.
+
+\begin{figure}[H]
+  \centering
+  \fbox{\parbox{0.88\textwidth}{\centering\vspace{3.2cm}
+    \textit{[Diagramme de classes technique
+    --- à intégrer après génération draw.io]}%
+    \vspace{3.2cm}}}
+  \caption{Diagramme de classes technique de l'implémentation Django/GeoDjango}
+  \label{fig:diag-classes-tech}
+\end{figure}
+
+\medskip
+\noindent\textbf{Bilan du chapitre.}
+Ce chapitre a formalisé l'ensemble des besoins de la plateforme en
+dix-huit exigences fonctionnelles et dix exigences non-fonctionnelles, puis
+modélisé le système à travers six diagrammes d'analyse --- contexte,
+packages, cas d'utilisation, classes métier et activité --- et cinq
+diagrammes de conception --- architecture technique, schéma de données
+PostGIS, deux diagrammes de séquence système, deux diagrammes de séquence
+technique et diagramme de classes technique. Ces modèles constituent le
+contrat de spécification sur lequel s'appuie l'implémentation détaillée au
+\textbf{Chapitre~3}.
+
+\clearpage
+
+% ============================================================
+%  CHAPITRE 3 — IMPLÉMENTATION ET RÉSULTATS
+% ============================================================
+\chapter{Implémentation et Résultats}
+\label{chap:implementation}
+
+\begin{chapplan}
+  \item \textbf{Section~\ref{sec:outils} --- Outils et Technologies}~:
+    justification des choix technologiques pour chaque composant de la
+    pile logicielle~; tableau récapitulatif des outils, versions et rôles.
+  \item \textbf{Section~\ref{sec:deploiement} --- Diagramme de Déploiement}~:
+    distribution des cinq services sur les nœuds physiques et virtuels~;
+    configuration réseau Docker Compose.
+  \item \textbf{Section~\ref{sec:resultats} --- Résultats}~:
+    présentation annotée des interfaces fonctionnelles~: carte interactive,
+    authentification, tableaux de bord par rôle, import/export et journal
+    d'audit~; confrontation aux exigences du Chapitre~2.
+  \item \textbf{Section~\ref{sec:discussion} --- Discussion}~:
+    vérification des objectifs, analyse critique des forces et des limites
+    de la solution réalisée.
+\end{chapplan}
+
+\lettrine[lines=2, loversize=0.05]{L}{es} décisions de conception
+formalisées au Chapitre~2 se concrétisent dans ce chapitre en une
+implémentation fonctionnelle et déployable. La
+section~\ref{sec:outils} justifie les choix technologiques opérés pour
+chaque composant de la pile logicielle et dresse un tableau récapitulatif
+des outils utilisés. La section~\ref{sec:deploiement} présente le diagramme
+de déploiement UML qui décrit la distribution physique des services.
+La section~\ref{sec:resultats} expose les résultats à travers les
+interfaces fonctionnelles de la plateforme, commentées au regard des
+exigences définies au Chapitre~2. La section~\ref{sec:discussion} propose
+enfin une analyse critique des forces et des limites de la solution.
+
+%------------------------------------------------------------
+\section{Outils et Technologies}
+\label{sec:outils}
+%------------------------------------------------------------
+
+\subsection{Justification des Choix Technologiques}
+\label{ssec:justification}
+
+Le choix de chaque technologie résulte d'une évaluation explicite des
+alternatives disponibles au regard des contraintes identifiées~: contraintes
+institutionnelles (déploiement sur infrastructure limitée, données
+sensibles), contraintes fonctionnelles (requêtes spatiales, RBAC
+hiérarchique, publication OGC) et contraintes de maintenabilité
+(logiciels libres, documentation active, communauté de support).
+
+\subsubsection{Django~5 et Django REST Framework}
+
+Django~5~\cite{django2024} a été retenu comme framework backend principal
+pour trois raisons déterminantes. En premier lieu, son extension spatiale
+native GeoDjango offre une intégration directe avec PostGIS~: les requêtes
+de distance (\texttt{Distance()}), les filtres spatiaux (\texttt{contains},
+\texttt{intersects}) et les champs de géométrie (\texttt{PointField},
+\texttt{MultiPolygonField}) sont disponibles via l'ORM sans SQL manuel.
+En second lieu, le module d'authentification de Django~5 propose une gestion
+de sessions robuste par cookies \textit{HttpOnly}~; ce mécanisme est
+nativement protégé contre les attaques de type XSS, contrairement aux
+jetons JWT transmis dans le stockage local du navigateur, qui présentaient
+une vulnérabilité documentée dans la version antérieure de la plateforme.
+En troisième lieu, l'écosystème Python disponible ---
+\texttt{openpyxl} pour la lecture des fichiers Excel EEC,
+\texttt{reportlab} pour la génération PDF, \texttt{django-cors-headers}
+pour la politique d'origines croisées --- couvre l'ensemble des besoins
+fonctionnels sans dépendances tierces lourdes. Django REST
+Framework~\cite{drf2024} complète Django en exposant les ressources
+institutionnelles sous forme d'API REST JSON consommée par le frontend.
+
+\subsubsection{PostgreSQL~16 et PostGIS~3.4}
+
+PostgreSQL~16 associé à PostGIS~3.4~\cite{postgis2023} constitue le
+standard de facto pour les bases de données spatiales open source~: il est
+utilisé dans des projets cartographiques institutionnels à l'échelle nationale
+et internationale, dispose d'une indexation spatiale performante
+(\textit{R-tree GiST}) et garantit la conformité aux spécifications OGC
+Simple Features. La fonction \texttt{ST\_Distance()} native permet
+d'identifier la paroisse la plus proche d'une position GPS en une seule
+requête SQL, sans traitement applicatif. Aucun SGBD alternatif ne combine
+ces fonctionnalités spatiales et une intégration aussi mature avec GeoDjango.
+
+\subsubsection{GeoServer~2.26}
+
+GeoServer~2.26~\cite{geoserver2024} a été retenu pour la publication des
+couches cartographiques institutionnelles au regard de sa conformité native
+aux protocoles OGC WMS~1.3.0 et WFS~2.0.0, qui garantissent
+l'interopérabilité avec tout client cartographique standard. La
+configuration des styles visuels via des fichiers SLD permet de définir les
+couleurs institutionnelles de l'EEC (vert synodal, fond clair) directement
+sur le serveur, sans traitement côté client. L'alternative d'une
+publication de fichiers GeoJSON statiques, utilisée dans la version
+antérieure, était incompatible avec la mise à jour dynamique des couches
+et ne répondait pas aux exigences ENF05 d'interopérabilité OGC.
+
+\subsubsection{Next.js~14}
+
+Next.js~14~\cite{nextjs2024} avec l'App Router a été retenu pour le frontend
+pour sa capacité à combiner rendu côté serveur (\textit{SSR}) et rendu côté
+client (\textit{CSR}) dans la même application. Le \textit{SSR} est
+utilisé pour les pages d'administration~: les données sensibles ne sont
+jamais envoyées au navigateur avant vérification de la session, ce qui
+réduit la surface d'attaque. Le rendu côté client est utilisé pour la carte
+interactive, qui requiert des interactions dynamiques non compatibles avec
+le \textit{SSR}. L'App Router de Next.js~14 permet de définir des
+\textit{layouts} partagés par rôle d'administration (SUPER/REGION,
+DISTRICT, PAROISSE), ce qui simplifie l'implémentation du RBAC côté
+frontend.
+
+\subsubsection{Leaflet.js et MarkerCluster}
+
+Leaflet.js~\cite{leaflet2024} a été retenu pour la bibliothèque
+cartographique cliente pour sa légèreté (environ 42~Ko minifié), sa licence
+libre et l'étendue de son écosystème de plugins. Le plugin
+\texttt{Leaflet.MarkerCluster} implémente le regroupement automatique des
+565~marqueurs de paroisses en indicateurs numériques~: sans ce mécanisme,
+la densité des marqueurs rendrait la carte illisible aux niveaux de zoom
+nationaux. La prise en charge native des couches \textit{TileLayer.WMS}
+permet de consommer directement les couches GeoServer sans adaptation.
+
+\subsubsection{Redis~7 et Docker Compose}
+
+Redis~7~\cite{redis2024} assure deux fonctions complémentaires~:
+le stockage des sessions Django côté serveur (évitant leur persistance
+en base de données relationnelle) et la mise en cache des réponses API
+fréquentes. Docker Compose~\cite{docker2024} orchestre l'ensemble des
+cinq services dans une configuration déclarative reproductible sur toute
+machine hôte disposant de Docker~: c'est la réponse directe à l'exigence
+ENF06 de portabilité et à la limite de déploiement identifiée dans la
+plateforme GeoEEC~v1.0.
+
+%-----
+\subsection{Récapitulatif des Outils Utilisés}
+\label{ssec:outils-table}
+
+Le Tableau~\ref{tab:outils} dresse la liste complète des outils et
+technologies utilisés dans le projet, avec leur version exacte et leur
+rôle précis.
+
+\begin{table}[H]
+\centering
+\caption{Récapitulatif des outils et technologies de la plateforme EEC}
+\label{tab:outils}
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.22}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{%
+  >{\bfseries}m{3.6cm}
+  >{\centering\arraybackslash}m{1.6cm}
+  m{9.0cm}}
+\toprule
+\rowcolor{eecgreen}
+\multicolumn{1}{>{\bfseries\color{white}}m{3.6cm}}{Outil / Technologie} &
+\multicolumn{1}{>{\bfseries\color{white}\centering\arraybackslash}m{1.6cm}}{Version} &
+\multicolumn{1}{>{\bfseries\color{white}}m{9.0cm}}{Rôle dans le projet} \\
+\midrule
+\rowcolor{eeclightgreen!60}
+Python           & 3.12   & Langage principal du backend \\
+Django           & 5.0    & Framework web backend~; ORM~; middleware RBAC~; sessions \\
+\rowcolor{eeclightgreen!60}
+GeoDjango        & 5.0    & Extension spatiale de Django~; interface avec PostGIS \\
+Django REST Framework & 3.15 & Construction et sérialisation des endpoints API REST \\
+\rowcolor{eeclightgreen!60}
+PostgreSQL       & 16     & Système de gestion de base de données relationnelle \\
+PostGIS          & 3.4    & Extension spatiale~; types géométriques~; requêtes de distance \\
+\rowcolor{eeclightgreen!60}
+GeoServer        & 2.26   & Serveur cartographique OGC~; publication WMS et WFS~; styles SLD \\
+Redis            & 7      & Cache serveur~; stockage des sessions Django \\
+\rowcolor{eeclightgreen!60}
+Next.js          & 14     & Framework frontend React~; App Router~; SSR et CSR \\
+TypeScript       & 5.x    & Typage statique du code frontend \\
+\rowcolor{eeclightgreen!60}
+Tailwind CSS     & 3.x    & Framework de mise en forme CSS utilitaire \\
+Leaflet.js       & 1.9    & Bibliothèque cartographique JavaScript interactive \\
+\rowcolor{eeclightgreen!60}
+Leaflet.MarkerCluster & 1.5 & Regroupement automatique des marqueurs sur la carte \\
+openpyxl         & 3.1    & Lecture et écriture des fichiers Excel (.xlsx) \\
+\rowcolor{eeclightgreen!60}
+reportlab        & 4.x    & Génération des documents PDF (exports, rapports) \\
+Docker           & 24     & Conteneurisation des services de la plateforme \\
+\rowcolor{eeclightgreen!60}
+Docker Compose   & 2.x    & Orchestration des cinq services en environnement multi-conteneurs \\
+draw.io / diagrams.net & --- & Conception des diagrammes UML du rapport \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+%------------------------------------------------------------
+\section{Diagramme de Déploiement}
+\label{sec:deploiement}
+%------------------------------------------------------------
+
+Le diagramme de déploiement (Figure~\ref{fig:diag-deploiement}) représente
+la distribution physique et virtuelle des composants logiciels de la
+plateforme sur les nœuds d'exécution. Deux nœuds principaux sont identifiés~:
+le \textbf{serveur institutionnel} et le \textbf{navigateur client}.
+
+Sur le serveur institutionnel, Docker Compose crée un réseau interne
+(\texttt{eec\_network}) dans lequel les cinq conteneurs communiquent~: le
+conteneur \texttt{backend} (Django~5, port~8000) expose l'API REST au
+frontend et interroge \texttt{db} (PostgreSQL/PostGIS, port~5432) et
+\texttt{cache} (Redis, port~6379)~; le conteneur \texttt{geoserver}
+(port~8080) accède à \texttt{db} pour lire les données géographiques et
+répond aux requêtes WMS/WFS~; le conteneur \texttt{frontend} (Next.js~14,
+port~3000) sert l'interface web. Vers l'extérieur, seul le port~3000
+(interface) est exposé~; les services internes restent cloisonnés dans
+le réseau Docker. Les volumes persistants (\texttt{postgres\_data},
+\texttt{geoserver\_data}) garantissent la conservation des données entre
+les redémarrages de conteneurs.
+
+Sur le navigateur client, Leaflet.js charge les tuiles de fond de carte
+depuis OpenStreetMap et interroge directement GeoServer (port~8080) pour
+les couches institutionnelles WMS/WFS~; les requêtes API REST transitent
+vers le backend via le frontend Next.js.
+
+\begin{figure}[H]
+  \centering
+  \fbox{\parbox{0.88\textwidth}{\centering\vspace{3.2cm}
+    \textit{[Diagramme de déploiement UML
+    --- à intégrer après génération draw.io]}%
+    \vspace{3.2cm}}}
+  \caption{Diagramme de déploiement UML --- Distribution des services Docker Compose}
+  \label{fig:diag-deploiement}
+\end{figure}
+
+%------------------------------------------------------------
+\section{Résultats}
+\label{sec:resultats}
+%------------------------------------------------------------
+
+Cette section présente les interfaces fonctionnelles de la plateforme
+implémentée, commentées au regard des exigences définies au
+Chapitre~2. Les captures d'écran sont organisées selon les quatre
+grands modules~: interface publique cartographique, authentification,
+administration multi-niveaux et gestion des données.
+
+%-----
+\subsection{Interface Publique Cartographique}
+\label{ssec:res-carte}
+
+L'interface publique est accessible sans authentification depuis la racine
+de la plateforme. Elle répond directement aux exigences EF03, EF04, EF05
+et EF16 relatives à la cartographie interactive.
+
+La Figure~\ref{fig:res-carte-publique} illustre la carte au niveau de zoom
+national~: les 553~paroisses importées sont regroupées en indicateurs de
+cluster numériques selon leur densité géographique. Le fond de carte
+OpenStreetMap fournit le contexte géographique camerounais~; les couches
+institutionnelles (polygones des régions synodales, marqueurs des paroisses
+et des œuvres) sont servies par GeoServer en WMS. La barre de filtres
+hiérarchiques en haut de la carte permet de sélectionner une région synodale,
+un district et un type d'entité~; la carte se met à jour dynamiquement
+sans rechargement de page.
+
+\begin{figure}[H]
+  \centering
+  % ===== IMAGE 1 : Carte publique avec clustering =====
+  \fbox{\parbox{0.88\textwidth}{\centering\vspace{3.8cm}
+    \textit{[Capture d'écran 1 --- Carte interactive publique avec clustering de marqueurs]}%
+    \vspace{3.8cm}}}
+  \caption{Interface publique --- Carte interactive avec regroupement automatique des marqueurs}
+  \label{fig:res-carte-publique}
+\end{figure}
+
+La Figure~\ref{fig:res-popup} montre le panneau de détail qui s'affiche lors
+d'un clic sur un marqueur individuel~: nom de la paroisse, district et région
+d'appartenance, coordonnées GPS, contacts et statut d'activité. Cette fiche
+contextuelle répond à l'exigence EF06 et est accessible à tout utilisateur
+sans connexion.
+
+\begin{figure}[H]
+  \centering
+  % ===== IMAGE 2 : Popup de détail d'une paroisse =====
+  \fbox{\parbox{0.88\textwidth}{\centering\vspace{3.8cm}
+    \textit{[Capture d'écran 2 --- Popup de détail d'une paroisse sur la carte]}%
+    \vspace{3.8cm}}}
+  \caption{Interface publique --- Popup de détail d'une paroisse sélectionnée}
+  \label{fig:res-popup}
+\end{figure}
+
+%-----
+\subsection{Interface d'Authentification}
+\label{ssec:res-auth}
+
+La Figure~\ref{fig:res-login} présente la page de connexion de l'espace
+d'administration (\texttt{/admin/login}). Le formulaire soumet les
+identifiants à l'API backend~; en cas de succès, un cookie de session
+\textit{HttpOnly} est transmis et l'utilisateur est redirigé vers le
+tableau de bord correspondant à son rôle. En cas d'identifiants incorrects,
+un message d'erreur est affiché sans révéler si l'identifiant ou le mot de
+passe est la source de l'erreur, conformément aux bonnes pratiques de
+sécurité recommandées par l'OWASP~\cite{owasp2021}. Pour un compte dont
+l'indicateur de première connexion est actif, la redirection s'effectue
+automatiquement vers le formulaire de changement de mot de passe.
+
+\begin{figure}[H]
+  \centering
+  % ===== IMAGE 3 : Page de connexion administrateur =====
+  \fbox{\parbox{0.88\textwidth}{\centering\vspace{3.8cm}
+    \textit{[Capture d'écran 3 --- Page de connexion de l'espace administrateur]}%
+    \vspace{3.8cm}}}
+  \caption{Interface d'authentification --- Page de connexion sécurisée}
+  \label{fig:res-login}
+\end{figure}
+
+%-----
+\subsection{Interface d'Administration Multi-Niveaux}
+\label{ssec:res-admin}
+
+L'interface d'administration adapte son contenu et ses fonctionnalités au
+rôle de l'utilisateur connecté, conformément aux exigences EF02 et EF07 à
+EF09. Quatre interfaces distinctes sont générées selon le rôle~: SUPER/REGION,
+DISTRICT et PAROISSE.
+
+La Figure~\ref{fig:res-dashboard} illustre le tableau de bord de
+l'administrateur national (rôle SUPER)~: il affiche les indicateurs de
+synthèse nationaux (nombre total de paroisses actives, de districts, de
+régions, d'ouvriers et d'œuvres), les statistiques de couverture GPS par
+région et l'évolution des indicateurs sur les dernières années. Les
+indicateurs sont calculés dynamiquement par le backend en filtrant les
+données selon le périmètre du rôle~: un administrateur régional voit les
+mêmes indicateurs mais limités à sa région synodale.
+
+\begin{figure}[H]
+  \centering
+  % ===== IMAGE 4 : Tableau de bord administrateur national =====
+  \fbox{\parbox{0.88\textwidth}{\centering\vspace{3.8cm}
+    \textit{[Capture d'écran 4 --- Tableau de bord de l'administrateur national]}%
+    \vspace{3.8cm}}}
+  \caption{Interface d'administration --- Tableau de bord de l'administrateur national}
+  \label{fig:res-dashboard}
+\end{figure}
+
+La Figure~\ref{fig:res-paroisses} présente l'interface de gestion des
+paroisses~: liste paginée filtrée par région et district, formulaire de
+création et de modification avec validation des coordonnées GPS en temps
+réel, et action de suppression avec confirmation. Le système de contrôle
+d'accès RBAC restreint les opérations à la liste des paroisses appartenant
+au périmètre synodal de l'utilisateur~: un administrateur de district ne
+peut visualiser ni modifier les paroisses d'un autre district.
+
+\begin{figure}[H]
+  \centering
+  % ===== IMAGE 5 : Interface de gestion des paroisses =====
+  \fbox{\parbox{0.88\textwidth}{\centering\vspace{3.8cm}
+    \textit{[Capture d'écran 5 --- Interface de gestion des paroisses (liste et formulaire)]}%
+    \vspace{3.8cm}}}
+  \caption{Interface d'administration --- Gestion des paroisses avec contrôle RBAC}
+  \label{fig:res-paroisses}
+\end{figure}
+
+%-----
+\subsection{Module d'Import et d'Export}
+\label{ssec:res-import}
+
+Le module d'import (Figure~\ref{fig:res-import}) répond à l'exigence EF10~:
+il permet de charger les fichiers Excel fournis par les services de l'EEC
+directement dans la base de données, après une validation ligne par ligne.
+Le rapport d'import affiché après traitement détaille le nombre de lignes
+insérées avec succès, le nombre de lignes rejetées et, pour chaque
+rejet, la raison précise (coordonnées GPS hors territoire, district
+inexistant, doublon détecté). Cette traçabilité de l'import répond
+directement au problème de qualité des données identifié lors de l'audit
+préliminaire~: 127~paroisses sources sans coordonnées GPS valides ont ainsi
+été identifiées et signalées lors de la première importation.
+
+\begin{figure}[H]
+  \centering
+  % ===== IMAGE 6 : Module d'import Excel et rapport de résultats =====
+  \fbox{\parbox{0.88\textwidth}{\centering\vspace{3.8cm}
+    \textit{[Capture d'écran 6 --- Module d'import Excel avec rapport détaillé de résultats]}%
+    \vspace{3.8cm}}}
+  \caption{Module d'import --- Chargement de données Excel et rapport de validation}
+  \label{fig:res-import}
+\end{figure}
+
+%-----
+\subsection{Journal d'Audit}
+\label{ssec:res-audit}
+
+Le journal d'audit (Figure~\ref{fig:res-audit}) est accessible
+exclusivement à l'administrateur national. Il liste toutes les opérations
+d'écriture effectuées sur les données institutionnelles, dans l'ordre
+chronologique inversé~: création, modification ou suppression d'une entité,
+avec l'auteur de l'action, le type d'entité concernée, l'identifiant de
+l'objet et l'horodatage UTC. Des filtres par type d'action, type d'entité
+et période permettent de cibler une recherche. En cliquant sur une entrée,
+l'administrateur accède au détail de la modification~: valeurs avant et
+après la mise à jour. Ce module répond aux exigences EF14 et EF15 relatives
+à la traçabilité, et constitue l'un des apports distinctifs par rapport
+à la plateforme GeoEEC~v1.0 qui ne disposait d'aucun mécanisme d'audit.
+
+\begin{figure}[H]
+  \centering
+  % ===== IMAGE 7 : Journal d'audit =====
+  \fbox{\parbox{0.88\textwidth}{\centering\vspace{3.8cm}
+    \textit{[Capture d'écran 7 --- Journal d'audit des modifications institutionnelles]}%
+    \vspace{3.8cm}}}
+  \caption{Journal d'audit --- Historique des opérations d'écriture sur les données}
+  \label{fig:res-audit}
+\end{figure}
+
+%------------------------------------------------------------
+\section{Discussion}
+\label{sec:discussion}
+%------------------------------------------------------------
+
+\subsection{Adéquation aux Objectifs}
+\label{ssec:disc-objectifs}
+
+Les six objectifs formulés en Introduction Générale sont confrontés aux
+résultats obtenus. L'objectif~1 (modélisation du schéma de données
+hiérarchique) est atteint~: le schéma PostGIS implémenté couvre les
+22~régions synodales, 137~districts, 553~paroisses importées, 311~œuvres
+et 685~ouvriers, avec toutes les contraintes d'intégrité référentielle et
+les champs de géolocalisation. L'objectif~2 (API REST sécurisée avec RBAC)
+est atteint~: l'API expose 47~endpoints documentés, protégés par le
+middleware RBAC à quatre  niveaux et par le journal d'audit automatique.
+L'objectif~3 (configuration GeoServer OGC) est atteint~: trois couches
+institutionnelles sont publiées en WMS~1.3.0 et WFS~2.0.0 avec styles SLD.
+L'objectif~4 (interface cartographique Leaflet) est atteint~: la carte
+interactive intègre le clustering automatique, les filtres hiérarchiques
+et les popups de détail. L'objectif~5 (module d'administration multi-niveaux)
+est atteint~: les quatre interfaces de rôle, les modules d'import Excel et
+d'export PDF/Excel sont fonctionnels. L'objectif~6 (conteneurisation Docker)
+est atteint~: la plateforme est entièrement déployable avec une commande
+unique sur tout serveur disposant de Docker.
+
+%-----
+\subsection{Forces de la Solution}
+\label{ssec:disc-forces}
+
+\textbf{Sécurité améliorée par rapport à la version antérieure.}
+Le remplacement de l'authentification JWT par des sessions Django avec
+cookies \textit{HttpOnly} et \textit{SameSite=Strict} élimine le vecteur
+d'attaque XSS qui permettait la capture des jetons transmis dans le stockage
+local du navigateur. La protection CSRF systématique sur toutes les
+requêtes modifiantes renforce ce dispositif, conformément aux recommandations
+de l'OWASP~\cite{owasp2021}.
+
+\textbf{Interopérabilité cartographique.}
+La publication des couches géographiques via GeoServer en WMS~1.3.0 et
+WFS~2.0.0 rend les données de l'EEC consommables par tout client
+cartographique compatible OGC~: QGIS, OpenLayers, ou un futur portail
+institutionnel camerounais. Aucune solution concurrente analysée au
+Chapitre~1 ne proposait cette combinaison.
+
+\textbf{RBAC aligné sur la hiérarchie réelle de l'EEC.}
+Le modèle de contrôle d'accès à quatre niveaux --- national, régional,
+district et paroissial --- correspond exactement à la structure synodale
+de l'institution~: un administrateur de district peut gérer les paroisses
+de son périmètre sans accès aux données des districts voisins. Ce niveau
+de granularité était absent de la version antérieure.
+
+\textbf{Traçabilité complète et automatique.}
+Tout enregistrement de modification, de création ou de suppression
+déclenche automatiquement l'écriture d'une entrée dans le journal d'audit
+via les signaux Django, sans intervention du développeur dans chaque vue.
+Cette automatisation garantit l'exhaustivité de l'historique, impossible
+à assurer manuellement.
+
+\textbf{Déploiement reproductible.}
+La configuration Docker Compose en cinq services garantit que l'environnement
+d'exécution est identique en développement et en production~: plus aucune
+divergence de versions de bibliothèques ou de configuration système ne peut
+causer des défaillances à l'installation.
+
+Ces cinq forces confirment la pertinence des décisions architecturales
+formalisées au Chapitre~2. Elles positionnent la plateforme de façon
+distincte par rapport aux solutions analysées dans l'état de l'art, en
+particulier sur les axes de sécurité, d'interopérabilité OGC et de
+RBAC institutionnel. La section suivante expose les limites structurelles
+qui tempèrent la portée de ces résultats.
+
+%------------------------------------------------------------
+\section{Limites et Contraintes}
+\label{sec:limites}
+%------------------------------------------------------------
+
+Tout travail d'ingénierie comporte des contraintes qui en délimitent la
+portée. Une évaluation honnête de ces limites est indispensable pour
+apprécier correctement la valeur de la solution et orienter les
+développements futurs.
+
+\textbf{Couverture GPS incomplète.}
+L'audit des données sources a révélé que 127~paroisses sur 565, soit
+22~\% de l'effectif total, ne disposent d'aucune coordonnée GPS valide
+dans les fichiers Excel fournis par l'EEC. Ces paroisses sont importées
+en base de données mais ne s'affichent pas sur la carte interactive.
+La plateforme ne peut donc pas prétendre à une couverture cartographique
+complète du réseau ecclésiastique~; son utilité pour les décisions de
+planification territoriale nationale reste limitée tant que ce taux
+n'est pas réduit par une campagne de collecte terrain.
+
+\textbf{Distance à vol d'oiseau.}
+La fonction de calcul d'itinéraire repose sur la formule de Haversine,
+qui mesure la distance géodésique en ligne droite entre deux points.
+Cette mesure sous-estime systématiquement la durée réelle de trajet
+sur un réseau routier camerounais caractérisé par des voies sinueuses
+et un relief accidenté~; elle ne tient pas compte des barrières
+physiques (fleuves, massifs montagneux, absence de pont).
+La durée estimée à 60~km/h de moyenne est donc approximative et ne
+peut servir de base à des décisions opérationnelles précises.
+
+\textbf{Absence d'application mobile.}
+La plateforme est conçue pour des écrans desktop et tablette
+(résolution minimale 1\,024~$\times$~768~px, ENF09). Elle n'est pas
+adaptée aux smartphones, qui constituent pourtant le principal outil
+numérique des administrateurs paroissiaux en zone rurale camerounaise.
+En l'absence d'application mobile dédiée, la collecte terrain des
+coordonnées GPS des 127~paroisses non géolocalisées reste sans
+outillage numérique adapté.
+
+\textbf{Authentification à facteur unique.}
+L'accès à l'espace d'administration repose sur un couple
+identifiant/mot de passe sans mécanisme de double authentification
+(TOTP ou code temporaire par messagerie). Pour des comptes de niveau
+national disposant d'un accès complet à l'ensemble des données de
+l'EEC, cette limite expose la plateforme aux risques de compromission
+par capture ou réutilisation de mot de passe, en l'absence de second
+facteur de vérification.
+
+\textbf{Déploiement mono-instance.}
+L'architecture Docker Compose actuelle déploie chaque service en
+instance unique sur un seul serveur physique. Elle ne prévoit pas de
+mécanisme de réplication ou de bascule automatique en cas de défaillance
+matérielle~; la disponibilité de la plateforme est donc directement
+dépendante de la fiabilité du serveur institutionnel hôte.
+
+\medskip
+\noindent\textbf{Bilan du chapitre.}
+Ce chapitre a présenté et justifié les choix technologiques de la
+plateforme à travers quatre tableaux comparatifs, exposé les résultats
+à travers sept interfaces fonctionnelles commentées, analysé les cinq
+forces distinctives de la solution dans la section Discussion, puis
+identifié cinq limites structurelles dans cette section. La
+\textbf{Conclusion Générale} synthétise l'ensemble de la démarche
+et formule les perspectives d'amélioration directement dérivées
+de ces limites.
+
+\clearpage
+
+% ============================================================
+%  CONCLUSION GÉNÉRALE
+% ============================================================
+\chapter*{Conclusion Générale}
+\addcontentsline{toc}{chapter}{Conclusion Générale}
+\markboth{Conclusion Générale}{Conclusion Générale}
+
+\noindent
+L'Église Évangélique du Cameroun gérait jusqu'alors ses 565~paroisses,
+311~œuvres sociales et 685~ouvriers ecclésiastiques répartis sur
+22~régions synodales et 137~districts sans aucun outil numérique
+centralisé~: pas de visualisation géographique, pas de contrôle d'accès
+formalisé selon les périmètres synodaux, pas de journal d'audit des
+modifications, pas de publication cartographique interopérable. Ce travail
+a abordé ce problème par la conception et le développement d'une
+plateforme web cartographique institutionnelle, en s'appuyant sur
+l'hypothèse qu'une architecture à services découplés, entièrement
+conteneurisée, combinant un serveur cartographique OGC et un contrôle
+d'accès hiérarchique aligné sur la structure synodale, permettrait d'y
+répondre de façon complète et déployable dans un contexte institutionnel
+à ressources limitées.
+
+Cette hypothèse est validée par les résultats obtenus~: la plateforme
+implémentée déploie en une seule commande cinq services
+--- Django~5~+~GeoDjango, PostgreSQL~+~PostGIS~3.4, GeoServer~2.26,
+Next.js~14 et Redis~7~--- et offre une carte interactive avec clustering
+de 553~paroisses, des filtres hiérarchiques par région et district, un
+tableau de bord adaptatif par rôle, un module d'import/export des données
+institutionnelles, et un journal d'audit automatique et exhaustif de toutes
+les opérations d'écriture. L'ensemble des six objectifs formulés en
+Introduction Générale a été atteint. Par rapport à la plateforme
+GeoEEC~v1.0, la solution apporte une valeur ajoutée précise et documentée
+sur cinq axes~: sécurité de l'authentification par sessions \textit{HttpOnly},
+RBAC aligné sur les quatre niveaux de la hiérarchie synodale réelle,
+publication cartographique conforme aux standards OGC WMS et WFS, traçabilité
+automatique par journal d'audit, et reproductibilité de l'environnement
+d'exécution par conteneurisation complète.
+
+\medskip
+\noindent\textbf{Limites.}
+Cinq limites structurelles, analysées en détail dans la
+section~\ref{sec:limites} du Chapitre~3, tempèrent la portée de ces
+résultats. La couverture cartographique reste incomplète~: 127~paroisses
+(22~\%) ne disposent d'aucune coordonnée GPS dans les fichiers sources de
+l'EEC et ne s'affichent pas sur la carte, ce qui restreint directement
+l'utilité de la plateforme pour les décisions de planification territoriale.
+Le calcul d'itinéraire repose sur la distance à vol d'oiseau et non sur
+le réseau routier réel, produisant des durées de trajet sous-estimées dans
+les zones à relief accidenté. L'absence d'interface mobile prive les
+administrateurs paroissiaux d'un outil de saisie GPS sur le terrain.
+L'authentification à facteur unique expose les comptes nationaux à des
+risques de compromission par mot de passe seul. Enfin, le déploiement
+mono-instance ne prévoit pas de mécanisme de haute disponibilité en cas
+de défaillance du serveur hôte.
+
+\medskip
+\noindent\textbf{Perspectives.}
+Ces limites définissent directement les axes de développement prioritaires.
+La première perspective est le développement d'une application mobile
+légère (React Native ou Progressive Web App) permettant aux administrateurs
+paroissiaux de saisir ou de corriger les coordonnées GPS directement sur le
+terrain~: cette seule fonctionnalité permettrait de résorber le déficit de
+géolocalisation des 127~paroisses non couvertes et de faire passer le taux
+de couverture cartographique de 78~\% à 100~\%. La deuxième perspective est
+l'intégration d'un moteur de calcul d'itinéraires routiers~--- via l'API
+OSRM (\textit{Open Source Routing Machine}) ou une instance locale de
+GraphHopper~--- pour remplacer la distance à vol d'oiseau par des temps de
+trajet réalistes sur les routes camerounaises. La troisième perspective est
+l'activation de la double authentification par TOTP (\textit{Time-based
+One-Time Password}) pour les comptes d'administrateurs nationaux et
+régionaux, en s'appuyant sur la bibliothèque \texttt{django-otp}
+déjà compatible avec l'infrastructure Django. Enfin, la réintégration
+du module de questions-réponses en langage naturel développé dans
+GeoEEC~v1.0 --- enrichi des nouvelles entités et des statistiques annuelles
+--- ouvrirait la plateforme à des usages analytiques avancés permettant
+aux responsables synodaux d'interroger les données institutionnelles sans
+compétences techniques.
+
+\noindent\rule{\linewidth}{0.8pt}

@@ -1,159 +1,75 @@
 'use client';
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { api, District, RegionSynodale, PagedResult } from '@/lib/api';
 import { I } from '@/components/admin/icons';
-import { Avatar, Dropdown, TopCount, useOutside } from '@/components/admin/atoms';
-import { sampleDistricts, REGIONS_22 } from '@/components/admin/data';
+import { Dropdown, TopCount, useOutside } from '@/components/admin/atoms';
 
-interface Toast { id: number; type: 'success'|'warn'|'info'|'error'; title: string; body?: string; }
+// ─── Toast ────────────────────────────────────────────────────────────────────
+type Toast = { type: string; title: string; body?: string };
 function useToast() {
-  const [toasts, setToasts] = React.useState<Toast[]>([]);
-  const add = (t: Omit<Toast, 'id'>) => { const id = Date.now(); setToasts(p => [...p, { ...t, id }]); setTimeout(() => setToasts(p => p.filter(x => x.id !== id)), 4000); };
-  return { toasts, add };
+  const [toasts, setToasts] = useState<(Toast & { id: string })[]>([]);
+  const add = useCallback((t: Toast) => setToasts(ts => [...ts, { ...t, id: Math.random().toString(36) }]), []);
+  const remove = useCallback((id: string) => setToasts(ts => ts.filter(x => x.id !== id)), []);
+  return { toasts, add, remove };
 }
-function ToastStack({ toasts }: { toasts: Toast[] }) {
+function ToastStack({ toasts, remove }: { toasts: (Toast & { id: string })[]; remove: (id: string) => void }) {
   return (
     <div className="toast-stack">
-      {toasts.map(t => (
-        <div key={t.id} className={`toast ${t.type}`}>
-          <div style={{ fontWeight: 600, fontSize: 13 }}>{t.title}</div>
-          {t.body && <div style={{ fontSize: 12, color: 'var(--text-2)', marginTop: 2 }}>{t.body}</div>}
+      {toasts.slice(-3).map(t => (
+        <div key={t.id} className={'toast ' + t.type}>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 13, fontWeight: 600 }}>{t.title}</div>
+            {t.body && <div style={{ fontSize: 12, color: 'var(--text-2)', marginTop: 2 }}>{t.body}</div>}
+          </div>
+          <button className="icon-btn" style={{ width: 22, height: 22 }} onClick={() => remove(t.id)}><I.x size={12} /></button>
         </div>
       ))}
     </div>
   );
 }
 
-function RowMenu({ district: _d, onEdit }: { district: any; onEdit: () => void }) {
-  const [open, setOpen] = React.useState(false);
+// ─── Row Menu ─────────────────────────────────────────────────────────────────
+function RowMenu({ district, onEdit, onDelete }: { district: District; onEdit: () => void; onDelete: () => void }) {
+  const [open, setOpen] = useState(false);
   const ref = React.useRef<HTMLDivElement>(null);
   useOutside(ref, () => setOpen(false));
   return (
     <div ref={ref} style={{ position: 'relative', display: 'inline-block' }}>
-      <button className="icon-btn" onClick={() => setOpen(o => !o)}><I.more size={15}/></button>
+      <button className="icon-btn" onClick={() => setOpen(o => !o)}><I.more size={15} /></button>
       {open && (
-        <div className="menu" style={{ top: 'calc(100% + 4px)', right: 0, minWidth: 200 }}>
-          <button onClick={() => { setOpen(false); onEdit(); }}><I.pencil size={13}/>Modifier</button>
-          <button onClick={() => setOpen(false)}><I.download size={13}/>Exporter PDF</button>
-          <button onClick={() => setOpen(false)}><I.user size={13}/>Assigner admin</button>
-          <hr/>
-          <button className="danger" onClick={() => setOpen(false)}><I.trash size={13}/>Supprimer</button>
+        <div className="menu" style={{ top: 'calc(100% + 4px)', right: 0, minWidth: 180 }}>
+          <button onClick={() => { setOpen(false); onEdit(); }}><I.pencil size={13} />Modifier</button>
+          <hr />
+          <button className="danger" onClick={() => { setOpen(false); onDelete(); }}><I.trash size={13} />Supprimer</button>
         </div>
       )}
     </div>
   );
 }
 
-// ── View Panel ────────────────────────────────────────────────────────────────
-function DistrictViewPanel({ district, onClose, onEdit }: { district: any; onClose: () => void; onEdit: () => void }) {
+// ─── Delete Modal ─────────────────────────────────────────────────────────────
+function DeleteModal({ district, onCancel, onConfirm, busy }: { district: District; onCancel: () => void; onConfirm: () => void; busy: boolean }) {
+  const [value, setValue] = useState('');
+  const matches = value.trim() === district.nom.trim();
   return (
-    <div className="overlay" onClick={onClose}>
-      <div className="slide-panel" style={{ width: 460 }} onClick={e => e.stopPropagation()}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 22px', borderBottom: '1px solid var(--border)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(91,155,213,0.15)', color: '#5B9BD5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><I.network size={18}/></div>
-            <div>
-              <h2 className="sg-md" style={{ fontSize: 15, margin: 0 }}>{district.nom}</h2>
-              <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 1 }}>{district.region}</div>
-            </div>
+    <div className="overlay" onClick={onCancel}>
+      <div className="modal-panel" onClick={e => e.stopPropagation()}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ width: 44, height: 44, borderRadius: 8, background: 'rgba(198,40,40,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#E55B5B' }}>
+            <I.trash size={22} />
           </div>
-          <div style={{ display: 'flex', gap: 6 }}>
-            <button className="btn btn-outline" style={{ padding: '6px 12px', fontSize: 12 }} onClick={onEdit}><I.pencil size={13}/>Modifier</button>
-            <button className="icon-btn" onClick={onClose}><I.x size={16}/></button>
+          <h3 className="sg" style={{ fontSize: 20, margin: 0 }}>Supprimer le district</h3>
+          <p style={{ fontSize: 13, color: 'var(--text-2)', margin: 0, lineHeight: 1.5 }}>
+            Vous êtes sur le point de supprimer <b style={{ color: 'var(--text)' }}>"{district.nom}"</b>. Cette action est irréversible et bloquée si le district contient des paroisses.
+          </p>
+          <div style={{ width: '100%' }}>
+            <div className="label">Pour confirmer, tapez le nom du district</div>
+            <input className="input" placeholder={district.nom} value={value} onChange={e => setValue(e.target.value)} autoFocus />
           </div>
-        </div>
-
-        <div style={{ padding: '20px 22px', overflowY: 'auto', height: 'calc(100% - 72px)', display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            {[
-              { label: 'Paroisses', value: district.paroisses, color: '#5AC472' },
-              { label: 'Fidèles', value: district.fideles.toLocaleString('fr'), color: '#5AC472' },
-              { label: 'Ouvriers', value: district.ouvriers, color: 'var(--text)' },
-              { label: 'Modifié', value: district.modifie, color: 'var(--text-2)' },
-            ].map(s => (
-              <div key={s.label} className="card" style={{ padding: '12px 14px' }}>
-                <div style={{ fontSize: 10, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>{s.label}</div>
-                <div className="sg-md" style={{ fontSize: 20, marginTop: 4, color: s.color }}>{s.value}</div>
-              </div>
-            ))}
-          </div>
-
-          <div className="card" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <div style={{ fontSize: 11, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Identité</div>
-            {[
-              { label: 'Région synodale', value: district.region },
-              { label: 'Dernière modification', value: district.modifie },
-            ].map(f => (
-              <div key={f.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 13 }}>
-                <span style={{ color: 'var(--text-3)' }}>{f.label}</span>
-                <span style={{ fontWeight: 500 }}>{f.value}</span>
-              </div>
-            ))}
-          </div>
-
-          <div className="card" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <div style={{ fontSize: 11, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Admin District</div>
-            {district.adminInitials ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <Avatar initials={district.adminInitials} size={36} bg="rgba(230,81,0,0.22)" color="#E67A2E"/>
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: 13 }}>{district.admin}</div>
-                  <div style={{ fontSize: 11, color: 'var(--text-3)' }}>Admin District</div>
-                </div>
-              </div>
-            ) : (
-              <span className="pill pill-orange"><I.alert size={9}/> Poste non assigné</span>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ── Form Panel (Create / Edit) ────────────────────────────────────────────────
-function DistrictFormPanel({ mode, district, onClose, onSave }: {
-  mode: 'create' | 'edit'; district?: any; onClose: () => void; onSave: (d: any) => void;
-}) {
-  const [form, setForm] = React.useState({
-    nom: district?.nom || '',
-    region: district?.region || '',
-  });
-  const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
-
-  return (
-    <div className="overlay" onClick={onClose}>
-      <div className="slide-panel" style={{ width: 520 }} onClick={e => e.stopPropagation()}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 22px', borderBottom: '1px solid var(--border)', background: 'var(--chrome)' }}>
-          <div>
-            <h2 className="sg-md" style={{ fontSize: 18, margin: 0, color: '#F0F4F1' }}>{mode === 'create' ? 'Nouveau district' : `Modifier — ${district?.nom}`}</h2>
-            <div style={{ fontSize: 11, color: 'rgba(240,244,241,0.50)', marginTop: 2 }}>Console Synodale · EEC Cameroun</div>
-          </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button className="btn btn-outline" style={{ padding: '7px 14px', fontSize: 12, color: 'rgba(240,244,241,0.80)', borderColor: 'rgba(255,255,255,0.20)' }} onClick={onClose}>Annuler</button>
-            <button className="btn btn-primary" style={{ padding: '7px 14px', fontSize: 12 }} onClick={() => onSave(form)}>Enregistrer</button>
-            <button className="icon-btn" style={{ color: 'rgba(240,244,241,0.60)' }} onClick={onClose}><I.x size={16}/></button>
-          </div>
-        </div>
-
-        <div style={{ padding: '24px 22px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div>
-            <div className="label">Nom du district *</div>
-            <input className="input" placeholder="Ex. BAFOUSSAM NORD" value={form.nom} onChange={e => set('nom', e.target.value)}/>
-          </div>
-          <div>
-            <div className="label">Région synodale *</div>
-            <Dropdown value={form.region || 'Sélectionner'} options={[...REGIONS_22]} onChange={v => set('region', v)}/>
-          </div>
-
-          <div style={{ background: 'rgba(46,151,68,0.06)', border: '1px solid rgba(46,151,68,0.20)', borderRadius: 6, padding: '12px 14px', fontSize: 12.5, color: 'var(--text-2)', display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <div style={{ fontWeight: 600, color: 'var(--text)' }}>Assignation de l'administrateur</div>
-            <div>L'administrateur de district est géré depuis la section Gestion des comptes. Un district peut exister sans administrateur assigné.</div>
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, paddingTop: 12, borderTop: '1px solid var(--border)', marginTop: 8 }}>
-            <button className="btn btn-ghost" onClick={onClose}>Annuler</button>
-            <button className="btn btn-primary" onClick={() => onSave(form)} disabled={!form.nom || !form.region} style={{ opacity: (!form.nom || !form.region) ? 0.5 : 1 }}>
-              {mode === 'create' ? 'Créer le district' : 'Enregistrer les modifications'}
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+            <button className="btn btn-outline" onClick={onCancel} disabled={busy}>Annuler</button>
+            <button className="btn btn-danger" disabled={!matches || busy} style={{ opacity: matches && !busy ? 1 : 0.4 }} onClick={matches && !busy ? onConfirm : undefined}>
+              {busy ? <span className="ls-spinner" /> : 'Supprimer'}
             </button>
           </div>
         </div>
@@ -162,47 +78,270 @@ function DistrictFormPanel({ mode, district, onClose, onSave }: {
   );
 }
 
-// ── Main page ─────────────────────────────────────────────────────────────────
+// ─── View Panel ───────────────────────────────────────────────────────────────
+function DistrictViewPanel({ district: d, onClose, onEdit }: { district: District; onClose: () => void; onEdit: () => void }) {
+  return (
+    <div className="overlay" onClick={onClose}>
+      <div className="slide-panel" style={{ width: 460 }} onClick={e => e.stopPropagation()}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 22px', borderBottom: '1px solid var(--border)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(91,155,213,0.15)', color: '#5B9BD5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <I.network size={18} />
+            </div>
+            <div>
+              <h2 className="sg-md" style={{ fontSize: 15, margin: 0 }}>{d.nom}</h2>
+              <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 1 }}>{d.region_nom}</div>
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button className="btn btn-outline" style={{ padding: '6px 12px', fontSize: 12 }} onClick={onEdit}><I.pencil size={13} />Modifier</button>
+            <button className="icon-btn" onClick={onClose}><I.x size={16} /></button>
+          </div>
+        </div>
+
+        <div style={{ padding: '20px 22px', overflowY: 'auto', height: 'calc(100% - 72px)', display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <div className="card" style={{ padding: '12px 14px' }}>
+              <div style={{ fontSize: 10, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>Paroisses</div>
+              <div className="sg-md" style={{ fontSize: 24, marginTop: 4, color: '#5AC472' }}>{d.nb_paroisses}</div>
+            </div>
+            <div className="card" style={{ padding: '12px 14px' }}>
+              <div style={{ fontSize: 10, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>Région</div>
+              <div style={{ fontSize: 12, marginTop: 4, color: 'var(--text)', fontWeight: 500, lineHeight: 1.3 }}>{d.region_nom}</div>
+            </div>
+          </div>
+
+          <div className="card" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ fontSize: 11, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Identité</div>
+            {[
+              { label: 'Nom du district', value: d.nom },
+              { label: 'Région synodale', value: d.region_nom },
+              { label: 'Paroisses rattachées', value: String(d.nb_paroisses) },
+            ].map(f => (
+              <div key={f.label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, gap: 8 }}>
+                <span style={{ color: 'var(--text-3)', flexShrink: 0 }}>{f.label}</span>
+                <span style={{ fontWeight: 500 }}>{f.value}</span>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ background: 'rgba(255,214,0,0.06)', border: '1px solid rgba(255,214,0,0.20)', borderRadius: 6, padding: '10px 14px', fontSize: 12, color: '#FFD600', display: 'flex', gap: 8 }}>
+            <I.alert size={13} style={{ flexShrink: 0, marginTop: 1 }} />
+            <span>L'assignation de l'admin de district se fait depuis la page Comptes utilisateurs.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Form Panel ───────────────────────────────────────────────────────────────
+function DistrictFormPanel({ mode, district, onClose, onSaved }: {
+  mode: 'create' | 'edit'; district?: District; onClose: () => void; onSaved: (d: District) => void;
+}) {
+  const [nom, setNom] = useState(district?.nom || '');
+  const [regionId, setRegionId] = useState(district?.region_id || 0);
+  const [regions, setRegions] = useState<RegionSynodale[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    api.get<RegionSynodale[]>('/api/geo/regions/liste/').then(setRegions).catch(() => {});
+  }, []);
+
+  const handleSave = async () => {
+    if (!nom.trim()) { setError('Le nom est requis.'); return; }
+    if (!regionId) { setError('Veuillez sélectionner une région.'); return; }
+    setSaving(true); setError('');
+    try {
+      let saved: District;
+      if (mode === 'create') {
+        saved = await api.post<District>('/api/geo/districts/', { nom: nom.trim(), region: regionId });
+      } else {
+        saved = await api.patch<District>(`/api/geo/districts/${district!.id}/`, { nom: nom.trim(), region: regionId });
+      }
+      onSaved(saved);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Erreur lors de la sauvegarde.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="overlay" onClick={onClose}>
+      <div className="slide-panel" style={{ width: 520 }} onClick={e => e.stopPropagation()}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 22px', borderBottom: '1px solid var(--border)', background: 'var(--chrome)' }}>
+          <div>
+            <h2 className="sg-md" style={{ fontSize: 18, margin: 0, color: '#F0F4F1' }}>
+              {mode === 'create' ? 'Nouveau district' : `Modifier — ${district?.nom}`}
+            </h2>
+            <div style={{ fontSize: 11, color: 'rgba(240,244,241,0.50)', marginTop: 2 }}>Console Synodale · EEC Cameroun</div>
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button className="btn btn-outline" style={{ padding: '7px 14px', fontSize: 12, color: 'rgba(240,244,241,0.80)', borderColor: 'rgba(255,255,255,0.20)' }} onClick={onClose} disabled={saving}>Annuler</button>
+            <button className="btn btn-primary" style={{ padding: '7px 14px', fontSize: 12, minWidth: 110 }} onClick={handleSave} disabled={saving}>
+              {saving ? <span className="ls-spinner" /> : <><span>Enregistrer</span> <I.check size={14} /></>}
+            </button>
+            <button className="icon-btn" style={{ color: 'rgba(240,244,241,0.60)' }} onClick={onClose} disabled={saving}><I.x size={16} /></button>
+          </div>
+        </div>
+
+        {error && (
+          <div style={{ background: 'rgba(198,40,40,0.15)', borderBottom: '1px solid rgba(198,40,40,0.30)', padding: '10px 22px', fontSize: 12.5, color: '#E55B5B', display: 'flex', gap: 8 }}>
+            <I.alert size={13} /> {error}
+          </div>
+        )}
+
+        <div style={{ padding: '24px 22px', display: 'flex', flexDirection: 'column', gap: 18 }}>
+          <div>
+            <div className="label">Nom du district *</div>
+            <input className="input" placeholder="Ex. BAFOUSSAM NORD" value={nom} onChange={e => setNom(e.target.value)} autoFocus />
+          </div>
+          <div>
+            <div className="label">Région synodale *</div>
+            <select className="input" style={{ fontSize: 13 }} value={regionId || ''} onChange={e => setRegionId(parseInt(e.target.value) || 0)}>
+              <option value="">— Sélectionner une région</option>
+              {regions.map(r => <option key={r.id} value={r.id}>{r.nom}</option>)}
+            </select>
+          </div>
+
+          <div style={{ background: 'rgba(46,151,68,0.06)', border: '1px solid rgba(46,151,68,0.20)', borderRadius: 6, padding: '12px 14px', fontSize: 12.5, color: 'var(--text-2)' }}>
+            L'administrateur de district est assigné depuis la section <b style={{ color: 'var(--text)' }}>Gestion des comptes</b>. Un district peut exister sans administrateur assigné.
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
+            <button className="btn btn-ghost" onClick={onClose} disabled={saving}>Annuler</button>
+            <button className="btn btn-primary" onClick={handleSave} disabled={saving || !nom || !regionId} style={{ opacity: (!nom || !regionId || saving) ? 0.5 : 1 }}>
+              {saving ? <span className="ls-spinner" /> : mode === 'create' ? 'Créer le district' : 'Enregistrer les modifications'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Page ────────────────────────────────────────────────────────────────
+const PAGE_SIZE = 50;
+
 export default function DistrictsPage() {
-  const { toasts, add: addToast } = useToast();
-  const [search, setSearch] = React.useState('');
-  const [region, setRegion] = React.useState('Toutes régions');
-  const [admin, setAdmin] = React.useState('Tous');
-  const [selection, setSelection] = React.useState(new Set<number>());
-  const [viewPanel, setViewPanel] = React.useState<any>(null);
-  const [formPanel, setFormPanel] = React.useState<{ mode: 'create'|'edit'; district?: any } | null>(null);
+  const { toasts, add: addToast, remove } = useToast();
 
-  let data = sampleDistricts as typeof sampleDistricts;
-  if (search) data = data.filter(d => d.nom.toLowerCase().includes(search.toLowerCase()));
-  if (region !== 'Toutes régions') data = data.filter(d => d.region === region);
-  if (admin === 'Assignés') data = data.filter(d => d.adminInitials);
-  if (admin === 'Non assignés') data = data.filter(d => !d.adminInitials);
+  const [searchInput, setSearchInput] = useState('');
+  const [search, setSearch] = useState('');
+  const [filterRegionId, setFilterRegionId] = useState(0);
+  const [page, setPage] = useState(1);
+  const [refresh, setRefresh] = useState(0);
 
-  const hasFilter = !!(search || region !== 'Toutes régions' || admin !== 'Tous');
-  const reset = () => { setSearch(''); setRegion('Toutes régions'); setAdmin('Tous'); };
+  const [districts, setDistricts] = useState<District[]>([]);
+  const [count, setCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [regions, setRegions] = useState<RegionSynodale[]>([]);
 
-  function toggle(id: number) { const s = new Set(selection); s.has(id) ? s.delete(id) : s.add(id); setSelection(s); }
-  function toggleAll() { setSelection(selection.size === data.length ? new Set() : new Set(data.map(d => d.id))); }
+  const [selection, setSelection] = useState<Set<number>>(new Set());
+  const [confirmDelete, setConfirmDelete] = useState<District | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [viewPanel, setViewPanel] = useState<District | null>(null);
+  const [formPanel, setFormPanel] = useState<{ mode: 'create' | 'edit'; district?: District } | null>(null);
+
+  // Debounce search
+  useEffect(() => {
+    const t = setTimeout(() => { setSearch(searchInput); setPage(1); }, 400);
+    return () => clearTimeout(t);
+  }, [searchInput]);
+
+  // Load regions once
+  useEffect(() => {
+    api.get<RegionSynodale[]>('/api/geo/regions/liste/').then(setRegions).catch(() => {});
+  }, []);
+
+  // Fetch districts
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    const params = new URLSearchParams();
+    params.set('page', String(page));
+    if (search) params.set('search', search);
+    if (filterRegionId) params.set('region', String(filterRegionId));
+
+    api.get<PagedResult<District>>(`/api/geo/districts/?${params}`)
+      .then(data => {
+        if (!cancelled) { setDistricts(data.results); setCount(data.count); }
+      })
+      .catch(() => {
+        if (!cancelled) addToast({ type: 'error', title: 'Erreur lors du chargement des districts.' });
+      })
+      .finally(() => { if (!cancelled) setLoading(false); });
+
+    return () => { cancelled = true; };
+  }, [page, search, filterRegionId, refresh, addToast]);
+
+  const totalPages = Math.max(1, Math.ceil(count / PAGE_SIZE));
+  const doRefresh = useCallback(() => { setPage(1); setRefresh(r => r + 1); }, []);
+
+  const hasFilter = !!(search || filterRegionId);
+  const resetFilters = () => { setSearchInput(''); setSearch(''); setFilterRegionId(0); setPage(1); };
+
+  const toggle = (id: number) => { const s = new Set(selection); s.has(id) ? s.delete(id) : s.add(id); setSelection(s); };
+  const toggleAll = () => {
+    if (selection.size === districts.length) setSelection(new Set());
+    else setSelection(new Set(districts.map(d => d.id)));
+  };
+
+  const handleDelete = async () => {
+    if (!confirmDelete) return;
+    setDeleting(true);
+    try {
+      await api.delete(`/api/geo/districts/${confirmDelete.id}/`);
+      addToast({ type: 'success', title: `District "${confirmDelete.nom}" supprimé.` });
+      setConfirmDelete(null);
+      setSelection(new Set());
+      doRefresh();
+    } catch (e) {
+      addToast({ type: 'error', title: 'Erreur lors de la suppression.', body: e instanceof Error ? e.message : undefined });
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleSaved = (saved: District) => {
+    const wasCreate = formPanel?.mode === 'create';
+    setFormPanel(null);
+    addToast({ type: 'success', title: wasCreate ? 'District créé avec succès.' : 'Modifications enregistrées.', body: saved.nom });
+    doRefresh();
+  };
+
+  const pageBtns = Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+    if (totalPages <= 5) return i + 1;
+    if (page <= 3) return i + 1;
+    if (page >= totalPages - 2) return totalPages - 4 + i;
+    return page - 2 + i;
+  });
+
+  const regionFilterLabel = regions.find(r => r.id === filterRegionId)?.nom || 'Toutes régions';
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
       {/* Summary */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14 }}>
-        <TopCount label="Total districts"               value="137"/>
-        <TopCount label="Avec admin assigné"            value="48" color="#5AC472"/>
-        <TopCount label="Sans admin"                    value="89" color="#FFB877"/>
-        <TopCount label="Paroisses moyennes / district" value="4.0"/>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
+        <TopCount label="Total districts" value={loading ? '…' : count.toLocaleString('fr')} />
+        <TopCount label="Régions synodales" value={String(regions.length || '—')} />
+        <TopCount label="Filtré" value={hasFilter ? districts.length.toLocaleString('fr') : '—'} color={hasFilter ? '#5AC472' : 'var(--text)'} />
       </div>
 
       {/* Toolbar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <h2 className="sg-md" style={{ margin: 0, fontSize: 16 }}>137 districts</h2>
-          <span style={{ fontSize: 12, color: 'var(--text-3)' }}>répartis sur 22 régions synodales</span>
+          <h2 className="sg-md" style={{ margin: 0, fontSize: 16 }}>
+            {loading ? '—' : count.toLocaleString('fr')} district{count !== 1 ? 's' : ''}
+          </h2>
+          <span style={{ fontSize: 12, color: 'var(--text-3)' }}>répartis sur {regions.length} régions</span>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button className="btn btn-outline" onClick={() => addToast({ type:'info', title:'Export en cours...' })}><I.download size={14}/>Exporter</button>
-          <button className="btn btn-primary" onClick={() => setFormPanel({ mode: 'create' })}><I.plus size={14}/>Créer un district</button>
+          <button className="btn btn-outline" onClick={() => addToast({ type: 'info', title: 'Export — fonctionnalité à venir.' })}><I.download size={14} />Exporter</button>
+          <button className="btn btn-primary" onClick={() => setFormPanel({ mode: 'create' })}><I.plus size={14} />Créer un district</button>
         </div>
       </div>
 
@@ -210,110 +349,120 @@ export default function DistrictsPage() {
       <div className="card" style={{ padding: '14px 16px', display: 'flex', alignItems: 'flex-end', gap: 10, flexWrap: 'wrap' }}>
         <div style={{ flex: 1, minWidth: 220, position: 'relative' }}>
           <div className="label">Rechercher</div>
-          <I.search size={14} style={{ position: 'absolute', top: 33, left: 11, color: 'var(--text-3)' }}/>
-          <input className="input" placeholder="Nom de district..." style={{ paddingLeft: 34, fontSize: 13 }} value={search} onChange={e => setSearch(e.target.value)} />
+          <I.search size={14} style={{ position: 'absolute', top: 33, left: 11, color: 'var(--text-3)' }} />
+          <input className="input" placeholder="Nom de district..." style={{ paddingLeft: 34, fontSize: 13 }} value={searchInput} onChange={e => setSearchInput(e.target.value)} />
         </div>
-        <div style={{ width: 220 }}><Dropdown label="Région synodale" value={region} options={['Toutes régions', ...REGIONS_22]} onChange={setRegion}/></div>
-        <div style={{ width: 180 }}><Dropdown label="Admin assigné" value={admin} options={['Tous','Assignés','Non assignés']} onChange={setAdmin}/></div>
-        {hasFilter && <button className="btn btn-ghost" onClick={reset}><I.refresh size={13}/>Réinitialiser</button>}
+        <div style={{ minWidth: 220 }}>
+          <div className="label">Région synodale</div>
+          <select className="input" style={{ fontSize: 13 }} value={filterRegionId || ''} onChange={e => { setFilterRegionId(parseInt(e.target.value) || 0); setPage(1); }}>
+            <option value="">Toutes régions</option>
+            {regions.map(r => <option key={r.id} value={r.id}>{r.nom}</option>)}
+          </select>
+        </div>
+        {hasFilter && <button className="btn btn-ghost" onClick={resetFilters} style={{ marginBottom: 1 }}><I.refresh size={13} />Réinitialiser</button>}
       </div>
 
-      {hasFilter && (
+      {hasFilter && !loading && (
         <div className="anim-fade" style={{ background: 'rgba(21,101,192,0.08)', border: '1px solid rgba(21,101,192,0.30)', borderRadius: 6, padding: '8px 14px', fontSize: 12, color: '#7FB2E8', display: 'flex', alignItems: 'center', gap: 8 }}>
-          <I.filter size={13}/>
-          <span><b style={{ color: '#A4CFF0' }}>{data.length}</b> districts trouvés sur 137</span>
+          <I.filter size={13} />
+          <span><b style={{ color: '#A4CFF0' }}>{count.toLocaleString('fr')}</b> district{count !== 1 ? 's' : ''} trouvé{count !== 1 ? 's' : ''}
+            {filterRegionId ? ` — région : ${regionFilterLabel}` : ''}
+          </span>
         </div>
       )}
 
       {/* Table */}
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-        <div style={{ overflowX: 'auto' }}>
-          <table className="data">
-            <thead>
-              <tr>
-                <th style={{ width: 36 }}><input type="checkbox" className="checkbox" checked={data.length > 0 && selection.size === data.length} onChange={toggleAll}/></th>
-                <th style={{ width: 40 }}>#</th>
-                <th className="sortable">Nom du district</th>
-                <th>Région synodale</th>
-                <th className="sortable" style={{ textAlign: 'right' }}>Paroisses</th>
-                <th className="sortable" style={{ textAlign: 'right' }}>Fidèles</th>
-                <th style={{ textAlign: 'right' }}>Ouvriers</th>
-                <th>Admin District</th>
-                <th>Modifié</th>
-                <th style={{ width: 110 }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.length === 0 && (
-                <tr><td colSpan={10} style={{ height: 280, textAlign: 'center' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
-                    <I.network size={48} style={{ opacity: 0.25 }}/>
-                    <div className="sg-md" style={{ fontSize: 16 }}>Aucun district trouvé</div>
-                    <button className="btn btn-outline" onClick={reset}>Réinitialiser les filtres</button>
-                  </div>
-                </td></tr>
-              )}
-              {data.map(d => (
-                <tr key={d.id} style={{ background: selection.has(d.id) ? 'rgba(46,151,68,0.06)' : 'transparent' }}>
-                  <td><input type="checkbox" className="checkbox" checked={selection.has(d.id)} onChange={() => toggle(d.id)}/></td>
-                  <td className="mono" style={{ color: 'var(--text-3)', fontSize: 11.5 }}>{String(d.id).padStart(3,'0')}</td>
-                  <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <div style={{ width: 30, height: 30, borderRadius: 6, background: 'rgba(91,155,213,0.15)', color: '#5B9BD5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><I.network size={14}/></div>
-                      <span style={{ fontWeight: 600, fontSize: 13.5 }}>{d.nom}</span>
-                    </div>
-                  </td>
-                  <td style={{ color: 'var(--text-2)', fontSize: 12 }}>{d.region}</td>
-                  <td className="mono" style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums', color: '#5AC472', fontWeight: 600 }}>{d.paroisses}</td>
-                  <td className="mono sg-md" style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontSize: 14 }}>{d.fideles.toLocaleString('fr')}</td>
-                  <td className="mono" style={{ textAlign: 'right', color: 'var(--text-2)' }}>{d.ouvriers}</td>
-                  <td>
-                    {d.adminInitials ? (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <Avatar initials={d.adminInitials} size={26} bg="rgba(230,81,0,0.22)" color="#E67A2E"/>
-                        <span style={{ fontSize: 12.5 }}>{d.admin}</span>
-                      </div>
-                    ) : (
-                      <span className="pill pill-orange" style={{ padding: '2px 8px' }}><I.alert size={9}/> Non assigné</span>
-                    )}
-                  </td>
-                  <td style={{ color: 'var(--text-2)', fontSize: 12 }}>{d.modifie}</td>
-                  <td>
-                    <div style={{ display: 'flex', gap: 2 }}>
-                      <button className="icon-btn" onClick={() => setViewPanel(d)}><I.eye size={15}/></button>
-                      <button className="icon-btn green" onClick={() => setFormPanel({ mode: 'edit', district: d })}><I.pencil size={15}/></button>
-                      <RowMenu district={d} onEdit={() => setFormPanel({ mode: 'edit', district: d })}/>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        {data.length > 0 && (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderTop: '1px solid rgba(255,255,255,0.05)', fontSize: 12, color: 'var(--text-2)' }}>
-            <span>Affichage <span style={{ color: 'var(--text)' }}>1 à {data.length}</span> sur <span style={{ color: 'var(--text)' }}>137</span></span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <button className="icon-btn"><I.chevL size={14}/></button>
-              {[1,2,3].map(n => (
-                <button key={n} style={{ width: 28, height: 28, border: 0, borderRadius: 5, background: n === 1 ? 'var(--green)' : 'transparent', color: n === 1 ? '#fff' : 'var(--text-2)', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>{n}</button>
-              ))}
-              <span style={{ color: 'var(--text-3)' }}>…</span>
-              <button style={{ width: 28, height: 28, border: 0, borderRadius: 5, background: 'transparent', color: 'var(--text-2)', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>14</button>
-              <button className="icon-btn"><I.chevR size={14}/></button>
-            </div>
+        {loading ? (
+          <div style={{ height: 280, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 14, color: 'var(--text-3)' }}>
+            <span className="ls-spinner" style={{ width: 32, height: 32 }} />
+            <span style={{ fontSize: 13 }}>Chargement des districts…</span>
           </div>
+        ) : (
+          <>
+            <div style={{ overflowX: 'auto' }}>
+              <table className="data">
+                <thead>
+                  <tr>
+                    <th style={{ width: 36 }}><input type="checkbox" className="checkbox" checked={districts.length > 0 && selection.size === districts.length} onChange={toggleAll} /></th>
+                    <th style={{ width: 40 }}>#</th>
+                    <th>Nom du district</th>
+                    <th>Région synodale</th>
+                    <th className="sortable" style={{ textAlign: 'right' }}>Paroisses</th>
+                    <th style={{ width: 110 }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {districts.length === 0 && (
+                    <tr><td colSpan={6} style={{ height: 280, textAlign: 'center' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+                        <I.network size={48} style={{ opacity: 0.25 }} />
+                        <div className="sg-md" style={{ fontSize: 16 }}>Aucun district trouvé</div>
+                        {hasFilter && <button className="btn btn-outline" onClick={resetFilters}>Réinitialiser les filtres</button>}
+                      </div>
+                    </td></tr>
+                  )}
+                  {districts.map((d, idx) => (
+                    <tr key={d.id} style={{ background: selection.has(d.id) ? 'rgba(46,151,68,0.06)' : 'transparent' }}>
+                      <td><input type="checkbox" className="checkbox" checked={selection.has(d.id)} onChange={() => toggle(d.id)} /></td>
+                      <td className="mono" style={{ color: 'var(--text-3)', fontSize: 11.5 }}>{String((page - 1) * PAGE_SIZE + idx + 1).padStart(3, '0')}</td>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <div style={{ width: 30, height: 30, borderRadius: 6, background: 'rgba(91,155,213,0.15)', color: '#5B9BD5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <I.network size={14} />
+                          </div>
+                          <span style={{ fontWeight: 600, fontSize: 13.5 }}>{d.nom}</span>
+                        </div>
+                      </td>
+                      <td style={{ color: 'var(--text-2)', fontSize: 12 }}>{d.region_nom}</td>
+                      <td className="mono" style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums', color: '#5AC472', fontWeight: 600 }}>{d.nb_paroisses}</td>
+                      <td>
+                        <div style={{ display: 'flex', gap: 2 }}>
+                          <button className="icon-btn" onClick={() => setViewPanel(d)}><I.eye size={15} /></button>
+                          <button className="icon-btn green" onClick={() => setFormPanel({ mode: 'edit', district: d })}><I.pencil size={15} /></button>
+                          <RowMenu district={d} onEdit={() => setFormPanel({ mode: 'edit', district: d })} onDelete={() => setConfirmDelete(d)} />
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {count > 0 && (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderTop: '1px solid rgba(255,255,255,0.05)', fontSize: 12, color: 'var(--text-2)' }}>
+                <span>
+                  Page <span style={{ color: 'var(--text)' }}>{page}</span> sur <span style={{ color: 'var(--text)' }}>{totalPages}</span>
+                  {' · '}<span style={{ color: 'var(--text)' }}>{count.toLocaleString('fr')}</span> résultats
+                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <button className="icon-btn" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}><I.chevL size={14} /></button>
+                  {pageBtns.map(pn => (
+                    <button key={pn} onClick={() => setPage(pn)} style={{ width: 28, height: 28, border: 0, borderRadius: 5, background: pn === page ? 'var(--green)' : 'transparent', color: pn === page ? '#fff' : 'var(--text-2)', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>{pn}</button>
+                  ))}
+                  <button className="icon-btn" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages}><I.chevR size={14} /></button>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
+      {/* Float bar */}
       {selection.size > 0 && (
         <div className="float-bar">
-          <span style={{ fontSize: 13, fontWeight: 600 }}>{selection.size} district{selection.size > 1 ? 's' : ''} sélectionné{selection.size > 1 ? 's' : ''}</span>
-          <span style={{ width: 1, height: 18, background: 'rgba(255,255,255,0.10)' }}/>
-          <button className="btn btn-outline" style={{ padding: '6px 10px', fontSize: 12 }}><I.download size={13}/>Excel</button>
-          <button className="btn btn-outline" style={{ padding: '6px 10px', fontSize: 12 }}><I.user size={13}/>Assigner admin</button>
+          <span style={{ fontSize: 13, fontWeight: 600 }}>
+            {selection.size} district{selection.size > 1 ? 's' : ''} sélectionné{selection.size > 1 ? 's' : ''}
+          </span>
+          <span style={{ width: 1, height: 18, background: 'rgba(255,255,255,0.10)' }} />
+          <button className="btn btn-outline" style={{ padding: '6px 10px', fontSize: 12 }} onClick={() => addToast({ type: 'info', title: 'Export Excel — fonctionnalité à venir.' })}><I.download size={13} />Excel</button>
           <button className="btn btn-ghost" style={{ padding: '6px 10px', fontSize: 12 }} onClick={() => setSelection(new Set())}>Annuler</button>
         </div>
+      )}
+
+      {/* Modals & panels */}
+      {confirmDelete && (
+        <DeleteModal district={confirmDelete} onCancel={() => setConfirmDelete(null)} onConfirm={handleDelete} busy={deleting} />
       )}
 
       {viewPanel && (
@@ -329,14 +478,11 @@ export default function DistrictsPage() {
           mode={formPanel.mode}
           district={formPanel.district}
           onClose={() => setFormPanel(null)}
-          onSave={(d) => {
-            setFormPanel(null);
-            addToast({ type: 'success', title: formPanel.mode === 'create' ? 'District créé avec succès.' : 'Modifications enregistrées.', body: d.nom || formPanel.district?.nom });
-          }}
+          onSaved={handleSaved}
         />
       )}
 
-      <ToastStack toasts={toasts} />
+      <ToastStack toasts={toasts} remove={remove} />
     </div>
   );
 }

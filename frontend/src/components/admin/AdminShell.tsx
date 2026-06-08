@@ -25,7 +25,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   }, []);
 
   return (
-    <div className={`admin-shell${theme === 'light' ? ' light' : ''}`}>
+    <div suppressHydrationWarning className={`admin-shell${theme === 'light' ? ' light' : ''}`}>
       {children}
     </div>
   );

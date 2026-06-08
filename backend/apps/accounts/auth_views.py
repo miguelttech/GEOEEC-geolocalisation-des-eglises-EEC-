@@ -1,6 +1,11 @@
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
 from django.middleware.csrf import get_token
 from django.db.models import Sum
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.conf import settings
 
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -307,10 +312,12 @@ def reset_user_password(request, pk):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def dashboard_stats(request):
-    """GET /api/auth/dashboard-stats/ — Compteurs pour le tableau de bord admin."""
+    """GET /api/auth/dashboard-stats/ — Compteurs et données agrégées pour le tableau de bord."""
+    from django.db.models import Count, Q
     from apps.geo.models import RegionSynodale, District, Paroisse
     from apps.oeuvres.models import Oeuvre
     from apps.ouvriers.models import Ouvrier
+    from apps.audit.models import LogActivite
 
     user = request.user
 
@@ -351,6 +358,98 @@ def dashboard_stats(request):
         else (District.objects.filter(region=user.region).count() if user.role == "REGION" else 1)
     )
 
+    # ── Évolution fidèles par année (2020 → annee) ──────────────────────────
+    annees_range = range(max(2020, annee - 6), annee + 1)
+    fideles_par_annee = []
+    for yr in annees_range:
+        t = stats_qs.filter(annee=yr).aggregate(c=Sum("communiants"), nc=Sum("non_communiants"))
+        fideles_par_annee.append({"year": yr, "comm": t["c"] or 0, "noncomm": t["nc"] or 0})
+
+    # ── Top régions par fidèles (annee courante) ─────────────────────────────
+    if user.role == "SUPER":
+        top_regions_qs = (
+            RegionSynodale.objects
+            .annotate(
+                nb_p=Count("districts__paroisses", distinct=True),
+                comm=Sum("districts__paroisses__statistiques__communiants",
+                         filter=Q(districts__paroisses__statistiques__annee=annee)),
+                noncomm=Sum("districts__paroisses__statistiques__non_communiants",
+                            filter=Q(districts__paroisses__statistiques__annee=annee)),
+            )
+            .order_by("-comm")[:10]
+        )
+        top_regions = [
+            {"name": r.nom, "fideles": (r.comm or 0) + (r.noncomm or 0), "paroisses": r.nb_p}
+            for r in top_regions_qs
+        ]
+    else:
+        top_regions = []
+
+    # ── Oeuvres par type ─────────────────────────────────────────────────────
+    TYPE_COLORS = {
+        "SCOLAIRE":      "#1565C0",
+        "UNIVERSITAIRE": "#6A1B9A",
+        "MEDICALE":      "#C62828",
+        "AGROPASTORALE": "#E65100",
+        "IMMEUBLE":      "#455A64",
+        "TERRAIN":       "#2E9744",
+        "AUTRE":         "#5B9BD5",
+    }
+    TYPE_LABELS = {
+        "SCOLAIRE": "Scolaire", "UNIVERSITAIRE": "Universitaire",
+        "MEDICALE": "Médical", "AGROPASTORALE": "Agropastoral",
+        "IMMEUBLE": "Immeuble", "TERRAIN": "Terrain", "AUTRE": "Autre",
+    }
+    oeuvres_par_type = []
+    for row in oeuvres_qs.values("type_oeuvre").annotate(count=Count("id")).order_by("type_oeuvre"):
+        t = row["type_oeuvre"]
+        oeuvres_par_type.append({
+            "type": TYPE_LABELS.get(t, t),
+            "count": row["count"],
+            "color": TYPE_COLORS.get(t, "#888"),
+        })
+
+    # ── Niveaux de paroisses par région (top 6) ──────────────────────────────
+    niveaux_par_region = []
+    if user.role == "SUPER":
+        regions_niveaux = (
+            RegionSynodale.objects
+            .annotate(
+                nb_paroisse=Count("districts__paroisses",
+                                  filter=Q(districts__paroisses__niveau="PAROISSE"), distinct=True),
+                nb_station=Count("districts__paroisses",
+                                 filter=Q(districts__paroisses__niveau="STATION"), distinct=True),
+                nb_annexe=Count("districts__paroisses",
+                                filter=Q(districts__paroisses__niveau="ANNEXE"), distinct=True),
+                total=Count("districts__paroisses", distinct=True),
+            )
+            .order_by("-total")[:6]
+        )
+        niveaux_par_region = [
+            {"name": r.nom, "paroisse": r.nb_paroisse, "station": r.nb_station, "annexe": r.nb_annexe}
+            for r in regions_niveaux
+        ]
+
+    # ── Validations en attente ───────────────────────────────────────────────
+    validations_attente = stats_qs.filter(validee=False).count()
+
+    # ── Activité récente (6 dernières entrées du journal) ────────────────────
+    log_qs = LogActivite.objects.select_related("utilisateur").order_by("-created_at")[:6]
+    activite_recente = []
+    for log in log_qs:
+        nom = log.utilisateur.get_full_name() if log.utilisateur else "Système"
+        role_disp = log.utilisateur.get_role_display() if log.utilisateur else "Système"
+        initials = "".join(p[0].upper() for p in nom.split()[:2]) if nom != "Système" else "SY"
+        activite_recente.append({
+            "who": nom,
+            "role": role_disp,
+            "action": log.action,
+            "entity": log.objet_nom or log.type_objet,
+            "description": log.description,
+            "when": log.created_at.strftime("%d/%m %H:%M"),
+            "initials": initials,
+        })
+
     return Response({
         "nb_paroisses":          paroisses_qs.count(),
         "nb_paroisses_sans_gps": paroisses_qs.filter(position__isnull=True).count(),
@@ -364,4 +463,102 @@ def dashboard_stats(request):
         "annee":                 annee,
         "scope":                 user.get_scope_label(),
         "role":                  user.role,
+        "validations_attente":   validations_attente,
+        "fideles_par_annee":     fideles_par_annee,
+        "top_regions":           top_regions,
+        "oeuvres_par_type":      oeuvres_par_type,
+        "niveaux_par_region":    niveaux_par_region,
+        "activite_recente":      activite_recente,
     })
+
+
+# ---------------------------------------------------------------------------
+# RÉINITIALISATION DU MOT DE PASSE (mot de passe oublié)
+# ---------------------------------------------------------------------------
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def password_reset_request(request):
+    """
+    POST /api/auth/password-reset/
+    Body : { "email": "..." }
+    Génère un token et envoie un email avec le lien de réinitialisation.
+    En dev (EMAIL_BACKEND console), l'email s'affiche dans les logs backend.
+    """
+    email = request.data.get("email", "").strip().lower()
+    if not email:
+        return Response({"detail": "Email requis."}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        user = User.objects.get(email__iexact=email, is_active=True)
+    except User.DoesNotExist:
+        # Ne pas révéler si l'email existe ou non (sécurité)
+        return Response({"detail": "Si cet email est associé à un compte, vous recevrez un lien de réinitialisation."})
+
+    uid   = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
+    reset_url = f"{settings.FRONTEND_URL}/auth/reset-password/{uid}/{token}/"
+
+    try:
+        send_mail(
+            subject="Réinitialisation de votre mot de passe — EEC Géolocalisation",
+            message=(
+                f"Bonjour {user.get_full_name() or user.username},\n\n"
+                f"Vous avez demandé la réinitialisation de votre mot de passe.\n\n"
+                f"Cliquez sur ce lien pour définir un nouveau mot de passe (valable 1 heure) :\n"
+                f"{reset_url}\n\n"
+                f"Si vous n'êtes pas à l'origine de cette demande, ignorez cet email.\n\n"
+                f"— L'équipe EEC Cameroun"
+            ),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            fail_silently=False,
+        )
+    except Exception:
+        # En cas d'erreur SMTP, on renvoie quand même un succès (évite la fuite d'info)
+        pass
+
+    return Response({"detail": "Si cet email est associé à un compte, vous recevrez un lien de réinitialisation."})
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def password_reset_confirm(request):
+    """
+    POST /api/auth/password-reset/confirm/
+    Body : { "uid": "...", "token": "...", "new_password": "...", "confirm_password": "..." }
+    Valide le token et change le mot de passe.
+    """
+    uid            = request.data.get("uid", "")
+    token          = request.data.get("token", "")
+    new_password   = request.data.get("new_password", "")
+    confirm        = request.data.get("confirm_password", "")
+
+    if not all([uid, token, new_password, confirm]):
+        return Response({"detail": "Tous les champs sont requis."}, status=status.HTTP_400_BAD_REQUEST)
+
+    if new_password != confirm:
+        return Response({"detail": "Les mots de passe ne correspondent pas."}, status=status.HTTP_400_BAD_REQUEST)
+
+    if len(new_password) < 12:
+        return Response({"detail": "Le mot de passe doit contenir au moins 12 caractères."}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        pk   = force_str(urlsafe_base64_decode(uid))
+        user = User.objects.get(pk=pk, is_active=True)
+    except (TypeError, ValueError, User.DoesNotExist):
+        return Response({"detail": "Lien invalide ou expiré."}, status=status.HTTP_400_BAD_REQUEST)
+
+    if not default_token_generator.check_token(user, token):
+        return Response({"detail": "Lien invalide ou expiré (plus d'1 heure)."}, status=status.HTTP_400_BAD_REQUEST)
+
+    user.set_password(new_password)
+    user.force_password_change = False
+    user.save()
+
+    from apps.audit.utils import log_action
+    log_action(request, "UPDATE", "user", objet_id=user.id,
+               objet_nom=user.get_full_name() or user.username,
+               description="Réinitialisation mot de passe via email")
+
+    return Response({"detail": "Mot de passe réinitialisé avec succès. Vous pouvez maintenant vous connecter."})

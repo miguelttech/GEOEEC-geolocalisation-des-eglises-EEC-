@@ -16,7 +16,7 @@ export default function CTABand() {
             paroisse, ajouter des photos, gérer vos ouvriers et publier vos œuvres.
           </p>
           <div className="cta-btns">
-            <Link href="/admin" className="lp-btn lp-btn-gold">Connexion administrateur</Link>
+            <Link href="/login" className="lp-btn lp-btn-gold">Connexion administrateur</Link>
             <Link href="/carte" className="lp-btn lp-btn-ghost">Découvrir la carte publique</Link>
           </div>
         </div>
