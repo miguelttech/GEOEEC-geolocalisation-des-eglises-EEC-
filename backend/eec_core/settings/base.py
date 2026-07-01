@@ -116,14 +116,16 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "DEFAULT_PAGINATION_CLASS": "eec_core.pagination.StandardPagination",
     "PAGE_SIZE": 50,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-    "DEFAULT_THROTTLE_CLASSES": [
-        "rest_framework.throttling.AnonRateThrottle",
-    ],
+    # Pas de throttle global : la carte publique charge des centaines
+    # d'enregistrements paginés. On ne limite que login / register (voir
+    # apps/accounts/throttles.py et les vues d'authentification).
+    "DEFAULT_THROTTLE_CLASSES": [],
     "DEFAULT_THROTTLE_RATES": {
-        "anon": "100/day",
+        "login":    "60/min",
+        "register": "30/hour",
     },
 }
 

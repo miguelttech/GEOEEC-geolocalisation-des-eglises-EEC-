@@ -64,6 +64,10 @@ def filter_by_scope(queryset, user, region_field="district__region", district_fi
     `region_field` et `district_field` permettent d'adapter le chemin ORM
     selon le modèle (ex: Paroisse → district__region, Oeuvre → district__region).
     """
+    # Visiteur / rôle non-administrateur → données publiques complètes (comme un anonyme)
+    if not getattr(user, "is_admin", False):
+        return queryset
+
     if user.role == "SUPER":
         return queryset
 
@@ -81,6 +85,10 @@ def filter_by_scope(queryset, user, region_field="district__region", district_fi
 
 def filter_paroisses_by_scope(queryset, user):
     """Filtre spécialisé pour le modèle Paroisse."""
+    # Visiteur / rôle non-administrateur → données publiques complètes (comme un anonyme)
+    if not getattr(user, "is_admin", False):
+        return queryset
+
     if user.role == "SUPER":
         return queryset
     if user.role == "REGION" and user.region_id:
@@ -94,6 +102,10 @@ def filter_paroisses_by_scope(queryset, user):
 
 def filter_oeuvres_by_scope(queryset, user):
     """Filtre spécialisé pour le modèle Oeuvre."""
+    # Visiteur / rôle non-administrateur → données publiques complètes (comme un anonyme)
+    if not getattr(user, "is_admin", False):
+        return queryset
+
     if user.role == "SUPER":
         return queryset
     if user.role == "REGION" and user.region_id:
@@ -107,6 +119,10 @@ def filter_oeuvres_by_scope(queryset, user):
 
 def filter_ouvriers_by_scope(queryset, user):
     """Filtre spécialisé pour le modèle Ouvrier."""
+    # Visiteur / rôle non-administrateur → données publiques complètes (comme un anonyme)
+    if not getattr(user, "is_admin", False):
+        return queryset
+
     if user.role == "SUPER":
         return queryset
     if user.role == "REGION" and user.region_id:

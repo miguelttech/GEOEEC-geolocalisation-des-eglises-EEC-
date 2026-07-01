@@ -16,7 +16,8 @@ services:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 30s
 
   geoserver:
     image: docker.osgeo.org/geoserver:2.26.2
@@ -87,6 +88,7 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
+      - next_cache:/app/.next
     ports:
       - "3004:3004"
     environment:
@@ -95,6 +97,7 @@ services:
       - BACKEND_INTERNAL_URL=http://backend:8000
       - WATCHPACK_POLLING=true
       - CHOKIDAR_USEPOLLING=true
+      - NEXT_TELEMETRY_DISABLED=1
     depends_on:
       - backend
     networks: [eecnet]
@@ -103,6 +106,7 @@ volumes:
   pg_data:
   geoserver_data:
   redis_data:
+  next_cache:
 
 networks:
   eecnet:

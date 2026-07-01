@@ -176,3 +176,53 @@ class ParoisseEnregistree(models.Model):
 
     def __str__(self):
         return f"{self.utilisateur.email} ♥ {self.paroisse.nom}"
+
+
+# =============================================================================
+# PERSISTANCE GÉNÉRIQUE DE LA CARTE (paroisses ET œuvres)
+# =============================================================================
+# Les favoris/historique de la carte visiteur peuvent porter sur n'importe quelle
+# entité affichée (paroisse OU œuvre). On stocke une référence générique
+# (type_entite, entite_id) plutôt qu'une FK, pour rester simple et robuste.
+# Le frontend reconstruit l'élément complet depuis les données déjà chargées.
+
+ENTITE_TYPES = [("paroisse", "Paroisse"), ("oeuvre", "Œuvre")]
+
+
+class FavoriCarte(models.Model):
+    """Favori (étoile) d'un visiteur sur la carte — paroisse ou œuvre."""
+    utilisateur = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="favoris_carte",
+    )
+    type_entite = models.CharField(max_length=20, choices=ENTITE_TYPES)
+    entite_id   = models.IntegerField()
+    created_at  = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Favori Carte"
+        verbose_name_plural = "Favoris Carte"
+        unique_together = ("utilisateur", "type_entite", "entite_id")
+        ordering = ["-created_at"]
+        indexes = [models.Index(fields=["utilisateur", "created_at"])]
+
+    def __str__(self):
+        return f"{self.utilisateur.email} ★ {self.type_entite}#{self.entite_id}"
+
+
+class ConsultationCarte(models.Model):
+    """Historique de consultation d'un visiteur — paroisse ou œuvre."""
+    utilisateur = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="consultations_carte",
+    )
+    type_entite = models.CharField(max_length=20, choices=ENTITE_TYPES)
+    entite_id   = models.IntegerField()
+    vue_at      = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Consultation Carte"
+        verbose_name_plural = "Consultations Carte"
+        ordering = ["-vue_at"]
+        indexes = [models.Index(fields=["utilisateur", "vue_at"])]
+
+    def __str__(self):
+        return f"{self.utilisateur.email} 👁 {self.type_entite}#{self.entite_id}"

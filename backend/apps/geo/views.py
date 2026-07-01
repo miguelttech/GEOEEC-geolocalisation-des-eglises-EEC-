@@ -1,4 +1,8 @@
-from django.db.models import Count
+import json
+
+from django.db.models import Count, Func, Value, F
+from django.contrib.gis.db.models import GeometryField
+from django.contrib.gis.db.models.functions import AsGeoJSON
 
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
@@ -20,12 +24,20 @@ from apps.accounts.permissions import (
 )
 
 
+class STSimplify(Func):
+    """ST_Simplify(geom, tolerance) de PostGIS — réduit le nombre de sommets
+    des polygones → payload beaucoup plus léger."""
+    function = "ST_Simplify"
+    output_field = GeometryField()
+
+
 # ---------------------------------------------------------------------------
 # Régions — lecture publique, pas de CRUD (entités stables de l'EEC)
 # ---------------------------------------------------------------------------
 
 class RegionSynodaleViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.AllowAny]
+    pagination_class = None
 
     def get_queryset(self):
         return (
@@ -39,6 +51,28 @@ class RegionSynodaleViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_serializer_class(self):
         return RegionSynodaleSerializer
+
+    def list(self, request, *args, **kwargs):
+        """GET /api/geo/regions/ — FeatureCollection GeoJSON des 22 régions synodales.
+        La géométrie est SIMPLIFIÉE et convertie en GeoJSON directement par PostGIS
+        (ST_Simplify + ST_AsGeoJSON) → réponse légère et quasi instantanée
+        (vs ~6,5 Mo / 16 s avec les polygones bruts)."""
+        qs = self.get_queryset().annotate(
+            geojson=AsGeoJSON(STSimplify(F("geometrie"), Value(0.002)), precision=5)
+        )
+        features = [
+            {
+                "type": "Feature",
+                "id": r.id,
+                "geometry": json.loads(r.geojson) if r.geojson else None,
+                "properties": {
+                    "id": r.id, "nom": r.nom, "code": r.code,
+                    "nb_districts": r.nb_districts, "nb_paroisses": r.nb_paroisses,
+                },
+            }
+            for r in qs
+        ]
+        return Response({"type": "FeatureCollection", "features": features})
 
     @action(detail=False, url_path="liste")
     def liste(self, request):

@@ -218,6 +218,9 @@ class StatistiqueAnnuelleViewSet(viewsets.ModelViewSet):
 # ---------------------------------------------------------------------------
 
 def _filter_stats_by_scope(queryset, user):
+    # Visiteur / rôle non-administrateur → données publiques complètes (comme un anonyme)
+    if not getattr(user, "is_admin", False):
+        return queryset
     if user.role == "SUPER":
         return queryset
     if user.role == "REGION" and user.region_id:

@@ -7,12 +7,13 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.db import IntegrityError
 
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 
 from apps.accounts.models import User
+from apps.accounts.throttles import RegisterRateThrottle
 from apps.geo.models import Paroisse
 
 
@@ -46,6 +47,7 @@ def _send_welcome_email(user):
 from .models import (
     ProfilVisiteur, ParoisseVue, RechercheHistorique,
     ItinerairePersonnel, ParoisseEnregistree,
+    FavoriCarte, ConsultationCarte,
 )
 from .serializers import (
     ProfilVisiteurSerializer, ParoisseVueSerializer,
@@ -80,6 +82,7 @@ def _duree_estimee(distance_km):
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
+@throttle_classes([RegisterRateThrottle])
 def register_visitor(request):
     """
     POST /api/visitor/register/
@@ -498,3 +501,149 @@ def calculer_itineraire(request):
         ItinerairePersonnelSerializer(itin).data,
         status=status.HTTP_201_CREATED,
     )
+
+
+# ---------------------------------------------------------------------------
+# ITINÉRAIRE RÉEL SUR ROUTES (type Google Maps — Valhalla)
+# ---------------------------------------------------------------------------
+
+@api_view(["POST"])
+@permission_classes([IsAuthentifiedUser])
+def route_reelle(request):
+    """
+    POST /api/visitor/itineraires/route/
+    Body : {
+      "start_lat", "start_lng",   # départ (position GPS ou élément carte)
+      "end_lat",   "end_lng",     # destination (église, œuvre, ou élément)
+      "mode": "auto" | "bicycle" | "pedestrian"   (défaut: auto)
+    }
+
+    Calcule un VRAI itinéraire qui suit les routes (réseau OpenStreetMap via
+    Valhalla) et renvoie :
+      { mode, distance_km, duration_min, geometry:[[lat,lng]...], steps:[...] }
+
+    Le tracé `geometry` est dessiné directement sur la carte Leaflet côté frontend.
+    Contrairement à /calculer/ (vol d'oiseau Haversine), ici la distance et la
+    durée sont réalistes (suivent les routes praticables selon le mode).
+    """
+    from .routing import calculer_route, RoutingError
+
+    data = request.data
+    try:
+        start_lat = float(data["start_lat"])
+        start_lng = float(data["start_lng"])
+        end_lat   = float(data["end_lat"])
+        end_lng   = float(data["end_lng"])
+    except (KeyError, TypeError, ValueError):
+        return Response(
+            {"detail": "start_lat, start_lng, end_lat, end_lng sont requis (nombres)."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    mode = (data.get("mode") or "auto")
+
+    try:
+        result = calculer_route(start_lat, start_lng, end_lat, end_lng, mode=mode)
+    except RoutingError as e:
+        return Response({"detail": str(e)}, status=status.HTTP_502_BAD_GATEWAY)
+    except Exception:  # noqa: BLE001 — filet de sécurité : ne jamais renvoyer 500
+        from .routing import _route_direct
+        result = _route_direct(start_lat, start_lng, end_lat, end_lng, mode)
+
+    return Response(result, status=status.HTTP_200_OK)
+
+
+# ---------------------------------------------------------------------------
+# PERSISTANCE CARTE — Favoris génériques (paroisse OU œuvre)
+# ---------------------------------------------------------------------------
+
+_VALID_TYPES = {"paroisse", "oeuvre"}
+
+
+@api_view(["GET", "POST"])
+@permission_classes([IsAuthentifiedUser])
+def favoris_carte(request):
+    """
+    GET  /api/visitor/favoris-carte/  — liste des favoris du visiteur connecté.
+    POST /api/visitor/favoris-carte/  — body { type_entite, entite_id } → ajoute.
+    Chaque utilisateur ne voit et ne modifie QUE ses propres favoris.
+    """
+    if request.method == "GET":
+        rows = FavoriCarte.objects.filter(utilisateur=request.user).values(
+            "type_entite", "entite_id", "created_at"
+        )
+        return Response(list(rows))
+
+    type_entite = request.data.get("type_entite")
+    entite_id   = request.data.get("entite_id")
+    if type_entite not in _VALID_TYPES or entite_id in (None, ""):
+        return Response({"detail": "type_entite et entite_id requis."},
+                        status=status.HTTP_400_BAD_REQUEST)
+    try:
+        entite_id = int(entite_id)
+    except (TypeError, ValueError):
+        return Response({"detail": "entite_id invalide."}, status=status.HTTP_400_BAD_REQUEST)
+
+    FavoriCarte.objects.get_or_create(
+        utilisateur=request.user, type_entite=type_entite, entite_id=entite_id
+    )
+    return Response({"detail": "Ajouté aux favoris."}, status=status.HTTP_201_CREATED)
+
+
+@api_view(["DELETE"])
+@permission_classes([IsAuthentifiedUser])
+def favori_carte_delete(request, type_entite, entite_id):
+    """DELETE /api/visitor/favoris-carte/<type>/<id>/ — retire un favori."""
+    FavoriCarte.objects.filter(
+        utilisateur=request.user, type_entite=type_entite, entite_id=entite_id
+    ).delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# ---------------------------------------------------------------------------
+# PERSISTANCE CARTE — Historique de consultation générique
+# ---------------------------------------------------------------------------
+
+@api_view(["GET", "POST"])
+@permission_classes([IsAuthentifiedUser])
+def consultations_carte(request):
+    """
+    GET  /api/visitor/consultations/ — 40 dernières entités distinctes consultées.
+    POST /api/visitor/consultations/ — body { type_entite, entite_id } → enregistre.
+    """
+    if request.method == "GET":
+        seen, result = set(), []
+        qs = ConsultationCarte.objects.filter(utilisateur=request.user).order_by("-vue_at")
+        for c in qs[:200]:
+            key = (c.type_entite, c.entite_id)
+            if key in seen:
+                continue
+            seen.add(key)
+            result.append({"type_entite": c.type_entite, "entite_id": c.entite_id,
+                           "vue_at": c.vue_at})
+            if len(result) == 40:
+                break
+        return Response(result)
+
+    type_entite = request.data.get("type_entite")
+    entite_id   = request.data.get("entite_id")
+    if type_entite not in _VALID_TYPES or entite_id in (None, ""):
+        return Response({"detail": "type_entite et entite_id requis."},
+                        status=status.HTTP_400_BAD_REQUEST)
+    try:
+        entite_id = int(entite_id)
+    except (TypeError, ValueError):
+        return Response({"detail": "entite_id invalide."}, status=status.HTTP_400_BAD_REQUEST)
+
+    ConsultationCarte.objects.create(
+        utilisateur=request.user, type_entite=type_entite, entite_id=entite_id
+    )
+    return Response({"detail": "Consultation enregistrée."}, status=status.HTTP_201_CREATED)
+
+
+@api_view(["DELETE"])
+@permission_classes([IsAuthentifiedUser])
+def consultations_clear(request):
+    """DELETE /api/visitor/consultations/clear/ — efface tout l'historique du visiteur."""
+    count, _ = ConsultationCarte.objects.filter(utilisateur=request.user).delete()
+    return Response({"detail": f"{count} entrée(s) supprimée(s)."})

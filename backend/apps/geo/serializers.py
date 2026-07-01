@@ -67,16 +67,8 @@ class RegionSynodaleSerializer(GeoFeatureModelSerializer):
     nb_paroisses = serializers.IntegerField(read_only=True)
 
     class Meta:
-        # model : quel modèle Django on sérialise
         model = RegionSynodale
-
-        # geo_field : quel champ contient la géométrie à mettre dans "geometry" du GeoJSON
-        # Le champ "geometrie" est un MultiPolygonField stocké en PostGIS
         geo_field = "geometrie"
-
-        # fields : liste des champs à inclure dans la réponse JSON
-        # "geometrie" sera mis dans "geometry" (GeoJSON standard)
-        # Les autres iront dans "properties"
         fields = ["id", "nom", "code", "geometrie", "nb_districts", "nb_paroisses"]
 
 

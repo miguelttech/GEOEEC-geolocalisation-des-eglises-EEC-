@@ -26,7 +26,14 @@ visitor_patterns = [
 
     # Itinéraires
     path("itineraires/",                    views.itineraires_list),
-    path("itineraires/calculer/",           views.calculer_itineraire),
+    path("itineraires/calculer/",           views.calculer_itineraire),   # vol d'oiseau (Haversine)
+    path("itineraires/route/",              views.route_reelle),          # vrai routing sur routes (Valhalla)
+
+    # Persistance carte (favoris + historique génériques : paroisse OU œuvre)
+    path("favoris-carte/",                              views.favoris_carte),
+    path("favoris-carte/<str:type_entite>/<int:entite_id>/", views.favori_carte_delete),
+    path("consultations/",                              views.consultations_carte),
+    path("consultations/clear/",                        views.consultations_clear),
 ]
 
 # ── Routes analytics (SUPER + REGION uniquement) ──────────────────────────────

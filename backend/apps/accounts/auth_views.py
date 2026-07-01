@@ -8,13 +8,14 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.conf import settings
 
 from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from .models import User, StatistiqueAnnuelle
 from .permissions import can_manage_accounts
 from .serializers import UserSerializer, UserCreateSerializer
+from .throttles import LoginRateThrottle
 
 
 # ---------------------------------------------------------------------------
@@ -34,6 +35,7 @@ def csrf_token(request):
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
+@throttle_classes([LoginRateThrottle])
 def login_view(request):
     """
     POST /api/auth/login/
