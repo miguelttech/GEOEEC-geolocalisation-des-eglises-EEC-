@@ -99,7 +99,7 @@ export default function FicheParoissePage() {
           <Section title="Identité">
             <LockedField label="RÉGION" value={MOCK_PAROISSE.region + ' — scopée'}/>
             <LockedField label="DISTRICT" value={MOCK_PAROISSE.district + ' — scopé'}/>
-            <LockedField label="NIVEAU" value={MOCK_PAROISSE.niveau + ' — modifiable par Admin District uniquement'}/>
+            <LockedField label="CATÉGORIE" value={MOCK_PAROISSE.categorie + ' — modifiable par Admin District uniquement'}/>
             <div>
               <div style={{ fontSize:11, color:'var(--text-3)', fontWeight:600, marginBottom:4 }}>PASTEUR EN CHARGE</div>
               {editMode

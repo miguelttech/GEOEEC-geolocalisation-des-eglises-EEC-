@@ -3,7 +3,7 @@ import React from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { I } from '@/components/admin/icons';
-import { Avatar, Widget, HorizontalBars, Donut, StackedBars, LineChart, NiveauPill, GpsCell, StatusPill } from '@/components/admin/atoms';
+import { Avatar, Widget, HorizontalBars, Donut, StackedBars, LineChart, CategoriePill, GpsCell, StatusPill } from '@/components/admin/atoms';
 import { api, type DashboardStats, type Paroisse } from '@/lib/api';
 
 const MiniLeafletMap = dynamic(() => import('@/components/admin/MiniLeafletMap'), { ssr: false });
@@ -14,7 +14,9 @@ interface FullStats extends DashboardStats {
   fideles_par_annee: { year: number; comm: number; noncomm: number }[];
   top_regions: { name: string; fideles: number; paroisses: number }[];
   oeuvres_par_type: { type: string; count: number; color: string }[];
-  niveaux_par_region: { name: string; paroisse: number; station: number; annexe: number }[];
+  top_paroisses_fideles: { name: string; fideles: number }[];
+  oeuvres_par_region: ({ name: string; total: number } & Record<string, unknown>)[];
+  categories_par_region: { name: string; cat_a: number; cat_b: number; cat_c: number }[];
   activite_recente: { who: string; role: string; action: string; entity: string; description: string; when: string; initials: string }[];
 }
 
@@ -94,7 +96,7 @@ function ParoissesTable({ onEdit, onView, onCreate }: { onEdit: (p: Paroisse) =>
                 <td className="mono" style={{ textAlign: 'right', fontSize: 13 }}>
                   {p.nombre_fideles != null ? p.nombre_fideles.toLocaleString('fr') : '—'}
                 </td>
-                <td><NiveauPill niveau={p.niveau} /></td>
+                <td><CategoriePill categorie={p.categorie} /></td>
                 <td><GpsCell ok={p.latitude != null} /></td>
                 <td>
                   <div style={{ display: 'flex', gap: 2 }}>
@@ -247,21 +249,21 @@ export default function DashboardPage() {
           ) : <div style={{ color: 'var(--text-3)', fontSize: 13 }}>Aucune œuvre enregistrée</div>}
         </Widget>
 
-        <Widget title="Niveaux de paroisses par région">
-          {loading ? <Skeleton h={180} /> : s?.niveaux_par_region?.length ? (
+        <Widget title="Catégories de paroisses par région">
+          {loading ? <Skeleton h={180} /> : s?.categories_par_region?.length ? (
             <>
-              <StackedBars data={s.niveaux_par_region as any} keys={[
-                { key: 'paroisse', color: '#2E9744' },
-                { key: 'station',  color: '#E65100' },
-                { key: 'annexe',   color: '#1565C0' },
+              <StackedBars data={s.categories_par_region as any} keys={[
+                { key: 'cat_a', color: '#E8B600' },
+                { key: 'cat_b', color: '#1565C0' },
+                { key: 'cat_c', color: '#2E9744' },
               ]} />
               <div style={{ display: 'flex', gap: 14, fontSize: 11, color: 'var(--text-2)', marginTop: 6, justifyContent: 'center' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 10, height: 10, background: '#2E9744', borderRadius: 2 }} />Paroisse</span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 10, height: 10, background: '#E65100', borderRadius: 2 }} />Station</span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 10, height: 10, background: '#1565C0', borderRadius: 2 }} />Annexe</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 10, height: 10, background: '#E8B600', borderRadius: 2 }} />Catégorie A</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 10, height: 10, background: '#1565C0', borderRadius: 2 }} />Catégorie B</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 10, height: 10, background: '#2E9744', borderRadius: 2 }} />Catégorie C</span>
               </div>
             </>
-          ) : <div style={{ color: 'var(--text-3)', fontSize: 13 }}>Importez des données pour voir les niveaux</div>}
+          ) : <div style={{ color: 'var(--text-3)', fontSize: 13 }}>Importez des données pour voir les catégories</div>}
         </Widget>
 
         <Widget title={`Évolution des fidèles ${(s?.fideles_par_annee?.[0]?.year ?? 2020)} → ${annee}`}>
@@ -277,10 +279,65 @@ export default function DashboardPage() {
         </Widget>
       </div>
 
-      {/* Row 4 — Mini-map + Activité */}
+      {/* Row 4 — Mini-map + Top 10 paroisses (EXIGENCE : la carte est conservée,
+          la nouvelle statistique s'ajoute à côté) */}
       <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: 16 }}>
         <Widget title="Aperçu géographique" action={<button className="btn-ghost btn" style={{ padding: '4px 8px', fontSize: 11 }} onClick={() => nav('map')}>Ouvrir la carte →</button>}>
           <MiniLeafletMap height={320} />
+        </Widget>
+
+        <Widget title="Top 10 — paroisses par nombre de fidèles">
+          {loading ? <Skeleton h={320} /> : s?.top_paroisses_fideles?.length ? (
+            <HorizontalBars data={s.top_paroisses_fideles.map(p => ({ label: p.name, value: p.fideles }))} />
+          ) : <div style={{ color: 'var(--text-3)', fontSize: 13 }}>Aucune donnée de fidèles</div>}
+        </Widget>
+      </div>
+
+      {/* Row 4bis — Œuvres par région (EXIGENCE : par région ET par type,
+          couleurs pertinentes + légende) + Activité */}
+      <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: 16 }}>
+        <Widget title="Répartition des œuvres par région">
+          {loading ? <Skeleton h={280} /> : s?.oeuvres_par_region?.length ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+              {(() => {
+                const TYPES: { key: string; label: string; color: string }[] = [
+                  { key: 'SCOLAIRE',      label: 'Scolaire',      color: '#1565C0' },
+                  { key: 'UNIVERSITAIRE', label: 'Universitaire', color: '#6A1B9A' },
+                  { key: 'MEDICALE',      label: 'Médical',       color: '#C62828' },
+                  { key: 'AGROPASTORALE', label: 'Agropastoral',  color: '#E65100' },
+                  { key: 'IMMEUBLE',      label: 'Immeuble',      color: '#455A64' },
+                  { key: 'TERRAIN',       label: 'Terrain',       color: '#2E9744' },
+                  { key: 'AUTRE',         label: 'Autre',         color: '#5B9BD5' },
+                ];
+                const max = Math.max(...s.oeuvres_par_region.map(r => r.total));
+                return (
+                  <>
+                    {s.oeuvres_par_region.map(r => (
+                      <div key={r.name} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <span style={{ width: 150, fontSize: 11, color: 'var(--text-2)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.name}</span>
+                        <div style={{ flex: 1, display: 'flex', height: 16, borderRadius: 4, overflow: 'hidden', background: 'rgba(255,255,255,0.04)' }}>
+                          {TYPES.map(t => {
+                            const v = (r as Record<string, unknown>)[t.key] as number | undefined;
+                            if (!v) return null;
+                            return <span key={t.key} title={`${t.label} : ${v}`}
+                              style={{ width: `${(v / max) * 100}%`, background: t.color }} />;
+                          })}
+                        </div>
+                        <span className="mono" style={{ width: 34, textAlign: 'right', fontSize: 12, fontWeight: 700 }}>{r.total}</span>
+                      </div>
+                    ))}
+                    <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 8, fontSize: 11, color: 'var(--text-2)' }}>
+                      {TYPES.map(t => (
+                        <span key={t.key} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                          <span style={{ width: 10, height: 10, background: t.color, borderRadius: 2 }} />{t.label}
+                        </span>
+                      ))}
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
+          ) : <div style={{ color: 'var(--text-3)', fontSize: 13 }}>Réservé à l&apos;administrateur général</div>}
         </Widget>
 
         <Widget title="Activité récente" action={<span style={{ color: '#5AC472', textDecoration: 'none', fontSize: 12, fontWeight: 500, cursor: 'pointer' }} onClick={() => nav('journal')}>Voir tout →</span>}>

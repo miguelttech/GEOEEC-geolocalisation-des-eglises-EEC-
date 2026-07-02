@@ -118,6 +118,8 @@ function OeuvreViewPanel({ oeuvre: o, onClose, onEdit }: {
             <div style={{ fontSize: 11, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Informations</div>
             {[
               { label: 'Capacité',         value: o.capacite     ? String(o.capacite)      : '—' },
+              { label: 'Personnels',       value: o.nb_personnels != null ? String(o.nb_personnels) : '—' },
+              { label: 'En prospection',   value: o.en_prospection ? 'Oui' : 'Non' },
               { label: 'Année création',   value: o.annee_creation ? String(o.annee_creation) : '—' },
               { label: 'Téléphone',        value: o.telephone    || '—' },
               { label: 'Email',            value: o.email        || '—' },
@@ -153,7 +155,7 @@ type GeoLevel = 'paroisse' | 'district' | 'region';
 interface FormState {
   nom: string; adresse: string; description: string;
   type_oeuvre: string; est_active: boolean;
-  capacite: string; annee_creation: string;
+  capacite: string; nb_personnels: string; en_prospection: boolean; annee_creation: string;
   telephone: string; email: string;
   latitude: string; longitude: string;
   geo_level: GeoLevel;
@@ -162,7 +164,7 @@ interface FormState {
 function emptyForm(): FormState {
   return {
     nom: '', adresse: '', description: '', type_oeuvre: '',
-    est_active: true, capacite: '', annee_creation: '',
+    est_active: true, capacite: '', nb_personnels: '', en_prospection: false, annee_creation: '',
     telephone: '', email: '', latitude: '', longitude: '',
     geo_level: 'paroisse', region: '', district: '', paroisse: '',
   };
@@ -173,6 +175,8 @@ function formFromOeuvre(o: Oeuvre): FormState {
     nom: o.nom, adresse: o.adresse, description: o.description,
     type_oeuvre: String(o.type_oeuvre_id), est_active: o.est_active,
     capacite: o.capacite ? String(o.capacite) : '',
+    nb_personnels: o.nb_personnels != null ? String(o.nb_personnels) : '',
+    en_prospection: o.en_prospection,
     annee_creation: o.annee_creation ? String(o.annee_creation) : '',
     telephone: o.telephone, email: o.email,
     latitude:  o.latitude  ? String(o.latitude)  : '',
@@ -280,6 +284,8 @@ function OeuvreFormPanel({ mode, oeuvre, types, onClose, onSaved }: {
         nom: form.nom.trim(), adresse: form.adresse, description: form.description,
         type_oeuvre: Number(form.type_oeuvre), est_active: form.est_active,
         capacite:       form.capacite       ? Number(form.capacite)       : null,
+        nb_personnels:  form.nb_personnels  ? Number(form.nb_personnels)  : null,
+        en_prospection: form.en_prospection,
         annee_creation: form.annee_creation ? Number(form.annee_creation) : null,
         telephone: form.telephone, email: form.email,
         paroisse: form.geo_level === 'paroisse' ? Number(form.paroisse) : null,
@@ -444,8 +450,19 @@ function OeuvreFormPanel({ mode, oeuvre, types, onClose, onSaved }: {
                   <input className="input mono" type="number" placeholder="Ex. 500" value={form.capacite} onChange={e => set('capacite', e.target.value)} style={{ color: '#111827' }} />
                 </div>
                 <div>
+                  <label style={Lbl}>Nombre de personnels</label>
+                  <input className="input mono" type="number" placeholder="Ex. 24" value={form.nb_personnels} onChange={e => set('nb_personnels', e.target.value)} style={{ color: '#111827' }} />
+                </div>
+                <div>
                   <label style={Lbl}>Année de création</label>
                   <input className="input mono" type="number" placeholder="Ex. 1985" value={form.annee_creation} onChange={e => set('annee_creation', e.target.value)} style={{ color: '#111827' }} />
+                </div>
+                <div>
+                  <label style={Lbl}>En prospection</label>
+                  <select className="input" value={form.en_prospection ? 'oui' : 'non'} onChange={e => set('en_prospection', e.target.value === 'oui')} style={{ color: '#111827' }}>
+                    <option value="non">Non</option>
+                    <option value="oui">Oui — en prospection</option>
+                  </select>
                 </div>
               </div>
             </div>

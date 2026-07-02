@@ -3,7 +3,7 @@ import 'leaflet/dist/leaflet.css';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { api, Paroisse, Ouvrier, Oeuvre, PagedResult, getCsrf } from '@/lib/api';
 import { I } from '@/components/admin/icons';
-import { CompleteBar, NiveauPill, GpsCell, StatusPill, Dropdown, useOutside } from '@/components/admin/atoms';
+import { CompleteBar, CategoriePill, GpsCell, StatusPill, Dropdown, useOutside } from '@/components/admin/atoms';
 
 const BACKEND = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api')
   .replace(/\/api\/?$/, '');
@@ -45,57 +45,8 @@ function ToastStack({ toasts, remove }: { toasts: (Toast & { id: string })[]; re
   );
 }
 
-/* ── Row Menu ──────────────────────────────────────────────────────────── */
-function RowMenu({ paroisse, onDelete, onToggleActive }: { paroisse: Paroisse; onDelete: () => void; onToggleActive: () => void }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  useOutside(ref, () => setOpen(false));
-  return (
-    <div ref={ref} style={{ position: 'relative', display: 'inline-block' }}>
-      <button className="icon-btn" onClick={() => setOpen(o => !o)}><I.more size={15} /></button>
-      {open && (
-        <div className="menu" style={{ top: 'calc(100% + 4px)', right: 0, minWidth: 200 }}>
-          <button onClick={() => { setOpen(false); onToggleActive(); }}>
-            <I.lock size={13} />{paroisse.est_active ? 'Désactiver' : 'Réactiver'}
-          </button>
-          <hr />
-          <button className="danger" onClick={() => { setOpen(false); onDelete(); }}><I.trash size={13} />Supprimer</button>
-        </div>
-      )}
-    </div>
-  );
-}
-
-/* ── Delete Modal ──────────────────────────────────────────────────────── */
-function DeleteModal({ paroisse, onCancel, onConfirm, busy }: { paroisse: Paroisse; onCancel: () => void; onConfirm: () => void; busy: boolean }) {
-  const [value, setValue] = useState('');
-  const matches = value.trim() === paroisse.nom.trim();
-  return (
-    <div className="overlay" onClick={e => { e.stopPropagation(); onCancel(); }}>
-      <div className="modal-panel" onClick={e => e.stopPropagation()}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div style={{ width: 44, height: 44, borderRadius: 8, background: 'rgba(198,40,40,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#E55B5B' }}>
-            <I.trash size={22} />
-          </div>
-          <h3 className="sg" style={{ fontSize: 20, margin: 0 }}>Supprimer la paroisse</h3>
-          <p style={{ fontSize: 13, color: 'var(--text-2)', margin: 0, lineHeight: 1.5 }}>
-            Action irréversible. Tapez exactement <b style={{ color: 'var(--text)', fontFamily: 'monospace' }}>{paroisse.nom}</b> pour confirmer.
-          </p>
-          <input className="input" placeholder="Tapez le nom de la paroisse…" value={value}
-            onChange={e => setValue(e.target.value)} autoFocus
-            style={{ borderColor: matches ? 'rgba(220,38,38,0.60)' : undefined }} />
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-            <button className="btn btn-outline" onClick={onCancel} disabled={busy}>Annuler</button>
-            <button className="btn btn-danger" disabled={!matches || busy} onClick={matches && !busy ? onConfirm : undefined}
-              style={{ opacity: matches && !busy ? 1 : 0.35 }}>
-              {busy ? <span className="ls-spinner" /> : <><I.trash size={13} />Supprimer définitivement</>}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+/* ── EXIGENCES : la suppression et l'activation/désactivation d'une paroisse
+      n'existent plus — ni ici, ni côté serveur (RowMenu et DeleteModal retirés). ── */
 
 /* ── GPS Map Picker ────────────────────────────────────────────────────── */
 function GpsMapPicker({ lat, lng, onChange }: {
@@ -255,7 +206,7 @@ function OuvrierSelector({ selected, onChange }: {
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>{o.prenom} {o.nom}</div>
                 <div style={{ fontSize: 11, color: '#6B7280' }}>
-                  {o.grade_nom || 'Ouvrier'} · {o.statut === 'ACTIF' ? '🟢 Actif' : o.statut}
+                  {o.grade_nom || 'Ouvrier'} · {o.statut === 'OCCUPE' ? '🟢 Occupé' : '⚪ Inoccupé'}
                 </div>
               </div>
               <I.plus size={13} style={{ color: '#2E9744', flexShrink: 0 }} />
@@ -396,13 +347,15 @@ function ParoisseViewPanel({ paroisse: p, onClose, onEdit }: { paroisse: Paroiss
         </div>
         <div style={{ padding: '20px 22px', overflowY: 'auto', height: 'calc(100% - 72px)', display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <NiveauPill niveau={p.niveau} /><StatusPill statut={p.est_active ? 'actif' : 'inactif'} /><GpsCell ok={hasGps} />
+            <CategoriePill categorie={p.categorie} /><GpsCell ok={hasGps} />
+            {p.en_prospection && <span className="pill pill-orange">En prospection</span>}
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             {[
               { label: 'Fidèles', value: p.nombre_fideles !== null ? p.nombre_fideles.toLocaleString('fr') : '—', color: '#2E9744' },
-              { label: 'Complétude', value: complete + '%', color: complete >= 80 ? '#2E9744' : complete >= 50 ? '#D97706' : '#DC2626' },
-              { label: 'Fondée en', value: p.annee_creation ? String(p.annee_creation) : '—', color: 'var(--text)' },
+              { label: 'Communiants', value: p.communiants !== null ? p.communiants.toLocaleString('fr') : '—', color: '#1565C0' },
+              { label: 'Non-communiants', value: p.non_communiants !== null ? p.non_communiants.toLocaleString('fr') : '—', color: '#6A1B9A' },
+              { label: 'Ouvriers', value: String(p.nb_ouvriers ?? 0), color: '#E8B600' },
               { label: 'Mis à jour', value: new Date(p.updated_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: '2-digit' }), color: 'var(--text-2)' },
             ].map(s => (
               <div key={s.label} className="card" style={{ padding: '12px 14px' }}>
@@ -416,7 +369,7 @@ function ParoisseViewPanel({ paroisse: p, onClose, onEdit }: { paroisse: Paroiss
             {[
               { label: 'Région', value: p.region_nom },
               { label: 'District', value: p.district_nom },
-              { label: 'Niveau', value: p.niveau },
+              { label: 'Catégorie', value: p.categorie || 'Non catégorisée' },
               { label: 'Adresse', value: p.adresse || '—' },
             ].map(f => (
               <div key={f.label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, gap: 8 }}>
@@ -441,26 +394,26 @@ function ParoisseViewPanel({ paroisse: p, onClose, onEdit }: { paroisse: Paroiss
 
 /* ── Form Panel ────────────────────────────────────────────────────────── */
 type FormState = {
-  nom: string; adresse: string; niveau: string; est_active: boolean;
+  nom: string; adresse: string; categorie: string; en_prospection: boolean;
   regionId: number; districtId: number;
   lat: string; lng: string; altitude: string;
   communiants: string; non_communiants: string;
-  nombre_fideles: string; telephone: string; email: string; annee_creation: string;
+  nombre_fideles: string; telephone: string; email: string;
 };
 
 function emptyForm(): FormState {
   return {
-    nom: '', adresse: '', niveau: 'PAROISSE', est_active: true,
+    nom: '', adresse: '', categorie: '', en_prospection: false,
     regionId: 0, districtId: 0,
     lat: '', lng: '', altitude: '',
     communiants: '', non_communiants: '',
-    nombre_fideles: '', telephone: '', email: '', annee_creation: '',
+    nombre_fideles: '', telephone: '', email: '',
   };
 }
 
 function formFromParoisse(p: Paroisse): FormState {
   return {
-    nom: p.nom, adresse: p.adresse, niveau: p.niveau, est_active: p.est_active,
+    nom: p.nom, adresse: p.adresse, categorie: p.categorie || '', en_prospection: p.en_prospection,
     regionId: p.region_id, districtId: p.district_id,
     lat: p.latitude !== null ? String(p.latitude) : '',
     lng: p.longitude !== null ? String(p.longitude) : '',
@@ -468,7 +421,6 @@ function formFromParoisse(p: Paroisse): FormState {
     communiants: '', non_communiants: '',
     nombre_fideles: p.nombre_fideles !== null ? String(p.nombre_fideles) : '',
     telephone: p.telephone, email: p.email,
-    annee_creation: p.annee_creation !== null ? String(p.annee_creation) : '',
   };
 }
 
@@ -547,24 +499,26 @@ function ParoisseFormPanel({ mode, paroisse, onClose, onSaved }: {
 
     try {
       // ── 1. Save paroisse ──────────────────────────────────────────────
-      const payload: Record<string, unknown> = {
-        nom: form.nom.trim(), adresse: form.adresse.trim(),
-        niveau: form.niveau, est_active: form.est_active,
-        district: form.districtId,
-        nombre_fideles: form.nombre_fideles ? parseInt(form.nombre_fideles) : null,
-        telephone: form.telephone.trim(), email: form.email.trim(),
-        annee_creation: form.annee_creation ? parseInt(form.annee_creation) : null,
-      };
-      const latF = parseFloat(form.lat), lngF = parseFloat(form.lng);
-      if (form.lat && form.lng && !isNaN(latF) && !isNaN(lngF)) {
-        payload.latitude = latF; payload.longitude = lngF;
-      }
-
       let saved: Paroisse;
       if (mode === 'create') {
+        const payload: Record<string, unknown> = {
+          nom: form.nom.trim(), adresse: form.adresse.trim(),
+          categorie: form.categorie || null, en_prospection: form.en_prospection,
+          district: form.districtId,
+          nombre_fideles: form.nombre_fideles ? parseInt(form.nombre_fideles) : null,
+          telephone: form.telephone.trim(), email: form.email.trim(),
+        };
+        const latF = parseFloat(form.lat), lngF = parseFloat(form.lng);
+        if (form.lat && form.lng && !isNaN(latF) && !isNaN(lngF)) {
+          payload.latitude = latF; payload.longitude = lngF;
+        }
         saved = await api.post<Paroisse>('/api/geo/paroisses/', payload);
       } else {
-        saved = await api.patch<Paroisse>(`/api/geo/paroisses/${paroisse!.id}/`, payload);
+        // EXIGENCE : en modification, SEUL le nom (et l'état de prospection)
+        // peut changer — le backend refuse tout autre champ.
+        saved = await api.patch<Paroisse>(`/api/geo/paroisses/${paroisse!.id}/`, {
+          nom: form.nom.trim(), en_prospection: form.en_prospection,
+        });
       }
 
       const pid = saved.id;
@@ -699,41 +653,38 @@ function ParoisseFormPanel({ mode, paroisse, onClose, onSaved }: {
                     style={{ fontSize: 15, fontWeight: 600, color: '#111827' }} />
                 </div>
                 <div>
-                  <label style={L.label}>Niveau *</label>
-                  <select className="input" style={{ fontSize: 13, color: '#111827' }} value={form.niveau} onChange={e => set('niveau', e.target.value)}>
-                    <option value="PAROISSE">Paroisse</option>
-                    <option value="STATION">Station</option>
-                    <option value="ANNEXE">Annexe</option>
+                  <label style={L.label}>Catégorie</label>
+                  <select className="input" style={{ fontSize: 13, color: '#111827' }} value={form.categorie} onChange={e => set('categorie', e.target.value)}>
+                    <option value="">— Non catégorisée</option>
+                    {['A++', 'A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'C3', 'C4'].map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label style={L.label}>Statut</label>
-                  <select className="input" style={{ fontSize: 13, color: '#111827' }} value={form.est_active ? 'actif' : 'inactif'} onChange={e => set('est_active', e.target.value === 'actif')}>
-                    <option value="actif">Actif</option>
-                    <option value="inactif">Inactif</option>
+                  <label style={L.label}>En prospection</label>
+                  <select className="input" style={{ fontSize: 13, color: '#111827' }} value={form.en_prospection ? 'oui' : 'non'} onChange={e => set('en_prospection', e.target.value === 'oui')}>
+                    <option value="non">Non</option>
+                    <option value="oui">Oui — en prospection</option>
                   </select>
                 </div>
+                {/* EXIGENCE : en modification, la région, le district (et la position)
+                    ne sont PAS modifiables — seuls le nom et la prospection le sont. */}
                 <div>
-                  <label style={L.label}>Région synodiale *</label>
-                  <select className="input" style={{ fontSize: 13, color: '#111827' }} value={form.regionId || ''} onChange={e => { set('regionId', parseInt(e.target.value) || 0); set('districtId', 0); }}>
+                  <label style={L.label}>Région synodiale *{mode === 'edit' ? ' (verrouillée)' : ''}</label>
+                  <select className="input" style={{ fontSize: 13, color: '#111827' }} value={form.regionId || ''} disabled={mode === 'edit'} onChange={e => { set('regionId', parseInt(e.target.value) || 0); set('districtId', 0); }}>
                     <option value="">— Choisir une région</option>
                     {regions.map(r => <option key={r.id} value={r.id}>{r.nom}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label style={L.label}>District *</label>
-                  <select className="input" style={{ fontSize: 13, color: '#111827' }} value={form.districtId || ''} onChange={e => set('districtId', parseInt(e.target.value) || 0)} disabled={!form.regionId}>
+                  <label style={L.label}>District *{mode === 'edit' ? ' (verrouillé)' : ''}</label>
+                  <select className="input" style={{ fontSize: 13, color: '#111827' }} value={form.districtId || ''} onChange={e => set('districtId', parseInt(e.target.value) || 0)} disabled={mode === 'edit' || !form.regionId}>
                     <option value="">— Choisir un district</option>
                     {districts.map(d => <option key={d.id} value={d.id}>{d.nom}</option>)}
                   </select>
                 </div>
                 <div style={{ gridColumn: '1/-1' }}>
                   <label style={L.label}>Quartier / Adresse</label>
-                  <input className="input" placeholder="Ex. Quartier Messa, Yaoundé" value={form.adresse} onChange={e => set('adresse', e.target.value)} style={{ color: '#111827' }} />
-                </div>
-                <div>
-                  <label style={L.label}>Année de création</label>
-                  <input className="input mono" type="number" min={1800} max={2099} placeholder="Ex. 1952" value={form.annee_creation} onChange={e => set('annee_creation', e.target.value)} style={{ color: '#111827' }} />
+                  <input className="input" placeholder="Ex. Quartier Messa, Yaoundé" value={form.adresse} onChange={e => set('adresse', e.target.value)} disabled={mode === 'edit'} style={{ color: '#111827' }} />
                 </div>
               </div>
 
@@ -744,7 +695,6 @@ function ParoisseFormPanel({ mode, paroisse, onClose, onSaved }: {
                     { label: 'Nom', ok: !!form.nom },
                     { label: 'Région', ok: !!form.regionId },
                     { label: 'District', ok: !!form.districtId },
-                    { label: 'Niveau', ok: !!form.niveau },
                   ].map(c => (
                     <div key={c.label} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: c.ok ? '#166534' : '#6B7280' }}>
                       {c.ok ? <I.check size={12} /> : <I.x size={12} />} {c.label}
@@ -939,7 +889,7 @@ export default function ParoissesPage() {
   const [search, setSearch]           = useState('');
   const [filterRegionId, setFilterRegionId]     = useState(0);
   const [filterDistrictId, setFilterDistrictId] = useState(0);
-  const [niveauFilter, setNiveauFilter] = useState('');
+  const [categorieFilter, setCategorieFilter] = useState('');
   const [gpsMode, setGpsMode]           = useState('');
   const [page, setPage]     = useState(1);
   const [refresh, setRefresh] = useState(0);
@@ -979,7 +929,7 @@ export default function ParoissesPage() {
     if (search) p.set('search', search);
     if (filterRegionId) p.set('region', String(filterRegionId));
     if (filterDistrictId) p.set('district', String(filterDistrictId));
-    if (niveauFilter) p.set('niveau', niveauFilter);
+    if (categorieFilter) p.set('categorie', categorieFilter);
     if (gpsMode === 'avec') p.set('avec_gps', '1');
     if (gpsMode === 'sans') p.set('sans_gps', '1');
 
@@ -988,40 +938,23 @@ export default function ParoissesPage() {
       .catch(() => { if (!cancelled) addToast({ type: 'error', title: 'Erreur de chargement des paroisses.' }); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [page, search, filterRegionId, filterDistrictId, niveauFilter, gpsMode, refresh, addToast]);
+  }, [page, search, filterRegionId, filterDistrictId, categorieFilter, gpsMode, refresh, addToast]);
 
   const totalPages = Math.max(1, Math.ceil(count / PAGE_SIZE));
   const doRefresh  = useCallback(() => { setPage(1); setRefresh(r => r + 1); }, []);
 
-  const hasFilter = !!(search || filterRegionId || filterDistrictId || niveauFilter || gpsMode);
+  const hasFilter = !!(search || filterRegionId || filterDistrictId || categorieFilter || gpsMode);
   const resetFilters = () => {
     setSearchInput(''); setSearch('');
     setFilterRegionId(0); setFilterDistrictId(0);
-    setNiveauFilter(''); setGpsMode(''); setPage(1);
+    setCategorieFilter(''); setGpsMode(''); setPage(1);
   };
 
   const toggle    = (id: number) => { const s = new Set(selection); s.has(id) ? s.delete(id) : s.add(id); setSelection(s); };
   const toggleAll = () => { if (selection.size === paroisses.length) setSelection(new Set()); else setSelection(new Set(paroisses.map(p => p.id))); };
 
-  const handleDelete = async () => {
-    if (!confirmDelete) return;
-    setDeleting(true);
-    try {
-      await api.delete(`/api/geo/paroisses/${confirmDelete.id}/`);
-      addToast({ type: 'success', title: `Paroisse "${confirmDelete.nom}" supprimée.` });
-      setConfirmDelete(null); setSelection(new Set()); doRefresh();
-    } catch (e) {
-      addToast({ type: 'error', title: 'Erreur lors de la suppression.', body: e instanceof Error ? e.message : undefined });
-    } finally { setDeleting(false); }
-  };
-
-  const handleToggleActive = async (p: Paroisse) => {
-    try {
-      await api.patch(`/api/geo/paroisses/${p.id}/`, { est_active: !p.est_active });
-      addToast({ type: 'success', title: `"${p.nom}" ${p.est_active ? 'désactivée' : 'réactivée'}.` });
-      doRefresh();
-    } catch { addToast({ type: 'error', title: 'Erreur de mise à jour du statut.' }); }
-  };
+  // EXIGENCES : suppression et activation/désactivation d'une paroisse
+  // n'existent plus (handlers retirés ; le backend renvoie 405 de toute façon).
 
   const handleSaved = (saved: Paroisse) => {
     const wasCreate = formPanel?.mode === 'create';
@@ -1054,7 +987,7 @@ export default function ParoissesPage() {
     return page - 2 + i;
   });
 
-  const niveauLabel = niveauFilter ? niveauFilter.charAt(0) + niveauFilter.slice(1).toLowerCase() : 'Tous niveaux';
+  const categorieLabel = categorieFilter || 'Toutes catégories';
   const gpsLabel    = gpsMode === 'avec' ? 'GPS: avec' : gpsMode === 'sans' ? 'GPS: sans' : 'GPS: tous';
 
   return (
@@ -1069,7 +1002,17 @@ export default function ParoissesPage() {
           <span style={{ fontSize: 12, color: 'var(--text-3)' }}>EEC Cameroun</span>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button className="btn btn-outline" onClick={() => window.open(`${BACKEND}/api/exports/paroisses/excel/`, '_blank')}>
+          <button className="btn btn-outline" onClick={() => {
+            // EXIGENCE : exporter la liste AFFICHÉE avec les filtres appliqués
+            const q = new URLSearchParams();
+            if (search)           q.set('search', search);
+            if (filterRegionId)   q.set('region', String(filterRegionId));
+            if (filterDistrictId) q.set('district', String(filterDistrictId));
+            if (categorieFilter)  q.set('categorie', categorieFilter);
+            if (gpsMode === 'avec') q.set('avec_gps', '1');
+            if (gpsMode === 'sans') q.set('sans_gps', '1');
+            window.open(`${BACKEND}/api/exports/paroisses/excel/?${q}`, '_blank');
+          }}>
             <I.download size={14} />Exporter Excel
           </button>
           <button className="btn btn-primary" onClick={() => setFormPanel({ mode: 'create' })}>
@@ -1100,8 +1043,10 @@ export default function ParoissesPage() {
             {filterDistricts.map(d => <option key={d.id} value={d.id}>{d.nom}</option>)}
           </select>
         </div>
-        <div style={{ width: 140 }}>
-          <Dropdown label="Niveau" value={niveauLabel} options={['Tous niveaux', 'Paroisse', 'Station', 'Annexe']} onChange={v => { setNiveauFilter(v === 'Tous niveaux' ? '' : v.toUpperCase()); setPage(1); }} />
+        <div style={{ width: 150 }}>
+          <Dropdown label="Catégorie" value={categorieLabel}
+            options={['Toutes catégories', 'A++', 'A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'C3', 'C4']}
+            onChange={v => { setCategorieFilter(v === 'Toutes catégories' ? '' : v); setPage(1); }} />
         </div>
         <div style={{ width: 130 }}>
           <Dropdown label="GPS" value={gpsLabel} options={['GPS: tous', 'GPS: avec', 'GPS: sans']} onChange={v => { setGpsMode(v === 'GPS: tous' ? '' : v === 'GPS: avec' ? 'avec' : 'sans'); setPage(1); }} />
@@ -1134,13 +1079,14 @@ export default function ParoissesPage() {
                     <th>Nom</th>
                     <th>Région</th>
                     <th>District</th>
-                    <th>Niveau</th>
+                    <th>Catégorie</th>
                     <th style={{ textAlign: 'right' }}>Fidèles</th>
+                    <th style={{ textAlign: 'right' }}>Communiants</th>
+                    <th style={{ textAlign: 'right' }}>Non-comm.</th>
+                    <th style={{ textAlign: 'center' }}>Ouvriers</th>
                     <th>GPS</th>
-                    <th>Complétude</th>
-                    <th>Statut</th>
                     <th>Modifié</th>
-                    <th style={{ width: 120 }}>Actions</th>
+                    <th style={{ width: 90 }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1167,19 +1113,23 @@ export default function ParoissesPage() {
                         <td><span style={{ fontWeight: 600, color: 'var(--text)', fontSize: 13 }}>{p.nom}</span></td>
                         <td style={{ color: 'var(--text-2)', fontSize: 12 }}>{p.region_nom}</td>
                         <td style={{ color: 'var(--text-2)', fontSize: 12 }}>{p.district_nom}</td>
-                        <td><NiveauPill niveau={p.niveau} /></td>
+                        <td><CategoriePill categorie={p.categorie} /></td>
                         <td className="mono" style={{ textAlign: 'right' }}>
                           {p.nombre_fideles !== null ? p.nombre_fideles.toLocaleString('fr') : <span style={{ color: 'var(--text-3)' }}>—</span>}
                         </td>
+                        <td className="mono" style={{ textAlign: 'right', color: '#5B9BD5' }}>
+                          {p.communiants !== null ? p.communiants.toLocaleString('fr') : '—'}
+                        </td>
+                        <td className="mono" style={{ textAlign: 'right', color: '#9B72CF' }}>
+                          {p.non_communiants !== null ? p.non_communiants.toLocaleString('fr') : '—'}
+                        </td>
+                        <td className="mono" style={{ textAlign: 'center', fontWeight: 600 }}>{p.nb_ouvriers ?? 0}</td>
                         <td><GpsCell ok={p.latitude !== null} /></td>
-                        <td><CompleteBar pct={complete} /></td>
-                        <td><StatusPill statut={p.est_active ? 'actif' : 'inactif'} /></td>
                         <td style={{ color: 'var(--text-2)', fontSize: 12 }}>{modifie}</td>
                         <td>
                           <div style={{ display: 'flex', gap: 2 }}>
                             <button className="icon-btn" title="Voir les détails" onClick={() => setViewPanel(p)}><I.eye size={15} /></button>
-                            <button className="icon-btn green" title="Modifier" onClick={() => setFormPanel({ mode: 'edit', paroisse: p })}><I.pencil size={15} /></button>
-                            <RowMenu paroisse={p} onDelete={() => setConfirmDelete(p)} onToggleActive={() => handleToggleActive(p)} />
+                            <button className="icon-btn green" title="Modifier (nom uniquement)" onClick={() => setFormPanel({ mode: 'edit', paroisse: p })}><I.pencil size={15} /></button>
                           </div>
                         </td>
                       </tr>
@@ -1215,7 +1165,6 @@ export default function ParoissesPage() {
       )}
 
       {/* Panels & Modals */}
-      {confirmDelete && <DeleteModal paroisse={confirmDelete} onCancel={() => setConfirmDelete(null)} onConfirm={handleDelete} busy={deleting} />}
       {viewPanel && <ParoisseViewPanel paroisse={viewPanel} onClose={() => setViewPanel(null)} onEdit={() => { setFormPanel({ mode: 'edit', paroisse: viewPanel }); setViewPanel(null); }} />}
       {formPanel && <ParoisseFormPanel mode={formPanel.mode} paroisse={formPanel.paroisse} onClose={() => setFormPanel(null)} onSaved={handleSaved} />}
 

@@ -29,7 +29,6 @@ export const REGIONS = [
 ];
 
 export const GRADES = [
-  { id: 'eveque',       label: 'Évêque',           short: 'Évêque',   weight: 0.5 },
   { id: 'pasteur',      label: 'Pasteur',          short: 'Pasteur',  weight: 30 },
   { id: 'predicateur',  label: 'Prédicateur',      short: 'Préd.',    weight: 18 },
   { id: 'evangeliste',  label: 'Évangéliste',      short: 'Évang.',   weight: 16 },
@@ -158,12 +157,11 @@ function buildWorkers(parishes: ReturnType<typeof buildParishes>) {
   const out: { id: string; regionId: string; parishId: string | null; grade: string; gradeLabel: string; name: string; status: string }[] = [];
   let id = 1;
   REGIONS.forEach(r => {
-    out.push({ id: 'W' + String(id++).padStart(4, '0'), regionId: r.id, parishId: null, grade: 'eveque', gradeLabel: 'Évêque', name: `${pick(NAMES_M)} ${pick(SURNAMES)}`, status: 'actif' });
   });
   let pIdx = 0;
   while (id <= 685 && parishes.length > 0) {
     const parish = parishes[pIdx % parishes.length];
-    const grade = pickWeighted(GRADES.filter(g => g.id !== 'eveque'));
+    const grade = pickWeighted(GRADES);
     const isF = rand() < 0.2 && (grade.id === 'diacre' || grade.id === 'catechiste');
     const first = isF ? pick(NAMES_F) : pick(NAMES_M);
     const status = rand() < 0.86 ? 'actif' : (rand() < 0.85 ? 'retraite' : 'suspendu');

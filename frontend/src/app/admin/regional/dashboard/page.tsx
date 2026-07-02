@@ -47,10 +47,10 @@ export default function DashboardRegionalPage() {
     value: d.total,
   }));
 
-  const niveaux = [
-    { count: PAROISSES_MIFI.filter(p => p.niveau === 'PAROISSE').length, color: '#5AC472' },
-    { count: PAROISSES_MIFI.filter(p => p.niveau === 'STATION').length,  color: '#5B9BD5' },
-    { count: PAROISSES_MIFI.filter(p => p.niveau === 'ANNEXE').length,   color: '#E67A2E' },
+  const categories = [
+    { count: PAROISSES_MIFI.filter(p => p.categorie === 'C1').length, color: '#5AC472' },
+    { count: PAROISSES_MIFI.filter(p => p.categorie === 'C2').length,  color: '#5B9BD5' },
+    { count: PAROISSES_MIFI.filter(p => p.categorie === 'C3').length,   color: '#E67A2E' },
   ];
 
   const fidEvol = FIDELESEVOLUTION_MIFI.map(e => ({
@@ -102,8 +102,8 @@ export default function DashboardRegionalPage() {
           <HorizontalBars data={districtBars} />
         </div>
         <div className="card" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Niveaux (paroisses)</div>
-          <Donut segments={niveaux} total={MOCK_REGION_MIFI.nbParoisses} label="paroisses" />
+          <div style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Catégories (paroisses)</div>
+          <Donut segments={categories} total={MOCK_REGION_MIFI.nbParoisses} label="paroisses" />
         </div>
         <div className="card" style={{ padding: '14px 16px' }}>
           <div style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>Types d'œuvres</div>

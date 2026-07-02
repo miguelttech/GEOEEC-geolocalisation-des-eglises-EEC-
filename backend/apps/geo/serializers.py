@@ -116,13 +116,15 @@ class DistrictSerializer(serializers.ModelSerializer):
     region_nom   = serializers.CharField(source="region.nom", read_only=True)
     region_id    = serializers.IntegerField(source="region.id", read_only=True)
     nb_paroisses = serializers.IntegerField(read_only=True, default=0)
-    region       = serializers.PrimaryKeyRelatedField(
-        queryset=RegionSynodale.objects.all(), write_only=True
-    )
+    nb_fideles   = serializers.IntegerField(read_only=True, allow_null=True)
+    nb_ouvriers  = serializers.IntegerField(read_only=True, allow_null=True)
 
     class Meta:
         model = District
-        fields = ["id", "nom", "region", "region_id", "region_nom", "nb_paroisses"]
+        # Lecture seule (les districts ne se créent ni ne se modifient) —
+        # enrichi des statistiques réellement disponibles.
+        fields = ["id", "nom", "region_id", "region_nom",
+                  "nb_paroisses", "nb_fideles", "nb_ouvriers"]
 
 
 # =============================================================================
@@ -141,6 +143,10 @@ class ParoisseListSerializer(serializers.ModelSerializer):
     region_id    = serializers.IntegerField(source="district.region.id", read_only=True)
     latitude     = serializers.SerializerMethodField()
     longitude    = serializers.SerializerMethodField()
+    # Fournis par annotate() dans la view (année statistique la plus récente)
+    nb_ouvriers      = serializers.IntegerField(read_only=True, default=0)
+    communiants      = serializers.IntegerField(read_only=True, allow_null=True)
+    non_communiants  = serializers.IntegerField(read_only=True, allow_null=True)
 
     def get_latitude(self, obj):
         return obj.position.y if obj.position else None
@@ -150,13 +156,15 @@ class ParoisseListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Paroisse
+        # EXIGENCES : plus de statut actif/inactif ni de date de création ;
+        # affichage fidèles / communiants / non-communiants / catégorie / ouvriers.
         fields = [
-            "id", "nom", "adresse", "niveau",
+            "id", "nom", "adresse", "categorie", "en_prospection",
             "district_id", "district_nom",
             "region_id", "region_nom",
             "latitude", "longitude",
-            "est_active", "nombre_fideles", "telephone", "email",
-            "annee_creation", "created_at", "updated_at",
+            "nombre_fideles", "communiants", "non_communiants", "nb_ouvriers",
+            "telephone", "email", "updated_at",
         ]
 
 
@@ -212,12 +220,11 @@ class ParoisseDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Paroisse
         fields = [
-            "id", "nom", "adresse", "niveau",
+            "id", "nom", "adresse", "categorie", "en_prospection",
             "district_id", "district_nom",
             "region_id", "region_nom",
             "latitude", "longitude",
-            "est_active", "nombre_fideles", "telephone", "email",
-            "annee_creation", "created_at", "updated_at",
+            "nombre_fideles", "telephone", "email", "updated_at",
         ]
 
 
@@ -238,12 +245,13 @@ class ParoisseWriteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Paroisse
+        # Champs de CRÉATION. En MODIFICATION, la view ne laisse passer que
+        # le nom et l'état de prospection (exigence).
         fields = [
-            "id", "nom", "adresse", "niveau",
+            "id", "nom", "adresse", "categorie", "en_prospection",
             "district",
             "latitude", "longitude",
-            "est_active", "nombre_fideles", "telephone", "email",
-            "annee_creation",
+            "nombre_fideles", "telephone", "email",
         ]
 
     def validate(self, attrs):

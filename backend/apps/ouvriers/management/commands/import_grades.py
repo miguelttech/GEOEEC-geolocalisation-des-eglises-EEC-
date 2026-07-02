@@ -50,7 +50,7 @@ from apps.ouvriers.models import Grade
 # =============================================================================
 GRADES = [
     # Niveau 1 : le plus haut grade — responsable d'une région synodale entière
-    {"niveau": 1, "nom": "Évêque",                                     "abreviation": "Év."},
+    # EXIGENCE : le grade « Évêque » n existe pas dans l Église protestante — retiré.
 
     # Niveau 2 : agent pastoral principal, responsable d'une paroisse
     {"niveau": 2, "nom": "Pasteur",                                     "abreviation": "P."},

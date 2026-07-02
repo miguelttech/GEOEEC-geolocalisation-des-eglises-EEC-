@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from django.contrib.gis.geos import Point
 
 from .models import Grade, Ouvrier
 
@@ -22,8 +21,6 @@ class OuvrierListSerializer(serializers.ModelSerializer):
     district_nom      = serializers.SerializerMethodField()
     region_id         = serializers.SerializerMethodField()
     region_nom        = serializers.SerializerMethodField()
-    latitude          = serializers.SerializerMethodField()
-    longitude         = serializers.SerializerMethodField()
 
     def get_grade_id(self, obj):          return obj.grade_id
     def get_grade_nom(self, obj):         return obj.grade.nom if obj.grade_id else None
@@ -34,49 +31,64 @@ class OuvrierListSerializer(serializers.ModelSerializer):
     def get_district_nom(self, obj):      return obj.paroisse.district.nom
     def get_region_id(self, obj):         return obj.paroisse.district.region_id
     def get_region_nom(self, obj):        return obj.paroisse.district.region.nom
-    def get_latitude(self, obj):          return obj.position.y if obj.position else None
-    def get_longitude(self, obj):         return obj.position.x if obj.position else None
 
     class Meta:
         model = Ouvrier
+        # EXIGENCES : jamais géolocalisable ; email / date de naissance /
+        # ordination retirés (données non collectées — principe de faisabilité).
         fields = [
             "id", "nom", "prenom", "sexe", "statut",
             "grade_id", "grade_nom", "grade_abreviation",
             "paroisse_id", "paroisse_nom",
             "district_id", "district_nom",
             "region_id", "region_nom",
-            "telephone", "email", "date_naissance", "date_ordination",
-            "latitude", "longitude",
+            "telephone",
             "created_at", "updated_at",
         ]
 
 
 class OuvrierWriteSerializer(serializers.ModelSerializer):
-    latitude  = serializers.FloatField(required=False, allow_null=True, write_only=True)
-    longitude = serializers.FloatField(required=False, allow_null=True, write_only=True)
+    """Création d'un ouvrier : identité (nom, prénom, sexe) + téléphone
+    + statut + grade + affectation. Rien d'autre (faisabilité)."""
 
     class Meta:
         model = Ouvrier
         fields = [
             "id", "nom", "prenom", "sexe", "statut",
-            "grade", "paroisse",
-            "telephone", "email", "date_naissance", "date_ordination",
-            "latitude", "longitude",
+            "grade", "paroisse", "telephone",
         ]
         extra_kwargs = {
             "grade": {"required": False, "allow_null": True},
         }
 
+
+class OuvrierAffectationSerializer(serializers.ModelSerializer):
+    """
+    EXIGENCE : l'identité d'un ouvrier (nom, prénom, sexe) n'est JAMAIS
+    modifiable. Seuls le TÉLÉPHONE, le STATUT (Occupé/Inoccupé) et
+    l'AFFECTATION (paroisse unique) peuvent changer.
+
+    RÈGLE MÉTIER OBLIGATOIRE : un ouvrier ne travaille que dans UNE paroisse.
+    Pour le réaffecter, il faut d'abord le RETIRER de son ancienne paroisse
+    (statut « Inoccupé ») — sinon le système refuse en indiquant où il
+    travaille actuellement.
+    """
+
+    class Meta:
+        model = Ouvrier
+        fields = ["paroisse", "statut", "telephone"]
+
     def validate(self, attrs):
-        has_lat = "latitude" in attrs
-        has_lng = "longitude" in attrs
-        lat = attrs.pop("latitude", None)
-        lng = attrs.pop("longitude", None)
-        if has_lat and has_lng:
-            if lat is not None and lng is not None:
-                attrs["position"] = Point(lng, lat, srid=4326)
-            else:
-                attrs["position"] = None
-        elif has_lat or has_lng:
-            raise serializers.ValidationError("Fournir latitude ET longitude ensemble.")
+        inst = self.instance
+        nouvelle = attrs.get("paroisse")
+        if inst and nouvelle and nouvelle.id != inst.paroisse_id:
+            if inst.statut == "OCCUPE":
+                raise serializers.ValidationError(
+                    f"Impossible : cet ouvrier travaille actuellement à la paroisse "
+                    f"« {inst.paroisse.nom} » ({inst.paroisse.district.nom}, "
+                    f"{inst.paroisse.district.region.nom}). Retirez-le d'abord "
+                    f"(statut « Inoccupé ») avant de le réaffecter."
+                )
+            # Réaffectation d'un ouvrier inoccupé → il redevient occupé
+            attrs.setdefault("statut", "OCCUPE")
         return attrs

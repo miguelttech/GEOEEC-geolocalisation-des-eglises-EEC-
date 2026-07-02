@@ -154,6 +154,12 @@ class Oeuvre(models.Model):
     # La signification varie selon le type d'œuvre
     capacite = models.IntegerField(null=True, blank=True)
 
+    # Nombre de personnels travaillant dans l'œuvre (enseignants, soignants…)
+    nb_personnels = models.IntegerField(null=True, blank=True)
+
+    # Œuvre « en prospection » : projet à l'étude / en cours d'implantation
+    en_prospection = models.BooleanField(default=False)
+
     # Description longue : historique, état, particularités
     description = models.TextField(blank=True)
 

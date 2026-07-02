@@ -42,7 +42,7 @@ interface ImportResult {
 
 interface ParoissePreviewRow {
   nom: string;
-  niveau: string;
+  categorie: string;
   region: string;
   district: string;
   adresse: string;
@@ -451,7 +451,7 @@ function ImportPanel({ tab, onDone }: { tab: ImportTab; onDone: () => void }) {
                         </td>
                         <td>
                           <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 3, background: 'rgba(255,255,255,0.06)', color: 'var(--text-2)' }}>
-                            {row.niveau}
+                            {row.categorie || '—'}
                           </span>
                         </td>
                         <td style={{ color: 'var(--text-2)', fontSize: 11 }}>{row.region}</td>
@@ -489,6 +489,29 @@ export default function IOPage() {
   const [tab, setTab]             = React.useState<'import' | 'export' | 'historique'>('import');
   const [importTab, setImportTab] = React.useState<ImportTab>('paroisses');
   const [importKey, setImportKey] = React.useState(0);
+
+  // EXIGENCE : l'importation de données est réservée au SEUL administrateur
+  // général. Le backend refuse déjà (403) ; ici on bloque aussi l'interface.
+  const [role, setRole] = React.useState<string | null>(null);
+  React.useEffect(() => {
+    const B = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api').replace(/\/api\/?$/, '');
+    fetch(`${B}/api/auth/me/`, { credentials: 'include' })
+      .then(r => r.json()).then(me => setRole(me.role ?? '')).catch(() => setRole(''));
+  }, []);
+  if (role !== null && role !== 'SUPER' && tab === 'import') {
+    return (
+      <div className="card" style={{ padding: 40, textAlign: 'center', color: 'var(--text-2)' }}>
+        <div style={{ fontSize: 34, marginBottom: 10 }}>🔒</div>
+        <h3 style={{ margin: '0 0 6px' }}>Importation réservée</h3>
+        <p style={{ fontSize: 13, margin: 0 }}>
+          Seul l&apos;administrateur général peut importer des données dans la plateforme.
+        </p>
+        <button className="btn btn-outline" style={{ marginTop: 16 }} onClick={() => setTab('export')}>
+          Aller aux exports
+        </button>
+      </div>
+    );
+  }
 
   const [history, setHistory]   = React.useState<LogEntry[]>([]);
   const [histLoad, setHistLoad] = React.useState(false);

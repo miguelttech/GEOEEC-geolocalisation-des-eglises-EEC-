@@ -13,7 +13,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from .models import User, StatistiqueAnnuelle
-from .permissions import can_manage_accounts
+from .permissions import can_manage_accounts, IsAdminUser
 from .serializers import UserSerializer, UserCreateSerializer
 from .throttles import LoginRateThrottle
 
@@ -167,7 +167,7 @@ def change_password(request):
 # ---------------------------------------------------------------------------
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminUser])
 def list_users(request):
     """
     GET /api/auth/users/
@@ -190,7 +190,7 @@ def list_users(request):
 
 
 @api_view(["POST"])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminUser])
 def create_user(request):
     """POST /api/auth/users/create/ — Crée un nouveau compte admin."""
     from apps.audit.utils import log_action
@@ -208,12 +208,42 @@ def create_user(request):
             objet_nom=new_user.get_full_name() or new_user.username,
             description=f"Création compte — rôle : {new_user.get_role_display()}",
         )
-        return Response(UserSerializer(new_user).data, status=status.HTTP_201_CREATED)
+        # ── Envoi AUTOMATIQUE du mot de passe généré par e-mail ──────────
+        email_ok = False
+        try:
+            send_mail(
+                subject="EEC Géolocalisation — votre compte administrateur",
+                message=(
+                    f"Bonjour {new_user.get_full_name() or new_user.username},\n\n"
+                    f"Votre compte administrateur ({new_user.get_role_display()}) vient d'être créé "
+                    f"sur la plateforme de géolocalisation de l'Église Évangélique du Cameroun.\n\n"
+                    f"Identifiant : {new_user.username}\n"
+                    f"Mot de passe : {new_user._generated_password}\n\n"
+                    f"Ce mot de passe est généré automatiquement. Il vous sera demandé "
+                    f"de le changer à votre première connexion.\n\n"
+                    f"— Plateforme EEC Géolocalisation"
+                ),
+                from_email=getattr(settings, "DEFAULT_FROM_EMAIL", None),
+                recipient_list=[new_user.email],
+                fail_silently=False,
+            )
+            email_ok = True
+        except Exception:
+            # Le compte existe mais l'e-mail n'est pas parti (SMTP non joignable) :
+            # on l'indique au créateur pour qu'il transmette le mot de passe autrement.
+            pass
+        payload = UserSerializer(new_user).data
+        payload["email_envoye"] = email_ok
+        if not email_ok:
+            payload["mot_de_passe_genere"] = new_user._generated_password
+            payload["detail"] = ("Compte créé, mais l'e-mail n'a pas pu être envoyé "
+                                 "(vérifier la configuration SMTP). Transmettez ce mot de passe manuellement.")
+        return Response(payload, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["GET", "PATCH", "DELETE"])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminUser])
 def user_detail(request, pk):
     """GET/PATCH/DELETE /api/auth/users/{pk}/"""
     from apps.audit.utils import log_action
@@ -244,6 +274,13 @@ def user_detail(request, pk):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     if request.method == "DELETE":
+        # EXIGENCE : seul l'administrateur national (SUPER) peut supprimer
+        # d'autres administrateurs. Aucun autre niveau n'a ce droit.
+        if user.role != "SUPER":
+            return Response(
+                {"detail": "Seul l'administrateur national peut supprimer un compte."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         if target.role == "SUPER" or target == user:
             return Response(
                 {"detail": "Cette opération n'est pas autorisée."},
@@ -257,7 +294,7 @@ def user_detail(request, pk):
 
 
 @api_view(["POST"])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminUser])
 def toggle_user_active(request, pk):
     """POST /api/auth/users/{pk}/toggle-active/"""
     from apps.audit.utils import log_action
@@ -279,7 +316,7 @@ def toggle_user_active(request, pk):
 
 
 @api_view(["POST"])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminUser])
 def reset_user_password(request, pk):
     """POST /api/auth/users/{pk}/reset-password/"""
     from apps.audit.utils import log_action
@@ -312,7 +349,7 @@ def reset_user_password(request, pk):
 # ---------------------------------------------------------------------------
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminUser])
 def dashboard_stats(request):
     """GET /api/auth/dashboard-stats/ — Compteurs et données agrégées pour le tableau de bord."""
     from django.db.models import Count, Q
@@ -355,9 +392,13 @@ def dashboard_stats(request):
         RegionSynodale.objects.count() if user.role == "SUPER"
         else (District.objects.filter(region=user.region).values("region").count() if user.role == "REGION" else 1)
     )
+    # EXIGENCE : le nombre officiel de districts est 137 (fixe). Les districts
+    # techniques « NON PRÉCISÉ » (créés pour héberger les paroisses officielles
+    # en attente de rattachement) sont EXCLUS de tous les comptages.
+    districts_reels = District.objects.exclude(nom="NON PRÉCISÉ")
     nb_districts = (
-        District.objects.count() if user.role == "SUPER"
-        else (District.objects.filter(region=user.region).count() if user.role == "REGION" else 1)
+        districts_reels.count() if user.role == "SUPER"
+        else (districts_reels.filter(region=user.region).count() if user.role == "REGION" else 1)
     )
 
     # ── Évolution fidèles par année (2020 → annee) ──────────────────────────
@@ -403,33 +444,63 @@ def dashboard_stats(request):
         "IMMEUBLE": "Immeuble", "TERRAIN": "Terrain", "AUTRE": "Autre",
     }
     oeuvres_par_type = []
-    for row in oeuvres_qs.values("type_oeuvre").annotate(count=Count("id")).order_by("type_oeuvre"):
-        t = row["type_oeuvre"]
+    # BUGFIX : values("type_oeuvre") renvoyait l'ID de la FK (labels numériques,
+    # couleur grise) — on agrège sur le NOM du type pour retrouver couleurs/libellés.
+    for row in oeuvres_qs.values("type_oeuvre__nom").annotate(count=Count("id")).order_by("-count"):
+        t = row["type_oeuvre__nom"]
         oeuvres_par_type.append({
-            "type": TYPE_LABELS.get(t, t),
+            "type": TYPE_LABELS.get(t, t or "Autre"),
             "count": row["count"],
             "color": TYPE_COLORS.get(t, "#888"),
         })
 
-    # ── Niveaux de paroisses par région (top 6) ──────────────────────────────
-    niveaux_par_region = []
+    # ── EXIGENCE : top 10 des paroisses ayant le plus de fidèles ────────────
+    top_paroisses_fideles = [
+        {"name": p["nom"], "fideles": p["nombre_fideles"]}
+        for p in paroisses_qs.exclude(nombre_fideles__isnull=True)
+                             .order_by("-nombre_fideles")
+                             .values("nom", "nombre_fideles")[:10]
+    ]
+
+    # ── EXIGENCE : œuvres par région ET par type (compte SUPER) ─────────────
+    oeuvres_par_region = []
     if user.role == "SUPER":
-        regions_niveaux = (
+        compte: dict = {}
+        for o in oeuvres_qs.select_related(
+                "type_oeuvre", "paroisse__district__region", "district__region", "region"):
+            if o.paroisse_id:
+                reg = o.paroisse.district.region.nom
+            elif o.district_id:
+                reg = o.district.region.nom
+            else:
+                reg = o.region.nom if o.region_id else "National"
+            t = o.type_oeuvre.nom if o.type_oeuvre_id else "AUTRE"
+            compte.setdefault(reg, {"name": reg, "total": 0})
+            compte[reg][t] = compte[reg].get(t, 0) + 1
+            compte[reg]["total"] += 1
+        oeuvres_par_region = sorted(compte.values(), key=lambda r: -r["total"])[:12]
+
+    # ── Catégories de paroisses par région (top 6) ───────────────────────────
+    # Regroupées en 3 familles pour le graphique : A (A++, A1, A2),
+    # B (B1, B2), C (C1 à C4) — catégories officielles R05/CSG.
+    categories_par_region = []
+    if user.role == "SUPER":
+        regions_cats = (
             RegionSynodale.objects
             .annotate(
-                nb_paroisse=Count("districts__paroisses",
-                                  filter=Q(districts__paroisses__niveau="PAROISSE"), distinct=True),
-                nb_station=Count("districts__paroisses",
-                                 filter=Q(districts__paroisses__niveau="STATION"), distinct=True),
-                nb_annexe=Count("districts__paroisses",
-                                filter=Q(districts__paroisses__niveau="ANNEXE"), distinct=True),
+                nb_a=Count("districts__paroisses",
+                           filter=Q(districts__paroisses__categorie__in=["A++", "A1", "A2"]), distinct=True),
+                nb_b=Count("districts__paroisses",
+                           filter=Q(districts__paroisses__categorie__in=["B1", "B2"]), distinct=True),
+                nb_c=Count("districts__paroisses",
+                           filter=Q(districts__paroisses__categorie__in=["C1", "C2", "C3", "C4"]), distinct=True),
                 total=Count("districts__paroisses", distinct=True),
             )
             .order_by("-total")[:6]
         )
-        niveaux_par_region = [
-            {"name": r.nom, "paroisse": r.nb_paroisse, "station": r.nb_station, "annexe": r.nb_annexe}
-            for r in regions_niveaux
+        categories_par_region = [
+            {"name": r.nom, "cat_a": r.nb_a, "cat_b": r.nb_b, "cat_c": r.nb_c}
+            for r in regions_cats
         ]
 
     # ── Validations en attente ───────────────────────────────────────────────
@@ -469,7 +540,9 @@ def dashboard_stats(request):
         "fideles_par_annee":     fideles_par_annee,
         "top_regions":           top_regions,
         "oeuvres_par_type":      oeuvres_par_type,
-        "niveaux_par_region":    niveaux_par_region,
+        "top_paroisses_fideles": top_paroisses_fideles,
+        "oeuvres_par_region":    oeuvres_par_region,
+        "categories_par_region": categories_par_region,
         "activite_recente":      activite_recente,
     })
 

@@ -19,20 +19,20 @@ export const MOCK_DISTRICT = {
 };
 
 export interface ParoisseDistrict {
-  id: number; nom: string; niveau: 'PAROISSE'|'STATION'|'ANNEXE';
+  id: number; nom: string; categorie: 'C1'|'C2'|'C3';
   fideles: number; ouvriers: number; gps: boolean; complete: number;
   statut: 'actif'|'inactif'|'en_attente'; modifie: string; modPar: string;
 }
 
 export const PAROISSES_DISTRICT: ParoisseDistrict[] = [
-  { id:1, nom:'Bafoussam-Centre',   niveau:'PAROISSE', fideles:892,  ouvriers:4, gps:true,  complete:92, statut:'en_attente', modifie:'il y a 3h',  modPar:'Daniel AWONO' },
-  { id:2, nom:'Bafoussam-Plateau',  niveau:'PAROISSE', fideles:1140, ouvriers:3, gps:true,  complete:88, statut:'actif',      modifie:'il y a 1j',  modPar:'Daniel AWONO' },
-  { id:3, nom:'Bafoussam-Kamkop',   niveau:'STATION',  fideles:420,  ouvriers:2, gps:true,  complete:74, statut:'actif',      modifie:'il y a 2j',  modPar:'Système' },
-  { id:4, nom:'Bafoussam-Ndongo',   niveau:'PAROISSE', fideles:620,  ouvriers:2, gps:true,  complete:68, statut:'actif',      modifie:'il y a 4j',  modPar:'Daniel AWONO' },
-  { id:5, nom:'Bafoussam-Tougang',  niveau:'STATION',  fideles:285,  ouvriers:1, gps:false, complete:45, statut:'actif',      modifie:'il y a 5j',  modPar:'Système' },
-  { id:6, nom:'Bafoussam-Cité',     niveau:'ANNEXE',   fideles:178,  ouvriers:1, gps:false, complete:33, statut:'actif',      modifie:'il y a 6j',  modPar:'Système' },
-  { id:7, nom:'Bafoussam-Famla',    niveau:'STATION',  fideles:152,  ouvriers:1, gps:true,  complete:58, statut:'actif',      modifie:'il y a 8j',  modPar:'Système' },
-  { id:8, nom:'Bafoussam-Djeleng',  niveau:'ANNEXE',   fideles:143,  ouvriers:0, gps:false, complete:20, statut:'en_attente', modifie:'il y a 10j', modPar:'Système' },
+  { id:1, nom:'Bafoussam-Centre',   categorie:'C1', fideles:892,  ouvriers:4, gps:true,  complete:92, statut:'en_attente', modifie:'il y a 3h',  modPar:'Daniel AWONO' },
+  { id:2, nom:'Bafoussam-Plateau',  categorie:'C1', fideles:1140, ouvriers:3, gps:true,  complete:88, statut:'actif',      modifie:'il y a 1j',  modPar:'Daniel AWONO' },
+  { id:3, nom:'Bafoussam-Kamkop',   categorie:'C2',  fideles:420,  ouvriers:2, gps:true,  complete:74, statut:'actif',      modifie:'il y a 2j',  modPar:'Système' },
+  { id:4, nom:'Bafoussam-Ndongo',   categorie:'C1', fideles:620,  ouvriers:2, gps:true,  complete:68, statut:'actif',      modifie:'il y a 4j',  modPar:'Daniel AWONO' },
+  { id:5, nom:'Bafoussam-Tougang',  categorie:'C2',  fideles:285,  ouvriers:1, gps:false, complete:45, statut:'actif',      modifie:'il y a 5j',  modPar:'Système' },
+  { id:6, nom:'Bafoussam-Cité',     categorie:'C3',   fideles:178,  ouvriers:1, gps:false, complete:33, statut:'actif',      modifie:'il y a 6j',  modPar:'Système' },
+  { id:7, nom:'Bafoussam-Famla',    categorie:'C2',  fideles:152,  ouvriers:1, gps:true,  complete:58, statut:'actif',      modifie:'il y a 8j',  modPar:'Système' },
+  { id:8, nom:'Bafoussam-Djeleng',  categorie:'C3',   fideles:143,  ouvriers:0, gps:false, complete:20, statut:'en_attente', modifie:'il y a 10j', modPar:'Système' },
 ];
 
 export const OUVRIERS_DISTRICT = [
@@ -68,14 +68,14 @@ export const COMPTES_DISTRICT = [
 ];
 
 export const STATS_PAROISSES_DISTRICT = [
-  { paroisse:'Bafoussam-Centre',  niveau:'PAROISSE' as const, communiants:560, noncomm:332, total:892,  ouvriers:4, score:92 },
-  { paroisse:'Bafoussam-Plateau', niveau:'PAROISSE' as const, communiants:710, noncomm:430, total:1140, ouvriers:3, score:88 },
-  { paroisse:'Bafoussam-Kamkop',  niveau:'STATION'  as const, communiants:265, noncomm:155, total:420,  ouvriers:2, score:74 },
-  { paroisse:'Bafoussam-Ndongo',  niveau:'PAROISSE' as const, communiants:390, noncomm:230, total:620,  ouvriers:2, score:68 },
-  { paroisse:'Bafoussam-Tougang', niveau:'STATION'  as const, communiants:175, noncomm:110, total:285,  ouvriers:1, score:45 },
-  { paroisse:'Bafoussam-Cité',    niveau:'ANNEXE'   as const, communiants:112, noncomm:66,  total:178,  ouvriers:1, score:33 },
-  { paroisse:'Bafoussam-Famla',   niveau:'STATION'  as const, communiants:95,  noncomm:57,  total:152,  ouvriers:1, score:58 },
-  { paroisse:'Bafoussam-Djeleng', niveau:'ANNEXE'   as const, communiants:88,  noncomm:55,  total:143,  ouvriers:0, score:20 },
+  { paroisse:'Bafoussam-Centre',  categorie: 'C1' as const, communiants:560, noncomm:332, total:892,  ouvriers:4, score:92 },
+  { paroisse:'Bafoussam-Plateau', categorie: 'C1' as const, communiants:710, noncomm:430, total:1140, ouvriers:3, score:88 },
+  { paroisse:'Bafoussam-Kamkop',  categorie:'C2'  as const, communiants:265, noncomm:155, total:420,  ouvriers:2, score:74 },
+  { paroisse:'Bafoussam-Ndongo',  categorie: 'C1' as const, communiants:390, noncomm:230, total:620,  ouvriers:2, score:68 },
+  { paroisse:'Bafoussam-Tougang', categorie:'C2'  as const, communiants:175, noncomm:110, total:285,  ouvriers:1, score:45 },
+  { paroisse:'Bafoussam-Cité',    categorie:'C3'   as const, communiants:112, noncomm:66,  total:178,  ouvriers:1, score:33 },
+  { paroisse:'Bafoussam-Famla',   categorie:'C2'  as const, communiants:95,  noncomm:57,  total:152,  ouvriers:1, score:58 },
+  { paroisse:'Bafoussam-Djeleng', categorie:'C3'   as const, communiants:88,  noncomm:55,  total:143,  ouvriers:0, score:20 },
 ];
 
 export const JOURNAL_DISTRICT = [

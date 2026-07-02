@@ -11,6 +11,7 @@ from django.http import HttpResponse
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
+from apps.accounts.permissions import IsAdminUser
 from rest_framework.response import Response
 
 from apps.geo.models import RegionSynodale, District, Paroisse
@@ -93,9 +94,11 @@ def _parse_gps(lat_raw, lon_raw):
 # ===========================================================================
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminUser])
 def export_paroisses_excel(request):
-    """GET /api/exports/paroisses/excel/"""
+    """GET /api/exports/paroisses/excel/ — EXIGENCE : exporte la liste
+    ACTUELLEMENT AFFICHÉE, en tenant compte des filtres appliqués
+    (mêmes paramètres que la liste : region, district, search, categorie, GPS)."""
     from apps.audit.utils import log_action
 
     qs = (
@@ -103,6 +106,19 @@ def export_paroisses_excel(request):
         .select_related("district", "district__region")
         .order_by("district__region__nom", "district__nom", "nom")
     )
+    p = request.query_params
+    if p.get("region"):
+        qs = qs.filter(district__region_id=p["region"])
+    if p.get("district"):
+        qs = qs.filter(district_id=p["district"])
+    if p.get("search"):
+        qs = qs.filter(nom__icontains=p["search"])
+    if p.get("categorie"):
+        qs = qs.filter(categorie=p["categorie"])
+    if p.get("avec_gps") == "1":
+        qs = qs.exclude(position__isnull=True)
+    if p.get("sans_gps") == "1":
+        qs = qs.filter(position__isnull=True)
 
     wb  = openpyxl.Workbook()
     ws  = wb.active
@@ -110,27 +126,26 @@ def export_paroisses_excel(request):
 
     headers = [
         "ID", "Nom de la Paroisse", "District", "Région",
-        "Adresse", "Téléphone", "Latitude", "Longitude",
-        "GPS ?", "Année Création", "Active",
+        "Catégorie", "Fidèles", "Adresse", "Téléphone",
+        "Latitude", "Longitude", "GPS ?",
     ]
     ws.append(headers)
     _apply_header(ws, 1, len(headers))
 
-    for idx, p in enumerate(qs, start=2):
-        lat = round(p.position.y, 6) if p.position else ""
-        lon = round(p.position.x, 6) if p.position else ""
+    for idx, p_ in enumerate(qs, start=2):
+        lat = round(p_.position.y, 6) if p_.position else ""
+        lon = round(p_.position.x, 6) if p_.position else ""
         ws.append([
-            p.id, p.nom,
-            p.district.nom, p.district.region.nom,
-            p.adresse, p.telephone,
+            p_.id, p_.nom,
+            p_.district.nom, p_.district.region.nom,
+            p_.categorie or "", p_.nombre_fideles or "",
+            p_.adresse, p_.telephone,
             lat, lon,
-            "Oui" if p.position else "Non",
-            p.annee_creation or "",
-            "Oui" if p.est_active else "Non",
+            "Oui" if p_.position else "Non",
         ])
         _apply_row(ws, idx, len(headers))
 
-    _set_col_widths(ws, [6, 40, 25, 30, 35, 15, 12, 12, 6, 10, 6])
+    _set_col_widths(ws, [6, 40, 25, 30, 10, 10, 35, 15, 12, 12, 6])
     ws.freeze_panes = "A2"
 
     log_action(request, "EXPORT", "paroisse", description=f"Export Excel paroisses — {qs.count()} lignes")
@@ -138,7 +153,7 @@ def export_paroisses_excel(request):
 
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminUser])
 def export_oeuvres_excel(request):
     """GET /api/exports/oeuvres/excel/"""
     from apps.audit.utils import log_action
@@ -159,7 +174,7 @@ def export_oeuvres_excel(request):
     ws.title = "Oeuvres EEC"
 
     headers = [
-        "ID", "Nom de l'Œuvre", "Type", "Niveau",
+        "ID", "Nom de l'Œuvre", "Type", "Rattachement",
         "Paroisse", "District", "Région",
         "Adresse", "Latitude", "Longitude",
         "Capacité", "Année Création", "Active",
@@ -205,7 +220,61 @@ def export_oeuvres_excel(request):
 
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminUser])
+def export_ouvriers_excel(request):
+    """GET /api/exports/ouvriers/excel/ — EXIGENCE : exporte la liste
+    affichée en tenant compte des filtres (region, district, paroisse,
+    grade, statut, sexe, search)."""
+    from apps.audit.utils import log_action
+
+    qs = (
+        Ouvrier.objects
+        .select_related("grade", "paroisse__district__region")
+        .order_by("nom", "prenom")
+    )
+    p = request.query_params
+    if p.get("region"):
+        qs = qs.filter(paroisse__district__region_id=p["region"])
+    if p.get("district"):
+        qs = qs.filter(paroisse__district_id=p["district"])
+    if p.get("paroisse"):
+        qs = qs.filter(paroisse_id=p["paroisse"])
+    if p.get("grade"):
+        qs = qs.filter(grade_id=p["grade"])
+    if p.get("statut"):
+        qs = qs.filter(statut=p["statut"])
+    if p.get("sexe"):
+        qs = qs.filter(sexe=p["sexe"])
+    if p.get("search"):
+        qs = qs.filter(nom__icontains=p["search"])
+
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Ouvriers EEC"
+    headers = ["ID", "Nom", "Prénom", "Sexe", "Grade", "Paroisse",
+               "District", "Région", "Statut", "Téléphone"]
+    ws.append(headers)
+    _apply_header(ws, 1, len(headers))
+    for idx, o in enumerate(qs, start=2):
+        ws.append([
+            o.id, o.nom, o.prenom,
+            "Masculin" if o.sexe == "M" else "Féminin",
+            o.grade.nom if o.grade_id else "",
+            o.paroisse.nom, o.paroisse.district.nom,
+            o.paroisse.district.region.nom,
+            "Occupé" if o.statut == "OCCUPE" else "Inoccupé",
+            o.telephone,
+        ])
+        _apply_row(ws, idx, len(headers))
+    _set_col_widths(ws, [6, 22, 22, 10, 24, 32, 25, 28, 10, 16])
+    ws.freeze_panes = "A2"
+
+    log_action(request, "EXPORT", "ouvrier", description=f"Export Excel ouvriers — {qs.count()} lignes")
+    return _excel_response(wb, f"EEC_ouvriers_{date.today()}.xlsx")
+
+
+@api_view(["GET"])
+@permission_classes([IsAdminUser])
 def export_statistiques_excel(request):
     """GET /api/exports/statistiques/excel/?annee=2025"""
     from apps.audit.utils import log_action
@@ -266,7 +335,7 @@ def export_statistiques_excel(request):
 
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminUser])
 def export_statistiques_pdf(request):
     """GET /api/exports/statistiques/pdf/?annee=2025"""
     from apps.audit.utils import log_action
@@ -378,7 +447,7 @@ def export_statistiques_pdf(request):
 # ===========================================================================
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminUser])
 def template_paroisses(request):
     """GET /api/exports/templates/paroisses/"""
     from openpyxl.styles import PatternFill as PF
@@ -390,7 +459,7 @@ def template_paroisses(request):
 
     # --- En-têtes -----------------------------------------------------------
     headers = [
-        "Niveau",
+        "Catégorie",
         "Région Synodale *",
         "District",
         "Nom de la Paroisse *",
@@ -407,7 +476,7 @@ def template_paroisses(request):
 
     # --- Ligne d'exemple ----------------------------------------------------
     ws.append([
-        "PAROISSE",
+        "C1",
         "WOURI CENTRE",
         "WOURI",
         "Paroisse de Bonanjo",
@@ -423,7 +492,7 @@ def template_paroisses(request):
 
     # --- Ligne d'explication ------------------------------------------------
     ws.append([
-        "PAROISSE / STATION / ANNEXE",
+        "A++ / A1 / A2 / B1 / B2 / C1 / C2 / C3 / C4 (optionnel)",
         "Nom exact de la région synodiale",
         "Nom exact du district (optionnel si région fournie)",
         "Obligatoire",
@@ -448,7 +517,7 @@ def template_paroisses(request):
             "* = champ obligatoire  |  "
             "Région Synodale et Nom de la Paroisse sont les seuls champs OBLIGATOIRES.  |  "
             "Le District est recommandé mais optionnel (la première correspondance dans la région sera utilisée).  |  "
-            "Niveau par défaut : PAROISSE  |  "
+            "Catégorie : optionnelle, valeurs officielles A++ à C4 (résolution R05/CSG)  |  "
             "Coord. X = Longitude, Coord. Y = Latitude (système WGS-84, décimales, point comme séparateur).  |  "
             "Les communiants et non-communiants créent automatiquement une statistique annuelle pour l'année en cours."
         )
@@ -465,7 +534,7 @@ def template_paroisses(request):
 
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminUser])
 def template_oeuvres(request):
     """GET /api/exports/templates/oeuvres/"""
     wb = openpyxl.Workbook()
@@ -490,7 +559,7 @@ def template_oeuvres(request):
 
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminUser])
 def template_ouvriers(request):
     """GET /api/exports/templates/ouvriers/"""
     wb = openpyxl.Workbook()
@@ -520,14 +589,14 @@ def template_ouvriers(request):
 # ===========================================================================
 
 @api_view(["POST"])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminUser])
 def import_paroisses(request):
     """
     POST /api/imports/paroisses/
     Body : multipart/form-data, champ « file » (.xlsx)
 
     Colonnes (ligne 1 = en-tête ignorée) :
-      A  Niveau              (optionnel : PAROISSE/STATION/ANNEXE, défaut PAROISSE)
+      A  Catégorie           (optionnel : A++/A1/A2/B1/B2/C1/C2/C3/C4)
       B  Région Synodale     (OBLIGATOIRE)
       C  District            (optionnel — fallback : premier district de la région)
       D  Nom de la Paroisse  (OBLIGATOIRE)
@@ -542,7 +611,7 @@ def import_paroisses(request):
     from apps.audit.utils import log_action
     from datetime import date as _date
 
-    if request.user.role not in ("SUPER", "REGION", "DISTRICT"):
+    if request.user.role != "SUPER":  # EXIGENCE : import réservé à l administrateur général
         return Response({"detail": "Permission refusée."}, status=status.HTTP_403_FORBIDDEN)
 
     file_obj = request.FILES.get("file")
@@ -567,7 +636,7 @@ def import_paroisses(request):
     for (dnom, rid), d in districts_cache.items():
         districts_by_region[rid].append(d)
 
-    NIVEAUX_VALIDES = {"PAROISSE", "STATION", "ANNEXE"}
+    CATEGORIES_VALIDES = {"A++", "A1", "A2", "B1", "B2", "C1", "C2", "C3", "C4"}
     annee_courante  = _date.today().year
 
     def _str(val, default=""):
@@ -589,7 +658,7 @@ def import_paroisses(request):
             continue
 
         # --- Lecture des colonnes -------------------------------------------
-        niveau_raw   = _str(row[0] if len(row) > 0 else None)
+        categorie_raw = _str(row[0] if len(row) > 0 else None)
         nom_region   = _str(row[1] if len(row) > 1 else None)
         nom_district = _str(row[2] if len(row) > 2 else None)
         nom_paroisse = _str(row[3] if len(row) > 3 else None)
@@ -638,8 +707,8 @@ def import_paroisses(request):
         if request.user.role == "DISTRICT" and district.id != request.user.district_id:
             errors.append({"ligne": i, "erreur": f"District hors de votre périmètre"}); continue
 
-        # --- Niveau --------------------------------------------------------
-        niveau = niveau_raw.upper() if niveau_raw.upper() in NIVEAUX_VALIDES else "PAROISSE"
+        # --- Catégorie -------------------------------------------------------
+        categorie = categorie_raw.upper() if categorie_raw.upper() in CATEGORIES_VALIDES else None
 
         # --- GPS -----------------------------------------------------------
         position = _parse_gps(lat_raw, lon_raw)
@@ -651,7 +720,7 @@ def import_paroisses(request):
             defaults={
                 "nom":      nom_paroisse,
                 "adresse":  adresse,
-                "niveau":   niveau,
+                "categorie": categorie,
                 "position": position,
                 "est_active": True,
             },
@@ -663,7 +732,7 @@ def import_paroisses(request):
             changed = []
             if adresse  and not paroisse.adresse:   paroisse.adresse  = adresse;  changed.append("adresse")
             if position and not paroisse.position:  paroisse.position = position; changed.append("position")
-            if niveau   and paroisse.niveau != niveau: paroisse.niveau = niveau;  changed.append("niveau")
+            if categorie and paroisse.categorie != categorie: paroisse.categorie = categorie; changed.append("categorie")
             if changed:
                 paroisse.save(update_fields=changed)
                 updated += 1
@@ -689,7 +758,7 @@ def import_paroisses(request):
         # --- Aperçu --------------------------------------------------------
         preview.append({
             "nom":      paroisse.nom,
-            "niveau":   paroisse.niveau,
+            "categorie": paroisse.categorie or "",
             "region":   region.nom,
             "district": district.nom,
             "adresse":  paroisse.adresse or "",
@@ -714,7 +783,7 @@ def import_paroisses(request):
 
 
 @api_view(["POST"])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminUser])
 def import_oeuvres(request):
     """
     POST /api/imports/oeuvres/
@@ -733,7 +802,7 @@ def import_oeuvres(request):
     """
     from apps.audit.utils import log_action
 
-    if request.user.role not in ("SUPER", "REGION", "DISTRICT"):
+    if request.user.role != "SUPER":  # EXIGENCE : import réservé à l administrateur général
         return Response({"detail": "Permission refusée."}, status=status.HTTP_403_FORBIDDEN)
 
     file_obj = request.FILES.get("file")
@@ -831,7 +900,7 @@ def import_oeuvres(request):
 
 
 @api_view(["POST"])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminUser])
 def import_ouvriers(request):
     """
     POST /api/imports/ouvriers/
@@ -847,6 +916,10 @@ def import_ouvriers(request):
       G  Téléphone (optionnel)
     """
     from apps.audit.utils import log_action
+
+    if request.user.role != "SUPER":  # EXIGENCE : import réservé à l'administrateur général
+        return Response({"detail": "Seul l'administrateur général peut importer des données."},
+                        status=status.HTTP_403_FORBIDDEN)
 
     file_obj = request.FILES.get("file")
     if not file_obj:

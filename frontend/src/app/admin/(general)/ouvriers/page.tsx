@@ -41,10 +41,8 @@ function initials(nom: string, prenom: string) {
 
 // ─── Status pill ──────────────────────────────────────────────────────────────
 const STATUT_META: Record<string, { label: string; cls: string }> = {
-  ACTIF:    { label: 'Actif',    cls: 'pill-green' },
-  RETRAITE: { label: 'Retraité', cls: 'pill-gray'  },
-  SUSPENDU: { label: 'Suspendu', cls: 'pill-orange' },
-  DECEDE:   { label: 'Décédé',   cls: 'pill-red'   },
+  OCCUPE:   { label: 'Occupé',   cls: 'pill-green' },
+  INOCCUPE: { label: 'Inoccupé', cls: 'pill-gray'  },
 };
 function StatutPill({ statut }: { statut: string }) {
   const m = STATUT_META[statut] || { label: statut, cls: 'pill-gray' };
@@ -131,10 +129,7 @@ function OuvrierViewPanel({ ouvrier: o, grades, onClose, onEdit }: {
           <div className="card" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
             <div style={{ fontSize: 11, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Contact & Carrière</div>
             {[
-              { label: 'Téléphone',      value: o.telephone    || '—' },
-              { label: 'Email',          value: o.email        || '—' },
-              { label: 'Date naissance', value: o.date_naissance  || '—' },
-              { label: 'Ordination',     value: o.date_ordination || '—' },
+              { label: 'Téléphone', value: o.telephone || '—' },
             ].map(f => (
               <div key={f.label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
                 <span style={{ color: 'var(--text-3)' }}>{f.label}</span>
@@ -143,12 +138,7 @@ function OuvrierViewPanel({ ouvrier: o, grades, onClose, onEdit }: {
             ))}
           </div>
 
-          {(o.latitude && o.longitude) && (
-            <div className="card" style={{ padding: '12px 14px', fontSize: 12, color: 'var(--text-2)' }}>
-              <I.pin size={13} style={{ marginRight: 6, color: 'var(--green)' }}/>
-              GPS : {o.latitude.toFixed(5)}, {o.longitude.toFixed(5)}
-            </div>
-          )}
+          {/* EXIGENCE : un ouvrier n'est jamais géolocalisable — pas de GPS. */}
         </div>
       </div>
     </div>
@@ -159,21 +149,16 @@ function OuvrierViewPanel({ ouvrier: o, grades, onClose, onEdit }: {
 interface FormState {
   nom: string; prenom: string; sexe: string; statut: string;
   grade: string; paroisse: string;
-  telephone: string; email: string;
-  date_naissance: string; date_ordination: string;
-  lat: string; lng: string;
+  telephone: string;
 }
 function emptyForm(): FormState {
-  return { nom: '', prenom: '', sexe: 'M', statut: 'ACTIF', grade: '', paroisse: '', telephone: '', email: '', date_naissance: '', date_ordination: '', lat: '', lng: '' };
+  return { nom: '', prenom: '', sexe: 'M', statut: 'OCCUPE', grade: '', paroisse: '', telephone: '' };
 }
 function formFromOuvrier(o: Ouvrier): FormState {
   return {
     nom: o.nom, prenom: o.prenom, sexe: o.sexe, statut: o.statut,
     grade: String(o.grade_id || ''), paroisse: String(o.paroisse_id || ''),
-    telephone: o.telephone, email: o.email,
-    date_naissance: o.date_naissance || '', date_ordination: o.date_ordination || '',
-    lat: o.latitude  ? String(o.latitude)  : '',
-    lng: o.longitude ? String(o.longitude) : '',
+    telephone: o.telephone,
   };
 }
 
@@ -222,7 +207,6 @@ function GpsMapPicker({ lat, lng, onChange }: { lat: number|null; lng: number|nu
 const FORM_TABS_OUV = [
   { label: 'Identité',    icon: 'user'   as const },
   { label: 'Affectation', icon: 'cross'  as const },
-  { label: 'Contact GPS', icon: 'map'    as const },
 ];
 
 // ─── Form Panel ───────────────────────────────────────────────────────────────
@@ -280,23 +264,21 @@ function OuvrierFormPanel({ mode, ouvrier, grades, onClose, onSaved }: {
     }
     setSaving(true); setError('');
     try {
-      const latF = parseFloat(form.lat), lngF = parseFloat(form.lng);
-      const payload: Record<string, unknown> = {
-        nom: form.nom.trim(), prenom: form.prenom.trim(),
-        sexe: form.sexe, statut: form.statut,
-        paroisse: Number(form.paroisse),
-        grade: form.grade ? Number(form.grade) : null,
-        telephone: form.telephone, email: form.email,
-        date_naissance: form.date_naissance || null,
-        date_ordination: form.date_ordination || null,
-      };
-      if (form.lat && form.lng && !isNaN(latF) && !isNaN(lngF)) {
-        payload.latitude = latF; payload.longitude = lngF;
-      }
       if (mode === 'create') {
+        const payload: Record<string, unknown> = {
+          nom: form.nom.trim(), prenom: form.prenom.trim(),
+          sexe: form.sexe, statut: form.statut,
+          paroisse: Number(form.paroisse),
+          grade: form.grade ? Number(form.grade) : null,
+          telephone: form.telephone,
+        };
         await api.post('/api/ouvriers/ouvriers/', payload);
       } else {
-        await api.patch(`/api/ouvriers/ouvriers/${ouvrier!.id}/`, payload);
+        // EXIGENCE : l'identité d'un ouvrier n'est JAMAIS modifiable —
+        // seule son AFFECTATION (paroisse unique) peut changer.
+        await api.patch(`/api/ouvriers/ouvriers/${ouvrier!.id}/`, {
+          paroisse: Number(form.paroisse),
+        });
       }
       onSaved(form.nom);
     } catch (e: unknown) {
@@ -306,14 +288,9 @@ function OuvrierFormPanel({ mode, ouvrier, grades, onClose, onSaved }: {
     }
   }
 
-  const latNum = parseFloat(form.lat || '');
-  const lngNum = parseFloat(form.lng || '');
-  const gpsValid = !isNaN(latNum) && !isNaN(lngNum) && form.lat && form.lng;
-
   const tabDone = [
     !!(form.nom.trim() && form.prenom.trim()),
     !!form.paroisse,
-    !!(form.telephone || form.email),
   ];
 
   return (
@@ -324,9 +301,13 @@ function OuvrierFormPanel({ mode, ouvrier, grades, onClose, onSaved }: {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px', borderBottom: '1px solid var(--border)', background: 'var(--chrome)', flexShrink: 0 }}>
           <div>
             <h2 className="sg-md" style={{ fontSize: 19, margin: 0 }}>
-              {mode === 'create' ? '+ Nouvel ouvrier EEC' : `Modifier — ${ouvrier?.prenom} ${ouvrier?.nom}`}
+              {mode === 'create' ? '+ Nouvel ouvrier EEC' : `Réaffecter — ${ouvrier?.prenom} ${ouvrier?.nom}`}
             </h2>
-            <div style={{ fontSize: 11, color: 'rgba(240,244,241,0.50)', marginTop: 2 }}>Étape {tab + 1} / {FORM_TABS_OUV.length} · {FORM_TABS_OUV[tab].label}</div>
+            <div style={{ fontSize: 11, color: 'rgba(240,244,241,0.50)', marginTop: 2 }}>
+              {mode === 'edit'
+                ? 'L\'identité d\'un ouvrier n\'est jamais modifiable — seule son affectation peut changer.'
+                : `Étape ${tab + 1} / ${FORM_TABS_OUV.length} · ${FORM_TABS_OUV[tab].label}`}
+            </div>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <button className="btn btn-outline" style={{ padding: '7px 14px', fontSize: 12 }} onClick={onClose} disabled={saving}>Annuler</button>
@@ -393,11 +374,13 @@ function OuvrierFormPanel({ mode, ouvrier, grades, onClose, onSaved }: {
               <div>
                 <label style={L.label}>Statut</label>
                 <select className="input" style={{ color: '#111827' }} value={form.statut} onChange={e => set('statut', e.target.value)}>
-                  <option value="ACTIF">Actif</option>
-                  <option value="RETRAITE">Retraité</option>
-                  <option value="SUSPENDU">Suspendu</option>
-                  <option value="DECEDE">Décédé</option>
+                  <option value="OCCUPE">Occupé</option>
+                  <option value="INOCCUPE">Inoccupé</option>
                 </select>
+              </div>
+              <div>
+                <label style={L.label}>Numéro de téléphone</label>
+                <input className="input mono" placeholder="+237 6XX XXX XXX" value={form.telephone} onChange={e => set('telephone', e.target.value)} style={{ color: '#111827' }} />
               </div>
 
               {form.prenom && form.nom && (
@@ -456,47 +439,9 @@ function OuvrierFormPanel({ mode, ouvrier, grades, onClose, onSaved }: {
             </div>
           )}
 
-          {/* Tab 3 — Contact & GPS */}
-          {tab === 2 && (
-            <>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                <div>
-                  <label style={L.label}>Téléphone</label>
-                  <input className="input mono" placeholder="+237 6XX XXX XXX" value={form.telephone} onChange={e => set('telephone', e.target.value)} style={{ color: '#111827' }} />
-                </div>
-                <div>
-                  <label style={L.label}>Email</label>
-                  <input className="input" type="email" placeholder="email@eec.cm" value={form.email} onChange={e => set('email', e.target.value)} style={{ color: '#111827' }} />
-                </div>
-                <div>
-                  <label style={L.label}>Date de naissance</label>
-                  <input className="input" type="date" value={form.date_naissance} onChange={e => set('date_naissance', e.target.value)} style={{ color: '#111827' }} />
-                </div>
-                <div>
-                  <label style={L.label}>Date d'ordination</label>
-                  <input className="input" type="date" value={form.date_ordination} onChange={e => set('date_ordination', e.target.value)} style={{ color: '#111827' }} />
-                </div>
-              </div>
-
-              <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: 8, padding: '10px 14px', fontSize: 12.5, color: '#1D4ED8', display: 'flex', gap: 8, alignItems: 'center' }}>
-                <I.pin size={14} /> Cliquez sur la carte pour localiser l'ouvrier, ou saisissez les coordonnées.
-              </div>
-
-              <GpsMapPicker lat={gpsValid ? latNum : null} lng={gpsValid ? lngNum : null}
-                onChange={(la, lo) => { set('lat', String(la)); set('lng', String(lo)); }} />
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-                <div>
-                  <label style={L.label}>Coord. Y — Latitude</label>
-                  <input className="input mono" placeholder="Ex. 3.8480" value={form.lat} onChange={e => set('lat', e.target.value)} style={{ color: '#111827' }} />
-                </div>
-                <div>
-                  <label style={L.label}>Coord. X — Longitude</label>
-                  <input className="input mono" placeholder="Ex. 11.5021" value={form.lng} onChange={e => set('lng', e.target.value)} style={{ color: '#111827' }} />
-                </div>
-              </div>
-            </>
-          )}
+          {/* EXIGENCE : la section « Contact GPS » n'existe plus.
+              Le téléphone fait partie de l'identité (onglet 1) et un ouvrier
+              n'est jamais géolocalisé. */}
 
           {/* Navigation */}
           <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 12, borderTop: '1px solid #E5E7EB', marginTop: 'auto' }}>
@@ -678,7 +623,16 @@ export default function OuvriersPage() {
           <span style={{ fontSize: 12, color: 'var(--text-3)' }}>{grades.length} grades hiérarchiques</span>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button className="btn btn-outline"><I.download size={14}/>Exporter</button>
+          <button className="btn btn-outline" onClick={() => {
+            // EXIGENCE : exporter la liste AFFICHÉE avec les filtres appliqués
+            const q = new URLSearchParams();
+            if (search)       q.set('search', search);
+            if (filterGrade)  q.set('grade', filterGrade);
+            if (filterRegion) q.set('region', filterRegion);
+            if (filterStatut) q.set('statut', filterStatut);
+            const B = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api').replace(/\/api\/?$/, '');
+            window.open(`${B}/api/exports/ouvriers/excel/?${q}`, '_blank');
+          }}><I.download size={14}/>Exporter</button>
           <button className="btn btn-primary" onClick={() => setFormPanel({ mode: 'create' })}><I.plus size={14}/>Créer un ouvrier</button>
         </div>
       </div>
@@ -709,10 +663,8 @@ export default function OuvriersPage() {
           <div className="label">Statut</div>
           <select className="input" value={filterStatut} onChange={e => { setFilterStatut(e.target.value); setPage(1); }}>
             <option value="">Tous statuts</option>
-            <option value="ACTIF">Actif</option>
-            <option value="RETRAITE">Retraité</option>
-            <option value="SUSPENDU">Suspendu</option>
-            <option value="DECEDE">Décédé</option>
+            <option value="OCCUPE">Occupé</option>
+            <option value="INOCCUPE">Inoccupé</option>
           </select>
         </div>
         {hasFilter && <button className="btn btn-ghost" onClick={resetFilters} style={{ alignSelf: 'flex-end' }}><I.refresh size={13}/>Réinitialiser</button>}

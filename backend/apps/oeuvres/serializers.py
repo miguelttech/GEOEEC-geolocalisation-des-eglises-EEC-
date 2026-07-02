@@ -70,7 +70,7 @@ class OeuvreListSerializer(serializers.ModelSerializer):
             "paroisse_id", "paroisse_nom",
             "district_id", "district_nom",
             "region_id", "region_nom",
-            "est_active", "capacite", "annee_creation", "telephone", "email",
+            "est_active", "capacite", "nb_personnels", "en_prospection", "annee_creation", "telephone", "email",
             "latitude", "longitude",
             "created_at", "updated_at",
         ]
@@ -86,7 +86,7 @@ class OeuvreWriteSerializer(serializers.ModelSerializer):
             "id", "nom", "adresse", "description",
             "type_oeuvre",
             "paroisse", "district", "region",
-            "est_active", "capacite", "annee_creation", "telephone", "email",
+            "est_active", "capacite", "nb_personnels", "en_prospection", "annee_creation", "telephone", "email",
             "latitude", "longitude",
         ]
         extra_kwargs = {

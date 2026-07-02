@@ -22,7 +22,7 @@ export interface DistrictItem {
 export interface ParishItem {
   id: string; type: 'paroisse'; regionId: string; regionName: string;
   districtId: string; districtName: string;
-  name: string; address: string; niveau: string;
+  name: string; address: string; categorie: string | null;
   lat: number; lng: number;
   stats: {
     fideles: number; communiants: number; nonCommuniants: number;
@@ -184,7 +184,7 @@ export async function loadMapData(): Promise<MapDataResult> {
         districtName: (p.district_nom as string) ?? '',
         name:         (p.nom         as string),
         address:      (p.adresse     as string) ?? '',
-        niveau:       (p.niveau      as string) ?? 'PAROISSE',
+        categorie:    (p.categorie   as string) ?? null,
         lat:          p.latitude  as number,
         lng:          p.longitude as number,
         active:       (p.est_active  as boolean) ?? true,
@@ -216,8 +216,11 @@ export async function loadMapData(): Promise<MapDataResult> {
     districtParishCount[dId] = (districtParishCount[dId] ?? 0) + 1;
   });
 
-  // 4. Districts
-  const districts: DistrictItem[] = (distRaw as any[]).map(d => {
+  // 4. Districts — les districts techniques « NON PRÉCISÉ » (paroisses
+  // officielles en attente de rattachement) sont exclus de la carte et
+  // des compteurs : le nombre officiel de districts est fixe (137).
+  const distReels = (distRaw as any[]).filter(d => d.nom !== 'NON PRÉCISÉ');
+  const districts: DistrictItem[] = distReels.map(d => {
     const dId = String(d.id);
     const rId = String(d.region_id);
     const dc  = dCent[dId];
@@ -262,9 +265,7 @@ export async function loadMapData(): Promise<MapDataResult> {
     grade:        String(w.grade_id ?? ''),
     gradeLabel:   (w.grade_nom    as string) ?? '',
     name:         [w.nom, w.prenom].filter(Boolean).join(' '),
-    status: w.statut === 'actif'     ? 'actif'
-           : w.statut === 'retraite' ? 'retraite'
-           : 'suspendu',
+    status: w.statut === 'OCCUPE' ? 'occupe' : 'inoccupe',
   }));
 
   return {
@@ -276,7 +277,7 @@ export async function loadMapData(): Promise<MapDataResult> {
     allItems: [...parishes, ...oeuvres],
     globalStats: {
       regions:   regions.length,
-      districts: distRaw.length,
+      districts: distReels.length,
       parishes:  parRaw.length,
       oeuvres:   oeuRaw.length,
       workers:   ouvRaw.length,

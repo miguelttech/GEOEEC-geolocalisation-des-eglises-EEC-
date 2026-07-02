@@ -1,10 +1,18 @@
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 
+# Rôles d'administration agréés — un VISITEUR n'est JAMAIS un admin.
+ADMIN_ROLES = ("SUPER", "REGION", "DISTRICT", "PAROISSE")
+
+
+def is_admin_role(user) -> bool:
+    """Vrai uniquement pour un compte administrateur agréé (jamais VISITEUR)."""
+    return bool(user and user.is_authenticated and user.role in ADMIN_ROLES)
+
 
 class IsAdminUser(BasePermission):
-    """Utilisateur authentifié avec un compte admin EEC."""
+    """Utilisateur authentifié avec un compte admin EEC (VISITEUR exclu)."""
     def has_permission(self, request, view):
-        return bool(request.user and request.user.is_authenticated)
+        return is_admin_role(request.user)
 
 
 class IsSuperAdmin(BasePermission):
@@ -40,12 +48,13 @@ class IsDistrictOrAbove(BasePermission):
 class ReadPublicWriteAdmin(BasePermission):
     """
     Lecture publique (sans authentification).
-    Écriture réservée aux admins authentifiés.
+    Écriture STRICTEMENT réservée aux administrateurs agréés — un compte
+    VISITEUR authentifié ne peut RIEN écrire (exigence de sécurité).
     """
     def has_permission(self, request, view):
         if request.method in SAFE_METHODS:
             return True
-        return bool(request.user and request.user.is_authenticated)
+        return is_admin_role(request.user)
 
 
 # ---------------------------------------------------------------------------

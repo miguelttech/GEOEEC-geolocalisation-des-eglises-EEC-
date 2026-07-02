@@ -92,11 +92,12 @@ class Ouvrier(models.Model):
     ]
 
     # Statut actuel de l'ouvrier dans le service de l'EEC
+    # EXIGENCE : seuls deux états existent pour un ouvrier.
+    # OCCUPE   = affecté et en service dans sa paroisse
+    # INOCCUPE = retiré / disponible (préalable obligatoire à toute réaffectation)
     STATUT = [
-        ("ACTIF", "Actif"),          # en service actuel
-        ("RETRAITE", "Retraité"),    # retraité mais toujours dans les archives
-        ("SUSPENDU", "Suspendu"),    # suspendu disciplinairement
-        ("DECEDE", "Décédé"),        # décédé mais gardé en archive historique
+        ("OCCUPE", "Occupé"),
+        ("INOCCUPE", "Inoccupé"),
     ]
 
     # Identité de l'ouvrier
@@ -122,9 +123,9 @@ class Ouvrier(models.Model):
         Paroisse, on_delete=models.PROTECT, related_name="ouvriers"
     )
 
-    # Position GPS de l'ouvrier (lieu de résidence ou de travail)
-    # null=True : beaucoup d'ouvriers n'ont pas encore de coordonnées
-    position = models.PointField(srid=4326, null=True, blank=True)
+    # EXIGENCE : un ouvrier n'est JAMAIS géolocalisable — l'ancien champ
+    # `position` (PointField) a été supprimé. Seule son AFFECTATION
+    # (la paroisse, unique) le situe géographiquement.
 
     # Coordonnées de contact
     telephone = models.CharField(max_length=30, blank=True)
@@ -135,7 +136,7 @@ class Ouvrier(models.Model):
     date_ordination = models.DateField(null=True, blank=True)  # date d'entrée en service
 
     # État actuel dans le service
-    statut = models.CharField(max_length=10, choices=STATUT, default="ACTIF")
+    statut = models.CharField(max_length=10, choices=STATUT, default="OCCUPE")
 
     # Horodatages automatiques
     created_at = models.DateTimeField(auto_now_add=True)

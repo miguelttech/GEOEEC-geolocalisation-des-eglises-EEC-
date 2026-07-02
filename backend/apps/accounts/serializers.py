@@ -56,14 +56,22 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
-    """Création d'un nouveau compte admin avec mot de passe temporaire."""
-    password = serializers.CharField(write_only=True, min_length=12)
+    """
+    Création d'un compte administrateur — EXIGENCES OBLIGATOIRES :
+      · le mot de passe est GÉNÉRÉ AUTOMATIQUEMENT côté serveur (jamais fourni
+        par le client) et envoyé par e-mail à l'administrateur concerné ;
+      · hiérarchie stricte : SUPER → tous ; REGION → DISTRICT/PAROISSE de SA
+        région ; DISTRICT → PAROISSE de SON district ;
+      · UN SEUL administrateur actif par région / district / paroisse
+        (plusieurs SUPER autorisés) ;
+      · un VISITEUR ne peut jamais être créé par ce circuit.
+    """
 
     class Meta:
         model = User
         fields = [
             "username", "email", "first_name", "last_name",
-            "telephone", "role", "password",
+            "telephone", "role",
             "region", "district", "paroisse",
             "permissions_custom",
         ]
@@ -72,24 +80,77 @@ class UserCreateSerializer(serializers.ModelSerializer):
         request_user = self.context["request"].user
         target_role = data.get("role", "PAROISSE")
 
-        # Un REGION ne peut créer que DISTRICT ou PAROISSE
-        if request_user.role == "REGION" and target_role not in ("DISTRICT", "PAROISSE"):
-            raise serializers.ValidationError("Vous ne pouvez créer que des admins District ou Paroisse.")
+        if target_role == "VISITEUR":
+            raise serializers.ValidationError(
+                "Un compte visiteur ne se crée pas ici (inscription publique uniquement).")
+        if target_role not in ("SUPER", "REGION", "DISTRICT", "PAROISSE"):
+            raise serializers.ValidationError("Rôle inconnu.")
 
-        # Un DISTRICT ne peut créer que PAROISSE
+        # ── Hiérarchie de création ────────────────────────────────────────
+        if request_user.role == "REGION" and target_role not in ("DISTRICT", "PAROISSE"):
+            raise serializers.ValidationError(
+                "Un admin régional ne peut créer que des admins District ou Paroisse.")
         if request_user.role == "DISTRICT" and target_role != "PAROISSE":
-            raise serializers.ValidationError("Vous ne pouvez créer que des admins Paroisse.")
+            raise serializers.ValidationError(
+                "Un admin de district ne peut créer que des admins Paroisse.")
+
+        # ── Périmètre imposé par le créateur ─────────────────────────────
+        if request_user.role == "REGION":
+            data["region"] = request_user.region
+            if target_role == "DISTRICT" and data.get("district") and \
+               data["district"].region_id != request_user.region_id:
+                raise serializers.ValidationError("Ce district n'est pas dans votre région.")
+            if target_role == "PAROISSE" and data.get("paroisse") and \
+               data["paroisse"].district.region_id != request_user.region_id:
+                raise serializers.ValidationError("Cette paroisse n'est pas dans votre région.")
+        if request_user.role == "DISTRICT":
+            data["district"] = request_user.district
+            data["region"] = request_user.region
+            if data.get("paroisse") and data["paroisse"].district_id != request_user.district_id:
+                raise serializers.ValidationError("Cette paroisse n'est pas dans votre district.")
+
+        # ── Rattachement obligatoire selon le rôle ───────────────────────
+        if target_role == "REGION" and not data.get("region"):
+            raise serializers.ValidationError("Un admin régional doit être rattaché à une région.")
+        if target_role == "DISTRICT" and not data.get("district"):
+            raise serializers.ValidationError("Un admin de district doit être rattaché à un district.")
+        if target_role == "PAROISSE" and not data.get("paroisse"):
+            raise serializers.ValidationError("Un admin paroissial doit être rattaché à une paroisse.")
+
+        # ── UN SEUL admin actif par périmètre (SUPER : plusieurs autorisés) ──
+        if target_role == "REGION" and User.objects.filter(
+                role="REGION", region=data["region"], is_active=True).exists():
+            raise serializers.ValidationError(
+                f"La région « {data['region'].nom} » a déjà son administrateur (1 seul autorisé).")
+        if target_role == "DISTRICT" and User.objects.filter(
+                role="DISTRICT", district=data["district"], is_active=True).exists():
+            raise serializers.ValidationError(
+                f"Le district « {data['district'].nom} » a déjà son administrateur (1 seul autorisé).")
+        if target_role == "PAROISSE" and User.objects.filter(
+                role="PAROISSE", paroisse=data["paroisse"], is_active=True).exists():
+            raise serializers.ValidationError(
+                f"La paroisse « {data['paroisse'].nom} » a déjà son administrateur (1 seul autorisé).")
 
         return data
 
     def create(self, validated_data):
-        password = validated_data.pop("password")
+        import secrets
+        import string
+        # Mot de passe GÉNÉRÉ automatiquement (16 caractères, robuste)
+        alphabet = string.ascii_letters + string.digits + "!#%*+-"
+        password = "".join(secrets.choice(alphabet) for _ in range(16))
+
         user = User(**validated_data)
         user.set_password(password)
         user.force_password_change = True
-        # username par défaut = préfixe email
         if not user.username:
             base = validated_data.get("email", "user").split("@")[0]
-            user.username = base
+            candidate, i = base, 1
+            while User.objects.filter(username=candidate).exists():
+                i += 1
+                candidate = f"{base}{i}"
+            user.username = candidate
         user.save()
+        # Transmis à la vue pour l'envoi par e-mail (jamais stocké en clair)
+        user._generated_password = password
         return user

@@ -37,7 +37,7 @@ export default function DashboardParoissePage() {
         <div className="card" style={{ padding:'18px 20px', display:'flex', flexDirection:'column', gap:14 }}>
           <div style={{ fontSize:12, color:'var(--text-2)', fontWeight:600, textTransform:'uppercase', letterSpacing:'0.05em' }}>Informations générales</div>
           {[
-            { label:'Niveau',   value:MOCK_PAROISSE.niveau },
+            { label:'Catégorie',   value:MOCK_PAROISSE.categorie },
             { label:'District', value:MOCK_PAROISSE.district },
             { label:'Région',   value:MOCK_PAROISSE.region },
             { label:'Pasteur',  value:MOCK_PAROISSE.pasteur },

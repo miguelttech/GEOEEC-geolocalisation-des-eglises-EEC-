@@ -21,24 +21,24 @@ export const DISTRICTS_BY_REGION: Record<string, string[]> = {
 };
 
 export interface Paroisse {
-  id: number; nom: string; region: string; district: string; niveau: 'PAROISSE'|'STATION'|'ANNEXE';
+  id: number; nom: string; region: string; district: string; categorie: 'C1'|'C2'|'C3';
   fideles: number; ouvriers: number; gps: boolean; complete: number;
   statut: 'actif'|'inactif'|'en_attente'; modifie: string; modPar: string;
 }
 
 export const sampleParoisses: Paroisse[] = [
-  { id:1,  nom:'Yaoundé-Centre',       region:'CENTRE SUD 1',  district:'YAOUNDE CENTRE', niveau:'PAROISSE', fideles:1247, ouvriers:18, gps:true,  complete:96, statut:'actif',      modifie:'il y a 2h',  modPar:'Marie-Claire BIYA' },
-  { id:2,  nom:'Bafoussam-Nord',        region:'MIFI',          district:'BAFOUSSAM NORD', niveau:'PAROISSE', fideles:892,  ouvriers:14, gps:true,  complete:88, statut:'en_attente', modifie:'il y a 3h',  modPar:'Paul ATEBA' },
-  { id:3,  nom:'Douala-Akwa',           region:'WOURI CENTRE',  district:'DOUALA CENTRE',  niveau:'PAROISSE', fideles:1583, ouvriers:22, gps:true,  complete:92, statut:'actif',      modifie:'il y a 5h',  modPar:'Système' },
-  { id:4,  nom:'Dschang Mission',       region:'MENOUA',        district:'DSCHANG',        niveau:'PAROISSE', fideles:734,  ouvriers:11, gps:true,  complete:78, statut:'actif',      modifie:'hier',       modPar:'Eric NDJI' },
-  { id:5,  nom:'Baham-Centre',          region:'MIFI',          district:'BAHAM',          niveau:'PAROISSE', fideles:320,  ouvriers:7,  gps:true,  complete:65, statut:'actif',      modifie:'hier',       modPar:'Paul ATEBA' },
-  { id:6,  nom:'Ngaoundéré-Plateau',    region:'ADAMAOUA',      district:'NGAOUNDERE',     niveau:'PAROISSE', fideles:445,  ouvriers:9,  gps:false, complete:42, statut:'actif',      modifie:'il y a 2j',  modPar:'Sam KAMTO' },
-  { id:7,  nom:'Bafang Annexe Est',     region:'HAUT-NKAM',     district:'BAFANG',         niveau:'ANNEXE',   fideles:128,  ouvriers:3,  gps:true,  complete:55, statut:'actif',      modifie:'il y a 2j',  modPar:'Système' },
-  { id:8,  nom:'Bertoua Station',       region:'EST',           district:'BERTOUA',        niveau:'STATION',  fideles:267,  ouvriers:5,  gps:true,  complete:71, statut:'en_attente', modifie:'il y a 3j',  modPar:'Jean ONANA' },
-  { id:9,  nom:'Ebolowa-Mission',       region:'CENTRE SUD 2',  district:'EBOLOWA',        niveau:'PAROISSE', fideles:512,  ouvriers:9,  gps:false, complete:38, statut:'actif',      modifie:'il y a 3j',  modPar:'Système' },
-  { id:10, nom:'Fokoué Annexe',         region:'MENOUA',        district:'FOKOUE',         niveau:'ANNEXE',   fideles:94,   ouvriers:2,  gps:true,  complete:48, statut:'inactif',    modifie:'il y a 5j',  modPar:'Marie BIYA' },
-  { id:11, nom:'Bandja Centre',         region:'HAUT-NKAM',     district:'BANDJA',         niveau:'PAROISSE', fideles:380,  ouvriers:8,  gps:true,  complete:82, statut:'actif',      modifie:'il y a 5j',  modPar:'Paul ATEBA' },
-  { id:12, nom:'Yaoundé-Mvog-Ada',      region:'CENTRE SUD 1',  district:'YAOUNDE SUD',    niveau:'STATION',  fideles:621,  ouvriers:11, gps:true,  complete:86, statut:'actif',      modifie:'il y a 6j',  modPar:'Marie-Claire BIYA' },
+  { id:1,  nom:'Yaoundé-Centre',       region:'CENTRE SUD 1',  district:'YAOUNDE CENTRE', categorie:'C1', fideles:1247, ouvriers:18, gps:true,  complete:96, statut:'actif',      modifie:'il y a 2h',  modPar:'Marie-Claire BIYA' },
+  { id:2,  nom:'Bafoussam-Nord',        region:'MIFI',          district:'BAFOUSSAM NORD', categorie:'C1', fideles:892,  ouvriers:14, gps:true,  complete:88, statut:'en_attente', modifie:'il y a 3h',  modPar:'Paul ATEBA' },
+  { id:3,  nom:'Douala-Akwa',           region:'WOURI CENTRE',  district:'DOUALA CENTRE',  categorie:'C1', fideles:1583, ouvriers:22, gps:true,  complete:92, statut:'actif',      modifie:'il y a 5h',  modPar:'Système' },
+  { id:4,  nom:'Dschang Mission',       region:'MENOUA',        district:'DSCHANG',        categorie:'C1', fideles:734,  ouvriers:11, gps:true,  complete:78, statut:'actif',      modifie:'hier',       modPar:'Eric NDJI' },
+  { id:5,  nom:'Baham-Centre',          region:'MIFI',          district:'BAHAM',          categorie:'C1', fideles:320,  ouvriers:7,  gps:true,  complete:65, statut:'actif',      modifie:'hier',       modPar:'Paul ATEBA' },
+  { id:6,  nom:'Ngaoundéré-Plateau',    region:'ADAMAOUA',      district:'NGAOUNDERE',     categorie:'C1', fideles:445,  ouvriers:9,  gps:false, complete:42, statut:'actif',      modifie:'il y a 2j',  modPar:'Sam KAMTO' },
+  { id:7,  nom:'Bafang Annexe Est',     region:'HAUT-NKAM',     district:'BAFANG',         categorie:'C3',   fideles:128,  ouvriers:3,  gps:true,  complete:55, statut:'actif',      modifie:'il y a 2j',  modPar:'Système' },
+  { id:8,  nom:'Bertoua Station',       region:'EST',           district:'BERTOUA',        categorie:'C2',  fideles:267,  ouvriers:5,  gps:true,  complete:71, statut:'en_attente', modifie:'il y a 3j',  modPar:'Jean ONANA' },
+  { id:9,  nom:'Ebolowa-Mission',       region:'CENTRE SUD 2',  district:'EBOLOWA',        categorie:'C1', fideles:512,  ouvriers:9,  gps:false, complete:38, statut:'actif',      modifie:'il y a 3j',  modPar:'Système' },
+  { id:10, nom:'Fokoué Annexe',         region:'MENOUA',        district:'FOKOUE',         categorie:'C3',   fideles:94,   ouvriers:2,  gps:true,  complete:48, statut:'inactif',    modifie:'il y a 5j',  modPar:'Marie BIYA' },
+  { id:11, nom:'Bandja Centre',         region:'HAUT-NKAM',     district:'BANDJA',         categorie:'C1', fideles:380,  ouvriers:8,  gps:true,  complete:82, statut:'actif',      modifie:'il y a 5j',  modPar:'Paul ATEBA' },
+  { id:12, nom:'Yaoundé-Mvog-Ada',      region:'CENTRE SUD 1',  district:'YAOUNDE SUD',    categorie:'C2',  fideles:621,  ouvriers:11, gps:true,  complete:86, statut:'actif',      modifie:'il y a 6j',  modPar:'Marie-Claire BIYA' },
 ];
 
 export const topRegions = [
@@ -74,7 +74,7 @@ export const fidelesEvolution = [
   { year:2026, comm:91800, noncomm:59700 },
 ];
 
-export const niveauxByRegion = [
+export const categoriesByRegion = [
   { name:'CENTRE SUD 1', paroisse:62, station:21, annexe:12 },
   { name:'WOURI CENTRE', paroisse:48, station:16, annexe:8  },
   { name:'MIFI',         paroisse:31, station:12, annexe:5  },
@@ -129,7 +129,6 @@ export const sampleOeuvres = [
 ];
 
 export const OUVRIER_GRADES = [
-  { key:'Évêque',           color:'#FFD600' },
   { key:'Pasteur',          color:'#5AC472' },
   { key:'Prédicateur',      color:'#5B9BD5' },
   { key:'Évangéliste',      color:'#E67A2E' },
@@ -149,7 +148,7 @@ export const sampleOuvriers = [
   { id:7,  nom:'MBARGA Charles',       grade:'Prédicateur',     paroisse:'Bafoussam-Nord',    district:'BAFOUSSAM NORD',  region:'MIFI',         tel:'+237 698 56 34 12', priseFonction:'2013-08-10', initials:'CM', statut:'actif' },
   { id:8,  nom:'ATEBA Paul',           grade:'Évangéliste',     paroisse:'Baham-Centre',      district:'BAHAM',           region:'MIFI',         tel:'+237 695 11 22 33', priseFonction:'2007-04-18', initials:'PA', statut:'actif' },
   { id:9,  nom:'NKONO Brigitte',       grade:'Diacre',          paroisse:'Yaoundé-Mvog-Ada',  district:'YAOUNDE SUD',     region:'CENTRE SUD 1', tel:'+237 698 33 44 55', priseFonction:'2016-01-30', initials:'BN', statut:'actif' },
-  { id:10, nom:'ESSOMBA Christian',    grade:'Évêque',          paroisse:'Yaoundé-Centre',    district:'YAOUNDE CENTRE',  region:'CENTRE SUD 1', tel:'+237 698 00 11 22', priseFonction:'1988-12-04', initials:'CE', statut:'actif' },
+  { id:10, nom:'ESSOMBA Christian',    grade:'Pasteur',          paroisse:'Yaoundé-Centre',    district:'YAOUNDE CENTRE',  region:'CENTRE SUD 1', tel:'+237 698 00 11 22', priseFonction:'1988-12-04', initials:'CE', statut:'actif' },
   { id:11, nom:'ONANA Jean',           grade:'Pasteur',         paroisse:'Bertoua Station',   district:'BERTOUA',         region:'EST',          tel:'+237 677 22 99 87', priseFonction:'1999-07-12', initials:'JO', statut:'actif' },
   { id:12, nom:'TCHATCHOU Brice',      grade:'Aide-Pasteur',    paroisse:'Bandja Centre',     district:'BANDJA',          region:'HAUT-NKAM',    tel:'+237 695 88 77 66', priseFonction:'2018-09-01', initials:'BT', statut:'actif' },
   { id:13, nom:'FOTSO Pauline',        grade:'Catéchiste',      paroisse:'Bafang Annexe Est', district:'BAFANG',          region:'HAUT-NKAM',    tel:'+237 698 12 56 87', priseFonction:'2019-03-15', initials:'PF', statut:'inactif' },

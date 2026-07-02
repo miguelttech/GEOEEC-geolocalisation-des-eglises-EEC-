@@ -1,6 +1,6 @@
 import json
 
-from django.db.models import Count, Func, Value, F
+from django.db.models import Count, Func, Value, F, Q
 from django.contrib.gis.db.models import GeometryField
 from django.contrib.gis.db.models.functions import AsGeoJSON
 
@@ -20,7 +20,6 @@ from .serializers import (
 from apps.accounts.permissions import (
     ReadPublicWriteAdmin,
     filter_paroisses_by_scope,
-    can_delete_paroisse,
 )
 
 
@@ -43,7 +42,7 @@ class RegionSynodaleViewSet(viewsets.ReadOnlyModelViewSet):
         return (
             RegionSynodale.objects
             .annotate(
-                nb_districts=Count("districts", distinct=True),
+                nb_districts=Count("districts", filter=~Q(districts__nom="NON PRÉCISÉ"), distinct=True),
                 nb_paroisses=Count("districts__paroisses", distinct=True),
             )
             .order_by("nom")
@@ -76,31 +75,62 @@ class RegionSynodaleViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=False, url_path="liste")
     def liste(self, request):
-        """GET /api/geo/regions/liste/ — sans géométrie, pour dropdowns et tableau admin."""
+        """GET /api/geo/regions/liste/ — sans géométrie, pour dropdowns et
+        tableau admin. Enrichi avec fidèles et ouvriers par région (toutes les
+        statistiques réellement disponibles)."""
+        from django.db.models import Sum
+        from apps.ouvriers.models import Ouvrier
+
         qs = (
             RegionSynodale.objects
             .annotate(
-                nb_districts=Count("districts", distinct=True),
+                nb_districts=Count("districts", filter=~Q(districts__nom="NON PRÉCISÉ"), distinct=True),
                 nb_paroisses=Count("districts__paroisses", distinct=True),
             )
             .order_by("nom")
         )
-        return Response(RegionSynodaleListSerializer(qs, many=True).data)
+        data = RegionSynodaleListSerializer(qs, many=True).data
+        fideles = {r["district__region"]: r["total"] or 0
+                   for r in Paroisse.objects.values("district__region").annotate(total=Sum("nombre_fideles"))}
+        ouvriers = {r["paroisse__district__region"]: r["n"]
+                    for r in Ouvrier.objects.values("paroisse__district__region").annotate(n=Count("id"))}
+        for d in data:
+            d["nb_fideles"] = fideles.get(d["id"], 0)
+            d["nb_ouvriers"] = ouvriers.get(d["id"], 0)
+        return Response(data)
 
 
 # ---------------------------------------------------------------------------
 # Districts — lecture publique, CRUD réservé admin
 # ---------------------------------------------------------------------------
 
-class DistrictViewSet(viewsets.ModelViewSet):
+class DistrictViewSet(viewsets.ReadOnlyModelViewSet):
+    """EXIGENCE : il est IMPOSSIBLE de modifier ou supprimer un district
+    (comme une région). Lecture seule pour tout le monde."""
     permission_classes = [ReadPublicWriteAdmin]
     serializer_class = DistrictSerializer
 
     def get_queryset(self):
+        from django.db.models import OuterRef, Subquery, Sum, IntegerField
+        from apps.ouvriers.models import Ouvrier
+
+        # Sous-requêtes (évitent la multiplication des lignes par jointures croisées)
+        fideles_sq = (Paroisse.objects.filter(district=OuterRef("pk"))
+                      .values("district").annotate(t=Sum("nombre_fideles")).values("t")[:1])
+        ouvriers_sq = (Ouvrier.objects.filter(paroisse__district=OuterRef("pk"))
+                       .values("paroisse__district").annotate(n=Count("id")).values("n")[:1])
+        # EXIGENCE : le nombre de districts est FIXE (137). Les districts
+        # techniques « NON PRÉCISÉ » n'apparaissent ni dans la liste ni
+        # dans les compteurs.
         qs = (
             District.objects
+            .exclude(nom="NON PRÉCISÉ")
             .select_related("region")
-            .annotate(nb_paroisses=Count("paroisses", distinct=True))
+            .annotate(
+                nb_paroisses=Count("paroisses", distinct=True),
+                nb_fideles=Subquery(fideles_sq, output_field=IntegerField()),
+                nb_ouvriers=Subquery(ouvriers_sq, output_field=IntegerField()),
+            )
             .order_by("region__nom", "nom")
         )
         region_id = self.request.query_params.get("region")
@@ -108,13 +138,6 @@ class DistrictViewSet(viewsets.ModelViewSet):
             qs = qs.filter(region_id=region_id)
         return qs
 
-    def destroy(self, request, *args, **kwargs):
-        if not request.user.is_super_admin:
-            return Response(
-                {"detail": "Seul l'administrateur national peut supprimer un district."},
-                status=status.HTTP_403_FORBIDDEN,
-            )
-        return super().destroy(request, *args, **kwargs)
 
 
 # ---------------------------------------------------------------------------
@@ -125,9 +148,21 @@ class ParoisseViewSet(viewsets.ModelViewSet):
     permission_classes = [ReadPublicWriteAdmin]
 
     def get_queryset(self):
+        from django.db.models import OuterRef, Subquery
+        from apps.accounts.models import StatistiqueAnnuelle
+
+        # Statistique de l'année la plus récente (communiants / non-communiants)
+        derniere_stat = (StatistiqueAnnuelle.objects
+                         .filter(paroisse=OuterRef("pk"))
+                         .order_by("-annee"))
         qs = (
             Paroisse.objects
             .select_related("district", "district__region")
+            .annotate(
+                nb_ouvriers=Count("ouvriers", distinct=True),
+                communiants=Subquery(derniere_stat.values("communiants")[:1]),
+                non_communiants=Subquery(derniere_stat.values("non_communiants")[:1]),
+            )
             .order_by("district__region__nom", "district__nom", "nom")
         )
         params = self.request.query_params
@@ -150,9 +185,9 @@ class ParoisseViewSet(viewsets.ModelViewSet):
         if params.get("sans_gps") == "1":
             qs = qs.filter(position__isnull=True)
 
-        niveau = params.get("niveau")
-        if niveau:
-            qs = qs.filter(niveau=niveau)
+        categorie = params.get("categorie")
+        if categorie:
+            qs = qs.filter(categorie=categorie)
 
         # Pour les admins : filtrer par leur scope
         if self.request.user.is_authenticated:
@@ -175,25 +210,33 @@ class ParoisseViewSet(viewsets.ModelViewSet):
             extra["district"] = user.district
         serializer.save(**extra)
 
+    # Champs modifiables sur une paroisse existante — EXIGENCE : uniquement
+    # le NOM (+ l'état de prospection). District, région, position, catégorie,
+    # statistiques : verrouillés en modification.
+    CHAMPS_MODIFIABLES = {"nom", "en_prospection"}
+
     def update(self, request, *args, **kwargs):
         paroisse = self.get_object()
         user = request.user
-        # Vérifier que l'admin a le droit de modifier cette paroisse
         if not _can_write_paroisse(user, paroisse):
             return Response(status=status.HTTP_403_FORBIDDEN)
+        interdits = set(request.data.keys()) - self.CHAMPS_MODIFIABLES
+        if interdits:
+            return Response(
+                {"detail": "Seul le nom (et l'état de prospection) d'une paroisse "
+                           f"peut être modifié. Champs refusés : {sorted(interdits)}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        kwargs["partial"] = True
         return super().update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
-        paroisse = self.get_object()
-        user = request.user
-        if not can_delete_paroisse(user):
-            return Response(
-                {"detail": "Vous n'avez pas la permission de supprimer une paroisse."},
-                status=status.HTTP_403_FORBIDDEN,
-            )
-        if not _can_write_paroisse(user, paroisse):
-            return Response(status=status.HTTP_403_FORBIDDEN)
-        return super().destroy(request, *args, **kwargs)
+        # EXIGENCE : il est IMPOSSIBLE de supprimer une paroisse — pour TOUS
+        # les niveaux d'administration, y compris l'administrateur général.
+        return Response(
+            {"detail": "La suppression d'une paroisse est définitivement désactivée."},
+            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+        )
 
     @action(detail=False, url_path="sans-gps", permission_classes=[permissions.IsAuthenticated])
     def sans_gps(self, request):

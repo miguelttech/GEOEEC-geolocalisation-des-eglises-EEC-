@@ -5,7 +5,12 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from .models import Grade, Ouvrier
-from .serializers import GradeSerializer, OuvrierListSerializer, OuvrierWriteSerializer
+from .serializers import (
+    GradeSerializer,
+    OuvrierListSerializer,
+    OuvrierWriteSerializer,
+    OuvrierAffectationSerializer,
+)
 from apps.accounts.permissions import (
     ReadPublicWriteAdmin,
     filter_ouvriers_by_scope,
@@ -37,8 +42,12 @@ class OuvrierViewSet(viewsets.ModelViewSet):
     permission_classes = [ReadPublicWriteAdmin]
 
     def get_serializer_class(self):
-        if self.action in ("create", "update", "partial_update"):
+        if self.action == "create":
             return OuvrierWriteSerializer
+        if self.action in ("update", "partial_update"):
+            # EXIGENCE : l'identité d'un ouvrier n'est jamais modifiable ;
+            # seule son affectation (paroisse unique) peut changer.
+            return OuvrierAffectationSerializer
         return OuvrierListSerializer
 
     def get_queryset(self):
@@ -119,7 +128,7 @@ class OuvrierViewSet(viewsets.ModelViewSet):
         total = qs.count()
         par_statut = {
             s: qs.filter(statut=s).count()
-            for s in ("ACTIF", "RETRAITE", "SUSPENDU", "DECEDE")
+            for s in ("OCCUPE", "INOCCUPE")
         }
         return Response({
             "total": total,

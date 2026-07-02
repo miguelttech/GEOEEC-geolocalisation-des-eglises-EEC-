@@ -138,10 +138,19 @@ class Paroisse(models.Model):
                                             ↑longitude   ↑latitude
     """
 
-    NIVEAUX = [
-        ("PAROISSE", "Paroisse"),
-        ("STATION", "Station"),
-        ("ANNEXE", "Annexe"),
+    # Catégories officielles des paroisses de l'EEC — résolution n° R05/CSG
+    # du Conseil Synodal Général de juillet 2024 (document du 02/06/2026).
+    # De la plus importante (A++) à la plus petite (C4).
+    CATEGORIES = [
+        ("A++", "A++"),
+        ("A1", "A1"),
+        ("A2", "A2"),
+        ("B1", "B1"),
+        ("B2", "B2"),
+        ("C1", "C1"),
+        ("C2", "C2"),
+        ("C3", "C3"),
+        ("C4", "C4"),
     ]
 
     # Nom de la paroisse (ex: "PAROISSE DE BONANJO", "PAROISSE CENTRALE DE YAOUNDÉ")
@@ -150,8 +159,13 @@ class Paroisse(models.Model):
     # Code unique optionnel (ex: "PAR-001")
     code = models.CharField(max_length=20, unique=True, null=True, blank=True)
 
-    # Niveau hiérarchique : Paroisse > Station > Annexe
-    niveau = models.CharField(max_length=10, choices=NIVEAUX, default="PAROISSE")
+    # Catégorie officielle de la paroisse (nullable : paroisses pas encore
+    # catégorisées par le Conseil Synodal). Remplace l'ancien champ `niveau`
+    # qui ne portait aucune information (100 % des lignes = "PAROISSE").
+    categorie = models.CharField(max_length=3, choices=CATEGORIES, null=True, blank=True)
+
+    # Paroisse « en prospection » : en cours d'implantation / d'étude
+    en_prospection = models.BooleanField(default=False)
 
     # District auquel appartient cette paroisse
     # on_delete=PROTECT : on ne peut pas supprimer un district avec des paroisses

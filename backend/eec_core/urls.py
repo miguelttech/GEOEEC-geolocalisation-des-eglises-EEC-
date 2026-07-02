@@ -35,6 +35,7 @@ from apps.visitors.urls import visitor_patterns, analytics_patterns
 from apps.exports.views import (
     export_paroisses_excel,
     export_oeuvres_excel,
+    export_ouvriers_excel,
     export_statistiques_excel,
     export_statistiques_pdf,
     template_paroisses,
@@ -84,6 +85,7 @@ auth_patterns = [
 export_patterns = [
     path("paroisses/excel/",          export_paroisses_excel),
     path("oeuvres/excel/",            export_oeuvres_excel),
+    path("ouvriers/excel/",           export_ouvriers_excel),
     path("statistiques/excel/",       export_statistiques_excel),
     path("statistiques/pdf/",         export_statistiques_pdf),
     path("templates/paroisses/",      template_paroisses),

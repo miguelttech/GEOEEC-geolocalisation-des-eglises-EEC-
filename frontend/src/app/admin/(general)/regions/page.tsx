@@ -28,6 +28,8 @@ function RegionViewPanel({ region: r, onClose }: { region: RegionSynodale; onClo
             {[
               { label: 'Districts', value: String(r.nb_districts), color: 'var(--text)' },
               { label: 'Paroisses', value: String(r.nb_paroisses), color: '#5AC472' },
+              { label: 'Fidèles',   value: (r.nb_fideles ?? 0).toLocaleString('fr'), color: '#FFD600' },
+              { label: 'Ouvriers',  value: String(r.nb_ouvriers ?? 0), color: '#5B9BD5' },
             ].map(s => (
               <div key={s.label} className="card" style={{ padding: '12px 14px' }}>
                 <div style={{ fontSize: 10, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>{s.label}</div>
@@ -40,7 +42,6 @@ function RegionViewPanel({ region: r, onClose }: { region: RegionSynodale; onClo
             <div style={{ fontSize: 11, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Identité</div>
             {[
               { label: 'Nom officiel', value: r.nom },
-              { label: 'Code', value: r.code || '—' },
             ].map(f => (
               <div key={f.label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, gap: 8 }}>
                 <span style={{ color: 'var(--text-3)', flexShrink: 0 }}>{f.label}</span>
@@ -127,15 +128,16 @@ export default function RegionsPage() {
                   <tr>
                     <th style={{ width: 40 }}>#</th>
                     <th>Région synodale</th>
-                    <th style={{ width: 80 }}>Code</th>
                     <th className="sortable" style={{ textAlign: 'right' }}>Districts</th>
                     <th className="sortable" style={{ textAlign: 'right' }}>Paroisses</th>
-                    <th style={{ width: 60 }}>Actions</th>
+                    <th className="sortable" style={{ textAlign: 'right' }}>Fidèles</th>
+                    <th className="sortable" style={{ textAlign: 'right' }}>Ouvriers</th>
+                    <th style={{ width: 60 }}>Détail</th>
                   </tr>
                 </thead>
                 <tbody>
                   {data.length === 0 && (
-                    <tr><td colSpan={6} style={{ height: 200, textAlign: 'center' }}>
+                    <tr><td colSpan={7} style={{ height: 200, textAlign: 'center' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
                         <I.compass size={40} style={{ opacity: 0.25 }} />
                         <div className="sg-md" style={{ fontSize: 15 }}>Aucune région trouvée</div>
@@ -154,15 +156,12 @@ export default function RegionsPage() {
                           <span style={{ fontWeight: 600, fontSize: 13.5 }}>{r.nom}</span>
                         </div>
                       </td>
-                      <td>
-                        {r.code
-                          ? <span className="pill pill-gray mono" style={{ fontSize: 11 }}>{r.code}</span>
-                          : <span style={{ color: 'var(--text-3)' }}>—</span>}
-                      </td>
                       <td className="mono" style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{r.nb_districts}</td>
                       <td className="mono" style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums', color: '#5AC472', fontWeight: 600 }}>{r.nb_paroisses}</td>
+                      <td className="mono" style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums', color: '#FFD600' }}>{(r.nb_fideles ?? 0).toLocaleString('fr')}</td>
+                      <td className="mono" style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums', color: '#5B9BD5' }}>{r.nb_ouvriers ?? 0}</td>
                       <td>
-                        <button className="icon-btn" onClick={() => setViewPanel(r)}><I.eye size={15} /></button>
+                        <button className="icon-btn" title="Vue détaillée" onClick={() => setViewPanel(r)}><I.eye size={15} /></button>
                       </td>
                     </tr>
                   ))}
@@ -170,12 +169,18 @@ export default function RegionsPage() {
                 {!loading && data.length > 0 && (
                   <tfoot>
                     <tr style={{ background: 'rgba(46,151,68,0.06)', borderTop: '2px solid rgba(46,151,68,0.30)' }}>
-                      <td colSpan={3} style={{ padding: 14, fontWeight: 700 }} className="sg-md">Totaux</td>
+                      <td colSpan={2} style={{ padding: 14, fontWeight: 700 }} className="sg-md">Totaux</td>
                       <td className="mono sg-md" style={{ textAlign: 'right', padding: 14 }}>
                         {data.reduce((s, r) => s + r.nb_districts, 0)}
                       </td>
                       <td className="mono sg-md" style={{ textAlign: 'right', padding: 14, color: '#5AC472' }}>
                         {data.reduce((s, r) => s + r.nb_paroisses, 0).toLocaleString('fr')}
+                      </td>
+                      <td className="mono sg-md" style={{ textAlign: 'right', padding: 14, color: '#FFD600' }}>
+                        {data.reduce((s, r) => s + (r.nb_fideles ?? 0), 0).toLocaleString('fr')}
+                      </td>
+                      <td className="mono sg-md" style={{ textAlign: 'right', padding: 14, color: '#5B9BD5' }}>
+                        {data.reduce((s, r) => s + (r.nb_ouvriers ?? 0), 0)}
                       </td>
                       <td />
                     </tr>

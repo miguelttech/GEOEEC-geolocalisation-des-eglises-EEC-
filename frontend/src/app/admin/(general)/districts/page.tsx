@@ -28,58 +28,8 @@ function ToastStack({ toasts, remove }: { toasts: (Toast & { id: string })[]; re
   );
 }
 
-// ─── Row Menu ─────────────────────────────────────────────────────────────────
-function RowMenu({ district, onEdit, onDelete }: { district: District; onEdit: () => void; onDelete: () => void }) {
-  const [open, setOpen] = useState(false);
-  const ref = React.useRef<HTMLDivElement>(null);
-  useOutside(ref, () => setOpen(false));
-  return (
-    <div ref={ref} style={{ position: 'relative', display: 'inline-block' }}>
-      <button className="icon-btn" onClick={() => setOpen(o => !o)}><I.more size={15} /></button>
-      {open && (
-        <div className="menu" style={{ top: 'calc(100% + 4px)', right: 0, minWidth: 180 }}>
-          <button onClick={() => { setOpen(false); onEdit(); }}><I.pencil size={13} />Modifier</button>
-          <hr />
-          <button className="danger" onClick={() => { setOpen(false); onDelete(); }}><I.trash size={13} />Supprimer</button>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── Delete Modal ─────────────────────────────────────────────────────────────
-function DeleteModal({ district, onCancel, onConfirm, busy }: { district: District; onCancel: () => void; onConfirm: () => void; busy: boolean }) {
-  const [value, setValue] = useState('');
-  const matches = value.trim() === district.nom.trim();
-  return (
-    <div className="overlay" onClick={onCancel}>
-      <div className="modal-panel" onClick={e => e.stopPropagation()}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div style={{ width: 44, height: 44, borderRadius: 8, background: 'rgba(198,40,40,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#E55B5B' }}>
-            <I.trash size={22} />
-          </div>
-          <h3 className="sg" style={{ fontSize: 20, margin: 0 }}>Supprimer le district</h3>
-          <p style={{ fontSize: 13, color: 'var(--text-2)', margin: 0, lineHeight: 1.5 }}>
-            Vous êtes sur le point de supprimer <b style={{ color: 'var(--text)' }}>"{district.nom}"</b>. Cette action est irréversible et bloquée si le district contient des paroisses.
-          </p>
-          <div style={{ width: '100%' }}>
-            <div className="label">Pour confirmer, tapez le nom du district</div>
-            <input className="input" placeholder={district.nom} value={value} onChange={e => setValue(e.target.value)} autoFocus />
-          </div>
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-            <button className="btn btn-outline" onClick={onCancel} disabled={busy}>Annuler</button>
-            <button className="btn btn-danger" disabled={!matches || busy} style={{ opacity: matches && !busy ? 1 : 0.4 }} onClick={matches && !busy ? onConfirm : undefined}>
-              {busy ? <span className="ls-spinner" /> : 'Supprimer'}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ─── View Panel ───────────────────────────────────────────────────────────────
-function DistrictViewPanel({ district: d, onClose, onEdit }: { district: District; onClose: () => void; onEdit: () => void }) {
+function DistrictViewPanel({ district: d, onClose }: { district: District; onClose: () => void }) {
   return (
     <div className="overlay" onClick={onClose}>
       <div className="slide-panel" style={{ width: 460 }} onClick={e => e.stopPropagation()}>
@@ -94,21 +44,24 @@ function DistrictViewPanel({ district: d, onClose, onEdit }: { district: Distric
             </div>
           </div>
           <div style={{ display: 'flex', gap: 6 }}>
-            <button className="btn btn-outline" style={{ padding: '6px 12px', fontSize: 12 }} onClick={onEdit}><I.pencil size={13} />Modifier</button>
             <button className="icon-btn" onClick={onClose}><I.x size={16} /></button>
           </div>
         </div>
 
         <div style={{ padding: '20px 22px', overflowY: 'auto', height: 'calc(100% - 72px)', display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {/* Même modèle que les régions : toutes les statistiques disponibles */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            <div className="card" style={{ padding: '12px 14px' }}>
-              <div style={{ fontSize: 10, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>Paroisses</div>
-              <div className="sg-md" style={{ fontSize: 24, marginTop: 4, color: '#5AC472' }}>{d.nb_paroisses}</div>
-            </div>
-            <div className="card" style={{ padding: '12px 14px' }}>
-              <div style={{ fontSize: 10, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>Région</div>
-              <div style={{ fontSize: 12, marginTop: 4, color: 'var(--text)', fontWeight: 500, lineHeight: 1.3 }}>{d.region_nom}</div>
-            </div>
+            {[
+              { label: 'Paroisses', value: String(d.nb_paroisses), color: '#5AC472', big: true },
+              { label: 'Fidèles',   value: (d.nb_fideles ?? 0).toLocaleString('fr'), color: '#FFD600', big: true },
+              { label: 'Ouvriers',  value: String(d.nb_ouvriers ?? 0), color: '#5B9BD5', big: true },
+              { label: 'Région',    value: d.region_nom, color: 'var(--text)', big: false },
+            ].map(s => (
+              <div key={s.label} className="card" style={{ padding: '12px 14px' }}>
+                <div style={{ fontSize: 10, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>{s.label}</div>
+                <div className="sg-md" style={{ fontSize: s.big ? 24 : 13, marginTop: 4, color: s.color, lineHeight: 1.3 }}>{s.value}</div>
+              </div>
+            ))}
           </div>
 
           <div className="card" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -135,93 +88,6 @@ function DistrictViewPanel({ district: d, onClose, onEdit }: { district: Distric
   );
 }
 
-// ─── Form Panel ───────────────────────────────────────────────────────────────
-function DistrictFormPanel({ mode, district, onClose, onSaved }: {
-  mode: 'create' | 'edit'; district?: District; onClose: () => void; onSaved: (d: District) => void;
-}) {
-  const [nom, setNom] = useState(district?.nom || '');
-  const [regionId, setRegionId] = useState(district?.region_id || 0);
-  const [regions, setRegions] = useState<RegionSynodale[]>([]);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    api.get<RegionSynodale[]>('/api/geo/regions/liste/').then(setRegions).catch(() => {});
-  }, []);
-
-  const handleSave = async () => {
-    if (!nom.trim()) { setError('Le nom est requis.'); return; }
-    if (!regionId) { setError('Veuillez sélectionner une région.'); return; }
-    setSaving(true); setError('');
-    try {
-      let saved: District;
-      if (mode === 'create') {
-        saved = await api.post<District>('/api/geo/districts/', { nom: nom.trim(), region: regionId });
-      } else {
-        saved = await api.patch<District>(`/api/geo/districts/${district!.id}/`, { nom: nom.trim(), region: regionId });
-      }
-      onSaved(saved);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erreur lors de la sauvegarde.');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return (
-    <div className="overlay" onClick={onClose}>
-      <div className="slide-panel" style={{ width: 520 }} onClick={e => e.stopPropagation()}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 22px', borderBottom: '1px solid var(--border)', background: 'var(--chrome)' }}>
-          <div>
-            <h2 className="sg-md" style={{ fontSize: 18, margin: 0, color: '#F0F4F1' }}>
-              {mode === 'create' ? 'Nouveau district' : `Modifier — ${district?.nom}`}
-            </h2>
-            <div style={{ fontSize: 11, color: 'rgba(240,244,241,0.50)', marginTop: 2 }}>Console Synodale · EEC Cameroun</div>
-          </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button className="btn btn-outline" style={{ padding: '7px 14px', fontSize: 12, color: 'rgba(240,244,241,0.80)', borderColor: 'rgba(255,255,255,0.20)' }} onClick={onClose} disabled={saving}>Annuler</button>
-            <button className="btn btn-primary" style={{ padding: '7px 14px', fontSize: 12, minWidth: 110 }} onClick={handleSave} disabled={saving}>
-              {saving ? <span className="ls-spinner" /> : <><span>Enregistrer</span> <I.check size={14} /></>}
-            </button>
-            <button className="icon-btn" style={{ color: 'rgba(240,244,241,0.60)' }} onClick={onClose} disabled={saving}><I.x size={16} /></button>
-          </div>
-        </div>
-
-        {error && (
-          <div style={{ background: 'rgba(198,40,40,0.15)', borderBottom: '1px solid rgba(198,40,40,0.30)', padding: '10px 22px', fontSize: 12.5, color: '#E55B5B', display: 'flex', gap: 8 }}>
-            <I.alert size={13} /> {error}
-          </div>
-        )}
-
-        <div style={{ padding: '24px 22px', display: 'flex', flexDirection: 'column', gap: 18 }}>
-          <div>
-            <div className="label">Nom du district *</div>
-            <input className="input" placeholder="Ex. BAFOUSSAM NORD" value={nom} onChange={e => setNom(e.target.value)} autoFocus />
-          </div>
-          <div>
-            <div className="label">Région synodale *</div>
-            <select className="input" style={{ fontSize: 13 }} value={regionId || ''} onChange={e => setRegionId(parseInt(e.target.value) || 0)}>
-              <option value="">— Sélectionner une région</option>
-              {regions.map(r => <option key={r.id} value={r.id}>{r.nom}</option>)}
-            </select>
-          </div>
-
-          <div style={{ background: 'rgba(46,151,68,0.06)', border: '1px solid rgba(46,151,68,0.20)', borderRadius: 6, padding: '12px 14px', fontSize: 12.5, color: 'var(--text-2)' }}>
-            L'administrateur de district est assigné depuis la section <b style={{ color: 'var(--text)' }}>Gestion des comptes</b>. Un district peut exister sans administrateur assigné.
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
-            <button className="btn btn-ghost" onClick={onClose} disabled={saving}>Annuler</button>
-            <button className="btn btn-primary" onClick={handleSave} disabled={saving || !nom || !regionId} style={{ opacity: (!nom || !regionId || saving) ? 0.5 : 1 }}>
-              {saving ? <span className="ls-spinner" /> : mode === 'create' ? 'Créer le district' : 'Enregistrer les modifications'}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ─── Main Page ────────────────────────────────────────────────────────────────
 const PAGE_SIZE = 50;
 
@@ -240,10 +106,7 @@ export default function DistrictsPage() {
   const [regions, setRegions] = useState<RegionSynodale[]>([]);
 
   const [selection, setSelection] = useState<Set<number>>(new Set());
-  const [confirmDelete, setConfirmDelete] = useState<District | null>(null);
-  const [deleting, setDeleting] = useState(false);
   const [viewPanel, setViewPanel] = useState<District | null>(null);
-  const [formPanel, setFormPanel] = useState<{ mode: 'create' | 'edit'; district?: District } | null>(null);
 
   // Debounce search
   useEffect(() => {
@@ -289,29 +152,6 @@ export default function DistrictsPage() {
     else setSelection(new Set(districts.map(d => d.id)));
   };
 
-  const handleDelete = async () => {
-    if (!confirmDelete) return;
-    setDeleting(true);
-    try {
-      await api.delete(`/api/geo/districts/${confirmDelete.id}/`);
-      addToast({ type: 'success', title: `District "${confirmDelete.nom}" supprimé.` });
-      setConfirmDelete(null);
-      setSelection(new Set());
-      doRefresh();
-    } catch (e) {
-      addToast({ type: 'error', title: 'Erreur lors de la suppression.', body: e instanceof Error ? e.message : undefined });
-    } finally {
-      setDeleting(false);
-    }
-  };
-
-  const handleSaved = (saved: District) => {
-    const wasCreate = formPanel?.mode === 'create';
-    setFormPanel(null);
-    addToast({ type: 'success', title: wasCreate ? 'District créé avec succès.' : 'Modifications enregistrées.', body: saved.nom });
-    doRefresh();
-  };
-
   const pageBtns = Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
     if (totalPages <= 5) return i + 1;
     if (page <= 3) return i + 1;
@@ -340,8 +180,6 @@ export default function DistrictsPage() {
           <span style={{ fontSize: 12, color: 'var(--text-3)' }}>répartis sur {regions.length} régions</span>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button className="btn btn-outline" onClick={() => addToast({ type: 'info', title: 'Export — fonctionnalité à venir.' })}><I.download size={14} />Exporter</button>
-          <button className="btn btn-primary" onClick={() => setFormPanel({ mode: 'create' })}><I.plus size={14} />Créer un district</button>
         </div>
       </div>
 
@@ -389,12 +227,14 @@ export default function DistrictsPage() {
                     <th>Nom du district</th>
                     <th>Région synodale</th>
                     <th className="sortable" style={{ textAlign: 'right' }}>Paroisses</th>
-                    <th style={{ width: 110 }}>Actions</th>
+                    <th className="sortable" style={{ textAlign: 'right' }}>Fidèles</th>
+                    <th className="sortable" style={{ textAlign: 'right' }}>Ouvriers</th>
+                    <th style={{ width: 70 }}>Détail</th>
                   </tr>
                 </thead>
                 <tbody>
                   {districts.length === 0 && (
-                    <tr><td colSpan={6} style={{ height: 280, textAlign: 'center' }}>
+                    <tr><td colSpan={8} style={{ height: 280, textAlign: 'center' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
                         <I.network size={48} style={{ opacity: 0.25 }} />
                         <div className="sg-md" style={{ fontSize: 16 }}>Aucun district trouvé</div>
@@ -416,11 +256,11 @@ export default function DistrictsPage() {
                       </td>
                       <td style={{ color: 'var(--text-2)', fontSize: 12 }}>{d.region_nom}</td>
                       <td className="mono" style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums', color: '#5AC472', fontWeight: 600 }}>{d.nb_paroisses}</td>
+                      <td className="mono" style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums', color: '#FFD600' }}>{(d.nb_fideles ?? 0).toLocaleString('fr')}</td>
+                      <td className="mono" style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums', color: '#5B9BD5' }}>{d.nb_ouvriers ?? 0}</td>
                       <td>
                         <div style={{ display: 'flex', gap: 2 }}>
-                          <button className="icon-btn" onClick={() => setViewPanel(d)}><I.eye size={15} /></button>
-                          <button className="icon-btn green" onClick={() => setFormPanel({ mode: 'edit', district: d })}><I.pencil size={15} /></button>
-                          <RowMenu district={d} onEdit={() => setFormPanel({ mode: 'edit', district: d })} onDelete={() => setConfirmDelete(d)} />
+                          <button className="icon-btn" title="Vue détaillée" onClick={() => setViewPanel(d)}><I.eye size={15} /></button>
                         </div>
                       </td>
                     </tr>
@@ -460,25 +300,11 @@ export default function DistrictsPage() {
         </div>
       )}
 
-      {/* Modals & panels */}
-      {confirmDelete && (
-        <DeleteModal district={confirmDelete} onCancel={() => setConfirmDelete(null)} onConfirm={handleDelete} busy={deleting} />
-      )}
-
+      {/* Panneau de détail (lecture seule) */}
       {viewPanel && (
         <DistrictViewPanel
           district={viewPanel}
           onClose={() => setViewPanel(null)}
-          onEdit={() => { setFormPanel({ mode: 'edit', district: viewPanel }); setViewPanel(null); }}
-        />
-      )}
-
-      {formPanel && (
-        <DistrictFormPanel
-          mode={formPanel.mode}
-          district={formPanel.district}
-          onClose={() => setFormPanel(null)}
-          onSaved={handleSaved}
         />
       )}
 

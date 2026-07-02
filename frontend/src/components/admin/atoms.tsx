@@ -63,10 +63,13 @@ export const StatusPill = ({ statut }: { statut: string }) => {
   return null;
 };
 
-// ── NiveauPill ────────────────────────────────────────────────────────────────
-export const NiveauPill = ({ niveau }: { niveau: string }) => {
-  const map: Record<string, string> = { PAROISSE: 'pill-green', STATION: 'pill-orange', ANNEXE: 'pill-blue' };
-  return <span className={'pill ' + (map[niveau] || 'pill-gray')}>{niveau}</span>;
+// ── CategoriePill ─────────────────────────────────────────────────────────────
+// Catégories officielles des paroisses (résolution R05/CSG) : famille A = or,
+// famille B = bleu, famille C = vert, non catégorisée = gris.
+export const CategoriePill = ({ categorie }: { categorie?: string | null }) => {
+  if (!categorie) return <span className="pill pill-gray">—</span>;
+  const fam = categorie.startsWith('A') ? 'pill-orange' : categorie.startsWith('B') ? 'pill-blue' : 'pill-green';
+  return <span className={'pill ' + fam}>{categorie}</span>;
 };
 
 // ── GpsCell ───────────────────────────────────────────────────────────────────

@@ -88,6 +88,8 @@ export interface RegionSynodale {
   code: string | null;
   nb_districts: number;
   nb_paroisses: number;
+  nb_fideles?: number;
+  nb_ouvriers?: number;
 }
 
 export interface District {
@@ -96,25 +98,28 @@ export interface District {
   region_id: number;
   region_nom: string;
   nb_paroisses: number;
+  nb_fideles?: number | null;
+  nb_ouvriers?: number | null;
 }
 
 export interface Paroisse {
   id: number;
   nom: string;
   adresse: string;
-  niveau: 'PAROISSE' | 'STATION' | 'ANNEXE';
+  categorie: 'A++' | 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2' | 'C3' | 'C4' | null;
+  en_prospection: boolean;
   district_id: number;
   district_nom: string;
   region_id: number;
   region_nom: string;
   latitude: number | null;
   longitude: number | null;
-  est_active: boolean;
   nombre_fideles: number | null;
+  communiants: number | null;
+  non_communiants: number | null;
+  nb_ouvriers: number;
   telephone: string;
   email: string;
-  annee_creation: number | null;
-  created_at: string;
   updated_at: string;
 }
 
@@ -131,7 +136,7 @@ export interface Ouvrier {
   nom: string;
   prenom: string;
   sexe: 'M' | 'F';
-  statut: 'ACTIF' | 'RETRAITE' | 'SUSPENDU' | 'DECEDE';
+  statut: 'OCCUPE' | 'INOCCUPE';
   grade_id: number | null;
   grade_nom: string | null;
   grade_abreviation: string | null;
@@ -142,11 +147,7 @@ export interface Ouvrier {
   region_id: number | null;
   region_nom: string | null;
   telephone: string;
-  email: string;
-  date_naissance: string | null;
-  date_ordination: string | null;
-  latitude: number | null;
-  longitude: number | null;
+  // EXIGENCE : un ouvrier n'est jamais géolocalisable — aucune coordonnée.
   created_at: string;
   updated_at: string;
 }
@@ -177,6 +178,8 @@ export interface Oeuvre {
   region_nom: string | null;
   est_active: boolean;
   capacite: number | null;
+  nb_personnels: number | null;
+  en_prospection: boolean;
   annee_creation: number | null;
   telephone: string;
   email: string;

@@ -39,10 +39,10 @@ export default function DashboardDistrictPage() {
     value: p.total,
   }));
 
-  const niveaux = [
-    { count: PAROISSES_DISTRICT.filter(p => p.niveau === 'PAROISSE').length, color: '#5AC472' },
-    { count: PAROISSES_DISTRICT.filter(p => p.niveau === 'STATION').length,  color: C },
-    { count: PAROISSES_DISTRICT.filter(p => p.niveau === 'ANNEXE').length,   color: '#E67A2E' },
+  const categories = [
+    { count: PAROISSES_DISTRICT.filter(p => p.categorie === 'C1').length, color: '#5AC472' },
+    { count: PAROISSES_DISTRICT.filter(p => p.categorie === 'C2').length,  color: C },
+    { count: PAROISSES_DISTRICT.filter(p => p.categorie === 'C3').length,   color: '#E67A2E' },
   ];
 
   const fidEvol = FIDELES_EVOLUTION_DISTRICT.map(e => ({ year: e.year, comm: e.comm, noncomm: e.noncomm }));
@@ -90,13 +90,13 @@ export default function DashboardDistrictPage() {
         </div>
         <div className="card" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Niveaux</div>
-          <Donut segments={niveaux} total={MOCK_DISTRICT.nbParoisses} label="unités" />
+          <Donut segments={categories} total={MOCK_DISTRICT.nbParoisses} label="unités" />
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 11 }}>
-            {[{label:'Paroisses', color:'#5AC472'},{label:'Stations', color:C},{label:'Annexes', color:'#E67A2E'}].map((n, i) => (
+            {[{label:'Catégorie C1', color:'#5AC472'},{label:'Catégorie C2', color:C},{label:'Catégorie C3', color:'#E67A2E'}].map((n, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <div style={{ width: 8, height: 8, borderRadius: '50%', background: n.color, flexShrink: 0 }}/>
                 <span style={{ color: 'var(--text-2)' }}>{n.label}</span>
-                <span style={{ marginLeft: 'auto', fontWeight: 600, color: 'var(--text)' }}>{niveaux[i].count}</span>
+                <span style={{ marginLeft: 'auto', fontWeight: 600, color: 'var(--text)' }}>{categories[i].count}</span>
               </div>
             ))}
           </div>
@@ -155,9 +155,9 @@ export default function DashboardDistrictPage() {
                 <td style={{ fontWeight: 500 }}>{p.nom}</td>
                 <td>
                   <span style={{ fontSize: 11, padding: '2px 6px', borderRadius: 4, fontWeight: 600,
-                    background: p.niveau === 'PAROISSE' ? 'rgba(90,196,114,0.12)' : p.niveau === 'STATION' ? 'rgba(155,114,207,0.12)' : 'rgba(230,122,46,0.12)',
-                    color: p.niveau === 'PAROISSE' ? '#5AC472' : p.niveau === 'STATION' ? C : '#E67A2E',
-                  }}>{p.niveau}</span>
+                    background: p.categorie === 'C1' ? 'rgba(90,196,114,0.12)' : p.categorie === 'C2' ? 'rgba(155,114,207,0.12)' : 'rgba(230,122,46,0.12)',
+                    color: p.categorie === 'C1' ? '#5AC472' : p.categorie === 'C2' ? C : '#E67A2E',
+                  }}>{p.categorie}</span>
                 </td>
                 <td className="mono" style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{p.fideles.toLocaleString('fr')}</td>
                 <td className="mono" style={{ textAlign: 'right' }}>{p.ouvriers}</td>

@@ -372,7 +372,9 @@ const ALL_RAIL_TABS = [
 ];
 // Onglets réservés au visiteur connecté. En mode 'public' ils restent cliquables
 // mais ouvrent l'invite de connexion (même système que le favori).
-const LOCKED_FOR_PUBLIC = new Set(['favoris', 'parcours', 'history', 'settings']);
+// EXIGENCE : les statistiques sont réservées aux utilisateurs ayant un compte —
+// un visiteur non connecté ne doit plus y avoir accès.
+const LOCKED_FOR_PUBLIC = new Set(['stats', 'favoris', 'parcours', 'history', 'settings']);
 
 /* ============================================================
    useLeafletMap hook
@@ -431,7 +433,18 @@ function useLeafletMap(
       let rafId = 0;
       const ro = new ResizeObserver(() => {
         cancelAnimationFrame(rafId);
-        rafId = requestAnimationFrame(() => map.invalidateSize({ animate: false } as L.ZoomPanOptions));
+        rafId = requestAnimationFrame(() => {
+          map.invalidateSize({ animate: false } as L.ZoomPanOptions);
+          // Fix leaflet-rotate : à la création, le conteneur a parfois une
+          // taille encore nulle → son calcul interne de bearing devient NaN
+          // et reste bloqué ainsi (flyToBounds plante alors avec "Invalid
+          // LatLng (NaN, NaN)"). Dès que le conteneur a une vraie taille,
+          // on recale le bearing à 0 pour purger ce NaN.
+          const anyMap = map as any;
+          if (typeof anyMap.getBearing === 'function' && Number.isNaN(anyMap.getBearing())) {
+            anyMap.setBearing(0);
+          }
+        });
       });
       ro.observe(map.getContainer());
     }
@@ -1228,8 +1241,8 @@ const EntityListPanel = ({ title, items, kind, onPick, onClose, totalLabel }: {
               <button key={it.id} className="list-row">
                 <span className="lr-ico" style={{ background: 'var(--eec-green-soft)', color: 'var(--green-deep-text)', fontWeight: 700, fontSize: 13 }}>{initials}</span>
                 <span className="lr-body"><span className="lr-title">{it.name}</span><span className="lr-sub">{it.gradeLabel} · {r?.city}</span></span>
-                <span className="dp-worker w-status" style={{ padding: '3px 10px', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', borderRadius: 999, background: it.status === 'actif' ? 'var(--eec-green)' : 'var(--surface-3)', color: it.status === 'actif' ? '#fff' : 'var(--t-2)' }}>
-                  {it.status === 'actif' ? 'Actif' : it.status === 'retraite' ? 'Retraité' : 'Susp.'}
+                <span className="dp-worker w-status" style={{ padding: '3px 10px', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', borderRadius: 999, background: it.status === 'occupe' ? 'var(--eec-green)' : 'var(--surface-3)', color: it.status === 'occupe' ? '#fff' : 'var(--t-2)' }}>
+                  {it.status === 'occupe' ? 'Occupé' : 'Inoccupé'}
                 </span>
               </button>
             );
@@ -1831,9 +1844,11 @@ const DetailPanel = ({ item, onClose, saved, onToggleSave, onPick, mode, onLogin
         </div>
         <div className="dp-meta-line">
           {isParish && (item as ParishItem).address && (
-            <><span style={{ background: 'var(--eec-green-soft)', color: 'var(--eec-green)', borderRadius: 4, padding: '1px 6px', fontSize: 10, fontWeight: 700, letterSpacing: '0.06em' }}>
-              {(item as ParishItem).niveau}
-            </span><span className="ml-sep">·</span><span>{(item as ParishItem).address}</span><span className="ml-sep">·</span></>
+            <>{(item as ParishItem).categorie && (
+              <><span style={{ background: 'var(--eec-green-soft)', color: 'var(--eec-green)', borderRadius: 4, padding: '1px 6px', fontSize: 10, fontWeight: 700, letterSpacing: '0.06em' }}>
+                Cat. {(item as ParishItem).categorie}
+              </span><span className="ml-sep">·</span></>
+            )}<span>{(item as ParishItem).address}</span><span className="ml-sep">·</span></>
           )}
           <span>{isRegion ? (item as RegionItem).admin : isDistrict ? (item as DistrictItem).regionName : (item as any).districtName || district?.name}</span>
           <span className="ml-sep">·</span>
@@ -1923,7 +1938,7 @@ const DetailPanel = ({ item, onClose, saved, onToggleSave, onPick, mode, onLogin
               label={isParish ? `District ${(item as ParishItem).districtName}` : isDistrict ? `Région ${(item as DistrictItem).regionName}` : (district ? district.name + ' · ' : '') + (region?.name ?? '')}
               sub={isParish ? `Région ${(item as ParishItem).regionName} · Cameroun` : isDistrict ? 'Cameroun' : (region?.admin ?? '') + ' · Cameroun'}
             />
-            {isParish && <InfoLine ico="church" label={(item as ParishItem).niveau} sub="Type d'entité ecclésiastique" />}
+            {isParish && (item as ParishItem).categorie && <InfoLine ico="church" label={`Catégorie ${(item as ParishItem).categorie}`} sub="Catégorie officielle (résolution R05/CSG)" />}
           </div>
           <div className="gps-box" style={{ marginTop: 14 }}>
             <div className="g-coords"><span className="g-tag">GPS</span>{item.lat.toFixed(5)}° N · {item.lng.toFixed(5)}° E</div>
@@ -1990,7 +2005,7 @@ const DetailPanel = ({ item, onClose, saved, onToggleSave, onPick, mode, onLogin
               <div key={w.id} className="dp-worker">
                 <span className="avatar">{initials}</span>
                 <span className="w-body"><div className="w-name">{w.gradeLabel} {w.name}</div><div className="w-meta">{w.gradeLabel}</div></span>
-                <span className={'w-status ' + w.status}>{w.status === 'actif' ? 'Actif' : w.status === 'retraite' ? 'Retraité' : 'Susp.'}</span>
+                <span className={'w-status ' + w.status}>{w.status === 'occupe' ? 'Occupé' : 'Inoccupé'}</span>
               </div>
             );
           })}
@@ -2020,7 +2035,7 @@ const ListView = ({ items, onPick }: { items: AnyItem[]; onPick: (item: AnyItem)
               <span className="lv-type">{t?.singular || '—'}</span>
               <span className="lv-region">{r?.city || r?.name || r?.admin || '—'}</span>
               <span className="lv-num">{it.stats ? fmt(it.stats.fideles) : '—'}</span>
-              <span className="lv-status"><span style={{ width: 8, height: 8, borderRadius: 4, background: '#2E9744', display: 'inline-block' }} /> Actif</span>
+              <span className="lv-status">{(it as any).categorie ? `Cat. ${(it as any).categorie}` : '—'}</span>
             </div>
           );
         })}
@@ -2423,7 +2438,17 @@ export default function EECMapApp({ mode, user, embedded = false }: { mode: MapM
     measurePoints,
     onMeasureClick,
   );
-  const recenter = () => mapRef.current?.flyToBounds(CAMEROON_BOUNDS, { duration: 0.7 } as L.FitBoundsOptions);
+  const recenter = () => {
+    const map = mapRef.current;
+    if (!map) return;
+    // Filet de sécurité : si le bearing interne de leaflet-rotate est resté
+    // NaN (voir ResizeObserver plus haut), on le purge avant de recentrer.
+    const anyMap = map as any;
+    if (typeof anyMap.getBearing === 'function' && Number.isNaN(anyMap.getBearing())) {
+      anyMap.setBearing(0);
+    }
+    map.flyToBounds(CAMEROON_BOUNDS, { duration: 0.7 } as L.FitBoundsOptions);
+  };
 
   // Rotation de la carte 2D (leaflet-rotate) — boutons gauche/droite
   const rotateMap = useCallback((delta: number) => {

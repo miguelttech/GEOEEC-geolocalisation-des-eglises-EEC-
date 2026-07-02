@@ -3,7 +3,7 @@
 export const MOCK_PAROISSE = {
   id: 201,
   nom: 'Bafoussam-Centre',
-  niveau: 'PAROISSE' as const,
+  categorie: 'C1' as const,
   district: 'Bafoussam Centre',
   region: 'MIFI',
   communiants: 520,

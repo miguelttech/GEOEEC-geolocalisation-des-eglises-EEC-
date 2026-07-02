@@ -28,28 +28,28 @@ export const DISTRICTS_MIFI = [
 ];
 
 export interface ParoisseMifi {
-  id: number; nom: string; district: string; niveau: 'PAROISSE'|'STATION'|'ANNEXE';
+  id: number; nom: string; district: string; categorie: 'C1'|'C2'|'C3';
   fideles: number; ouvriers: number; gps: boolean; complete: number;
   statut: 'actif'|'inactif'|'en_attente'; modifie: string; modPar: string;
 }
 
 export const PAROISSES_MIFI: ParoisseMifi[] = [
-  { id:1,  nom:'Bafoussam-Centre',     district:'BAFOUSSAM CENTRE', niveau:'PAROISSE', fideles:892,  ouvriers:14, gps:true,  complete:88, statut:'en_attente', modifie:'il y a 3h',  modPar:'Paul ATEBA' },
-  { id:2,  nom:'Bafoussam-Plateau',    district:'BAFOUSSAM CENTRE', niveau:'PAROISSE', fideles:1140, ouvriers:18, gps:true,  complete:92, statut:'actif',      modifie:'il y a 1j',  modPar:'Paul ATEBA' },
-  { id:3,  nom:'Bafoussam-Kamkop',     district:'BAFOUSSAM CENTRE', niveau:'STATION',  fideles:420,  ouvriers:8,  gps:true,  complete:74, statut:'actif',      modifie:'il y a 2j',  modPar:'Système' },
-  { id:4,  nom:'Bafoussam-Nord',       district:'BAFOUSSAM NORD',   niveau:'PAROISSE', fideles:765,  ouvriers:12, gps:true,  complete:84, statut:'actif',      modifie:'il y a 4h',  modPar:'Samuel KAMTO' },
-  { id:5,  nom:'Bafoussam-Tamdja',     district:'BAFOUSSAM NORD',   niveau:'STATION',  fideles:285,  ouvriers:5,  gps:false, complete:45, statut:'actif',      modifie:'il y a 5j',  modPar:'Système' },
-  { id:6,  nom:'Bafoussam-Tougang',    district:'BAFOUSSAM NORD',   niveau:'ANNEXE',   fideles:138,  ouvriers:3,  gps:true,  complete:60, statut:'actif',      modifie:'il y a 6j',  modPar:'Samuel KAMTO' },
-  { id:7,  nom:'Bafoussam-Sud',        district:'BAFOUSSAM SUD',    niveau:'PAROISSE', fideles:698,  ouvriers:11, gps:true,  complete:79, statut:'actif',      modifie:'il y a 2j',  modPar:'Paul ATEBA' },
-  { id:8,  nom:'Bafoussam-Djemoun',    district:'BAFOUSSAM SUD',    niveau:'STATION',  fideles:312,  ouvriers:6,  gps:false, complete:38, statut:'actif',      modifie:'il y a 7j',  modPar:'Système' },
-  { id:9,  nom:'Baham-Centre',         district:'BAHAM',            niveau:'PAROISSE', fideles:320,  ouvriers:7,  gps:true,  complete:65, statut:'actif',      modifie:'il y a 2j',  modPar:'Paul ATEBA' },
-  { id:10, nom:'Baham-Nord',           district:'BAHAM',            niveau:'STATION',  fideles:185,  ouvriers:4,  gps:true,  complete:55, statut:'actif',      modifie:'il y a 4j',  modPar:'Système' },
-  { id:11, nom:'Baham-Est',            district:'BAHAM',            niveau:'ANNEXE',   fideles:142,  ouvriers:2,  gps:false, complete:30, statut:'inactif',    modifie:'il y a 9j',  modPar:'Système' },
-  { id:12, nom:'Baham-Forêt',          district:'BAHAM',            niveau:'ANNEXE',   fideles:98,   ouvriers:2,  gps:false, complete:25, statut:'actif',      modifie:'il y a 10j', modPar:'Système' },
-  { id:13, nom:'Bamendjou',            district:'NKAM',             niveau:'PAROISSE', fideles:487,  ouvriers:9,  gps:true,  complete:71, statut:'actif',      modifie:'il y a 3j',  modPar:'Système' },
-  { id:14, nom:'Nkouoptamo',           district:'NKAM',             niveau:'STATION',  fideles:211,  ouvriers:4,  gps:false, complete:40, statut:'actif',      modifie:'il y a 8j',  modPar:'Système' },
-  { id:15, nom:'Koupan-Centre',        district:'KOUNG-KHI',        niveau:'PAROISSE', fideles:412,  ouvriers:8,  gps:true,  complete:68, statut:'actif',      modifie:'il y a 1j',  modPar:'Brice FOKOU' },
-  { id:16, nom:'Kouoptamo Station',    district:'KOUNG-KHI',        niveau:'STATION',  fideles:178,  ouvriers:3,  gps:false, complete:35, statut:'en_attente', modifie:'il y a 2j',  modPar:'Brice FOKOU' },
+  { id:1,  nom:'Bafoussam-Centre',     district:'BAFOUSSAM CENTRE', categorie:'C1', fideles:892,  ouvriers:14, gps:true,  complete:88, statut:'en_attente', modifie:'il y a 3h',  modPar:'Paul ATEBA' },
+  { id:2,  nom:'Bafoussam-Plateau',    district:'BAFOUSSAM CENTRE', categorie:'C1', fideles:1140, ouvriers:18, gps:true,  complete:92, statut:'actif',      modifie:'il y a 1j',  modPar:'Paul ATEBA' },
+  { id:3,  nom:'Bafoussam-Kamkop',     district:'BAFOUSSAM CENTRE', categorie:'C2',  fideles:420,  ouvriers:8,  gps:true,  complete:74, statut:'actif',      modifie:'il y a 2j',  modPar:'Système' },
+  { id:4,  nom:'Bafoussam-Nord',       district:'BAFOUSSAM NORD',   categorie:'C1', fideles:765,  ouvriers:12, gps:true,  complete:84, statut:'actif',      modifie:'il y a 4h',  modPar:'Samuel KAMTO' },
+  { id:5,  nom:'Bafoussam-Tamdja',     district:'BAFOUSSAM NORD',   categorie:'C2',  fideles:285,  ouvriers:5,  gps:false, complete:45, statut:'actif',      modifie:'il y a 5j',  modPar:'Système' },
+  { id:6,  nom:'Bafoussam-Tougang',    district:'BAFOUSSAM NORD',   categorie:'C3',   fideles:138,  ouvriers:3,  gps:true,  complete:60, statut:'actif',      modifie:'il y a 6j',  modPar:'Samuel KAMTO' },
+  { id:7,  nom:'Bafoussam-Sud',        district:'BAFOUSSAM SUD',    categorie:'C1', fideles:698,  ouvriers:11, gps:true,  complete:79, statut:'actif',      modifie:'il y a 2j',  modPar:'Paul ATEBA' },
+  { id:8,  nom:'Bafoussam-Djemoun',    district:'BAFOUSSAM SUD',    categorie:'C2',  fideles:312,  ouvriers:6,  gps:false, complete:38, statut:'actif',      modifie:'il y a 7j',  modPar:'Système' },
+  { id:9,  nom:'Baham-Centre',         district:'BAHAM',            categorie:'C1', fideles:320,  ouvriers:7,  gps:true,  complete:65, statut:'actif',      modifie:'il y a 2j',  modPar:'Paul ATEBA' },
+  { id:10, nom:'Baham-Nord',           district:'BAHAM',            categorie:'C2',  fideles:185,  ouvriers:4,  gps:true,  complete:55, statut:'actif',      modifie:'il y a 4j',  modPar:'Système' },
+  { id:11, nom:'Baham-Est',            district:'BAHAM',            categorie:'C3',   fideles:142,  ouvriers:2,  gps:false, complete:30, statut:'inactif',    modifie:'il y a 9j',  modPar:'Système' },
+  { id:12, nom:'Baham-Forêt',          district:'BAHAM',            categorie:'C3',   fideles:98,   ouvriers:2,  gps:false, complete:25, statut:'actif',      modifie:'il y a 10j', modPar:'Système' },
+  { id:13, nom:'Bamendjou',            district:'NKAM',             categorie:'C1', fideles:487,  ouvriers:9,  gps:true,  complete:71, statut:'actif',      modifie:'il y a 3j',  modPar:'Système' },
+  { id:14, nom:'Nkouoptamo',           district:'NKAM',             categorie:'C2',  fideles:211,  ouvriers:4,  gps:false, complete:40, statut:'actif',      modifie:'il y a 8j',  modPar:'Système' },
+  { id:15, nom:'Koupan-Centre',        district:'KOUNG-KHI',        categorie:'C1', fideles:412,  ouvriers:8,  gps:true,  complete:68, statut:'actif',      modifie:'il y a 1j',  modPar:'Brice FOKOU' },
+  { id:16, nom:'Kouoptamo Station',    district:'KOUNG-KHI',        categorie:'C2',  fideles:178,  ouvriers:3,  gps:false, complete:35, statut:'en_attente', modifie:'il y a 2j',  modPar:'Brice FOKOU' },
 ];
 
 export const OEUVRES_MIFI = [
