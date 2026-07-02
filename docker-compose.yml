@@ -10,7 +10,9 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      # Port hôte 5435 pour éviter le conflit avec PostgreSQL local (127.0.0.1:5432)
+      # Le backend Django communique en interne via db:5432 (réseau Docker)
+      - "5435:5432"
     networks: [eecnet]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
@@ -78,12 +80,19 @@ services:
         condition: service_healthy
     networks: [eecnet]
 
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Frontend : NE PAS démarrer avec "docker compose up" sans spécifier les services.
+  # En développement local, lancer avec : cd frontend && npm run dev
+  # Ce service est réservé au déploiement / CI uniquement.
+  # Commande manuelle si besoin : docker compose up frontend
+  # ─────────────────────────────────────────────────────────────────────────────
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: eec_frontend_dev
-    restart: unless-stopped
+    profiles:
+      - deploy
     command: npm run dev
     volumes:
       - ./frontend:/app
