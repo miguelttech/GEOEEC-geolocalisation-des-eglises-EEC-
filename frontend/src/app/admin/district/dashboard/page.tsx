@@ -1,15 +1,22 @@
 'use client';
-import dynamic from 'next/dynamic';
+import React from 'react';
 import { I } from '@/components/admin/icons';
-import { CompleteBar, HorizontalBars, Donut, LineChart } from '@/components/admin/atoms';
-import {
-  MOCK_DISTRICT, PAROISSES_DISTRICT, JOURNAL_DISTRICT,
-  STATS_PAROISSES_DISTRICT, FIDELES_EVOLUTION_DISTRICT,
-} from '@/components/admin/dataDistrict';
+import { HorizontalBars, Donut, LineChart, GpsCell, CategoriePill } from '@/components/admin/atoms';
+import { api, type DashboardStats, type Paroisse } from '@/lib/api';
 
-const MiniLeafletMap = dynamic(() => import('@/components/admin/MiniLeafletMap'), { ssr: false });
+/* ── Types ────────────────────────────────────────────────────────────────── */
+interface DistrictStats extends DashboardStats {
+  fideles_par_annee: { year: number; comm: number; noncomm: number }[];
+  oeuvres_par_type: { type: string; count: number; color: string }[];
+  top_paroisses_fideles: { name: string; fideles: number }[];
+  validations_attente: number;
+}
 
 const C = '#9B72CF';
+
+function Skeleton({ h = 24 }: { h?: number }) {
+  return <div style={{ height: h, width: '100%', background: 'rgba(255,255,255,0.07)', borderRadius: 6, animation: 'pulse 1.4s ease infinite' }} />;
+}
 
 function StatCard({ icon, label, value, sub, color = C }: {
   icon: keyof typeof I; label: string; value: string | number; sub?: string; color?: string;
@@ -30,106 +37,102 @@ function StatCard({ icon, label, value, sub, color = C }: {
 }
 
 export default function DashboardDistrictPage() {
-  const sansgps = PAROISSES_DISTRICT.filter(p => !p.gps).length;
-  const enAttente = PAROISSES_DISTRICT.filter(p => p.statut === 'en_attente').length;
-  const avgComplete = Math.round(PAROISSES_DISTRICT.reduce((a, p) => a + p.complete, 0) / PAROISSES_DISTRICT.length);
+  const [stats, setStats]         = React.useState<DistrictStats | null>(null);
+  const [paroisses, setParoisses] = React.useState<Paroisse[]>([]);
+  const [loading, setLoading]     = React.useState(true);
+  const [error, setError]         = React.useState('');
+  const annee = 2025;
 
-  const paroissesBars = STATS_PAROISSES_DISTRICT.map(p => ({
-    label: p.paroisse.replace('Bafoussam-', 'BFS-'),
-    value: p.total,
-  }));
+  React.useEffect(() => {
+    setLoading(true);
+    Promise.all([
+      api.get<DistrictStats>(`/api/auth/dashboard-stats/?annee=${annee}`),
+      api.get<{ count: number; results: Paroisse[] }>(`/api/geo/paroisses/?page_size=200`),
+    ])
+      .then(([s, p]) => { setStats(s); setParoisses(p.results); })
+      .catch(e => setError(e.message || 'Erreur de chargement'))
+      .finally(() => setLoading(false));
+  }, []);
 
-  const categories = [
-    { count: PAROISSES_DISTRICT.filter(p => p.categorie === 'C1').length, color: '#5AC472' },
-    { count: PAROISSES_DISTRICT.filter(p => p.categorie === 'C2').length,  color: C },
-    { count: PAROISSES_DISTRICT.filter(p => p.categorie === 'C3').length,   color: '#E67A2E' },
-  ];
+  if (error) return (
+    <div style={{ padding: 32, color: '#FF6B6B' }}>
+      <I.alert size={18} /> {error}
+      <button className="btn btn-outline" style={{ marginLeft: 12 }} onClick={() => setError('')}>Réessayer</button>
+    </div>
+  );
 
-  const fidEvol = FIDELES_EVOLUTION_DISTRICT.map(e => ({ year: e.year, comm: e.comm, noncomm: e.noncomm }));
+  const s = stats;
+  const sansgps = paroisses.filter(p => p.latitude == null).length;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
       {/* Row 1 — KPI */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
-        <StatCard icon="church"  label="Paroisses" value={MOCK_DISTRICT.nbParoisses}  sub="unités paroissiales"       color={C} />
-        <StatCard icon="users"   label="Fidèles"   value={MOCK_DISTRICT.totalFideles.toLocaleString('fr')} sub="communiants + non-comm." color="#FFD600" />
-        <StatCard icon="user"    label="Ouvriers"  value={MOCK_DISTRICT.nbOuvriers}   sub="7 grades différents"      color="#5AC472" />
-        <StatCard icon="hexagon" label="Œuvres"    value={MOCK_DISTRICT.nbOeuvres}    sub="dans ce district"         color="#E67A2E" />
+        {loading ? Array.from({ length: 4 }).map((_, i) => <div key={i} className="card" style={{ padding: 16 }}><Skeleton h={70} /></div>) : (<>
+          <StatCard icon="church"    label="Paroisses" value={s?.nb_paroisses ?? 0}  sub="unités paroissiales"       color={C} />
+          <StatCard icon="users"     label="Fidèles"   value={(s?.total_fideles ?? 0).toLocaleString('fr')} sub="communiants + non-comm." color="#FFD600" />
+          <StatCard icon="briefcase" label="Ouvriers"  value={s?.nb_ouvriers ?? 0}   sub="tous statuts"              color="#5AC472" />
+          <StatCard icon="hexagon"   label="Œuvres"    value={s?.nb_oeuvres ?? 0}    sub="dans ce district"          color="#E67A2E" />
+        </>)}
       </div>
 
       {/* Row 2 — Sub-stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
-        <div className="card" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <div style={{ fontSize: 11, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>Communiants</div>
-          <div className="sg" style={{ fontSize: 24, color: '#5AC472' }}>{MOCK_DISTRICT.communiants.toLocaleString('fr')}</div>
-          <div style={{ fontSize: 11, color: 'var(--text-3)' }}>Non-comm. : {MOCK_DISTRICT.nonCommuniants.toLocaleString('fr')}</div>
-        </div>
-        <div className="card" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <div style={{ fontSize: 11, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>Sans GPS</div>
-          <div className="sg" style={{ fontSize: 24, color: sansgps > 3 ? '#FF8A7A' : '#FFD600' }}>{sansgps}</div>
-          <div style={{ fontSize: 11, color: 'var(--text-3)' }}>sur {MOCK_DISTRICT.nbParoisses} paroisses</div>
-        </div>
-        <div className="card" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <div style={{ fontSize: 11, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>En attente</div>
-          <div className="sg" style={{ fontSize: 24, color: enAttente > 0 ? '#FFD600' : '#5AC472' }}>{enAttente}</div>
-          <div style={{ fontSize: 11, color: 'var(--text-3)' }}>modifications à valider</div>
-        </div>
-        <div className="card" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <div style={{ fontSize: 11, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>Score moyen</div>
-          <div className="sg" style={{ fontSize: 24, color: C }}>{avgComplete}%</div>
-          <CompleteBar pct={avgComplete} />
-        </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+        {loading ? Array.from({ length: 3 }).map((_, i) => <div key={i} className="card" style={{ padding: 16 }}><Skeleton h={56} /></div>) : (<>
+          <div className="card" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div style={{ fontSize: 11, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>Communiants</div>
+            <div className="sg" style={{ fontSize: 24, color: '#5AC472' }}>{(s?.total_communiants ?? 0).toLocaleString('fr')}</div>
+            <div style={{ fontSize: 11, color: 'var(--text-3)' }}>Non-comm. : {(s?.total_non_communiants ?? 0).toLocaleString('fr')}</div>
+          </div>
+          <div className="card" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div style={{ fontSize: 11, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>Sans GPS</div>
+            <div className="sg" style={{ fontSize: 24, color: sansgps > 3 ? '#FF8A7A' : '#FFD600' }}>{s?.nb_paroisses_sans_gps ?? sansgps}</div>
+            <div style={{ fontSize: 11, color: 'var(--text-3)' }}>sur {s?.nb_paroisses ?? 0} paroisses</div>
+          </div>
+          <div className="card" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div style={{ fontSize: 11, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>En attente</div>
+            <div className="sg" style={{ fontSize: 24, color: (s?.validations_attente ?? 0) > 0 ? '#FFD600' : '#5AC472' }}>{s?.validations_attente ?? 0}</div>
+            <div style={{ fontSize: 11, color: 'var(--text-3)' }}>statistiques à valider</div>
+          </div>
+        </>)}
       </div>
 
       {/* Row 3 — Charts */}
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 12 }}>
         <div className="card" style={{ padding: '14px 16px' }}>
           <div style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>Fidèles par paroisse</div>
-          <HorizontalBars data={paroissesBars} />
+          {loading ? <Skeleton h={180} /> : s?.top_paroisses_fideles?.length ? (
+            <HorizontalBars data={s.top_paroisses_fideles.map(p => ({ label: p.name, value: p.fideles }))} />
+          ) : <div style={{ color: 'var(--text-3)', fontSize: 13 }}>Aucune donnée de fidèles</div>}
         </div>
-        <div className="card" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Niveaux</div>
-          <Donut segments={categories} total={MOCK_DISTRICT.nbParoisses} label="unités" />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 11 }}>
-            {[{label:'Catégorie C1', color:'#5AC472'},{label:'Catégorie C2', color:C},{label:'Catégorie C3', color:'#E67A2E'}].map((n, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <div style={{ width: 8, height: 8, borderRadius: '50%', background: n.color, flexShrink: 0 }}/>
-                <span style={{ color: 'var(--text-2)' }}>{n.label}</span>
-                <span style={{ marginLeft: 'auto', fontWeight: 600, color: 'var(--text)' }}>{categories[i].count}</span>
+        <div className="card" style={{ padding: '14px 16px' }}>
+          <div style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>Répartition des œuvres</div>
+          {loading ? <Skeleton h={180} /> : s?.oeuvres_par_type?.length ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+              <Donut segments={s.oeuvres_par_type.map(o => ({ count: o.count, color: o.color }))} total={s.nb_oeuvres} label="œuvres" />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 11 }}>
+                {s.oeuvres_par_type.map((o, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: o.color, flexShrink: 0 }} />
+                    <span style={{ color: 'var(--text-2)' }}>{o.type}</span>
+                    <span style={{ marginLeft: 'auto', fontWeight: 600, color: 'var(--text)' }}>{o.count}</span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          ) : <div style={{ color: 'var(--text-3)', fontSize: 13 }}>Aucune œuvre enregistrée</div>}
         </div>
       </div>
 
-      {/* Row 4 — Carte + Évolution + Activité */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
-        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-          <MiniLeafletMap height={240} />
-          <div style={{ padding: '8px 14px', fontSize: 11, color: 'var(--text-3)' }}>Zone — District Bafoussam Centre</div>
+      {/* Row 4 — Évolution des fidèles */}
+      <div className="card" style={{ padding: '14px 16px' }}>
+        <div style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>
+          Évolution des fidèles {(s?.fideles_par_annee?.[0]?.year ?? 2020)} → {annee}
         </div>
-        <div className="card" style={{ padding: '14px 16px' }}>
-          <div style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>Évolution des fidèles</div>
-          <LineChart data={fidEvol} />
-        </div>
-        <div className="card" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <div style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Activité récente</div>
-          <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {JOURNAL_DISTRICT.slice(0, 5).map((a, i) => (
-              <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                <div style={{ width: 28, height: 28, borderRadius: '50%', background: a.color + '22', color: a.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <span style={{ fontSize: 10, fontWeight: 700 }}>{a.who.split(' ').map((w: string) => w[0]).join('').slice(0,2)}</span>
-                </div>
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{a.who}</div>
-                  <div style={{ fontSize: 11, color: 'var(--text-3)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{a.action} — {a.entity}</div>
-                </div>
-                <div style={{ fontSize: 10, color: 'var(--text-3)', flexShrink: 0, marginLeft: 'auto' }}>{a.time.split(' ')[1]}</div>
-              </div>
-            ))}
-          </div>
-        </div>
+        {loading ? <Skeleton h={180} /> : s?.fideles_par_annee?.length ? (
+          <LineChart data={s.fideles_par_annee.map(d => ({ year: d.year, comm: d.comm, noncomm: d.noncomm }))} />
+        ) : <div style={{ color: 'var(--text-3)', fontSize: 13 }}>Aucune statistique historique</div>}
       </div>
 
       {/* Row 5 — Tableau paroisses */}
@@ -145,49 +148,27 @@ export default function DashboardDistrictPage() {
               <th>Niveau</th>
               <th style={{ textAlign: 'right' }}>Fidèles</th>
               <th style={{ textAlign: 'right' }}>Ouvriers</th>
-              <th>Score</th>
               <th>GPS</th>
             </tr>
           </thead>
           <tbody>
-            {PAROISSES_DISTRICT.map((p, i) => (
-              <tr key={i}>
+            {loading ? (
+              Array.from({ length: 6 }).map((_, i) => <tr key={i}><td colSpan={5}><Skeleton h={28} /></td></tr>)
+            ) : paroisses.length ? paroisses.map(p => (
+              <tr key={p.id}>
                 <td style={{ fontWeight: 500 }}>{p.nom}</td>
-                <td>
-                  <span style={{ fontSize: 11, padding: '2px 6px', borderRadius: 4, fontWeight: 600,
-                    background: p.categorie === 'C1' ? 'rgba(90,196,114,0.12)' : p.categorie === 'C2' ? 'rgba(155,114,207,0.12)' : 'rgba(230,122,46,0.12)',
-                    color: p.categorie === 'C1' ? '#5AC472' : p.categorie === 'C2' ? C : '#E67A2E',
-                  }}>{p.categorie}</span>
+                <td><CategoriePill categorie={p.categorie} /></td>
+                <td className="mono" style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
+                  {p.nombre_fideles != null ? p.nombre_fideles.toLocaleString('fr') : '—'}
                 </td>
-                <td className="mono" style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{p.fideles.toLocaleString('fr')}</td>
-                <td className="mono" style={{ textAlign: 'right' }}>{p.ouvriers}</td>
-                <td style={{ width: 120 }}><CompleteBar pct={p.complete} /></td>
-                <td>
-                  <span style={{ fontSize: 11, color: p.gps ? '#5AC472' : '#FF8A7A' }}>{p.gps ? '✓ GPS' : '✗ GPS'}</span>
-                </td>
+                <td className="mono" style={{ textAlign: 'right' }}>{p.nb_ouvriers}</td>
+                <td><GpsCell ok={p.latitude != null} /></td>
               </tr>
-            ))}
+            )) : (
+              <tr><td colSpan={5} style={{ textAlign: 'center', color: 'var(--text-3)', padding: 24 }}>Aucune paroisse trouvée</td></tr>
+            )}
           </tbody>
         </table>
-      </div>
-
-      {/* Statistiques vitales */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
-        {[
-          { label: 'Baptêmes', value: MOCK_DISTRICT.baptemes, color: '#5B9BD5', icon: 'droplets' },
-          { label: 'Mariages', value: MOCK_DISTRICT.mariages,  color: '#5AC472', icon: 'heart' },
-          { label: 'Décès',    value: MOCK_DISTRICT.deces,     color: '#94A3B8', icon: 'minus' },
-        ].map(s => (
-          <div key={s.label} className="card" style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 16 }}>
-            <div style={{ width: 40, height: 40, borderRadius: 8, background: s.color + '18', color: s.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 18 }}>
-              {s.label === 'Baptêmes' ? '💧' : s.label === 'Mariages' ? '💍' : '✝'}
-            </div>
-            <div>
-              <div style={{ fontSize: 11, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>{s.label} 2025</div>
-              <div className="sg" style={{ fontSize: 26, color: s.color }}>{s.value}</div>
-            </div>
-          </div>
-        ))}
       </div>
 
     </div>

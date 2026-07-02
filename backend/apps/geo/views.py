@@ -202,13 +202,14 @@ class ParoisseViewSet(viewsets.ModelViewSet):
             return ParoisseDetailSerializer
         return ParoisseListSerializer
 
-    def perform_create(self, serializer):
-        # Forcer le district/région selon le scope de l'admin
-        user = self.request.user
-        extra = {}
-        if user.role == "DISTRICT" and user.district:
-            extra["district"] = user.district
-        serializer.save(**extra)
+    def create(self, request, *args, **kwargs):
+        # EXIGENCE : SEUL l'Administrateur Général peut créer une paroisse.
+        if request.user.role != "SUPER":
+            return Response(
+                {"detail": "Seul l'administrateur général peut créer une paroisse."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        return super().create(request, *args, **kwargs)
 
     # Champs modifiables sur une paroisse existante — EXIGENCE : uniquement
     # le NOM (+ l'état de prospection). District, région, position, catégorie,

@@ -86,34 +86,100 @@ class OeuvreViewSet(viewsets.ModelViewSet):
             return OeuvreWriteSerializer
         return OeuvreListSerializer
 
+    def create(self, request, *args, **kwargs):
+        """EXIGENCE : une œuvre appartient obligatoirement à une zone, et
+        chaque admin ne peut créer QUE dans SA zone.
+          · SUPER    → partout, y compris œuvre NATIONALE (aucun rattachement)
+          · RÉGION   → rattachement dans SA région (région, district ou paroisse de la région)
+          · DISTRICT → rattachement dans SON district (district ou paroisse du district)
+          · PAROISSE → SA paroisse uniquement
+        La validation se fait AVANT la création (aucun contournement possible)."""
+        user = request.user
+        data = request.data
+
+        def _err(msg):
+            return Response({"detail": msg}, status=status.HTTP_403_FORBIDDEN)
+
+        paroisse_id = data.get("paroisse")
+        district_id = data.get("district")
+        region_id = data.get("region")
+
+        if user.role != "SUPER":
+            # Œuvre nationale (aucun rattachement) : SUPER uniquement
+            if not (paroisse_id or district_id or region_id):
+                return _err("Seul l'administrateur général peut créer une œuvre nationale.")
+
+            if user.role == "REGION":
+                if region_id and int(region_id) != user.region_id:
+                    return _err("Cette région n'est pas la vôtre.")
+                if district_id:
+                    from apps.geo.models import District
+                    d = District.objects.filter(id=district_id).first()
+                    if not d or d.region_id != user.region_id:
+                        return _err("Ce district n'est pas dans votre région.")
+                if paroisse_id:
+                    from apps.geo.models import Paroisse
+                    p = Paroisse.objects.filter(id=paroisse_id).select_related("district").first()
+                    if not p or p.district.region_id != user.region_id:
+                        return _err("Cette paroisse n'est pas dans votre région.")
+            elif user.role == "DISTRICT":
+                if region_id:
+                    return _err("Un admin de district ne peut pas créer d'œuvre régionale.")
+                if district_id and int(district_id) != user.district_id:
+                    return _err("Ce district n'est pas le vôtre.")
+                if paroisse_id:
+                    from apps.geo.models import Paroisse
+                    p = Paroisse.objects.filter(id=paroisse_id).first()
+                    if not p or p.district_id != user.district_id:
+                        return _err("Cette paroisse n'est pas dans votre district.")
+            elif user.role == "PAROISSE":
+                if region_id or district_id:
+                    return _err("Un admin paroissial ne peut créer que des œuvres de sa paroisse.")
+                if paroisse_id and int(paroisse_id) != user.paroisse_id:
+                    return _err("Cette paroisse n'est pas la vôtre.")
+
+        return super().create(request, *args, **kwargs)
+
     def perform_create(self, serializer):
         user = self.request.user
         extra = {}
-        if user.role == "PAROISSE" and user.paroisse_id:
-            extra["paroisse"] = user.paroisse
-        elif user.role == "DISTRICT" and user.district_id:
-            extra["district"] = user.district
-        elif user.role == "REGION" and user.region_id:
-            extra["region"] = user.region
+        # Si l'admin scopé n'a fourni aucun rattachement précis, on rattache
+        # par défaut à son propre niveau (jamais hors zone — validé dans create()).
+        data = self.request.data
+        if not (data.get("paroisse") or data.get("district") or data.get("region")):
+            if user.role == "PAROISSE" and user.paroisse_id:
+                extra["paroisse"] = user.paroisse
+            elif user.role == "DISTRICT" and user.district_id:
+                extra["district"] = user.district
+            elif user.role == "REGION" and user.region_id:
+                extra["region"] = user.region
+            # SUPER sans rattachement = œuvre NATIONALE (les 3 FK restent nuls)
         serializer.save(**extra)
+
+    # EXIGENCE : en MODIFICATION, seuls le nom, le téléphone et l'adresse
+    # sont modifiables. Le GPS et le rattachement administratif : JAMAIS.
+    CHAMPS_MODIFIABLES = {"nom", "telephone", "adresse"}
 
     def update(self, request, *args, **kwargs):
         oeuvre = self.get_object()
         if not _can_write_oeuvre(request.user, oeuvre):
             return Response(status=status.HTTP_403_FORBIDDEN)
+        interdits = set(request.data.keys()) - self.CHAMPS_MODIFIABLES
+        if interdits:
+            return Response(
+                {"detail": "Seuls le nom, le téléphone et l'adresse d'une œuvre "
+                           f"sont modifiables. Champs refusés : {sorted(interdits)}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        kwargs["partial"] = True
         return super().update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
-        oeuvre = self.get_object()
-        user = request.user
-        if user.role not in ("SUPER", "REGION"):
-            return Response(
-                {"detail": "Seuls les admins régionaux et nationaux peuvent supprimer une oeuvre."},
-                status=status.HTTP_403_FORBIDDEN,
-            )
-        if not _can_write_oeuvre(user, oeuvre):
-            return Response(status=status.HTTP_403_FORBIDDEN)
-        return super().destroy(request, *args, **kwargs)
+        # EXIGENCE : la suppression d'une œuvre n'existe plus — pour AUCUN rôle.
+        return Response(
+            {"detail": "La suppression d'une œuvre est définitivement désactivée."},
+            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+        )
 
     @action(detail=False, url_path="sans-gps", permission_classes=[permissions.IsAuthenticated])
     def sans_gps(self, request):
@@ -136,13 +202,27 @@ class OeuvreViewSet(viewsets.ModelViewSet):
 
 
 def _can_write_oeuvre(user, oeuvre):
-    """Vérifie que l'admin a le droit d'écrire sur cette oeuvre."""
+    """Vérifie que l'admin a le droit d'écrire sur cette œuvre.
+    Résout la RÉGION/le DISTRICT effectifs via la chaîne de rattachement
+    (une œuvre paroissiale appartient aussi à son district et sa région)."""
     if user.role == "SUPER":
         return True
+
+    # Région / district effectifs de l'œuvre selon son rattachement
+    if oeuvre.paroisse_id:
+        eff_district_id = oeuvre.paroisse.district_id
+        eff_region_id = oeuvre.paroisse.district.region_id
+    elif oeuvre.district_id:
+        eff_district_id = oeuvre.district_id
+        eff_region_id = oeuvre.district.region_id
+    else:
+        eff_district_id = None
+        eff_region_id = oeuvre.region_id          # None = œuvre nationale
+
     if user.role == "REGION":
-        return oeuvre.region_id == user.region_id
+        return eff_region_id == user.region_id
     if user.role == "DISTRICT":
-        return oeuvre.district_id == user.district_id
+        return eff_district_id == user.district_id
     if user.role == "PAROISSE":
         return oeuvre.paroisse_id == user.paroisse_id
     return False

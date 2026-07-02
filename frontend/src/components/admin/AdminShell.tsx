@@ -1,5 +1,8 @@
 'use client';
 import React from 'react';
+import { api } from '@/lib/api';
+
+const BACKEND = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api').replace(/\/api\/?$/, '');
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = React.useState<'dark' | 'light'>('dark');
@@ -8,9 +11,21 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     const stored = (localStorage.getItem('eec-admin-theme') as 'dark' | 'light') || 'dark';
     setTheme(stored);
 
+    // EXIGENCE : le thème est persistant en base et restauré à la connexion —
+    // la valeur serveur (clair/sombre) fait autorité sur le cache local.
+    fetch(`${BACKEND}/api/auth/me/`, { credentials: 'include' })
+      .then(r => (r.ok ? r.json() : Promise.reject()))
+      .then((me: { theme?: 'clair' | 'sombre' }) => {
+        const t: 'dark' | 'light' = me.theme === 'clair' ? 'light' : 'dark';
+        setTheme(t);
+        localStorage.setItem('eec-admin-theme', t);
+      })
+      .catch(() => {});
+
     (window as any).__setEECTheme = (t: 'dark' | 'light') => {
       setTheme(t);
       localStorage.setItem('eec-admin-theme', t);
+      api.patch('/api/auth/me/', { theme: t === 'light' ? 'clair' : 'sombre' }).catch(() => {});
     };
 
     const onStorage = (e: StorageEvent) => {

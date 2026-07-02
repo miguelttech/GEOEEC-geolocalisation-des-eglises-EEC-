@@ -41,7 +41,7 @@ export default function Direction() {
               </div>
               <h4>{d.name}</h4>
               <div className="dir-titre">{d.titre}</div>
-              <div className="dir-region">{d.region} · MANDAT 2022–2027</div>
+              <div className="dir-region">{d.region ? `${d.region} · ` : ''}MANDAT 2022–2027</div>
             </div>
           ))}
         </div>

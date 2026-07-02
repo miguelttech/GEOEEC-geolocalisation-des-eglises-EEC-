@@ -37,8 +37,17 @@ class UserSerializer(serializers.ModelSerializer):
     district_nom = serializers.CharField(source="district.nom", read_only=True, default=None)
     paroisse_nom = serializers.CharField(source="paroisse.nom", read_only=True, default=None)
 
+    avatar_url = serializers.SerializerMethodField()
+
     def get_scope_label(self, obj):  return obj.get_scope_label()
     def get_role_display(self, obj): return obj.get_role_display()
+
+    def get_avatar_url(self, obj):
+        request = self.context.get("request")
+        if not obj.avatar:
+            return None
+        url = obj.avatar.url
+        return request.build_absolute_uri(url) if request else url
 
     class Meta:
         model = User
@@ -50,6 +59,7 @@ class UserSerializer(serializers.ModelSerializer):
             "paroisse", "paroisse_nom",
             "scope_label", "permissions_custom",
             "force_password_change",
+            "avatar_url", "theme",
             "date_joined", "last_login",
         ]
         read_only_fields = ["date_joined", "last_login", "username"]
@@ -86,23 +96,27 @@ class UserCreateSerializer(serializers.ModelSerializer):
         if target_role not in ("SUPER", "REGION", "DISTRICT", "PAROISSE"):
             raise serializers.ValidationError("Rôle inconnu.")
 
-        # ── Hiérarchie de création ────────────────────────────────────────
-        if request_user.role == "REGION" and target_role not in ("DISTRICT", "PAROISSE"):
+        # ── Hiérarchie de création (STRICTE, un seul niveau vers le bas) ──
+        #   SUPER    → RÉGION, DISTRICT, PAROISSE (tous)
+        #   RÉGION   → DISTRICT uniquement (dans SA région)
+        #   DISTRICT → PAROISSE uniquement (dans SON district)
+        #   PAROISSE → aucun
+        if request_user.role == "REGION" and target_role != "DISTRICT":
             raise serializers.ValidationError(
-                "Un admin régional ne peut créer que des admins District ou Paroisse.")
+                "Un administrateur régional ne peut créer que des administrateurs de District.")
         if request_user.role == "DISTRICT" and target_role != "PAROISSE":
             raise serializers.ValidationError(
                 "Un admin de district ne peut créer que des admins Paroisse.")
+        if request_user.role == "PAROISSE":
+            raise serializers.ValidationError(
+                "Un administrateur paroissial ne peut créer aucun compte.")
 
         # ── Périmètre imposé par le créateur ─────────────────────────────
         if request_user.role == "REGION":
             data["region"] = request_user.region
-            if target_role == "DISTRICT" and data.get("district") and \
+            if data.get("district") and \
                data["district"].region_id != request_user.region_id:
                 raise serializers.ValidationError("Ce district n'est pas dans votre région.")
-            if target_role == "PAROISSE" and data.get("paroisse") and \
-               data["paroisse"].district.region_id != request_user.region_id:
-                raise serializers.ValidationError("Cette paroisse n'est pas dans votre région.")
         if request_user.role == "DISTRICT":
             data["district"] = request_user.district
             data["region"] = request_user.region

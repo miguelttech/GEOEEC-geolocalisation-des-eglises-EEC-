@@ -176,6 +176,7 @@ export interface Oeuvre {
   district_nom: string | null;
   region_id: number | null;
   region_nom: string | null;
+  rattachement: 'national' | 'region' | 'district' | 'paroisse';
   est_active: boolean;
   capacite: number | null;
   nb_personnels: number | null;
@@ -196,7 +197,7 @@ export interface UserAccount {
   first_name: string;
   last_name: string;
   telephone: string;
-  role: 'SUPER' | 'REGION' | 'DISTRICT' | 'PAROISSE';
+  role: 'SUPER' | 'REGION' | 'DISTRICT' | 'PAROISSE' | 'VISITEUR';
   role_display: string;
   is_active: boolean;
   force_password_change: boolean;
@@ -209,6 +210,8 @@ export interface UserAccount {
   scope_label: string;
   date_joined: string;
   last_login: string | null;
+  avatar_url: string | null;
+  theme: 'clair' | 'sombre';
 }
 
 export interface LogEntry {

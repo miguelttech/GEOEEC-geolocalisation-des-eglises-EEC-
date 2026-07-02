@@ -161,10 +161,8 @@ export default function LoginPage() {
           </form>
 
           <p className="ls-footer">
-            Accès réservé aux administrateurs habilités.{' '}
-            <a href="mailto:secretariat@eec-cameroun.org">
-              Contacter le Secrétariat Général
-            </a>
+            Pas encore de compte ?{' '}
+            <Link href="/register">S&apos;inscrire</Link>
             <br />
             <Link href="/">← Retour au site public</Link>
           </p>

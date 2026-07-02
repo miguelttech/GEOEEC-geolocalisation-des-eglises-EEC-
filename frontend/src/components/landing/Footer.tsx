@@ -13,8 +13,17 @@ export default function Footer() {
               Geolocaliser votre Église, pour la marche ensemble.
             </p>
             <div className="footer-meta">
-              SIÈGE · BP 89 BAFOUSSAM<br />
-              EEC@SYNODE.CM · +237 233 44 12 89
+              SIÈGE · Douala, Akwa (13 rue Alfred Saker)<br />
+              EEC@SYNODE.CM · +237 233 44 12 89<br />
+              Site web :{' '}
+              <a
+                href="https://www.eecmr.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: 'var(--lp-gold)', textDecoration: 'underline' }}
+              >
+                www.eecmr.com
+              </a>
             </div>
           </div>
 

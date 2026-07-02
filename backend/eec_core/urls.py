@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 
@@ -17,6 +19,7 @@ from apps.accounts.auth_views import (
     login_view,
     logout_view,
     me_view,
+    upload_avatar,
     change_password,
     list_users,
     create_user,
@@ -30,6 +33,9 @@ from apps.accounts.auth_views import (
 
 # Vues visitors + analytics
 from apps.visitors.urls import visitor_patterns, analytics_patterns
+
+# Vues statistiques (refonte 2 onglets)
+from apps.accounts.stats_views import stats_globales, stats_visiteurs
 
 # Vues exports
 from apps.exports.views import (
@@ -68,6 +74,7 @@ auth_patterns = [
     path("login/",                           login_view),
     path("logout/",                          logout_view),
     path("me/",                              me_view),
+    path("me/avatar/",                       upload_avatar),
     path("change-password/",                 change_password),
     path("password-reset/",                  password_reset_request),
     path("password-reset/confirm/",          password_reset_confirm),
@@ -126,8 +133,17 @@ urlpatterns = [
     # API Analytics visiteurs (SUPER + REGION)
     path("api/analytics/",       include(analytics_patterns)),
 
+    # API Statistiques (refonte 2 onglets : globales / visiteurs)
+    path("api/stats/globales/",  stats_globales),
+    path("api/stats/visiteurs/", stats_visiteurs),
+
     # Documentation OpenAPI
     path("api/schema/",          SpectacularAPIView.as_view(),                             name="schema"),
     path("api/schema/swagger/",  SpectacularSwaggerView.as_view(url_name="schema"),        name="swagger-ui"),
     path("api/schema/redoc/",    SpectacularRedocView.as_view(url_name="schema"),          name="redoc"),
 ]
+
+# Sert les fichiers média (avatars…) en développement uniquement.
+# En production, ce sera un serveur web dédié (nginx/S3), jamais Django.
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

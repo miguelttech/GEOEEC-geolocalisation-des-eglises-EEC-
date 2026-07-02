@@ -3,7 +3,7 @@ import 'leaflet/dist/leaflet.css';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { api, TypeOeuvre, Oeuvre, PagedResult, RegionSynodale, District, Paroisse } from '@/lib/api';
 import { I } from '@/components/admin/icons';
-import { GpsCell, useOutside } from '@/components/admin/atoms';
+import { GpsCell } from '@/components/admin/atoms';
 
 // ─── Toast ────────────────────────────────────────────────────────────────────
 interface Toast { id: number; type: 'success'|'warn'|'error'; title: string; body?: string; }
@@ -39,32 +39,13 @@ function TypePill({ label, couleur }: { label: string; couleur: string }) {
   );
 }
 
-// ─── Row menu ─────────────────────────────────────────────────────────────────
-function RowMenu({ onView, onEdit, onDelete }: { onView: () => void; onEdit: () => void; onDelete: () => void }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  useOutside(ref, () => setOpen(false));
-  return (
-    <div ref={ref} style={{ position: 'relative', display: 'inline-block' }}>
-      <button className="icon-btn" onClick={() => setOpen(o => !o)}><I.more size={15}/></button>
-      {open && (
-        <div className="menu" style={{ top: 'calc(100% + 4px)', right: 0, minWidth: 160 }}>
-          <button onClick={() => { setOpen(false); onView(); }}><I.eye size={13}/>Voir la fiche</button>
-          <button onClick={() => { setOpen(false); onEdit(); }}><I.pencil size={13}/>Modifier</button>
-          <hr/>
-          <button className="danger" onClick={() => { setOpen(false); onDelete(); }}><I.trash size={13}/>Supprimer</button>
-        </div>
-      )}
-    </div>
-  );
-}
-
 // ─── Localisation label ───────────────────────────────────────────────────────
+// EXIGENCE : 4 niveaux de rattachement — National / Région / District / Paroisse.
 function LocalisationCell({ o }: { o: Oeuvre }) {
-  if (o.paroisse_nom)  return <span style={{ fontSize: 12 }}><span style={{ color: 'var(--text-3)' }}>Paroisse </span>{o.paroisse_nom}</span>;
-  if (o.district_nom)  return <span style={{ fontSize: 12 }}><span style={{ color: 'var(--text-3)' }}>District </span>{o.district_nom}</span>;
-  if (o.region_nom)    return <span style={{ fontSize: 12 }}><span style={{ color: 'var(--text-3)' }}>Région </span>{o.region_nom}</span>;
-  return <span style={{ color: 'var(--text-3)', fontSize: 12 }}>—</span>;
+  if (o.rattachement === 'paroisse') return <span style={{ fontSize: 12 }}><span style={{ color: 'var(--text-3)' }}>Paroisse </span>{o.paroisse_nom}</span>;
+  if (o.rattachement === 'district') return <span style={{ fontSize: 12 }}><span style={{ color: 'var(--text-3)' }}>District </span>{o.district_nom}</span>;
+  if (o.rattachement === 'region')   return <span style={{ fontSize: 12 }}><span style={{ color: 'var(--text-3)' }}>Région </span>{o.region_nom}</span>;
+  return <span className="pill pill-gold" style={{ fontSize: 10.5 }}>National</span>;
 }
 
 // ─── View Panel ───────────────────────────────────────────────────────────────
@@ -151,7 +132,8 @@ function OeuvreViewPanel({ oeuvre: o, onClose, onEdit }: {
 }
 
 // ─── Form state ───────────────────────────────────────────────────────────────
-type GeoLevel = 'paroisse' | 'district' | 'region';
+// EXIGENCE : 4 niveaux de rattachement — « national » réservé à l'administrateur général.
+type GeoLevel = 'national' | 'paroisse' | 'district' | 'region';
 interface FormState {
   nom: string; adresse: string; description: string;
   type_oeuvre: string; est_active: boolean;
@@ -170,7 +152,7 @@ function emptyForm(): FormState {
   };
 }
 function formFromOeuvre(o: Oeuvre): FormState {
-  const geo_level: GeoLevel = o.paroisse_id ? 'paroisse' : o.district_id ? 'district' : 'region';
+  const geo_level: GeoLevel = o.rattachement;
   return {
     nom: o.nom, adresse: o.adresse, description: o.description,
     type_oeuvre: String(o.type_oeuvre_id), est_active: o.est_active,
@@ -234,8 +216,8 @@ const FORM_TABS_OEU = [
 ];
 
 // ─── Form Panel ───────────────────────────────────────────────────────────────
-function OeuvreFormPanel({ mode, oeuvre, types, onClose, onSaved }: {
-  mode: 'create' | 'edit'; oeuvre?: Oeuvre; types: TypeOeuvre[];
+function OeuvreFormPanel({ mode, oeuvre, types, isSuper, onClose, onSaved }: {
+  mode: 'create' | 'edit'; oeuvre?: Oeuvre; types: TypeOeuvre[]; isSuper: boolean;
   onClose: () => void; onSaved: (nom: string) => void;
 }) {
   const [tab, setTab] = useState(0);
@@ -269,6 +251,24 @@ function OeuvreFormPanel({ mode, oeuvre, types, onClose, onSaved }: {
   }
 
   async function handleSave() {
+    // EXIGENCE : en modification, SEULS nom/téléphone/adresse sont envoyés
+    // (le backend refuse tout autre champ — voir CHAMPS_MODIFIABLES).
+    if (mode === 'edit') {
+      if (!form.nom.trim()) { setError('Le nom est obligatoire.'); return; }
+      setSaving(true); setError('');
+      try {
+        await api.patch(`/api/oeuvres/oeuvres/${oeuvre!.id}/`, {
+          nom: form.nom.trim(), telephone: form.telephone, adresse: form.adresse,
+        });
+        onSaved(form.nom);
+      } catch (e: unknown) {
+        setError(e instanceof Error ? e.message : 'Erreur lors de l\'enregistrement.');
+      } finally {
+        setSaving(false);
+      }
+      return;
+    }
+
     if (!form.nom.trim() || !form.type_oeuvre) {
       setError('Nom et type sont obligatoires.'); return;
     }
@@ -293,11 +293,7 @@ function OeuvreFormPanel({ mode, oeuvre, types, onClose, onSaved }: {
         region:   form.geo_level === 'region'   ? Number(form.region)   : null,
       };
       if (lat !== null && lng !== null) { payload.latitude = lat; payload.longitude = lng; }
-      if (mode === 'create') {
-        await api.post('/api/oeuvres/oeuvres/', payload);
-      } else {
-        await api.patch(`/api/oeuvres/oeuvres/${oeuvre!.id}/`, payload);
-      }
+      await api.post('/api/oeuvres/oeuvres/', payload);
       onSaved(form.nom);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Erreur lors de l\'enregistrement.');
@@ -318,6 +314,49 @@ function OeuvreFormPanel({ mode, oeuvre, types, onClose, onSaved }: {
 
   const Lbl = { fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 6, display: 'block' as const };
 
+  // EXIGENCE : en modification, on ne permet de changer QUE nom/téléphone/adresse
+  // — formulaire simplifié, sans onglets, sans GPS ni rattachement.
+  if (mode === 'edit') {
+    return (
+      <div className="overlay" onClick={onClose}>
+        <div className="slide-panel" style={{ width: 480 }} onClick={e => e.stopPropagation()}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px', borderBottom: '1px solid var(--border)', background: 'var(--chrome)', flexShrink: 0 }}>
+            <h2 className="sg-md" style={{ fontSize: 17, margin: 0 }}>Modifier — {oeuvre?.nom}</h2>
+            <button className="icon-btn" style={{ color: 'rgba(240,244,241,0.60)' }} onClick={onClose}><I.x size={16} /></button>
+          </div>
+          {error && (
+            <div style={{ background: '#FEF2F2', borderBottom: '1px solid #FECACA', padding: '10px 24px', fontSize: 12.5, color: '#DC2626', display: 'flex', gap: 8 }}>
+              <I.alert size={14} /> {error}
+            </div>
+          )}
+          <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: 8, padding: '10px 14px', fontSize: 12, color: '#1D4ED8' }}>
+              Seuls le nom, le téléphone et l&apos;adresse peuvent être modifiés. Le rattachement et la position GPS sont verrouillés.
+            </div>
+            <div>
+              <label style={Lbl}>Nom de l&apos;œuvre *</label>
+              <input className="input" value={form.nom} onChange={e => set('nom', e.target.value)} style={{ color: '#111827', fontWeight: 600 }} autoFocus />
+            </div>
+            <div>
+              <label style={Lbl}>Téléphone</label>
+              <input className="input mono" placeholder="+237 6XX…" value={form.telephone} onChange={e => set('telephone', e.target.value)} style={{ color: '#111827' }} />
+            </div>
+            <div>
+              <label style={Lbl}>Adresse</label>
+              <input className="input" placeholder="Quartier, ville…" value={form.adresse} onChange={e => set('adresse', e.target.value)} style={{ color: '#111827' }} />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, paddingTop: 8, borderTop: '1px solid #E5E7EB' }}>
+              <button className="btn btn-outline" onClick={onClose} disabled={saving}>Annuler</button>
+              <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
+                {saving ? <span className="ls-spinner" /> : <><I.check size={14} />Enregistrer</>}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="overlay" onClick={onClose}>
       <div className="slide-panel" style={{ width: 820 }} onClick={e => e.stopPropagation()}>
@@ -325,15 +364,13 @@ function OeuvreFormPanel({ mode, oeuvre, types, onClose, onSaved }: {
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px', borderBottom: '1px solid var(--border)', background: 'var(--chrome)', flexShrink: 0 }}>
           <div>
-            <h2 className="sg-md" style={{ fontSize: 19, margin: 0 }}>
-              {mode === 'create' ? '+ Nouvelle œuvre EEC' : `Modifier — ${oeuvre?.nom}`}
-            </h2>
+            <h2 className="sg-md" style={{ fontSize: 19, margin: 0 }}>+ Nouvelle œuvre EEC</h2>
             <div style={{ fontSize: 11, color: 'rgba(240,244,241,0.50)', marginTop: 2 }}>Étape {tab + 1} / {FORM_TABS_OEU.length} · {FORM_TABS_OEU[tab].label}</div>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <button className="btn btn-outline" style={{ padding: '7px 14px', fontSize: 12 }} onClick={onClose} disabled={saving}>Annuler</button>
             <button className="btn btn-primary" style={{ padding: '7px 18px', fontSize: 12, minWidth: 130 }} onClick={handleSave} disabled={saving}>
-              {saving ? <span className="ls-spinner" /> : <><I.check size={14} />{mode === 'create' ? 'Créer l\'œuvre' : 'Enregistrer'}</>}
+              {saving ? <span className="ls-spinner" /> : <><I.check size={14} />Créer l&apos;œuvre</>}
             </button>
             <button className="icon-btn" style={{ color: 'rgba(240,244,241,0.60)' }} onClick={onClose}><I.x size={16} /></button>
           </div>
@@ -407,40 +444,49 @@ function OeuvreFormPanel({ mode, oeuvre, types, onClose, onSaved }: {
               <div>
                 <label style={Lbl}>Niveau de rattachement *</label>
                 <div style={{ display: 'flex', gap: 8 }}>
-                  {(['paroisse', 'district', 'region'] as GeoLevel[]).map(lvl => (
+                  {([...(['paroisse', 'district', 'region'] as GeoLevel[]), ...(isSuper ? ['national' as GeoLevel] : [])]).map(lvl => (
                     <button key={lvl} className={`btn ${form.geo_level === lvl ? 'btn-primary' : 'btn-outline'}`}
                       style={{ fontSize: 13, padding: '7px 18px' }} onClick={() => changeLevel(lvl)}>
-                      {lvl === 'paroisse' ? 'Paroisse' : lvl === 'district' ? 'District' : 'Région'}
+                      {lvl === 'paroisse' ? 'Paroisse' : lvl === 'district' ? 'District' : lvl === 'region' ? 'Région' : 'National'}
                     </button>
                   ))}
                 </div>
+                {form.geo_level === 'national' && (
+                  <div style={{ marginTop: 8, fontSize: 12, color: 'var(--text-3)' }}>
+                    Œuvre nationale — aucun rattachement géographique (visible dans toute l&apos;EEC).
+                  </div>
+                )}
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                <div>
-                  <label style={Lbl}>Région synodiale{form.geo_level === 'region' ? ' *' : ''}</label>
-                  <select className="input" style={{ color: '#111827' }} value={form.region} onChange={e => setForm(f => ({ ...f, region: e.target.value, district: '', paroisse: '' }))}>
-                    <option value="">— Choisir —</option>
-                    {regions.map(r => <option key={r.id} value={String(r.id)}>{r.nom}</option>)}
-                  </select>
-                </div>
-                {form.geo_level !== 'region' && (
+              {form.geo_level !== 'national' && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                   <div>
-                    <label style={Lbl}>District{form.geo_level === 'district' ? ' *' : ''}</label>
-                    <select className="input" style={{ color: '#111827' }} value={form.district} onChange={e => setForm(f => ({ ...f, district: e.target.value, paroisse: '' }))} disabled={!form.region}>
+                    <label style={Lbl}>Région synodiale{form.geo_level === 'region' ? ' *' : ''}</label>
+                    <select className="input" style={{ color: '#111827' }} value={form.region} onChange={e => setForm(f => ({ ...f, region: e.target.value, district: '', paroisse: '' }))}>
                       <option value="">— Choisir —</option>
-                      {districts.map(d => <option key={d.id} value={String(d.id)}>{d.nom}</option>)}
+                      {regions.map(r => <option key={r.id} value={String(r.id)}>{r.nom}</option>)}
                     </select>
                   </div>
-                )}
-                {form.geo_level === 'paroisse' && (
-                  <div style={{ gridColumn: '1/-1' }}>
-                    <label style={Lbl}>Paroisse *</label>
-                    <select className="input" style={{ color: '#111827' }} value={form.paroisse} onChange={e => set('paroisse', e.target.value)} disabled={!form.district}>
-                      <option value="">— Choisir une paroisse —</option>
-                      {paroisses.map(p => <option key={p.id} value={String(p.id)}>{p.nom}</option>)}
-                    </select>
-                  </div>
-                )}
+                  {form.geo_level !== 'region' && (
+                    <div>
+                      <label style={Lbl}>District{form.geo_level === 'district' ? ' *' : ''}</label>
+                      <select className="input" style={{ color: '#111827' }} value={form.district} onChange={e => setForm(f => ({ ...f, district: e.target.value, paroisse: '' }))} disabled={!form.region}>
+                        <option value="">— Choisir —</option>
+                        {districts.map(d => <option key={d.id} value={String(d.id)}>{d.nom}</option>)}
+                      </select>
+                    </div>
+                  )}
+                  {form.geo_level === 'paroisse' && (
+                    <div style={{ gridColumn: '1/-1' }}>
+                      <label style={Lbl}>Paroisse *</label>
+                      <select className="input" style={{ color: '#111827' }} value={form.paroisse} onChange={e => set('paroisse', e.target.value)} disabled={!form.district}>
+                        <option value="">— Choisir une paroisse —</option>
+                        {paroisses.map(p => <option key={p.id} value={String(p.id)}>{p.nom}</option>)}
+                      </select>
+                    </div>
+                  )}
+                </div>
+              )}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                 <div style={{ gridColumn: '1/-1' }}>
                   <label style={Lbl}>Adresse</label>
                   <input className="input" placeholder="Quartier, ville…" value={form.adresse} onChange={e => set('adresse', e.target.value)} style={{ color: '#111827' }} />
@@ -517,54 +563,8 @@ function OeuvreFormPanel({ mode, oeuvre, types, onClose, onSaved }: {
   );
 }
 
-// ─── Delete Modal ─────────────────────────────────────────────────────────────
-function DeleteModal({ oeuvre, onClose, onDeleted }: {
-  oeuvre: Oeuvre; onClose: () => void; onDeleted: () => void;
-}) {
-  const [confirm, setConfirm] = useState('');
-  const [deleting, setDeleting] = useState(false);
-  const [error, setError] = useState('');
-
-  async function handleDelete() {
-    setDeleting(true); setError('');
-    try {
-      await api.delete(`/api/oeuvres/oeuvres/${oeuvre.id}/`);
-      onDeleted();
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Erreur lors de la suppression.');
-      setDeleting(false);
-    }
-  }
-
-  return (
-    <div className="overlay" onClick={onClose}>
-      <div className="modal" onClick={e => e.stopPropagation()}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-          <div style={{ width: 38, height: 38, borderRadius: 8, background: 'rgba(198,40,40,0.15)', color: '#FF8A7A', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <I.trash size={18}/>
-          </div>
-          <div>
-            <div className="sg-md" style={{ fontSize: 16 }}>Supprimer l'œuvre</div>
-            <div style={{ fontSize: 12, color: 'var(--text-3)' }}>Action irréversible</div>
-          </div>
-        </div>
-        <p style={{ fontSize: 13, color: 'var(--text-2)', marginBottom: 16 }}>
-          Pour confirmer, saisissez le nom exact :<br/>
-          <strong style={{ color: 'var(--text)' }}>{oeuvre.nom}</strong>
-        </p>
-        <input className="input" placeholder={oeuvre.nom} value={confirm} onChange={e => setConfirm(e.target.value)}/>
-        {error && <div style={{ marginTop: 8, fontSize: 12, color: '#FF8A7A' }}>{error}</div>}
-        <div style={{ display: 'flex', gap: 10, marginTop: 18, justifyContent: 'flex-end' }}>
-          <button className="btn btn-ghost" onClick={onClose} disabled={deleting}>Annuler</button>
-          <button className="btn" style={{ background: '#C62828', color: '#fff', opacity: confirm === oeuvre.nom ? 1 : 0.4 }}
-            onClick={handleDelete} disabled={confirm !== oeuvre.nom || deleting}>
-            {deleting ? 'Suppression…' : 'Supprimer définitivement'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
+// EXIGENCE : la suppression d'une œuvre n'existe plus (backend renvoie 405) —
+// DeleteModal et son flux ont été entièrement retirés.
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function OeuvresPage() {
@@ -583,8 +583,13 @@ export default function OeuvresPage() {
   const [refresh, setRefresh]   = useState(0);
   const [viewPanel, setViewPanel]   = useState<Oeuvre | null>(null);
   const [formPanel, setFormPanel]   = useState<{ mode: 'create'|'edit'; oeuvre?: Oeuvre } | null>(null);
-  const [deleteModal, setDeleteModal] = useState<Oeuvre | null>(null);
   const [regions, setRegions] = useState<RegionSynodale[]>([]);
+  const [isSuper, setIsSuper] = useState(false);
+
+  // Le niveau de rattachement « National » n'est proposé qu'à l'administrateur général.
+  useEffect(() => {
+    api.get<{ role: string }>('/api/auth/me/').then(m => setIsSuper(m.role === 'SUPER')).catch(() => {});
+  }, []);
 
   const PAGE_SIZE = 50;
   const totalPages = Math.ceil(total / PAGE_SIZE);
@@ -631,13 +636,6 @@ export default function OeuvresPage() {
   function handleSaved(nom: string) {
     setFormPanel(null);
     addToast({ type: 'success', title: formPanel?.mode === 'create' ? `Œuvre "${nom}" créée.` : 'Modifications enregistrées.', body: nom });
-    doRefresh();
-  }
-
-  function handleDeleted() {
-    const nom = deleteModal?.nom || '';
-    setDeleteModal(null);
-    addToast({ type: 'warn', title: `Œuvre "${nom}" supprimée.` });
     doRefresh();
   }
 
@@ -754,15 +752,14 @@ export default function OeuvresPage() {
                     <th>Type</th>
                     <th>Localisation</th>
                     <th>Région</th>
-                    <th>Adresse</th>
                     <th style={{ width: 90, textAlign: 'center' }}>GPS</th>
-                    <th style={{ width: 80, textAlign: 'center' }}>Statut</th>
-                    <th style={{ width: 80 }}>Actions</th>
+                    <th style={{ width: 70, textAlign: 'center' }}>Personnels</th>
+                    <th style={{ width: 60 }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {oeuvres.length === 0 && (
-                    <tr><td colSpan={9} style={{ height: 280, textAlign: 'center' }}>
+                    <tr><td colSpan={8} style={{ height: 280, textAlign: 'center' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
                         <I.building size={48} style={{ opacity: 0.25 }}/>
                         <div className="sg-md" style={{ fontSize: 16 }}>Aucune œuvre trouvée</div>
@@ -791,22 +788,12 @@ export default function OeuvresPage() {
                       </td>
                       <td><LocalisationCell o={o}/></td>
                       <td style={{ color: 'var(--text-2)', fontSize: 12 }}>{o.region_nom || '—'}</td>
-                      <td style={{ fontSize: 12, color: 'var(--text-3)', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{o.adresse || '—'}</td>
                       <td style={{ textAlign: 'center' }}><GpsCell ok={!!(o.latitude && o.longitude)}/></td>
-                      <td style={{ textAlign: 'center' }}>
-                        {o.est_active
-                          ? <span className="pill pill-green" style={{ fontSize: 11 }}>Active</span>
-                          : <span className="pill pill-gray" style={{ fontSize: 11 }}>Inactive</span>}
-                      </td>
+                      <td className="mono" style={{ textAlign: 'center', fontSize: 12.5 }}>{o.nb_personnels ?? '—'}</td>
                       <td>
                         <div style={{ display: 'flex', gap: 2 }}>
                           <button className="icon-btn" onClick={() => setViewPanel(o)}><I.eye size={15}/></button>
                           <button className="icon-btn green" onClick={() => setFormPanel({ mode: 'edit', oeuvre: o })}><I.pencil size={15}/></button>
-                          <RowMenu
-                            onView={() => setViewPanel(o)}
-                            onEdit={() => setFormPanel({ mode: 'edit', oeuvre: o })}
-                            onDelete={() => setDeleteModal(o)}
-                          />
                         </div>
                       </td>
                     </tr>
@@ -837,11 +824,8 @@ export default function OeuvresPage() {
           onEdit={() => { setFormPanel({ mode: 'edit', oeuvre: viewPanel! }); setViewPanel(null); }}/>
       )}
       {formPanel && (
-        <OeuvreFormPanel mode={formPanel.mode} oeuvre={formPanel.oeuvre} types={types}
+        <OeuvreFormPanel mode={formPanel.mode} oeuvre={formPanel.oeuvre} types={types} isSuper={isSuper}
           onClose={() => setFormPanel(null)} onSaved={handleSaved}/>
-      )}
-      {deleteModal && (
-        <DeleteModal oeuvre={deleteModal} onClose={() => setDeleteModal(null)} onDeleted={handleDeleted}/>
       )}
       <ToastStack toasts={toasts}/>
     </div>

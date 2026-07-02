@@ -55,6 +55,20 @@ export const EEC_DIRECTION = [
     image:  '/images/dir-vice-president.webp',
   },
   {
+    grade:  "Ancien d'Église",
+    name:   'BAUNI KAMGA',
+    titre:  '2ème Vice-Président',
+    region: '',
+    image:  '/images/dir-vp2.webp',
+  },
+  {
+    grade:  "Ancien d'Église",
+    name:   'TAMO TATIETSE',
+    titre:  '3ème Vice-Président',
+    region: '',
+    image:  '/images/dir-vp3.webp',
+  },
+  {
     grade:  'Révérende Pasteure',
     name:   'MEMIAFOH SOBJIO Abestine',
     titre:  'Secrétaire Générale',
@@ -62,10 +76,31 @@ export const EEC_DIRECTION = [
     image:  '/images/dir-secretaire.webp',
   },
   {
-    grade:  'Ancien d\'Église',
+    grade:  'Révérend',
+    name:   'MEKAH NYIMI Pierre',
+    titre:  'Secrétaire Général Adjoint n°1',
+    region: '',
+    image:  '/images/dir-placeholder.svg',
+  },
+  {
+    grade:  "Ancien d'Église",
+    name:   'MAKA TOCKO Samuel',
+    titre:  'Secrétaire Général Adjoint n°2',
+    region: '',
+    image:  '/images/dir-placeholder.svg',
+  },
+  {
+    grade:  "Ancien d'Église",
     name:   'FOCHIVE Édouard',
     titre:  'Trésorier Général',
     region: 'Bafoussam · Noun',
     image:  '/images/dir-tresorier.webp',
+  },
+  {
+    grade:  'Révérend',
+    name:   'DJENE Jacques Bruno',
+    titre:  'Trésorier Général Adjoint',
+    region: '',
+    image:  '/images/dir-placeholder.svg',
   },
 ];

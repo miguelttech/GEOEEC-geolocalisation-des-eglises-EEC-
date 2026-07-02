@@ -27,6 +27,19 @@ class OeuvreListSerializer(serializers.ModelSerializer):
     region_nom          = serializers.SerializerMethodField()
     latitude            = serializers.SerializerMethodField()
     longitude           = serializers.SerializerMethodField()
+    rattachement        = serializers.SerializerMethodField()
+
+    def get_rattachement(self, obj):
+        """« national » (aucun FK), « region », « district » ou « paroisse »
+        selon le niveau EXACT de rattachement de l'œuvre (pas son niveau
+        effectif hérité) — cf. exigence des 4 niveaux de rattachement."""
+        if obj.paroisse_id:
+            return "paroisse"
+        if obj.district_id:
+            return "district"
+        if obj.region_id:
+            return "region"
+        return "national"
 
     def get_type_oeuvre_id(self, obj):      return obj.type_oeuvre_id
     def get_type_oeuvre_nom(self, obj):     return obj.type_oeuvre.nom
@@ -70,6 +83,7 @@ class OeuvreListSerializer(serializers.ModelSerializer):
             "paroisse_id", "paroisse_nom",
             "district_id", "district_nom",
             "region_id", "region_nom",
+            "rattachement",
             "est_active", "capacite", "nb_personnels", "en_prospection", "annee_creation", "telephone", "email",
             "latitude", "longitude",
             "created_at", "updated_at",

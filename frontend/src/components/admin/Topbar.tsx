@@ -1,6 +1,5 @@
 'use client';
 import React from 'react';
-import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { I } from './icons';
 import { Avatar, useOutside } from './atoms';
@@ -30,53 +29,6 @@ const SCOPE_LABELS: Record<string, string> = {
   regional: 'Console Régionale',
 };
 
-const NOTIF_ITEMS = [
-  { type:'warn',  title:'7 statistiques en attente',  time:'Il y a 12 min', unread:true,  body:'Validation requise pour 7 paroisses' },
-  { type:'info',  title:'Import terminé',              time:'Il y a 1 h',   unread:true,  body:'94 ouvriers importés avec succès' },
-  { type:'err',   title:'5 GPS hors Cameroun',         time:'Il y a 2 h',   unread:true,  body:'Action recommandée — Audit qualité' },
-  { type:'info',  title:'Nouveau compte créé',         time:'Hier',         unread:false, body:'Admin Paroisse ajouté avec succès' },
-  { type:'info',  title:'Rapport mensuel disponible',  time:'Hier',         unread:false, body:'Mai 2026 — 553 paroisses' },
-];
-const NOTIF_COLOR: Record<string, string> = { warn:'#FFB877', err:'#FF6B6B', info:'#5B9BD5', success:'#5AC472' };
-
-function NotifPanel({ onClose }: { onClose: () => void }) {
-  const ref = React.useRef<HTMLDivElement>(null);
-  useOutside(ref, onClose);
-  return (
-    <div ref={ref} style={{
-      position: 'absolute', top: 'calc(100% + 8px)', right: 0, width: 360,
-      background: '#0F1F15', border: '1px solid rgba(245,197,24,0.20)', borderRadius: 8,
-      boxShadow: '0 18px 48px rgba(0,0,0,0.6)', zIndex: 70, animation: 'a-cascade 200ms ease both',
-    }}>
-      <div style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div style={{ fontSize: 13, fontWeight: 600 }}>Notifications <span style={{ color: 'var(--text-2)', fontWeight: 400 }}>(3 non lues)</span></div>
-        <button className="btn-ghost btn" style={{ padding: '4px 8px', fontSize: 11 }}>Tout marquer comme lu</button>
-      </div>
-      <div style={{ maxHeight: 380, overflowY: 'auto' }}>
-        {NOTIF_ITEMS.map((n, i) => (
-          <div key={i} style={{
-            padding: '12px 16px', display: 'flex', gap: 11, alignItems: 'flex-start',
-            background: n.unread ? 'rgba(255,214,0,0.045)' : 'transparent',
-            borderBottom: '1px solid rgba(255,255,255,0.04)', cursor: 'pointer',
-          }}>
-            <div style={{ width: 6, height: 6, borderRadius: '50%', background: n.unread ? NOTIF_COLOR[n.type] : 'transparent', marginTop: 7, flexShrink: 0 }} />
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 13, fontWeight: n.unread ? 600 : 500, color: 'var(--text)', marginBottom: 2 }}>{n.title}</div>
-              <div style={{ fontSize: 11.5, color: 'var(--text-2)', lineHeight: 1.4 }}>{n.body}</div>
-              <div style={{ fontSize: 10.5, color: 'var(--text-3)', marginTop: 4 }}>{n.time}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-      <div style={{ padding: '10px 16px', borderTop: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
-        <Link href="/admin/journal" onClick={onClose} style={{ fontSize: 12, color: '#5AC472', textDecoration: 'none', fontWeight: 500 }}>
-          Voir toutes les notifications →
-        </Link>
-      </div>
-    </div>
-  );
-}
-
 interface MeUser {
   id: number;
   first_name: string;
@@ -85,6 +37,7 @@ interface MeUser {
   role: string;
   role_display: string;
   scope_label: string;
+  theme: 'clair' | 'sombre';
 }
 
 function initials(u: MeUser | null): string {
@@ -115,18 +68,24 @@ export default function Topbar() {
   const key    = seg[seg.length - 1] || 'dashboard';
   const meta   = PAGE_META[key] || { title: 'EEC', crumb: '' };
 
-  const [openNotif, setOpenNotif] = React.useState(false);
   const [openUser,  setOpenUser]  = React.useState(false);
   const [me, setMe]               = React.useState<MeUser | null>(null);
+  const [theme, setThemeState]    = React.useState<'clair' | 'sombre'>('sombre');
   const userRef = React.useRef<HTMLDivElement>(null);
   useOutside(userRef, () => setOpenUser(false));
 
   React.useEffect(() => {
     fetch(`${BACKEND}/api/auth/me/`, { credentials: 'include' })
       .then(r => r.ok ? r.json() : Promise.reject())
-      .then(setMe)
+      .then((d: MeUser) => { setMe(d); setThemeState(d.theme || 'sombre'); })
       .catch(() => {});
   }, []);
+
+  function toggleTheme() {
+    const next = theme === 'clair' ? 'sombre' : 'clair';
+    setThemeState(next);
+    (window as any).__setEECTheme?.(next === 'clair' ? 'light' : 'dark');
+  }
 
   const handleLogout = async () => {
     try {
@@ -158,14 +117,10 @@ export default function Topbar() {
           {new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
         </div>
 
-        {/* Notifications */}
-        <div style={{ position: 'relative' }}>
-          <button className="icon-btn" style={{ width: 34, height: 34, position: 'relative' }} onClick={() => setOpenNotif(o => !o)}>
-            <I.bell size={18} />
-            <span style={{ position: 'absolute', top: 4, right: 4, width: 16, height: 16, borderRadius: '50%', background: '#C62828', color: '#fff', fontSize: 9, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid var(--chrome)' }}>3</span>
-          </button>
-          {openNotif && <NotifPanel onClose={() => setOpenNotif(false)} />}
-        </div>
+        {/* Thème Clair/Sombre */}
+        <button className="icon-btn" style={{ width: 34, height: 34 }} onClick={toggleTheme} title={theme === 'clair' ? 'Passer en sombre' : 'Passer en clair'}>
+          {theme === 'clair' ? <I.moon size={17} /> : <I.sun size={17} />}
+        </button>
 
         {/* User menu */}
         <div ref={userRef} style={{ position: 'relative' }}>

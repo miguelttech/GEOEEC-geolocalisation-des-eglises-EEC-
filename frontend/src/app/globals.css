@@ -136,6 +136,10 @@ button { font-family: inherit; cursor: pointer; }
 body:has(.ls-root) {
   overflow: auto !important;
 }
+/* Landing page publique : autoriser le scroll */
+body:has(.eec-lp) {
+  overflow: auto !important;
+}
 ::selection { background: var(--eec-yellow); color: #1A1A1A; }
 
 /* Subtle dark mode futuristic background animated gradient + grid */

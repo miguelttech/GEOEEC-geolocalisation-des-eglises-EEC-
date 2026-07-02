@@ -14,7 +14,6 @@ from .serializers import (
 from apps.accounts.permissions import (
     ReadPublicWriteAdmin,
     filter_ouvriers_by_scope,
-    can_delete_ouvrier,
 )
 
 
@@ -96,6 +95,32 @@ class OuvrierViewSet(viewsets.ModelViewSet):
 
         return qs
 
+    def create(self, request, *args, **kwargs):
+        """EXIGENCE : un ouvrier ne peut être créé QUE dans la zone de l'admin.
+          · SUPER    → partout
+          · RÉGION   → paroisse de SA région
+          · DISTRICT → paroisse de SON district
+          · PAROISSE → SA paroisse (forcée dans perform_create)"""
+        user = request.user
+        paroisse_id = request.data.get("paroisse")
+        if user.role in ("REGION", "DISTRICT") and paroisse_id:
+            from apps.geo.models import Paroisse
+            p = Paroisse.objects.filter(id=paroisse_id).select_related("district").first()
+            if p is None:
+                return Response({"detail": "Paroisse introuvable."},
+                                status=status.HTTP_400_BAD_REQUEST)
+            if user.role == "REGION" and p.district.region_id != user.region_id:
+                return Response(
+                    {"detail": "Cette paroisse n'est pas dans votre région : "
+                               "vous ne pouvez créer un ouvrier que dans votre zone."},
+                    status=status.HTTP_403_FORBIDDEN)
+            if user.role == "DISTRICT" and p.district_id != user.district_id:
+                return Response(
+                    {"detail": "Cette paroisse n'est pas dans votre district : "
+                               "vous ne pouvez créer un ouvrier que dans votre zone."},
+                    status=status.HTTP_403_FORBIDDEN)
+        return super().create(request, *args, **kwargs)
+
     def perform_create(self, serializer):
         user = self.request.user
         extra = {}
@@ -107,19 +132,28 @@ class OuvrierViewSet(viewsets.ModelViewSet):
         ouvrier = self.get_object()
         if not _can_write_ouvrier(request.user, ouvrier):
             return Response(status=status.HTTP_403_FORBIDDEN)
+        # La réaffectation vers une paroisse cible doit AUSSI rester dans la zone
+        paroisse_id = request.data.get("paroisse")
+        if paroisse_id and request.user.role in ("REGION", "DISTRICT"):
+            from apps.geo.models import Paroisse
+            p = Paroisse.objects.filter(id=paroisse_id).select_related("district").first()
+            if p is None:
+                return Response({"detail": "Paroisse introuvable."},
+                                status=status.HTTP_400_BAD_REQUEST)
+            if request.user.role == "REGION" and p.district.region_id != request.user.region_id:
+                return Response({"detail": "Réaffectation refusée : paroisse hors de votre région."},
+                                status=status.HTTP_403_FORBIDDEN)
+            if request.user.role == "DISTRICT" and p.district_id != request.user.district_id:
+                return Response({"detail": "Réaffectation refusée : paroisse hors de votre district."},
+                                status=status.HTTP_403_FORBIDDEN)
         return super().update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
-        ouvrier = self.get_object()
-        user = request.user
-        if not can_delete_ouvrier(user):
-            return Response(
-                {"detail": "Vous n'avez pas la permission de supprimer un ouvrier."},
-                status=status.HTTP_403_FORBIDDEN,
-            )
-        if not _can_write_ouvrier(user, ouvrier):
-            return Response(status=status.HTTP_403_FORBIDDEN)
-        return super().destroy(request, *args, **kwargs)
+        # EXIGENCE : la suppression d'un ouvrier n'existe plus — pour AUCUN rôle.
+        return Response(
+            {"detail": "La suppression d'un ouvrier est définitivement désactivée."},
+            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+        )
 
     @action(detail=False, url_path="stats", permission_classes=[permissions.IsAuthenticated])
     def stats(self, request):

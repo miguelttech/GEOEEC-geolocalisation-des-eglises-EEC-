@@ -1,18 +1,21 @@
 'use client';
-import dynamic from 'next/dynamic';
+import React from 'react';
 import { I } from '@/components/admin/icons';
-import { CompleteBar, HorizontalBars, Donut, LineChart } from '@/components/admin/atoms';
-import {
-  MOCK_REGION_MIFI,
-  DISTRICTS_MIFI,
-  PAROISSES_MIFI,
-  FIDELESEVOLUTION_MIFI,
-  JOURNAL_MIFI,
-  STATS_DISTRICTS_MIFI,
-} from '@/components/admin/dataRegional';
-import { OEUVRE_TYPES } from '@/components/admin/data';
+import { HorizontalBars, Donut, LineChart } from '@/components/admin/atoms';
+import { api, type DashboardStats, type District } from '@/lib/api';
 
-const MiniLeafletMap = dynamic(() => import('@/components/admin/MiniLeafletMap'), { ssr: false });
+/* ── Types ────────────────────────────────────────────────────────────────── */
+interface RegionStats extends DashboardStats {
+  fideles_par_annee: { year: number; comm: number; noncomm: number }[];
+  oeuvres_par_type: { type: string; count: number; color: string }[];
+  top_paroisses_fideles: { name: string; fideles: number }[];
+  validations_attente: number;
+}
+
+/* ── Skeleton ─────────────────────────────────────────────────────────────── */
+function Skeleton({ h = 24 }: { h?: number }) {
+  return <div style={{ height: h, width: '100%', background: 'rgba(255,255,255,0.07)', borderRadius: 6, animation: 'pulse 1.4s ease infinite' }} />;
+}
 
 function StatCard({ icon, label, value, sub, color = 'var(--green)' }: {
   icon: keyof typeof I; label: string; value: string | number; sub?: string; color?: string;
@@ -33,117 +36,120 @@ function StatCard({ icon, label, value, sub, color = 'var(--green)' }: {
 }
 
 export default function DashboardRegionalPage() {
-  const sansgps = PAROISSES_MIFI.filter(p => !p.gps).length;
-  const enAttente = PAROISSES_MIFI.filter(p => p.statut === 'en_attente').length;
-  const avgComplete = Math.round(PAROISSES_MIFI.reduce((a, p) => a + p.complete, 0) / PAROISSES_MIFI.length);
+  const [stats, setStats]     = React.useState<RegionStats | null>(null);
+  const [districts, setDistricts] = React.useState<District[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError]     = React.useState('');
+  const annee = 2025;
 
-  const oeuvresByType = OEUVRE_TYPES.map(t => ({
-    label: t.key,
-    value: [4, 2, 0, 1, 1, 0, 0][OEUVRE_TYPES.indexOf(t)] || 0,
-  }));
+  React.useEffect(() => {
+    setLoading(true);
+    Promise.all([
+      api.get<RegionStats>(`/api/auth/dashboard-stats/?annee=${annee}`),
+      api.get<{ count: number; results: District[] }>(`/api/geo/districts/?page_size=200`),
+    ])
+      .then(([s, d]) => { setStats(s); setDistricts(d.results); })
+      .catch(e => setError(e.message || 'Erreur de chargement'))
+      .finally(() => setLoading(false));
+  }, []);
 
-  const districtBars = STATS_DISTRICTS_MIFI.map(d => ({
-    label: d.district.replace('BAFOUSSAM ', 'BFS '),
-    value: d.total,
-  }));
+  if (error) return (
+    <div style={{ padding: 32, color: '#FF6B6B' }}>
+      <I.alert size={18} /> {error}
+      <button className="btn btn-outline" style={{ marginLeft: 12 }} onClick={() => setError('')}>Réessayer</button>
+    </div>
+  );
 
-  const categories = [
-    { count: PAROISSES_MIFI.filter(p => p.categorie === 'C1').length, color: '#5AC472' },
-    { count: PAROISSES_MIFI.filter(p => p.categorie === 'C2').length,  color: '#5B9BD5' },
-    { count: PAROISSES_MIFI.filter(p => p.categorie === 'C3').length,   color: '#E67A2E' },
-  ];
-
-  const fidEvol = FIDELESEVOLUTION_MIFI.map(e => ({
-    year: Number(e.year),
-    comm: e.comm,
-    noncomm: e.noncomm,
-  }));
+  const s = stats;
+  const districtBars = districts
+    .filter(d => (d.nb_fideles ?? 0) > 0)
+    .sort((a, b) => (b.nb_fideles ?? 0) - (a.nb_fideles ?? 0))
+    .slice(0, 12)
+    .map(d => ({ label: d.nom, value: d.nb_fideles ?? 0 }));
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
       {/* Row 1 — KPI stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 12 }}>
-        <StatCard icon="network"  label="Districts"    value={MOCK_REGION_MIFI.nbDistricts}  sub="dans la région MIFI"         color="#5B9BD5" />
-        <StatCard icon="church"   label="Paroisses"    value={MOCK_REGION_MIFI.nbParoisses}  sub="dont stations & annexes"     color="#5AC472" />
-        <StatCard icon="hexagon"  label="Œuvres"       value={MOCK_REGION_MIFI.nbOeuvres}    sub="8 types d'œuvres"            color="#E67A2E" />
-        <StatCard icon="user"     label="Ouvriers"     value={MOCK_REGION_MIFI.nbOuvriers}   sub="8 grades hiérarchiques"      color="#B377D9" />
-        <StatCard icon="users"    label="Fidèles"      value={MOCK_REGION_MIFI.totalFideles.toLocaleString('fr')} sub="communiants + non-comm." color="#FFD600" />
+        {loading ? Array.from({ length: 5 }).map((_, i) => <div key={i} className="card" style={{ padding: 16 }}><Skeleton h={70} /></div>) : (<>
+          <StatCard icon="network"  label="Districts"    value={s?.nb_districts ?? 0}  sub="dans la région"              color="#5B9BD5" />
+          <StatCard icon="church"   label="Paroisses"    value={s?.nb_paroisses ?? 0}  sub={`${s?.nb_paroisses_sans_gps ?? 0} sans GPS`} color="#5AC472" />
+          <StatCard icon="hexagon"  label="Œuvres"       value={s?.nb_oeuvres ?? 0}    sub="toutes catégories"           color="#E67A2E" />
+          <StatCard icon="briefcase" label="Ouvriers"    value={s?.nb_ouvriers ?? 0}   sub="tous statuts"                color="#B377D9" />
+          <StatCard icon="users"    label="Fidèles"      value={(s?.total_fideles ?? 0).toLocaleString('fr')} sub="communiants + non-comm." color="#FFD600" />
+        </>)}
       </div>
 
       {/* Row 2 — Sub-stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
-        <div className="card" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <div style={{ fontSize: 11, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>Communiants</div>
-          <div className="sg" style={{ fontSize: 24, color: '#5AC472' }}>{MOCK_REGION_MIFI.communiants.toLocaleString('fr')}</div>
-          <div style={{ fontSize: 11, color: 'var(--text-3)' }}>Non-comm. : {MOCK_REGION_MIFI.nonCommuiants.toLocaleString('fr')}</div>
-        </div>
-        <div className="card" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <div style={{ fontSize: 11, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>Sans GPS</div>
-          <div className="sg" style={{ fontSize: 24, color: sansgps > 5 ? '#FF8A7A' : '#FFD600' }}>{sansgps}</div>
-          <div style={{ fontSize: 11, color: 'var(--text-3)' }}>sur {MOCK_REGION_MIFI.nbParoisses} paroisses</div>
-        </div>
-        <div className="card" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <div style={{ fontSize: 11, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>En attente validation</div>
-          <div className="sg" style={{ fontSize: 24, color: enAttente > 0 ? '#FFD600' : '#5AC472' }}>{enAttente}</div>
-          <div style={{ fontSize: 11, color: 'var(--text-3)' }}>modifications à valider</div>
-        </div>
-        <div className="card" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <div style={{ fontSize: 11, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>Score moyen</div>
-          <div className="sg" style={{ fontSize: 24, color: '#5B9BD5' }}>{avgComplete}%</div>
-          <CompleteBar pct={avgComplete} />
-        </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+        {loading ? Array.from({ length: 3 }).map((_, i) => <div key={i} className="card" style={{ padding: 16 }}><Skeleton h={56} /></div>) : (<>
+          <div className="card" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div style={{ fontSize: 11, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>Communiants</div>
+            <div className="sg" style={{ fontSize: 24, color: '#5AC472' }}>{(s?.total_communiants ?? 0).toLocaleString('fr')}</div>
+            <div style={{ fontSize: 11, color: 'var(--text-3)' }}>Non-comm. : {(s?.total_non_communiants ?? 0).toLocaleString('fr')}</div>
+          </div>
+          <div className="card" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div style={{ fontSize: 11, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>Sans GPS</div>
+            <div className="sg" style={{ fontSize: 24, color: (s?.nb_paroisses_sans_gps ?? 0) > 5 ? '#FF8A7A' : '#FFD600' }}>{s?.nb_paroisses_sans_gps ?? 0}</div>
+            <div style={{ fontSize: 11, color: 'var(--text-3)' }}>sur {s?.nb_paroisses ?? 0} paroisses</div>
+          </div>
+          <div className="card" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div style={{ fontSize: 11, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>En attente validation</div>
+            <div className="sg" style={{ fontSize: 24, color: (s?.validations_attente ?? 0) > 0 ? '#FFD600' : '#5AC472' }}>{s?.validations_attente ?? 0}</div>
+            <div style={{ fontSize: 11, color: 'var(--text-3)' }}>statistiques à valider</div>
+          </div>
+        </>)}
       </div>
 
       {/* Row 3 — Charts */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 12 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 12 }}>
         <div className="card" style={{ padding: '14px 16px' }}>
           <div style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>Fidèles par district</div>
-          <HorizontalBars data={districtBars} />
-        </div>
-        <div className="card" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Catégories (paroisses)</div>
-          <Donut segments={categories} total={MOCK_REGION_MIFI.nbParoisses} label="paroisses" />
+          {loading ? <Skeleton h={180} /> : districtBars.length ? <HorizontalBars data={districtBars} /> :
+            <div style={{ color: 'var(--text-3)', fontSize: 13 }}>Aucune donnée de fidèles</div>}
         </div>
         <div className="card" style={{ padding: '14px 16px' }}>
-          <div style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>Types d'œuvres</div>
-          <HorizontalBars data={oeuvresByType.filter(o => o.value > 0)} />
+          <div style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>Répartition des œuvres</div>
+          {loading ? <Skeleton h={180} /> : s?.oeuvres_par_type?.length ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+              <Donut segments={s.oeuvres_par_type.map(o => ({ count: o.count, color: o.color }))} total={s.nb_oeuvres} label="œuvres" />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 11 }}>
+                {s.oeuvres_par_type.map((o, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: o.color, flexShrink: 0 }} />
+                    <span style={{ color: 'var(--text-2)' }}>{o.type}</span>
+                    <span style={{ marginLeft: 'auto', fontWeight: 600, color: 'var(--text)' }}>{o.count}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : <div style={{ color: 'var(--text-3)', fontSize: 13 }}>Aucune œuvre enregistrée</div>}
         </div>
       </div>
 
-      {/* Row 4 — Map + Evolution + Activity */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
-        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-          <MiniLeafletMap height={260} />
-          <div style={{ padding: '10px 14px', fontSize: 11, color: 'var(--text-3)' }}>Carte centrée sur la Région MIFI</div>
+      {/* Row 4 — Evolution + Top paroisses */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        <div className="card" style={{ padding: '14px 16px' }}>
+          <div style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>
+            Évolution des fidèles {(s?.fideles_par_annee?.[0]?.year ?? 2020)} → {annee}
+          </div>
+          {loading ? <Skeleton h={180} /> : s?.fideles_par_annee?.length ? (
+            <LineChart data={s.fideles_par_annee.map(d => ({ year: d.year, comm: d.comm, noncomm: d.noncomm }))} />
+          ) : <div style={{ color: 'var(--text-3)', fontSize: 13 }}>Aucune statistique historique</div>}
         </div>
         <div className="card" style={{ padding: '14px 16px' }}>
-          <div style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>Évolution des fidèles</div>
-          <LineChart data={fidEvol} />
-        </div>
-        <div className="card" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <div style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Activité récente</div>
-          <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {JOURNAL_MIFI.slice(0, 5).map((a, i) => (
-              <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                <div style={{ width: 28, height: 28, borderRadius: '50%', background: a.color + '22', color: a.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <span style={{ fontSize: 11, fontWeight: 700 }}>{a.who.split(' ').map((w: string) => w[0]).join('').slice(0,2)}</span>
-                </div>
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{a.who}</div>
-                  <div style={{ fontSize: 11, color: 'var(--text-3)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{a.action} — {a.entity}</div>
-                </div>
-                <div style={{ fontSize: 10, color: 'var(--text-3)', flexShrink: 0, marginLeft: 'auto' }}>{a.time.split(' ')[1]}</div>
-              </div>
-            ))}
-          </div>
+          <div style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>Top paroisses par fidèles</div>
+          {loading ? <Skeleton h={180} /> : s?.top_paroisses_fideles?.length ? (
+            <HorizontalBars data={s.top_paroisses_fideles.map(p => ({ label: p.name, value: p.fideles }))} />
+          ) : <div style={{ color: 'var(--text-3)', fontSize: 13 }}>Aucune donnée de fidèles</div>}
         </div>
       </div>
 
       {/* Row 5 — Districts table */}
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div className="sg-md" style={{ fontSize: 14 }}>Districts de la région MIFI</div>
+          <div className="sg-md" style={{ fontSize: 14 }}>Districts de la région</div>
           <a href="/admin/regional/districts" style={{ fontSize: 12, color: '#5B9BD5', textDecoration: 'none' }}>Voir tous →</a>
         </div>
         <table className="data">
@@ -153,21 +159,21 @@ export default function DashboardRegionalPage() {
               <th style={{ textAlign: 'right' }}>Paroisses</th>
               <th style={{ textAlign: 'right' }}>Fidèles</th>
               <th style={{ textAlign: 'right' }}>Ouvriers</th>
-              <th>Admin</th>
-              <th>Score</th>
             </tr>
           </thead>
           <tbody>
-            {STATS_DISTRICTS_MIFI.map((d, i) => (
-              <tr key={i}>
-                <td style={{ fontWeight: 500 }}>{d.district}</td>
-                <td className="mono" style={{ textAlign: 'right' }}>{d.paroisses}</td>
-                <td className="mono" style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{d.total.toLocaleString('fr')}</td>
-                <td className="mono" style={{ textAlign: 'right' }}>{d.ouvriers}</td>
-                <td style={{ fontSize: 12, color: 'var(--text-2)' }}>{DISTRICTS_MIFI[i]?.admin || '—'}</td>
-                <td style={{ width: 120 }}><CompleteBar pct={d.score} /></td>
+            {loading ? (
+              Array.from({ length: 5 }).map((_, i) => <tr key={i}><td colSpan={4}><Skeleton h={28} /></td></tr>)
+            ) : districts.length ? districts.map(d => (
+              <tr key={d.id}>
+                <td style={{ fontWeight: 500 }}>{d.nom}</td>
+                <td className="mono" style={{ textAlign: 'right' }}>{d.nb_paroisses}</td>
+                <td className="mono" style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{(d.nb_fideles ?? 0).toLocaleString('fr')}</td>
+                <td className="mono" style={{ textAlign: 'right' }}>{d.nb_ouvriers ?? 0}</td>
               </tr>
-            ))}
+            )) : (
+              <tr><td colSpan={4} style={{ textAlign: 'center', color: 'var(--text-3)', padding: 24 }}>Aucun district trouvé</td></tr>
+            )}
           </tbody>
         </table>
       </div>

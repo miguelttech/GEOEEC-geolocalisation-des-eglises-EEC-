@@ -1,12 +1,9 @@
 'use client';
 import React from 'react';
-import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { I } from '@/components/admin/icons';
-import { Avatar, Widget, HorizontalBars, Donut, StackedBars, LineChart, CategoriePill, GpsCell, StatusPill } from '@/components/admin/atoms';
+import { Avatar, Widget, HorizontalBars, Donut, StackedBars, LineChart, CategoriePill, GpsCell } from '@/components/admin/atoms';
 import { api, type DashboardStats, type Paroisse } from '@/lib/api';
-
-const MiniLeafletMap = dynamic(() => import('@/components/admin/MiniLeafletMap'), { ssr: false });
 
 /* ── Types ────────────────────────────────────────────────────────────────── */
 interface FullStats extends DashboardStats {
@@ -279,19 +276,15 @@ export default function DashboardPage() {
         </Widget>
       </div>
 
-      {/* Row 4 — Mini-map + Top 10 paroisses (EXIGENCE : la carte est conservée,
-          la nouvelle statistique s'ajoute à côté) */}
-      <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: 16 }}>
-        <Widget title="Aperçu géographique" action={<button className="btn-ghost btn" style={{ padding: '4px 8px', fontSize: 11 }} onClick={() => nav('map')}>Ouvrir la carte →</button>}>
-          <MiniLeafletMap height={320} />
-        </Widget>
-
-        <Widget title="Top 10 — paroisses par nombre de fidèles">
-          {loading ? <Skeleton h={320} /> : s?.top_paroisses_fideles?.length ? (
-            <HorizontalBars data={s.top_paroisses_fideles.map(p => ({ label: p.name, value: p.fideles }))} />
-          ) : <div style={{ color: 'var(--text-3)', fontSize: 13 }}>Aucune donnée de fidèles</div>}
-        </Widget>
-      </div>
+      {/* Row 4 — Top 10 paroisses (EXIGENCE : le widget « Aperçu géographique »
+          / mini-carte a été retiré — la carte interactive est désormais
+          l'élément principal, accessible en plein écran depuis la sidebar.
+          Cette statistique occupe maintenant tout l'espace disponible). */}
+      <Widget title="Top 10 — paroisses par nombre de fidèles">
+        {loading ? <Skeleton h={280} /> : s?.top_paroisses_fideles?.length ? (
+          <HorizontalBars data={s.top_paroisses_fideles.map(p => ({ label: p.name, value: p.fideles }))} />
+        ) : <div style={{ color: 'var(--text-3)', fontSize: 13 }}>Aucune donnée de fidèles</div>}
+      </Widget>
 
       {/* Row 4bis — Œuvres par région (EXIGENCE : par région ET par type,
           couleurs pertinentes + légende) + Activité */}

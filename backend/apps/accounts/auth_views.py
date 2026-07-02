@@ -111,11 +111,71 @@ def logout_view(request):
 # ME
 # ---------------------------------------------------------------------------
 
-@api_view(["GET"])
+@api_view(["GET", "PATCH"])
 @permission_classes([IsAuthenticated])
 def me_view(request):
-    """GET /api/auth/me/ — Retourne l'utilisateur courant avec son scope."""
-    return Response(UserSerializer(request.user).data)
+    """
+    GET   /api/auth/me/ — Retourne l'utilisateur courant avec son scope.
+    PATCH /api/auth/me/ — Ne permet de modifier QUE le thème d'affichage
+                          (nom, rôle, périmètre : jamais modifiables par
+                          l'utilisateur lui-même — exigence Paramètres).
+    """
+    if request.method == "PATCH":
+        theme = request.data.get("theme")
+        if theme not in ("clair", "sombre"):
+            return Response({"detail": "theme doit valoir 'clair' ou 'sombre'."},
+                            status=status.HTTP_400_BAD_REQUEST)
+        request.user.theme = theme
+        request.user.save(update_fields=["theme"])
+
+    return Response(UserSerializer(request.user, context={"request": request}).data)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def upload_avatar(request):
+    """
+    POST /api/auth/me/avatar/ — multipart/form-data, champ « file ».
+    Valide le type et la taille via Pillow, redimensionne (max 512×512),
+    remplace l'ancienne photo, renvoie l'URL absolue de la nouvelle image.
+    """
+    from PIL import Image, UnidentifiedImageError
+    from django.core.files.base import ContentFile
+    import io
+
+    file_obj = request.FILES.get("file")
+    if not file_obj:
+        return Response({"detail": "Champ 'file' manquant."}, status=status.HTTP_400_BAD_REQUEST)
+
+    MAX_SIZE = 5 * 1024 * 1024  # 5 Mo
+    if file_obj.size > MAX_SIZE:
+        return Response({"detail": "Image trop volumineuse (5 Mo maximum)."},
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        img = Image.open(file_obj)
+        img.verify()                      # détecte les fichiers corrompus/non-image
+        file_obj.seek(0)
+        img = Image.open(file_obj)        # verify() consomme l'image : on la rouvre
+        img = img.convert("RGB")
+    except (UnidentifiedImageError, OSError):
+        return Response({"detail": "Fichier image invalide."}, status=status.HTTP_400_BAD_REQUEST)
+
+    img.thumbnail((512, 512))
+    buf = io.BytesIO()
+    img.save(buf, format="JPEG", quality=88)
+    buf.seek(0)
+
+    user = request.user
+    if user.avatar:
+        user.avatar.delete(save=False)    # supprime l'ancien fichier du disque
+    user.avatar.save(f"user_{user.id}.jpg", ContentFile(buf.read()), save=True)
+
+    from apps.audit.utils import log_action
+    log_action(request, "UPDATE", "user", objet_id=user.id,
+               objet_nom=user.get_full_name(), description="Photo de profil modifiée")
+
+    return Response(UserSerializer(user, context={"request": request}).data)
 
 
 # ---------------------------------------------------------------------------
@@ -360,6 +420,8 @@ def dashboard_stats(request):
 
     user = request.user
 
+    from .permissions import filter_oeuvres_by_scope
+
     if user.role == "SUPER":
         paroisses_qs = Paroisse.objects.all()
         oeuvres_qs   = Oeuvre.objects.all()
@@ -367,12 +429,15 @@ def dashboard_stats(request):
         stats_qs     = StatistiqueAnnuelle.objects.all()
     elif user.role == "REGION" and user.region_id:
         paroisses_qs = Paroisse.objects.filter(district__region_id=user.region_id)
-        oeuvres_qs   = Oeuvre.objects.filter(region_id=user.region_id)
+        # Scope œuvres via le filtre central (couvre les rattachements
+        # région + district + paroisse de la zone — bug du rattachement
+        # direct corrigé)
+        oeuvres_qs   = filter_oeuvres_by_scope(Oeuvre.objects.all(), user)
         ouvriers_qs  = Ouvrier.objects.filter(paroisse__district__region_id=user.region_id)
         stats_qs     = StatistiqueAnnuelle.objects.filter(paroisse__district__region_id=user.region_id)
     elif user.role == "DISTRICT" and user.district_id:
         paroisses_qs = Paroisse.objects.filter(district_id=user.district_id)
-        oeuvres_qs   = Oeuvre.objects.filter(district_id=user.district_id)
+        oeuvres_qs   = filter_oeuvres_by_scope(Oeuvre.objects.all(), user)
         ouvriers_qs  = Ouvrier.objects.filter(paroisse__district_id=user.district_id)
         stats_qs     = StatistiqueAnnuelle.objects.filter(paroisse__district_id=user.district_id)
     else:

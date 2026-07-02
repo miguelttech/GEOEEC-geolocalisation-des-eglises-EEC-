@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { api, LogEntry, PagedResult } from '@/lib/api';
+import { api, LogEntry, PagedResult, UserAccount } from '@/lib/api';
 import { I } from '@/components/admin/icons';
 
 const ACTION_META: Record<string, { label: string; color: string; icon: keyof typeof I }> = {
@@ -46,24 +46,31 @@ export default function JournalPage() {
   const [typeObjet, setTypeObjet] = React.useState('');
   const [dateDebut, setDateDebut] = React.useState('');
   const [dateFin, setDateFin]     = React.useState('');
+  const [utilisateur, setUtilisateur] = React.useState('');
+  const [users, setUsers]         = React.useState<UserAccount[]>([]);
+
+  React.useEffect(() => {
+    api.get<UserAccount[]>('/api/auth/users/').then(setUsers).catch(() => {});
+  }, []);
 
   React.useEffect(() => {
     setLoading(true);
     setExpanded(-1);
     const params = new URLSearchParams({ page: String(page) });
-    if (action)    params.set('action', action);
-    if (typeObjet) params.set('type_objet', typeObjet);
-    if (dateDebut) params.set('date_debut', dateDebut);
-    if (dateFin)   params.set('date_fin', dateFin);
+    if (action)      params.set('action', action);
+    if (typeObjet)   params.set('type_objet', typeObjet);
+    if (dateDebut)   params.set('date_debut', dateDebut);
+    if (dateFin)     params.set('date_fin', dateFin);
+    if (utilisateur) params.set('utilisateur', utilisateur);
     api.get<PagedResult<LogEntry>>(`/api/audit/journal/?${params}`)
       .then(d => { setEntries(d.results); setCount(d.count); })
       .catch(() => { setEntries([]); setCount(0); })
       .finally(() => setLoading(false));
-  }, [page, action, typeObjet, dateDebut, dateFin]);
+  }, [page, action, typeObjet, dateDebut, dateFin, utilisateur]);
 
   const totalPages  = Math.max(1, Math.ceil(count / PAGE_SIZE));
-  const hasFilter   = !!(action || typeObjet || dateDebut || dateFin);
-  const reset = () => { setAction(''); setTypeObjet(''); setDateDebut(''); setDateFin(''); setPage(1); };
+  const hasFilter   = !!(action || typeObjet || dateDebut || dateFin || utilisateur);
+  const reset = () => { setAction(''); setTypeObjet(''); setDateDebut(''); setDateFin(''); setUtilisateur(''); setPage(1); };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -87,6 +94,18 @@ export default function JournalPage() {
             <option value="">Toutes entités</option>
             {Object.entries(TYPE_LABELS).map(([k, v]) => (
               <option key={k} value={k}>{v}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <div className="label">Utilisateur</div>
+          <select className="input" value={utilisateur} style={{ width: 190 }}
+            onChange={e => { setUtilisateur(e.target.value); setPage(1); }}>
+            <option value="">Tous les utilisateurs</option>
+            {users.map(u => (
+              <option key={u.id} value={String(u.id)}>
+                {[u.first_name, u.last_name].filter(Boolean).join(' ') || u.username}
+              </option>
             ))}
           </select>
         </div>

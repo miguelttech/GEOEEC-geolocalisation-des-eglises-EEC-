@@ -15,11 +15,6 @@ import Footer       from './Footer';
 
 export default function LandingPage() {
   useEffect(() => {
-    document.body.style.overflow = 'auto';
-    return () => { document.body.style.overflow = ''; };
-  }, []);
-
-  useEffect(() => {
     const obs = new IntersectionObserver(
       (entries) => {
         entries.forEach((e) => {

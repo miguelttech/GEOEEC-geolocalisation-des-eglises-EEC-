@@ -4,7 +4,7 @@ from django.db import models
 
 class User(AbstractUser):
     ROLES = [
-        ("SUPER",    "Super Administrateur National"),
+        ("SUPER",    "Administrateur Général"),
         ("REGION",   "Administrateur Régional"),
         ("DISTRICT", "Administrateur District"),
         ("PAROISSE", "Administrateur Paroissial"),
@@ -12,6 +12,14 @@ class User(AbstractUser):
     ]
 
     role = models.CharField(max_length=10, choices=ROLES, default="PAROISSE")
+
+    # Photo de profil (upload via /api/auth/me/avatar/) — validée/redimensionnée
+    # à l'upload (voir auth_views.upload_avatar).
+    avatar = models.ImageField(upload_to="avatars/", null=True, blank=True)
+
+    # Thème d'affichage persistant, restauré à chaque connexion.
+    THEMES = [("clair", "Clair"), ("sombre", "Sombre")]
+    theme = models.CharField(max_length=10, choices=THEMES, default="clair")
 
     # Portée géographique — null pour SUPER (accès global)
     region = models.ForeignKey(

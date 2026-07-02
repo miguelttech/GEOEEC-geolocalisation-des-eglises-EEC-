@@ -1,6 +1,7 @@
-from rest_framework import viewsets, permissions, serializers as drf_serializers
+from rest_framework import viewsets, serializers as drf_serializers
 
 from .models import LogActivite
+from apps.accounts.permissions import IsAdminUser
 
 
 class LogActiviteSerializer(drf_serializers.ModelSerializer):
@@ -34,7 +35,9 @@ class LogActiviteViewSet(viewsets.ReadOnlyModelViewSet):
       ?date_debut=YYYY-MM-DD
       ?date_fin=YYYY-MM-DD
     """
-    permission_classes = [permissions.IsAuthenticated]
+    # Journal réservé aux administrateurs agréés (jamais un VISITEUR),
+    # chacun limité à SA zone via _managed_user_ids ci-dessous.
+    permission_classes = [IsAdminUser]
     serializer_class   = LogActiviteSerializer
 
     def get_queryset(self):

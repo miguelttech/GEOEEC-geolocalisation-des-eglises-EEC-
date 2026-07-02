@@ -110,7 +110,17 @@ def filter_paroisses_by_scope(queryset, user):
 
 
 def filter_oeuvres_by_scope(queryset, user):
-    """Filtre spécialisé pour le modèle Oeuvre."""
+    """Filtre spécialisé pour le modèle Oeuvre.
+
+    Une œuvre peut être rattachée à une paroisse, un district OU une région
+    (voire aucun des trois = œuvre NATIONALE). Le scope d'un admin couvre
+    TOUS les rattachements situés dans sa zone — ex. un admin régional voit
+    les œuvres régionales, celles des districts ET celles des paroisses de
+    sa région (bug corrigé : seul le rattachement direct était couvert).
+    Les œuvres nationales ne sont visibles en gestion que par le SUPER.
+    """
+    from django.db.models import Q
+
     # Visiteur / rôle non-administrateur → données publiques complètes (comme un anonyme)
     if not getattr(user, "is_admin", False):
         return queryset
@@ -118,9 +128,16 @@ def filter_oeuvres_by_scope(queryset, user):
     if user.role == "SUPER":
         return queryset
     if user.role == "REGION" and user.region_id:
-        return queryset.filter(region_id=user.region_id)
+        return queryset.filter(
+            Q(region_id=user.region_id)
+            | Q(district__region_id=user.region_id)
+            | Q(paroisse__district__region_id=user.region_id)
+        )
     if user.role == "DISTRICT" and user.district_id:
-        return queryset.filter(district_id=user.district_id)
+        return queryset.filter(
+            Q(district_id=user.district_id)
+            | Q(paroisse__district_id=user.district_id)
+        )
     if user.role == "PAROISSE" and user.paroisse_id:
         return queryset.filter(paroisse_id=user.paroisse_id)
     return queryset.none()

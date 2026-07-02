@@ -1,115 +1,145 @@
 'use client';
-import dynamic from 'next/dynamic';
-import { CompleteBar, LineChart } from '@/components/admin/atoms';
-import { MOCK_PAROISSE, OUVRIERS_PAROISSE, OEUVRES_PAROISSE, STATS_ANNUELLES_PAROISSE } from '@/components/admin/dataParoisse';
+import React from 'react';
+import { I } from '@/components/admin/icons';
+import { LineChart, GpsCell } from '@/components/admin/atoms';
+import { api, type DashboardStats, type Paroisse, type Ouvrier, type Oeuvre } from '@/lib/api';
+
+/* ── Types ────────────────────────────────────────────────────────────────── */
+interface ParoisseStats extends DashboardStats {
+  fideles_par_annee: { year: number; comm: number; noncomm: number }[];
+}
 
 const C = '#E67A2E';
 
-const MiniLeafletMap = dynamic(() => import('@/components/admin/MiniLeafletMap'), { ssr: false });
+function Skeleton({ h = 24 }: { h?: number }) {
+  return <div style={{ height: h, width: '100%', background: 'rgba(255,255,255,0.07)', borderRadius: 6, animation: 'pulse 1.4s ease infinite' }} />;
+}
 
-function StatCard({ label, value, sub, color = C }: { label:string; value:string|number; sub?:string; color?:string }) {
+function StatCard({ label, value, sub, color = C }: { label: string; value: string | number; sub?: string; color?: string }) {
   return (
-    <div className="card" style={{ padding:'16px 18px', display:'flex', flexDirection:'column', gap:10 }}>
-      <span style={{ fontSize:12, color:'var(--text-2)', fontWeight:600, textTransform:'uppercase', letterSpacing:'0.05em' }}>{label}</span>
-      <div className="sg" style={{ fontSize:32, color, lineHeight:1 }}>{value}</div>
-      {sub && <div style={{ fontSize:11, color:'var(--text-3)' }}>{sub}</div>}
+    <div className="card" style={{ padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <span style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</span>
+      <div className="sg" style={{ fontSize: 32, color, lineHeight: 1 }}>{value}</div>
+      {sub && <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{sub}</div>}
     </div>
   );
 }
 
 export default function DashboardParoissePage() {
-  const fidEvol = STATS_ANNUELLES_PAROISSE.map(e => ({ year: e.annee, comm: e.communiants, noncomm: e.noncomm }));
-  const lastYear = STATS_ANNUELLES_PAROISSE[STATS_ANNUELLES_PAROISSE.length - 1];
+  const [stats, setStats]       = React.useState<ParoisseStats | null>(null);
+  const [paroisse, setParoisse] = React.useState<Paroisse | null>(null);
+  const [ouvriers, setOuvriers] = React.useState<Ouvrier[]>([]);
+  const [oeuvres, setOeuvres]   = React.useState<Oeuvre[]>([]);
+  const [loading, setLoading]   = React.useState(true);
+  const [error, setError]       = React.useState('');
+  const annee = 2025;
+
+  React.useEffect(() => {
+    setLoading(true);
+    Promise.all([
+      api.get<ParoisseStats>(`/api/auth/dashboard-stats/?annee=${annee}`),
+      api.get<{ count: number; results: Paroisse[] }>(`/api/geo/paroisses/?page_size=1`),
+      api.get<{ count: number; results: Ouvrier[] }>(`/api/ouvriers/ouvriers/?page_size=200`),
+      api.get<{ count: number; results: Oeuvre[] }>(`/api/oeuvres/oeuvres/?page_size=200`),
+    ])
+      .then(([s, p, o, oe]) => {
+        setStats(s);
+        setParoisse(p.results[0] ?? null);
+        setOuvriers(o.results);
+        setOeuvres(oe.results);
+      })
+      .catch(e => setError(e.message || 'Erreur de chargement'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (error) return (
+    <div style={{ padding: 32, color: '#FF6B6B' }}>
+      <I.alert size={18} /> {error}
+      <button className="btn btn-outline" style={{ marginLeft: 12 }} onClick={() => setError('')}>Réessayer</button>
+    </div>
+  );
+
+  const s = stats;
 
   return (
-    <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
       {/* Row 1 — 4 KPI */}
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap:12 }}>
-        <StatCard label="Fidèles"     value={MOCK_PAROISSE.totalFideles.toLocaleString('fr')} sub="total communiants + non-comm." color={C}/>
-        <StatCard label="Communiants" value={MOCK_PAROISSE.communiants}  sub={`Non-comm. : ${MOCK_PAROISSE.nonCommuniants}`} color="#5AC472"/>
-        <StatCard label="Ouvriers"    value={OUVRIERS_PAROISSE.length}   sub="dans cette paroisse"  color="#9B72CF"/>
-        <StatCard label="Œuvres"      value={OEUVRES_PAROISSE.length}    sub="liées à la paroisse"  color="#5B9BD5"/>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+        {loading ? Array.from({ length: 4 }).map((_, i) => <div key={i} className="card" style={{ padding: 16 }}><Skeleton h={70} /></div>) : (<>
+          <StatCard label="Fidèles"     value={(s?.total_fideles ?? 0).toLocaleString('fr')} sub="total communiants + non-comm." color={C} />
+          <StatCard label="Communiants" value={(s?.total_communiants ?? 0).toLocaleString('fr')} sub={`Non-comm. : ${(s?.total_non_communiants ?? 0).toLocaleString('fr')}`} color="#5AC472" />
+          <StatCard label="Ouvriers"    value={ouvriers.length} sub="dans cette paroisse" color="#9B72CF" />
+          <StatCard label="Œuvres"      value={oeuvres.length}  sub="liées à la paroisse"  color="#5B9BD5" />
+        </>)}
       </div>
 
-      {/* Row 2 — Info card + Mini carte */}
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-        <div className="card" style={{ padding:'18px 20px', display:'flex', flexDirection:'column', gap:14 }}>
-          <div style={{ fontSize:12, color:'var(--text-2)', fontWeight:600, textTransform:'uppercase', letterSpacing:'0.05em' }}>Informations générales</div>
+      {/* Row 2 — Informations générales */}
+      <div className="card" style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <div style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Informations générales</div>
+        {loading ? <Skeleton h={140} /> : paroisse ? (<>
           {[
-            { label:'Catégorie',   value:MOCK_PAROISSE.categorie },
-            { label:'District', value:MOCK_PAROISSE.district },
-            { label:'Région',   value:MOCK_PAROISSE.region },
-            { label:'Pasteur',  value:MOCK_PAROISSE.pasteur },
-            { label:'Adresse',  value:MOCK_PAROISSE.adresse },
-            { label:'Contact',  value:MOCK_PAROISSE.contact },
+            { label: 'Catégorie', value: paroisse.categorie ?? '—' },
+            { label: 'District',  value: paroisse.district_nom },
+            { label: 'Région',    value: paroisse.region_nom },
+            { label: 'Adresse',   value: paroisse.adresse || '—' },
+            { label: 'Contact',   value: paroisse.telephone || paroisse.email || '—' },
           ].map(r => (
-            <div key={r.label} style={{ display:'flex', justifyContent:'space-between', fontSize:13, borderBottom:'1px solid rgba(255,255,255,0.04)', paddingBottom:8 }}>
-              <span style={{ color:'var(--text-3)', fontWeight:500 }}>{r.label}</span>
-              <span style={{ color:'var(--text)', textAlign:'right', maxWidth:'60%' }}>{r.value}</span>
+            <div key={r.label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, borderBottom: '1px solid rgba(255,255,255,0.04)', paddingBottom: 8 }}>
+              <span style={{ color: 'var(--text-3)', fontWeight: 500 }}>{r.label}</span>
+              <span style={{ color: 'var(--text)', textAlign: 'right', maxWidth: '60%' }}>{r.value}</span>
             </div>
           ))}
-          <div>
-            <div style={{ fontSize:11, color:'var(--text-3)', marginBottom:6, fontWeight:500 }}>Complétion de fiche — {MOCK_PAROISSE.complete}%</div>
-            <CompleteBar pct={MOCK_PAROISSE.complete}/>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
+            <span style={{ color: 'var(--text-3)' }}>GPS :</span>
+            <GpsCell ok={paroisse.latitude != null} />
+            {paroisse.latitude != null && paroisse.longitude != null && (
+              <span style={{ color: 'var(--text-3)', fontSize: 11 }}>{paroisse.latitude.toFixed(4)}, {paroisse.longitude.toFixed(4)}</span>
+            )}
           </div>
-        </div>
-        <div className="card" style={{ padding:0, overflow:'hidden' }}>
-          <MiniLeafletMap height={380}/>
-          <div style={{ padding:'8px 14px', fontSize:11, color:'var(--text-3)', display:'flex', alignItems:'center', gap:6 }}>
-            <span style={{ color:'#5AC472' }}>●</span> GPS actif — {MOCK_PAROISSE.lat.toFixed(4)}, {MOCK_PAROISSE.lng.toFixed(4)}
-          </div>
-        </div>
+        </>) : <div style={{ color: 'var(--text-3)', fontSize: 13 }}>Aucune paroisse rattachée à ce compte</div>}
       </div>
 
-      {/* Row 3 — Évolution + Statistiques vitales */}
-      <div style={{ display:'grid', gridTemplateColumns:'2fr 1fr', gap:12 }}>
-        <div className="card" style={{ padding:'14px 16px' }}>
-          <div style={{ fontSize:12, color:'var(--text-2)', fontWeight:600, textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:12 }}>Évolution des fidèles (2020–2025)</div>
-          <LineChart data={fidEvol}/>
+      {/* Row 3 — Évolution des fidèles */}
+      <div className="card" style={{ padding: '14px 16px' }}>
+        <div style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>
+          Évolution des fidèles {(s?.fideles_par_annee?.[0]?.year ?? 2020)} → {annee}
         </div>
-        <div className="card" style={{ padding:'14px 16px', display:'flex', flexDirection:'column', gap:16 }}>
-          <div style={{ fontSize:12, color:'var(--text-2)', fontWeight:600, textTransform:'uppercase', letterSpacing:'0.05em' }}>Année 2025</div>
-          {[
-            { label:'Baptêmes',  value:lastYear.baptemes,  color:'#5B9BD5', emoji:'💧' },
-            { label:'Mariages',  value:lastYear.mariages,   color:'#5AC472', emoji:'💍' },
-            { label:'Décès',     value:lastYear.deces,      color:'#94A3B8', emoji:'✝' },
-          ].map(s => (
-            <div key={s.label} style={{ display:'flex', alignItems:'center', gap:14 }}>
-              <div style={{ width:36, height:36, borderRadius:8, background:s.color+'18', display:'flex', alignItems:'center', justifyContent:'center', fontSize:16, flexShrink:0 }}>{s.emoji}</div>
-              <div>
-                <div style={{ fontSize:11, color:'var(--text-3)', fontWeight:600 }}>{s.label}</div>
-                <div className="sg-md" style={{ fontSize:22, color:s.color }}>{s.value}</div>
-              </div>
-            </div>
-          ))}
-        </div>
+        {loading ? <Skeleton h={180} /> : s?.fideles_par_annee?.length ? (
+          <LineChart data={s.fideles_par_annee.map(d => ({ year: d.year, comm: d.comm, noncomm: d.noncomm }))} />
+        ) : <div style={{ color: 'var(--text-3)', fontSize: 13 }}>Aucune statistique historique</div>}
       </div>
 
       {/* Row 4 — Ouvriers */}
-      <div className="card" style={{ padding:0, overflow:'hidden' }}>
-        <div style={{ padding:'14px 18px', borderBottom:'1px solid var(--border)', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-          <div className="sg-md" style={{ fontSize:14 }}>Ouvriers de la paroisse</div>
-          <a href="/admin/paroisse/ouvriers" style={{ fontSize:12, color:C, textDecoration:'none' }}>Voir tous →</a>
+      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+        <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div className="sg-md" style={{ fontSize: 14 }}>Ouvriers de la paroisse</div>
+          <a href="/admin/paroisse/ouvriers" style={{ fontSize: 12, color: C, textDecoration: 'none' }}>Voir tous →</a>
         </div>
         <table className="data">
           <thead>
-            <tr><th>Ouvrier</th><th>Grade</th><th>Téléphone</th><th>En poste depuis</th></tr>
+            <tr><th>Ouvrier</th><th>Grade</th><th>Téléphone</th><th>Statut</th></tr>
           </thead>
           <tbody>
-            {OUVRIERS_PAROISSE.map(o => (
+            {loading ? (
+              Array.from({ length: 4 }).map((_, i) => <tr key={i}><td colSpan={4}><Skeleton h={28} /></td></tr>)
+            ) : ouvriers.length ? ouvriers.map(o => (
               <tr key={o.id}>
                 <td>
-                  <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-                    <div style={{ width:28, height:28, borderRadius:'50%', background:o.color+'22', color:o.color, display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:700, flexShrink:0 }}>{o.initials}</div>
-                    <span style={{ fontWeight:500 }}>{o.nom}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ width: 28, height: 28, borderRadius: '50%', background: C + '22', color: C, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, flexShrink: 0 }}>
+                      {(o.prenom[0] ?? '') + (o.nom[0] ?? '')}
+                    </div>
+                    <span style={{ fontWeight: 500 }}>{o.prenom} {o.nom}</span>
                   </div>
                 </td>
-                <td><span style={{ padding:'2px 8px', borderRadius:4, fontSize:11, fontWeight:600, background:o.color+'18', color:o.color }}>{o.grade}</span></td>
-                <td className="mono" style={{ fontSize:11 }}>{o.tel}</td>
-                <td style={{ fontSize:12, color:'var(--text-3)' }}>{new Date(o.priseFonction).toLocaleDateString('fr-FR',{year:'numeric',month:'long'})}</td>
+                <td><span style={{ padding: '2px 8px', borderRadius: 4, fontSize: 11, fontWeight: 600, background: C + '18', color: C }}>{o.grade_abreviation || o.grade_nom || '—'}</span></td>
+                <td className="mono" style={{ fontSize: 11 }}>{o.telephone || '—'}</td>
+                <td style={{ fontSize: 12, color: 'var(--text-3)' }}>{o.statut === 'OCCUPE' ? 'En poste' : 'Inoccupé'}</td>
               </tr>
-            ))}
+            )) : (
+              <tr><td colSpan={4} style={{ textAlign: 'center', color: 'var(--text-3)', padding: 24 }}>Aucun ouvrier enregistré</td></tr>
+            )}
           </tbody>
         </table>
       </div>

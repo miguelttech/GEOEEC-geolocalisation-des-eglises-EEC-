@@ -3,7 +3,7 @@ import 'leaflet/dist/leaflet.css';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { api, Grade, Ouvrier, PagedResult, RegionSynodale, District, Paroisse } from '@/lib/api';
 import { I } from '@/components/admin/icons';
-import { Avatar, useOutside } from '@/components/admin/atoms';
+import { Avatar } from '@/components/admin/atoms';
 
 // ─── Grade color by hierarchy level ──────────────────────────────────────────
 const LEVEL_COLORS = ['#F59E0B','#F97316','#EF4444','#10B981','#3B82F6','#8B5CF6','#06B6D4','#94A3B8'];
@@ -57,26 +57,6 @@ function GradePill({ abreviation, niveau }: { abreviation: string | null; niveau
     <span className="pill" style={{ background: color + '22', color, borderColor: color + '55', fontSize: 11.5 }}>
       {label}
     </span>
-  );
-}
-
-// ─── Row menu ─────────────────────────────────────────────────────────────────
-function RowMenu({ onView, onEdit, onDelete }: { onView: () => void; onEdit: () => void; onDelete: () => void }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  useOutside(ref, () => setOpen(false));
-  return (
-    <div ref={ref} style={{ position: 'relative', display: 'inline-block' }}>
-      <button className="icon-btn" onClick={() => setOpen(o => !o)}><I.more size={15}/></button>
-      {open && (
-        <div className="menu" style={{ top: 'calc(100% + 4px)', right: 0, minWidth: 160 }}>
-          <button onClick={() => { setOpen(false); onView(); }}><I.eye size={13}/>Voir la fiche</button>
-          <button onClick={() => { setOpen(false); onEdit(); }}><I.pencil size={13}/>Modifier</button>
-          <hr/>
-          <button className="danger" onClick={() => { setOpen(false); onDelete(); }}><I.trash size={13}/>Supprimer</button>
-        </div>
-      )}
-    </div>
   );
 }
 
@@ -463,56 +443,6 @@ function OuvrierFormPanel({ mode, ouvrier, grades, onClose, onSaved }: {
   );
 }
 
-// ─── Delete Modal ─────────────────────────────────────────────────────────────
-function DeleteModal({ ouvrier, onClose, onDeleted }: {
-  ouvrier: Ouvrier; onClose: () => void; onDeleted: () => void;
-}) {
-  const [confirm, setConfirm] = useState('');
-  const [deleting, setDeleting] = useState(false);
-  const [error, setError] = useState('');
-  const fullName = `${ouvrier.prenom} ${ouvrier.nom}`;
-
-  async function handleDelete() {
-    setDeleting(true); setError('');
-    try {
-      await api.delete(`/api/ouvriers/ouvriers/${ouvrier.id}/`);
-      onDeleted();
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Erreur lors de la suppression.');
-      setDeleting(false);
-    }
-  }
-
-  return (
-    <div className="overlay" onClick={onClose}>
-      <div className="modal" onClick={e => e.stopPropagation()}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-          <div style={{ width: 38, height: 38, borderRadius: 8, background: 'rgba(198,40,40,0.15)', color: '#FF8A7A', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <I.trash size={18}/>
-          </div>
-          <div>
-            <div className="sg-md" style={{ fontSize: 16 }}>Supprimer l'ouvrier</div>
-            <div style={{ fontSize: 12, color: 'var(--text-3)' }}>Action irréversible</div>
-          </div>
-        </div>
-        <p style={{ fontSize: 13, color: 'var(--text-2)', marginBottom: 16 }}>
-          Pour confirmer, saisissez le nom complet :<br/>
-          <strong style={{ color: 'var(--text)' }}>{fullName}</strong>
-        </p>
-        <input className="input" placeholder={fullName} value={confirm} onChange={e => setConfirm(e.target.value)}/>
-        {error && <div style={{ marginTop: 8, fontSize: 12, color: '#FF8A7A' }}>{error}</div>}
-        <div style={{ display: 'flex', gap: 10, marginTop: 18, justifyContent: 'flex-end' }}>
-          <button className="btn btn-ghost" onClick={onClose} disabled={deleting}>Annuler</button>
-          <button className="btn" style={{ background: '#C62828', color: '#fff', opacity: confirm === fullName ? 1 : 0.4 }}
-            onClick={handleDelete} disabled={confirm !== fullName || deleting}>
-            {deleting ? 'Suppression…' : 'Supprimer définitivement'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function OuvriersPage() {
   const { toasts, add: addToast } = useToast();
@@ -529,7 +459,6 @@ export default function OuvriersPage() {
   const [refresh, setRefresh] = useState(0);
   const [viewPanel, setViewPanel] = useState<Ouvrier | null>(null);
   const [formPanel, setFormPanel] = useState<{ mode: 'create'|'edit'; ouvrier?: Ouvrier } | null>(null);
-  const [deleteModal, setDeleteModal] = useState<Ouvrier | null>(null);
   const [regions, setRegions] = useState<RegionSynodale[]>([]);
 
   const PAGE_SIZE = 50;
@@ -572,13 +501,6 @@ export default function OuvriersPage() {
   function handleSaved(nom: string) {
     setFormPanel(null);
     addToast({ type: 'success', title: formPanel?.mode === 'create' ? `Ouvrier "${nom}" créé.` : `Modifications enregistrées.`, body: nom });
-    doRefresh();
-  }
-
-  function handleDeleted() {
-    const nom = deleteModal ? `${deleteModal.prenom} ${deleteModal.nom}` : '';
-    setDeleteModal(null);
-    addToast({ type: 'warn', title: `Ouvrier "${nom}" supprimé.` });
     doRefresh();
   }
 
@@ -736,13 +658,8 @@ export default function OuvriersPage() {
                         <td><StatutPill statut={o.statut}/></td>
                         <td>
                           <div style={{ display: 'flex', gap: 2 }}>
-                            <button className="icon-btn" onClick={() => setViewPanel(o)}><I.eye size={15}/></button>
-                            <button className="icon-btn green" onClick={() => setFormPanel({ mode: 'edit', ouvrier: o })}><I.pencil size={15}/></button>
-                            <RowMenu
-                              onView={() => setViewPanel(o)}
-                              onEdit={() => setFormPanel({ mode: 'edit', ouvrier: o })}
-                              onDelete={() => setDeleteModal(o)}
-                            />
+                            <button className="icon-btn" onClick={() => setViewPanel(o)} title="Voir la fiche"><I.eye size={15}/></button>
+                            <button className="icon-btn green" onClick={() => setFormPanel({ mode: 'edit', ouvrier: o })} title="Réaffecter"><I.pencil size={15}/></button>
                           </div>
                         </td>
                       </tr>
@@ -776,9 +693,6 @@ export default function OuvriersPage() {
       {formPanel && (
         <OuvrierFormPanel mode={formPanel.mode} ouvrier={formPanel.ouvrier} grades={grades}
           onClose={() => setFormPanel(null)} onSaved={handleSaved}/>
-      )}
-      {deleteModal && (
-        <DeleteModal ouvrier={deleteModal} onClose={() => setDeleteModal(null)} onDeleted={handleDeleted}/>
       )}
       <ToastStack toasts={toasts}/>
     </div>

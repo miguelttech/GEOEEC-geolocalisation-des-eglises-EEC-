@@ -238,11 +238,16 @@ export const StackedBars = ({ data, keys }: { data: Record<string, string|number
 // ── LineChart ─────────────────────────────────────────────────────────────────
 interface LinePoint { year: number; comm: number; noncomm: number; }
 export const LineChart = ({ data, width = 480, height = 200 }: { data: LinePoint[]; width?: number; height?: number }) => {
+  if (!data.length) return <svg width={width} height={height} style={{ width: '100%', height, display: 'block' }} />;
   const pad = { l: 40, r: 12, t: 14, b: 26 };
   const w = width - pad.l - pad.r, h = height - pad.t - pad.b;
   const all = data.flatMap(d => [d.comm, d.noncomm]);
-  const yMax = Math.max(...all) * 1.1, yMin = 0;
-  const xs = data.map((_, i) => pad.l + (i / (data.length - 1)) * w);
+  const rawMax = all.length ? Math.max(...all) : 0;
+  const yMax = rawMax > 0 ? rawMax * 1.1 : 1;   // évite yMax=0 → division par zéro
+  const yMin = 0;
+  const xs = data.map((_, i) =>
+    pad.l + (data.length > 1 ? (i / (data.length - 1)) * w : w / 2)
+  );
   const yScale = (v: number) => pad.t + h - ((v - yMin) / (yMax - yMin)) * h;
   const path = (key: 'comm'|'noncomm') => data.map((d, i) => (i === 0 ? 'M' : 'L') + xs[i] + ',' + yScale(d[key])).join(' ');
   const area = data.map((d, i) => (i === 0 ? 'M' : 'L') + xs[i] + ',' + yScale(d.comm)).join(' ') + ` L${pad.l + w},${pad.t + h} L${pad.l},${pad.t + h} Z`;

@@ -1,8 +1,8 @@
 'use client';
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { api, UserAccount, RegionSynodale, District, Paroisse, PagedResult } from '@/lib/api';
 import { I } from '@/components/admin/icons';
-import { Avatar, useOutside } from '@/components/admin/atoms';
+import { Avatar } from '@/components/admin/atoms';
 
 // ─── Toast ────────────────────────────────────────────────────────────────────
 interface Toast { id: number; type: 'success'|'warn'|'error'; title: string; body?: string; }
@@ -30,10 +30,11 @@ function ToastStack({ toasts }: { toasts: Toast[] }) {
 
 // ─── Role helpers ─────────────────────────────────────────────────────────────
 const ROLE_META: Record<string, { label: string; cls: string; initBg: string; initColor: string }> = {
-  SUPER:    { label: 'Super Admin',      cls: 'pill-gold',   initBg: 'rgba(255,214,0,0.15)',  initColor: '#FFD600' },
+  SUPER:    { label: 'Administrateur Général', cls: 'pill-gold',   initBg: 'rgba(255,214,0,0.15)',  initColor: '#FFD600' },
   REGION:   { label: 'Admin Régional',   cls: 'pill-blue',   initBg: 'rgba(59,130,246,0.15)', initColor: '#3B82F6' },
   DISTRICT: { label: 'Admin District',   cls: 'pill-orange', initBg: 'rgba(249,115,22,0.15)', initColor: '#F97316' },
   PAROISSE: { label: 'Admin Paroisse',   cls: 'pill-green',  initBg: 'rgba(46,151,68,0.15)',  initColor: '#5AC472' },
+  VISITEUR: { label: 'Visiteur',         cls: 'pill-gray',   initBg: 'rgba(148,163,184,0.15)', initColor: '#94A3B8' },
 };
 function RolePill({ role }: { role: string }) {
   const m = ROLE_META[role] || { label: role, cls: 'pill-gray', initBg: '', initColor: '' };
@@ -44,31 +45,6 @@ function userInitials(u: UserAccount) {
 }
 function userFullName(u: UserAccount) {
   return [u.first_name, u.last_name].filter(Boolean).join(' ') || u.username;
-}
-
-// ─── Row menu ─────────────────────────────────────────────────────────────────
-function RowMenu({ onView, onEdit, onToggle, onResetPwd, active }: {
-  onView: () => void; onEdit: () => void; onToggle: () => void; onResetPwd: () => void; active: boolean;
-}) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  useOutside(ref, () => setOpen(false));
-  return (
-    <div ref={ref} style={{ position: 'relative', display: 'inline-block' }}>
-      <button className="icon-btn" onClick={() => setOpen(o => !o)}><I.more size={15}/></button>
-      {open && (
-        <div className="menu" style={{ top: 'calc(100% + 4px)', right: 0, minWidth: 190 }}>
-          <button onClick={() => { setOpen(false); onView(); }}><I.eye size={13}/>Voir le profil</button>
-          <button onClick={() => { setOpen(false); onEdit(); }}><I.pencil size={13}/>Modifier</button>
-          <button onClick={() => { setOpen(false); onResetPwd(); }}><I.key size={13}/>Réinitialiser MDP</button>
-          <hr/>
-          <button onClick={() => { setOpen(false); onToggle(); }} className={active ? 'danger' : ''}>
-            {active ? <><I.lock size={13}/>Désactiver</> : <><I.unlock size={13}/>Activer</>}
-          </button>
-        </div>
-      )}
-    </div>
-  );
 }
 
 // ─── View Panel ───────────────────────────────────────────────────────────────
@@ -381,6 +357,56 @@ function ResetPwdModal({ user, onClose, onDone }: {
   );
 }
 
+// ─── Delete Modal (SUPER only) ─────────────────────────────────────────────────
+function DeleteAccountModal({ user, onClose, onDeleted }: {
+  user: UserAccount; onClose: () => void; onDeleted: () => void;
+}) {
+  const [confirm, setConfirm] = useState('');
+  const [deleting, setDeleting] = useState(false);
+  const [error, setError] = useState('');
+  const fullName = userFullName(user);
+
+  async function handleDelete() {
+    setDeleting(true); setError('');
+    try {
+      await api.delete(`/api/auth/users/${user.id}/`);
+      onDeleted();
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Erreur lors de la suppression.');
+      setDeleting(false);
+    }
+  }
+
+  return (
+    <div className="overlay" onClick={onClose}>
+      <div className="modal" onClick={e => e.stopPropagation()}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+          <div style={{ width: 38, height: 38, borderRadius: 8, background: 'rgba(198,40,40,0.15)', color: '#FF8A7A', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <I.trash size={18}/>
+          </div>
+          <div>
+            <div className="sg-md" style={{ fontSize: 16 }}>Supprimer le compte</div>
+            <div style={{ fontSize: 12, color: 'var(--text-3)' }}>Action irréversible — réservée à l'Administrateur Général</div>
+          </div>
+        </div>
+        <p style={{ fontSize: 13, color: 'var(--text-2)', marginBottom: 16 }}>
+          Pour confirmer, saisissez le nom complet :<br/>
+          <strong style={{ color: 'var(--text)' }}>{fullName}</strong>
+        </p>
+        <input className="input" placeholder={fullName} value={confirm} onChange={e => setConfirm(e.target.value)}/>
+        {error && <div style={{ marginTop: 8, fontSize: 12, color: '#FF8A7A' }}>{error}</div>}
+        <div style={{ display: 'flex', gap: 10, marginTop: 18, justifyContent: 'flex-end' }}>
+          <button className="btn btn-ghost" onClick={onClose} disabled={deleting}>Annuler</button>
+          <button className="btn" style={{ background: '#C62828', color: '#fff', opacity: confirm === fullName ? 1 : 0.4 }}
+            onClick={handleDelete} disabled={confirm !== fullName || deleting}>
+            {deleting ? 'Suppression…' : 'Supprimer définitivement'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function ComptesPage() {
   const { toasts, add: addToast } = useToast();
@@ -393,8 +419,17 @@ export default function ComptesPage() {
   const [viewPanel, setViewPanel]   = useState<UserAccount | null>(null);
   const [formPanel, setFormPanel]   = useState<{ mode: 'create'|'edit'; user?: UserAccount } | null>(null);
   const [resetModal, setResetModal] = useState<UserAccount | null>(null);
+  const [deleteModal, setDeleteModal] = useState<UserAccount | null>(null);
+  const [isSuper, setIsSuper] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
 
   function doRefresh() { setRefresh(r => r + 1); }
+
+  useEffect(() => {
+    api.get<{ id: number; role: string }>('/api/auth/me/')
+      .then(me => { setIsSuper(me.role === 'SUPER'); setCurrentUserId(me.id); })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -403,6 +438,13 @@ export default function ComptesPage() {
       .catch(() => addToast({ type: 'error', title: 'Erreur de chargement des comptes.' }))
       .finally(() => setLoading(false));
   }, [refresh]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function handleDeleted() {
+    const nom = deleteModal ? userFullName(deleteModal) : '';
+    setDeleteModal(null);
+    addToast({ type: 'warn', title: `Compte "${nom}" supprimé.` });
+    doRefresh();
+  }
 
   const filtered = users.filter(u => {
     const nameMatch = !search || userFullName(u).toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase());
@@ -468,6 +510,7 @@ export default function ComptesPage() {
           <option value="REGION">Admin Régional</option>
           <option value="DISTRICT">Admin District</option>
           <option value="PAROISSE">Admin Paroisse</option>
+          <option value="VISITEUR">Visiteur</option>
         </select>
         <select className="input" style={{ width: 140 }} value={filterActive} onChange={e => setFilterActive(e.target.value)}>
           <option value="">Tous statuts</option>
@@ -494,14 +537,13 @@ export default function ComptesPage() {
                   <th>Scope</th>
                   <th>Email</th>
                   <th>Téléphone</th>
-                  <th style={{ width: 80, textAlign: 'center' }}>Statut</th>
-                  <th style={{ width: 60, textAlign: 'center' }}>MDP</th>
-                  <th style={{ width: 80 }}>Actions</th>
+                  <th>Dernière connexion</th>
+                  <th style={{ width: 110 }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.length === 0 && (
-                  <tr><td colSpan={9} style={{ height: 200, textAlign: 'center' }}>
+                  <tr><td colSpan={8} style={{ height: 200, textAlign: 'center' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
                       <I.users size={40} style={{ opacity: 0.25 }}/>
                       <div className="sg-md" style={{ fontSize: 15 }}>Aucun compte trouvé</div>
@@ -526,26 +568,22 @@ export default function ComptesPage() {
                       <td style={{ fontSize: 12, color: 'var(--text-2)' }}>{u.scope_label || '—'}</td>
                       <td style={{ fontSize: 12, color: 'var(--text-2)' }}>{u.email}</td>
                       <td className="mono" style={{ fontSize: 12, color: 'var(--text-2)' }}>{u.telephone || '—'}</td>
-                      <td style={{ textAlign: 'center' }}>
-                        {u.is_active
-                          ? <span className="pill pill-green" style={{ fontSize: 11 }}>Actif</span>
-                          : <span className="pill pill-red"   style={{ fontSize: 11 }}>Inactif</span>}
-                      </td>
-                      <td style={{ textAlign: 'center' }}>
-                        {u.force_password_change
-                          ? <span className="pill pill-orange" style={{ fontSize: 10 }}>Temp.</span>
-                          : <span style={{ color: 'var(--text-3)', fontSize: 11 }}>—</span>}
+                      <td style={{ fontSize: 12, color: 'var(--text-2)' }}>
+                        {u.last_login ? new Date(u.last_login).toLocaleString('fr') : '—'}
                       </td>
                       <td>
                         <div style={{ display: 'flex', gap: 2 }}>
-                          <button className="icon-btn" onClick={() => setViewPanel(u)}><I.eye size={15}/></button>
-                          <RowMenu
-                            active={u.is_active}
-                            onView={() => setViewPanel(u)}
-                            onEdit={() => setFormPanel({ mode: 'edit', user: u })}
-                            onToggle={() => handleToggle(u)}
-                            onResetPwd={() => setResetModal(u)}
-                          />
+                          <button className="icon-btn" onClick={() => setViewPanel(u)} title="Voir le profil"><I.eye size={15}/></button>
+                          <button className="icon-btn green" onClick={() => setFormPanel({ mode: 'edit', user: u })} title="Modifier"><I.pencil size={15}/></button>
+                          <button className="icon-btn" onClick={() => setResetModal(u)} title="Réinitialiser le mot de passe"><I.key size={15}/></button>
+                          <button className="icon-btn" onClick={() => handleToggle(u)} title={u.is_active ? 'Désactiver' : 'Activer'}>
+                            {u.is_active ? <I.lock size={15}/> : <I.unlock size={15}/>}
+                          </button>
+                          {isSuper && u.id !== currentUserId && (
+                            <button className="icon-btn" style={{ color: '#FF8A7A' }} onClick={() => setDeleteModal(u)} title="Supprimer le compte">
+                              <I.trash size={15}/>
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -561,6 +599,7 @@ export default function ComptesPage() {
       {formPanel && <AccountFormPanel mode={formPanel.mode} user={formPanel.user} onClose={() => setFormPanel(null)}
         onSaved={() => { setFormPanel(null); addToast({ type: 'success', title: formPanel.mode === 'create' ? 'Compte créé avec succès.' : 'Compte modifié.' }); doRefresh(); }}/>}
       {resetModal && <ResetPwdModal user={resetModal} onClose={() => setResetModal(null)} onDone={() => { setResetModal(null); addToast({ type: 'success', title: 'Mot de passe réinitialisé.' }); doRefresh(); }}/>}
+      {deleteModal && <DeleteAccountModal user={deleteModal} onClose={() => setDeleteModal(null)} onDeleted={handleDeleted}/>}
       <ToastStack toasts={toasts}/>
     </div>
   );
