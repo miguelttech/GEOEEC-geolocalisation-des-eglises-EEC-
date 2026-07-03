@@ -36,7 +36,7 @@ export default function Hero() {
     <section className="hero" id="hero">
       <div className="hero-bg">
         <Image
-          src="/landing/paroisse1.png"
+          src="/landing/bible.png"
           alt=""
           fill
           priority

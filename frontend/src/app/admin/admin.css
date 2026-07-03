@@ -44,7 +44,7 @@
 
 /* Typography */
 .admin-shell .sg  { font-family: var(--font-space, 'Space Grotesk', sans-serif); font-weight: 700; letter-spacing: -0.03em; }
-.admin-shell .sg-md { font-family: var(--font-space, 'Space Grotesk', sans-serif); font-weight: 600; letter-spacing: -0.02em; }
+.admin-shell .sg-md { font-family: var(--font-space, 'Space Grotesk', sans-serif); font-weight: 700; letter-spacing: -0.02em; }
 .admin-shell .fr  { font-family: var(--font-fraunces, 'Fraunces', serif); font-weight: 500; }
 .admin-shell .mono { font-family: var(--font-mono, 'JetBrains Mono', monospace); }
 
@@ -91,7 +91,7 @@
 .admin-shell .input::placeholder { color: rgba(240,244,241,0.35); }
 .admin-shell .input:focus { border-color: rgba(46,151,68,0.60); box-shadow: 0 0 0 3px rgba(46,151,68,0.10); }
 .admin-shell .input:disabled { opacity: 0.5; cursor: not-allowed; }
-.admin-shell .label { display: block; font-size: 12px; font-weight: 500; color: rgba(240,244,241,0.70); margin-bottom: 6px; }
+.admin-shell .label { display: block; font-size: 12px; font-weight: 700; color: rgba(240,244,241,0.70); margin-bottom: 6px; }
 .admin-shell .label .req { color: #E55B5B; margin-left: 2px; }
 .admin-shell .checkbox { appearance: none; width: 16px; height: 16px; border: 1px solid rgba(245,197,24,0.30); border-radius: 3px; background: rgba(255,255,255,0.03); cursor: pointer; position: relative; flex-shrink: 0; transition: background 200ms ease, border-color 200ms ease; }
 .admin-shell .checkbox:checked { background: var(--green); border-color: var(--green); }
@@ -145,7 +145,7 @@
 
 /* Tables */
 .admin-shell table.data { width:100%; border-collapse:collapse; font-size:13px; }
-.admin-shell table.data thead th { text-align:left; padding:12px 14px; font-weight:600; font-size:11px; color:var(--text-2); text-transform:uppercase; letter-spacing:0.05em; border-bottom:1px solid rgba(245,197,24,0.10); background:rgba(255,255,255,0.02); user-select:none; }
+.admin-shell table.data thead th { text-align:left; padding:12px 14px; font-weight:700; font-size:11px; color:var(--text-2); text-transform:uppercase; letter-spacing:0.05em; border-bottom:1px solid rgba(245,197,24,0.10); background:rgba(255,255,255,0.02); user-select:none; }
 .admin-shell table.data thead th.sortable { cursor:pointer; }
 .admin-shell table.data thead th.sortable:hover { color:var(--text); }
 .admin-shell table.data tbody td { padding:14px 14px; border-bottom:1px solid rgba(255,255,255,0.04); vertical-align:middle; height:52px; }
@@ -267,8 +267,8 @@
   --border:        rgba(0,0,0,0.10); /* bordures légères */
   --border-strong: rgba(0,0,0,0.22);
   --text:          #0A1710;          /* texte principal : légèrement plus foncé */
-  --text-2:        rgba(10,23,16,0.68);
-  --text-3:        rgba(10,23,16,0.38);
+  --text-2:        rgba(10,23,16,0.80);
+  --text-3:        rgba(10,23,16,0.52);
   --green:         #1F8A38;
   --gold:          #8C6200;
   background: var(--canvas);

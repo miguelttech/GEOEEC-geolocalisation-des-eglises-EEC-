@@ -108,7 +108,7 @@ function GlobalesTab({ data, loading }: { data: StatsGlobales | null; loading: b
         <StatCard label="Paroisses" value={data.nb_paroisses} color="#2E9744"/>
         <StatCard label="Œuvres" value={data.nb_oeuvres} color="#8B5CF6"/>
         <StatCard label="Ouvriers" value={data.nb_ouvriers} color="#EF4444"/>
-        {data.nb_admins !== null && <StatCard label="Comptes administrateurs" value={data.nb_admins} color="#06B6D4"/>}
+        {data.nb_admins !== null && <StatCard label="Comptes administrateurs" value={data.nb_admins} color="#C2410C"/>}
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: isSuper ? '1fr 1fr' : '1fr', gap: 14 }}>

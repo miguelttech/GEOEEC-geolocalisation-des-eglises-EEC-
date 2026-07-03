@@ -39,7 +39,7 @@ const EECLogo = ({ size = 32 }: { size?: number }) => (
   </svg>
 );
 
-interface MeUser { first_name: string; last_name: string; email: string; role_display: string; }
+interface MeUser { first_name: string; last_name: string; email: string; role_display: string; avatar_url?: string | null; }
 
 function getInitials(u: MeUser | null): string {
   if (!u) return '–';
@@ -91,12 +91,21 @@ export default function Sidebar() {
   const active   = activeKey(pathname);
   const [me, setMe] = React.useState<MeUser | null>(null);
 
-  React.useEffect(() => {
+  const loadMe = React.useCallback(() => {
     fetch(`${BACKEND}/api/auth/me/`, { credentials: 'include' })
       .then(r => r.ok ? r.json() : Promise.reject())
       .then(setMe)
       .catch(() => {});
   }, []);
+
+  React.useEffect(() => { loadMe(); }, [loadMe]);
+
+  // EXIGENCE : la photo de profil doit se refléter immédiatement partout —
+  // la page Paramètres émet cet événement après un upload d'avatar réussi.
+  React.useEffect(() => {
+    window.addEventListener('eec-profile-updated', loadMe);
+    return () => window.removeEventListener('eec-profile-updated', loadMe);
+  }, [loadMe]);
 
   return (
     <aside suppressHydrationWarning style={{
@@ -116,7 +125,11 @@ export default function Sidebar() {
 
       {/* Compte connecté */}
       <div style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: 12, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-        <Avatar initials={getInitials(me)} size={38} bg="rgba(46,151,68,0.25)" color="#5AC472" ringColor="rgba(46,151,68,0.50)" />
+        {me?.avatar_url ? (
+          <img src={me.avatar_url} alt={getDisplayName(me)} width={38} height={38} style={{ borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(46,151,68,0.50)', flexShrink: 0 }} />
+        ) : (
+          <Avatar initials={getInitials(me)} size={38} bg="rgba(46,151,68,0.25)" color="#5AC472" ringColor="rgba(46,151,68,0.50)" />
+        )}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
           <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {getDisplayName(me)}

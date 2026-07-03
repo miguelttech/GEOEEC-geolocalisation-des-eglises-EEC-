@@ -1,8 +1,9 @@
 'use client';
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { usePathname, useRouter } from 'next/navigation';
 import { I } from './icons';
-import { Avatar, useOutside } from './atoms';
+import { Avatar } from './atoms';
 
 const BACKEND = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api')
   .replace(/\/api\/?$/, '');
@@ -38,6 +39,7 @@ interface MeUser {
   role_display: string;
   scope_label: string;
   theme: 'clair' | 'sombre';
+  avatar_url?: string | null;
 }
 
 function initials(u: MeUser | null): string {
@@ -71,15 +73,46 @@ export default function Topbar() {
   const [openUser,  setOpenUser]  = React.useState(false);
   const [me, setMe]               = React.useState<MeUser | null>(null);
   const [theme, setThemeState]    = React.useState<'clair' | 'sombre'>('sombre');
+  const [menuPos, setMenuPos]     = React.useState({ top: 0, right: 0 });
   const userRef = React.useRef<HTMLDivElement>(null);
-  useOutside(userRef, () => setOpenUser(false));
+  const menuRef = React.useRef<HTMLDivElement>(null);
 
-  React.useEffect(() => {
+  const loadMe = React.useCallback(() => {
     fetch(`${BACKEND}/api/auth/me/`, { credentials: 'include' })
       .then(r => r.ok ? r.json() : Promise.reject())
       .then((d: MeUser) => { setMe(d); setThemeState(d.theme || 'sombre'); })
       .catch(() => {});
   }, []);
+
+  React.useEffect(() => { loadMe(); }, [loadMe]);
+
+  // EXIGENCE : la photo de profil (et le reste des infos utilisateur) doit se
+  // refléter partout immédiatement — la page Paramètres émet cet événement
+  // après un upload d'avatar réussi.
+  React.useEffect(() => {
+    window.addEventListener('eec-profile-updated', loadMe);
+    return () => window.removeEventListener('eec-profile-updated', loadMe);
+  }, [loadMe]);
+
+  // Le menu déroulant est affiché via un portail (document.body) pour
+  // échapper au conteneur `.admin-topbar-wrap` (overflow:hidden, nécessaire
+  // à l'animation de la carte plein écran) qui le rognait auparavant.
+  React.useEffect(() => {
+    if (!openUser || !userRef.current) return;
+    const rect = userRef.current.getBoundingClientRect();
+    setMenuPos({ top: rect.bottom + 6, right: window.innerWidth - rect.right });
+  }, [openUser]);
+
+  React.useEffect(() => {
+    if (!openUser) return;
+    function onDown(e: MouseEvent) {
+      const t = e.target as Node;
+      if (userRef.current?.contains(t) || menuRef.current?.contains(t)) return;
+      setOpenUser(false);
+    }
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, [openUser]);
 
   function toggleTheme() {
     const next = theme === 'clair' ? 'sombre' : 'clair';
@@ -125,15 +158,19 @@ export default function Topbar() {
         {/* User menu */}
         <div ref={userRef} style={{ position: 'relative' }}>
           <div onClick={() => setOpenUser(o => !o)} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', padding: '4px 8px 4px 4px', borderRadius: 6, background: openUser ? 'rgba(255,255,255,0.05)' : 'transparent' }}>
-            <Avatar initials={initials(me)} size={34} bg="rgba(46,151,68,0.25)" color="#5AC472" ringColor="rgba(46,151,68,0.50)" />
+            {me?.avatar_url ? (
+              <img src={me.avatar_url} alt={displayName(me)} width={34} height={34} style={{ borderRadius: '50%', objectFit: 'cover', border: '1px solid rgba(46,151,68,0.50)' }} />
+            ) : (
+              <Avatar initials={initials(me)} size={34} bg="rgba(46,151,68,0.25)" color="#5AC472" ringColor="rgba(46,151,68,0.50)" />
+            )}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <span style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.2 }}>{displayName(me)}</span>
               {me && <span style={{ fontSize: 10, color: 'rgba(240,244,241,0.40)', lineHeight: 1 }}>{me.role_display}</span>}
             </div>
             <I.chevD size={14} style={{ opacity: 0.6, transform: openUser ? 'rotate(180deg)' : 'none', transition: 'transform 200ms' }} />
           </div>
-          {openUser && (
-            <div className="menu" style={{ top: 'calc(100% + 6px)', right: 0, width: 240 }}>
+          {openUser && typeof document !== 'undefined' && createPortal(
+            <div ref={menuRef} className="menu" style={{ position: 'fixed', top: menuPos.top, right: menuPos.right, width: 240, zIndex: 1000 }}>
               <div style={{ padding: '10px 14px 8px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                 <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{displayName(me)}</div>
                 <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 2 }}>{me?.email ?? '—'}</div>
@@ -152,7 +189,8 @@ export default function Topbar() {
               <button className="danger" onClick={handleLogout}>
                 <I.logout size={14}/>Déconnexion
               </button>
-            </div>
+            </div>,
+            document.body
           )}
         </div>
       </div>

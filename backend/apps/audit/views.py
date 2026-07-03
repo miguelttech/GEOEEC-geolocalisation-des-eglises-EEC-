@@ -44,6 +44,10 @@ class LogActiviteViewSet(viewsets.ReadOnlyModelViewSet):
         qs = (
             LogActivite.objects
             .select_related("utilisateur")
+            # EXIGENCE : le journal ne doit lister que les actions d'un compte
+            # authentifié (admin ou visiteur authentifié) — jamais un visiteur
+            # anonyme sans session.
+            .exclude(utilisateur__isnull=True)
             .order_by("-created_at")
         )
         p = self.request.query_params

@@ -30,7 +30,7 @@ function ToastStack({ toasts }: { toasts: Toast[] }) {
 
 // ─── Role helpers ─────────────────────────────────────────────────────────────
 const ROLE_META: Record<string, { label: string; cls: string; initBg: string; initColor: string }> = {
-  SUPER:    { label: 'Administrateur Général', cls: 'pill-gold',   initBg: 'rgba(255,214,0,0.15)',  initColor: '#FFD600' },
+  SUPER:    { label: 'Administrateur Général', cls: 'pill-gold',   initBg: 'rgba(194,65,12,0.15)',  initColor: '#C2410C' },
   REGION:   { label: 'Admin Régional',   cls: 'pill-blue',   initBg: 'rgba(59,130,246,0.15)', initColor: '#3B82F6' },
   DISTRICT: { label: 'Admin District',   cls: 'pill-orange', initBg: 'rgba(249,115,22,0.15)', initColor: '#F97316' },
   PAROISSE: { label: 'Admin Paroisse',   cls: 'pill-green',  initBg: 'rgba(46,151,68,0.15)',  initColor: '#5AC472' },
@@ -47,9 +47,9 @@ function userFullName(u: UserAccount) {
   return [u.first_name, u.last_name].filter(Boolean).join(' ') || u.username;
 }
 
-// ─── View Panel ───────────────────────────────────────────────────────────────
-function AccountViewPanel({ user: u, onClose, onEdit }: {
-  user: UserAccount; onClose: () => void; onEdit: () => void;
+// ─── View Panel (lecture seule — le compte n'est plus modifiable ici) ─────────
+function AccountViewPanel({ user: u, onClose }: {
+  user: UserAccount; onClose: () => void;
 }) {
   const m = ROLE_META[u.role] || ROLE_META.PAROISSE;
   return (
@@ -63,10 +63,7 @@ function AccountViewPanel({ user: u, onClose, onEdit }: {
               <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 2 }}>{u.email}</div>
             </div>
           </div>
-          <div style={{ display: 'flex', gap: 6 }}>
-            <button className="btn btn-outline" style={{ padding: '6px 12px', fontSize: 12 }} onClick={onEdit}><I.pencil size={13}/>Modifier</button>
-            <button className="icon-btn" onClick={onClose}><I.x size={16}/></button>
-          </div>
+          <button className="icon-btn" onClick={onClose}><I.x size={16}/></button>
         </div>
         <div style={{ padding: '20px 22px', overflowY: 'auto', height: 'calc(100% - 72px)', display: 'flex', flexDirection: 'column', gap: 14 }}>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -74,7 +71,6 @@ function AccountViewPanel({ user: u, onClose, onEdit }: {
             {u.is_active
               ? <span className="pill pill-green">Actif</span>
               : <span className="pill pill-red">Inactif</span>}
-            {u.force_password_change && <span className="pill pill-orange">MDP temporaire</span>}
           </div>
 
           <div className="card" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -120,7 +116,7 @@ function AccountViewPanel({ user: u, onClose, onEdit }: {
   );
 }
 
-// ─── Form state ───────────────────────────────────────────────────────────────
+// ─── Form state (création uniquement — un compte existant n'est plus modifiable) ─
 interface FormState {
   first_name: string; last_name: string; email: string;
   telephone: string; role: string; password: string;
@@ -129,20 +125,12 @@ interface FormState {
 function emptyForm(): FormState {
   return { first_name: '', last_name: '', email: '', telephone: '', role: 'PAROISSE', password: '', region: '', district: '', paroisse: '' };
 }
-function formFromUser(u: UserAccount): FormState {
-  return {
-    first_name: u.first_name, last_name: u.last_name, email: u.email,
-    telephone: u.telephone, role: u.role, password: '',
-    region: String(u.region || ''), district: String(u.district || ''), paroisse: String(u.paroisse || ''),
-  };
-}
 
-// ─── Form Panel ───────────────────────────────────────────────────────────────
-function AccountFormPanel({ mode, user, onClose, onSaved }: {
-  mode: 'create' | 'edit'; user?: UserAccount;
+// ─── Form Panel (création) ─────────────────────────────────────────────────────
+function AccountCreatePanel({ onClose, onSaved }: {
   onClose: () => void; onSaved: () => void;
 }) {
-  const [form, setForm] = useState<FormState>(user ? formFromUser(user) : emptyForm());
+  const [form, setForm] = useState<FormState>(emptyForm());
   const [regions, setRegions] = useState<RegionSynodale[]>([]);
   const [districts, setDistricts] = useState<District[]>([]);
   const [paroisses, setParoisses] = useState<Paroisse[]>([]);
@@ -171,29 +159,21 @@ function AccountFormPanel({ mode, user, onClose, onSaved }: {
 
   async function handleSave() {
     if (!form.first_name || !form.last_name || !form.email) { setError('Prénom, nom et email sont obligatoires.'); return; }
-    if (mode === 'create' && !form.password) { setError('Mot de passe obligatoire pour la création.'); return; }
-    if (mode === 'create' && form.password.length < 12) { setError('Le mot de passe doit contenir au moins 12 caractères.'); return; }
+    if (!form.password) { setError('Mot de passe obligatoire pour la création.'); return; }
+    if (form.password.length < 12) { setError('Le mot de passe doit contenir au moins 12 caractères.'); return; }
 
     setSaving(true); setError('');
     try {
-      if (mode === 'create') {
-        const payload: Record<string, unknown> = {
-          first_name: form.first_name, last_name: form.last_name,
-          email: form.email, telephone: form.telephone,
-          role: form.role, password: form.password,
-          username: form.email,
-        };
-        if (form.region)   payload.region   = Number(form.region);
-        if (form.district) payload.district = Number(form.district);
-        if (form.paroisse) payload.paroisse = Number(form.paroisse);
-        await api.post('/api/auth/users/create/', payload);
-      } else {
-        const payload: Record<string, unknown> = {
-          first_name: form.first_name, last_name: form.last_name,
-          email: form.email, telephone: form.telephone,
-        };
-        await api.patch(`/api/auth/users/${user!.id}/`, payload);
-      }
+      const payload: Record<string, unknown> = {
+        first_name: form.first_name, last_name: form.last_name,
+        email: form.email, telephone: form.telephone,
+        role: form.role, password: form.password,
+        username: form.email,
+      };
+      if (form.region)   payload.region   = Number(form.region);
+      if (form.district) payload.district = Number(form.district);
+      if (form.paroisse) payload.paroisse = Number(form.paroisse);
+      await api.post('/api/auth/users/create/', payload);
       onSaved();
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Erreur lors de l\'enregistrement.');
@@ -205,9 +185,7 @@ function AccountFormPanel({ mode, user, onClose, onSaved }: {
       <div className="slide-panel" style={{ width: 560 }} onClick={e => e.stopPropagation()}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 22px', borderBottom: '1px solid var(--border)', background: 'var(--chrome)' }}>
           <div>
-            <h2 className="sg-md" style={{ fontSize: 18, margin: 0, color: '#F0F4F1' }}>
-              {mode === 'create' ? 'Créer un compte admin' : `Modifier — ${userFullName(user!)}`}
-            </h2>
+            <h2 className="sg-md" style={{ fontSize: 18, margin: 0, color: '#F0F4F1' }}>Créer un compte admin</h2>
             <div style={{ fontSize: 11, color: 'rgba(240,244,241,0.50)', marginTop: 2 }}>Console Synodale · EEC Cameroun</div>
           </div>
           <button className="icon-btn" style={{ color: 'rgba(240,244,241,0.60)' }} onClick={onClose}><I.x size={16}/></button>
@@ -237,24 +215,20 @@ function AccountFormPanel({ mode, user, onClose, onSaved }: {
               <div className="label">Téléphone</div>
               <input className="input mono" placeholder="+237 6XX XXX XXX" value={form.telephone} onChange={e => set('telephone', e.target.value)}/>
             </div>
-            {mode === 'create' && (
-              <div>
-                <div className="label">Rôle *</div>
-                <select className="input" value={form.role} onChange={e => set('role', e.target.value)}>
-                  <option value="REGION">Admin Régional</option>
-                  <option value="DISTRICT">Admin District</option>
-                  <option value="PAROISSE">Admin Paroisse</option>
-                </select>
-              </div>
-            )}
-            {mode === 'create' && (
-              <div style={{ gridColumn: form.role === 'REGION' ? 'auto' : '1/-1' }}>
-                <div className="label">Mot de passe temporaire * (12 car. min.)</div>
-                <input className="input mono" type="password" placeholder="••••••••••••" value={form.password} onChange={e => set('password', e.target.value)}/>
-              </div>
-            )}
+            <div>
+              <div className="label">Rôle *</div>
+              <select className="input" value={form.role} onChange={e => set('role', e.target.value)}>
+                <option value="REGION">Admin Régional</option>
+                <option value="DISTRICT">Admin District</option>
+                <option value="PAROISSE">Admin Paroisse</option>
+              </select>
+            </div>
+            <div style={{ gridColumn: form.role === 'REGION' ? 'auto' : '1/-1' }}>
+              <div className="label">Mot de passe temporaire * (12 car. min.)</div>
+              <input className="input mono" type="password" placeholder="••••••••••••" value={form.password} onChange={e => set('password', e.target.value)}/>
+            </div>
 
-            {mode === 'create' && needsRegion && (
+            {needsRegion && (
               <>
                 <div style={{ gridColumn: '1/-1', borderTop: '1px solid var(--border)', paddingTop: 8 }}>
                   <div style={{ fontSize: 11, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Périmètre d'autorité</div>
@@ -291,67 +265,10 @@ function AccountFormPanel({ mode, user, onClose, onSaved }: {
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, paddingTop: 12, borderTop: '1px solid var(--border)', marginTop: 4 }}>
             <button className="btn btn-ghost" onClick={onClose} disabled={saving}>Annuler</button>
             <button className="btn btn-primary" onClick={handleSave} disabled={saving} style={{ opacity: saving ? 0.6 : 1 }}>
-              {saving ? 'Enregistrement…' : mode === 'create' ? 'Créer le compte' : 'Enregistrer'}
+              {saving ? 'Enregistrement…' : 'Créer le compte'}
             </button>
           </div>
         </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Reset Password Modal ─────────────────────────────────────────────────────
-function ResetPwdModal({ user, onClose, onDone }: {
-  user: UserAccount; onClose: () => void; onDone: () => void;
-}) {
-  const [sending, setSending] = useState(false);
-  const [done, setDone] = useState(false);
-  const [error, setError] = useState('');
-
-  async function handleReset() {
-    setSending(true); setError('');
-    try {
-      await api.post(`/api/auth/users/${user.id}/reset-password/`, {});
-      setDone(true);
-      setTimeout(() => { onDone(); }, 2000);
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Erreur.');
-      setSending(false);
-    }
-  }
-
-  return (
-    <div className="overlay" onClick={onClose}>
-      <div className="modal" onClick={e => e.stopPropagation()}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-          <div style={{ width: 38, height: 38, borderRadius: 8, background: 'rgba(59,130,246,0.15)', color: '#60A5FA', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <I.key size={18}/>
-          </div>
-          <div>
-            <div className="sg-md" style={{ fontSize: 16 }}>Réinitialiser le mot de passe</div>
-            <div style={{ fontSize: 12, color: 'var(--text-3)' }}>{userFullName(user)}</div>
-          </div>
-        </div>
-        {done ? (
-          <div style={{ textAlign: 'center', padding: '16px 0', color: '#5AC472' }}>
-            <I.check size={28}/><br/>
-            <span style={{ fontSize: 13, marginTop: 8, display: 'block' }}>Mot de passe réinitialisé. Un email a été envoyé.</span>
-          </div>
-        ) : (
-          <>
-            <p style={{ fontSize: 13, color: 'var(--text-2)', marginBottom: 16 }}>
-              Un nouveau mot de passe temporaire sera généré et envoyé par email à <strong>{user.email}</strong>.
-              L'utilisateur devra le changer à sa prochaine connexion.
-            </p>
-            {error && <div style={{ color: '#FF8A7A', fontSize: 12, marginBottom: 10 }}>{error}</div>}
-            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-              <button className="btn btn-ghost" onClick={onClose} disabled={sending}>Annuler</button>
-              <button className="btn btn-primary" onClick={handleReset} disabled={sending}>
-                {sending ? 'Envoi…' : 'Réinitialiser'}
-              </button>
-            </div>
-          </>
-        )}
       </div>
     </div>
   );
@@ -361,7 +278,6 @@ function ResetPwdModal({ user, onClose, onDone }: {
 function DeleteAccountModal({ user, onClose, onDeleted }: {
   user: UserAccount; onClose: () => void; onDeleted: () => void;
 }) {
-  const [confirm, setConfirm] = useState('');
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState('');
   const fullName = userFullName(user);
@@ -378,28 +294,26 @@ function DeleteAccountModal({ user, onClose, onDeleted }: {
   }
 
   return (
-    <div className="overlay" onClick={onClose}>
-      <div className="modal" onClick={e => e.stopPropagation()}>
+    <div className="modal" onClick={onClose}>
+      <div className="modal-panel" onClick={e => e.stopPropagation()}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
           <div style={{ width: 38, height: 38, borderRadius: 8, background: 'rgba(198,40,40,0.15)', color: '#FF8A7A', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <I.trash size={18}/>
           </div>
           <div>
-            <div className="sg-md" style={{ fontSize: 16 }}>Supprimer le compte</div>
-            <div style={{ fontSize: 12, color: 'var(--text-3)' }}>Action irréversible — réservée à l'Administrateur Général</div>
+            <div className="sg-md" style={{ fontSize: 16 }}>Supprimer ce compte utilisateur ?</div>
+            <div style={{ fontSize: 12, color: 'var(--text-3)' }}>{fullName} — action irréversible</div>
           </div>
         </div>
-        <p style={{ fontSize: 13, color: 'var(--text-2)', marginBottom: 16 }}>
-          Pour confirmer, saisissez le nom complet :<br/>
-          <strong style={{ color: 'var(--text)' }}>{fullName}</strong>
+        <p style={{ fontSize: 13, color: 'var(--text-2)' }}>
+          Êtes-vous sûr de vouloir supprimer ce compte utilisateur ?
         </p>
-        <input className="input" placeholder={fullName} value={confirm} onChange={e => setConfirm(e.target.value)}/>
         {error && <div style={{ marginTop: 8, fontSize: 12, color: '#FF8A7A' }}>{error}</div>}
         <div style={{ display: 'flex', gap: 10, marginTop: 18, justifyContent: 'flex-end' }}>
           <button className="btn btn-ghost" onClick={onClose} disabled={deleting}>Annuler</button>
-          <button className="btn" style={{ background: '#C62828', color: '#fff', opacity: confirm === fullName ? 1 : 0.4 }}
-            onClick={handleDelete} disabled={confirm !== fullName || deleting}>
-            {deleting ? 'Suppression…' : 'Supprimer définitivement'}
+          <button className="btn" style={{ background: '#C62828', color: '#fff' }}
+            onClick={handleDelete} disabled={deleting}>
+            {deleting ? 'Suppression…' : 'Supprimer'}
           </button>
         </div>
       </div>
@@ -417,8 +331,7 @@ export default function ComptesPage() {
   const [filterActive, setFilterActive] = useState('');
   const [refresh, setRefresh]   = useState(0);
   const [viewPanel, setViewPanel]   = useState<UserAccount | null>(null);
-  const [formPanel, setFormPanel]   = useState<{ mode: 'create'|'edit'; user?: UserAccount } | null>(null);
-  const [resetModal, setResetModal] = useState<UserAccount | null>(null);
+  const [createPanel, setCreatePanel] = useState(false);
   const [deleteModal, setDeleteModal] = useState<UserAccount | null>(null);
   const [isSuper, setIsSuper] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
@@ -453,16 +366,6 @@ export default function ComptesPage() {
     return nameMatch && roleMatch && activeMatch;
   });
 
-  async function handleToggle(u: UserAccount) {
-    try {
-      const res = await api.post<{ is_active: boolean }>(`/api/auth/users/${u.id}/toggle-active/`, {});
-      addToast({ type: 'success', title: res.is_active ? `Compte "${userFullName(u)}" activé.` : `Compte "${userFullName(u)}" désactivé.` });
-      doRefresh();
-    } catch (e: unknown) {
-      addToast({ type: 'error', title: e instanceof Error ? e.message : 'Erreur.' });
-    }
-  }
-
   // Counts by role
   const counts = { SUPER: 0, REGION: 0, DISTRICT: 0, PAROISSE: 0, actif: 0, inactif: 0 };
   users.forEach(u => {
@@ -495,7 +398,7 @@ export default function ComptesPage() {
           <h2 className="sg-md" style={{ margin: 0, fontSize: 16 }}>{loading ? '—' : users.length} compte{users.length !== 1 ? 's' : ''} administrateur{users.length !== 1 ? 's' : ''}</h2>
           <span style={{ fontSize: 12, color: 'var(--text-3)' }}>{counts.actif} actif{counts.actif !== 1 ? 's' : ''} · {counts.inactif} inactif{counts.inactif !== 1 ? 's' : ''}</span>
         </div>
-        <button className="btn btn-primary" onClick={() => setFormPanel({ mode: 'create' })}><I.plus size={14}/>Créer un compte</button>
+        <button className="btn btn-primary" onClick={() => setCreatePanel(true)}><I.plus size={14}/>Créer un compte</button>
       </div>
 
       {/* Filters */}
@@ -538,7 +441,7 @@ export default function ComptesPage() {
                   <th>Email</th>
                   <th>Téléphone</th>
                   <th>Dernière connexion</th>
-                  <th style={{ width: 110 }}>Actions</th>
+                  <th style={{ width: 70 }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -573,12 +476,7 @@ export default function ComptesPage() {
                       </td>
                       <td>
                         <div style={{ display: 'flex', gap: 2 }}>
-                          <button className="icon-btn" onClick={() => setViewPanel(u)} title="Voir le profil"><I.eye size={15}/></button>
-                          <button className="icon-btn green" onClick={() => setFormPanel({ mode: 'edit', user: u })} title="Modifier"><I.pencil size={15}/></button>
-                          <button className="icon-btn" onClick={() => setResetModal(u)} title="Réinitialiser le mot de passe"><I.key size={15}/></button>
-                          <button className="icon-btn" onClick={() => handleToggle(u)} title={u.is_active ? 'Désactiver' : 'Activer'}>
-                            {u.is_active ? <I.lock size={15}/> : <I.unlock size={15}/>}
-                          </button>
+                          <button className="icon-btn" onClick={() => setViewPanel(u)} title="Voir les détails"><I.eye size={15}/></button>
                           {isSuper && u.id !== currentUserId && (
                             <button className="icon-btn" style={{ color: '#FF8A7A' }} onClick={() => setDeleteModal(u)} title="Supprimer le compte">
                               <I.trash size={15}/>
@@ -595,10 +493,9 @@ export default function ComptesPage() {
         )}
       </div>
 
-      {viewPanel && <AccountViewPanel user={viewPanel} onClose={() => setViewPanel(null)} onEdit={() => { setFormPanel({ mode: 'edit', user: viewPanel! }); setViewPanel(null); }}/>}
-      {formPanel && <AccountFormPanel mode={formPanel.mode} user={formPanel.user} onClose={() => setFormPanel(null)}
-        onSaved={() => { setFormPanel(null); addToast({ type: 'success', title: formPanel.mode === 'create' ? 'Compte créé avec succès.' : 'Compte modifié.' }); doRefresh(); }}/>}
-      {resetModal && <ResetPwdModal user={resetModal} onClose={() => setResetModal(null)} onDone={() => { setResetModal(null); addToast({ type: 'success', title: 'Mot de passe réinitialisé.' }); doRefresh(); }}/>}
+      {viewPanel && <AccountViewPanel user={viewPanel} onClose={() => setViewPanel(null)}/>}
+      {createPanel && <AccountCreatePanel onClose={() => setCreatePanel(false)}
+        onSaved={() => { setCreatePanel(false); addToast({ type: 'success', title: 'Compte créé avec succès.' }); doRefresh(); }}/>}
       {deleteModal && <DeleteAccountModal user={deleteModal} onClose={() => setDeleteModal(null)} onDeleted={handleDeleted}/>}
       <ToastStack toasts={toasts}/>
     </div>

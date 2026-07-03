@@ -336,17 +336,25 @@ function OuvrierFormPanel({ mode, ouvrier, grades, onClose, onSaved }: {
           {/* Tab 1 — Identité */}
           {tab === 0 && (
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              {mode === 'edit' && (
+                <div style={{ gridColumn: '1/-1', background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: 6, padding: '10px 14px', fontSize: 12, color: '#1D4ED8' }}>
+                  <I.alert size={13} style={{ marginRight: 6 }} />
+                  Nom, prénom et sexe constituent l'identité de l'ouvrier et ne sont plus modifiables après création.
+                </div>
+              )}
               <div>
                 <label style={L.label}>Prénom(s) *</label>
-                <input className="input" placeholder="Ex. Jean-Pierre" value={form.prenom} onChange={e => set('prenom', e.target.value)} style={{ color: '#111827' }} autoFocus />
+                <input className="input" placeholder="Ex. Jean-Pierre" value={form.prenom} onChange={e => set('prenom', e.target.value)}
+                  disabled={mode === 'edit'} style={{ color: '#111827', opacity: mode === 'edit' ? 0.6 : 1, cursor: mode === 'edit' ? 'not-allowed' : 'text' }} autoFocus={mode === 'create'} />
               </div>
               <div>
                 <label style={L.label}>Nom de famille *</label>
-                <input className="input" placeholder="Ex. ATEBA" value={form.nom} onChange={e => set('nom', e.target.value)} style={{ color: '#111827', fontWeight: 600 }} />
+                <input className="input" placeholder="Ex. ATEBA" value={form.nom} onChange={e => set('nom', e.target.value)}
+                  disabled={mode === 'edit'} style={{ color: '#111827', fontWeight: 600, opacity: mode === 'edit' ? 0.6 : 1, cursor: mode === 'edit' ? 'not-allowed' : 'text' }} />
               </div>
               <div>
                 <label style={L.label}>Sexe</label>
-                <select className="input" style={{ color: '#111827' }} value={form.sexe} onChange={e => set('sexe', e.target.value)}>
+                <select className="input" style={{ color: '#111827', opacity: mode === 'edit' ? 0.6 : 1, cursor: mode === 'edit' ? 'not-allowed' : 'pointer' }} value={form.sexe} onChange={e => set('sexe', e.target.value)} disabled={mode === 'edit'}>
                   <option value="M">Masculin</option>
                   <option value="F">Féminin</option>
                 </select>

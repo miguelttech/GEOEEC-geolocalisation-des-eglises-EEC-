@@ -21,7 +21,7 @@ export default function ScriptureBand() {
   return (
     <section className="scripture" ref={ref}>
       <div className="scripture-bg">
-        <Image src="/landing/bible.png" alt="" fill style={{ objectFit: 'cover' }} />
+        <Image src="/landing/eglise_beau.png" alt="" fill style={{ objectFit: 'cover' }} />
       </div>
       <div className="scripture-inner wrap">
         <div className="section-num" style={{ textAlign: 'center', display: 'block', marginBottom: '20px' }}>

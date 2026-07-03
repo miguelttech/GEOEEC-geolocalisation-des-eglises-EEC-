@@ -100,6 +100,9 @@ function PrefProfil({ me, onAddToast, onSaved }: {
       }
       onAddToast({ type: 'success', title: 'Photo de profil mise à jour.' });
       onSaved();
+      // EXIGENCE : répercuter immédiatement la nouvelle photo partout
+      // (navbar, etc.) — chaque vue écoute cet événement et se resynchronise.
+      window.dispatchEvent(new Event('eec-profile-updated'));
     } catch (err: unknown) {
       onAddToast({ type: 'error', title: err instanceof Error ? err.message : 'Erreur lors du téléversement.' });
     } finally {

@@ -116,8 +116,9 @@
 \setlength{\DefaultFindent}{4pt}
 \setlength{\DefaultNfindent}{0pt}
 
-% ---- Symboles ----
+% ---- Symboles et mathématiques ----
 \usepackage{pifont}
+\usepackage{amsmath}
 \usepackage{amssymb}
 
 % ---- Liens ----
@@ -173,9 +174,9 @@
 \markboth{Résumé}{Résumé}
 
 \noindent
-L'Église Évangélique du Cameroun regroupe 565~paroisses, 311~œuvres sociales
+L'Église Évangélique du Cameroun regroupe 858~paroisses, 311~œuvres sociales
 et éducatives, ainsi que 685~ouvriers ecclésiastiques répartis dans 22~régions
-synodales et 137~districts couvrant l'ensemble du territoire national, sans
+synodales et 159~districts couvrant l'ensemble du territoire national, sans
 que l'institution ne dispose d'aucun outil numérique centralisé permettant
 leur visualisation géographique ni leur administration hiérarchisée. Cette
 lacune compromet la capacité du Bureau National à piloter ses ressources
@@ -218,9 +219,9 @@ Cameroun, cartographie interactive, contrôle d'accès par rôle.
 \markboth{Abstract}{Abstract}
 
 \noindent
-The Evangelical Church of Cameroon encompasses 565~parishes, 311~social and
+The Evangelical Church of Cameroon encompasses 858~parishes, 311~social and
 educational institutions, and 685~ordained workers spread across
-22~synodal regions and 137~districts covering the entire national territory,
+22~synodal regions and 159~districts covering the entire national territory,
 yet the institution lacks any centralized digital system for their geographic
 visualization or hierarchical administration. This gap undermines the National
 Bureau's ability to monitor its territorial resources, generate consolidated
@@ -500,8 +501,8 @@ missions protestantes bâloises et parisiennes, est l'une des plus grandes
 institutions protestantes d'Afrique centrale. Son organisation territoriale
 repose sur une hiérarchie administrative à quatre niveaux~: le Bureau National,
 qui assure la direction centrale de l'institution~; les 22~Régions Synodales, qui
-couvrent l'ensemble du territoire camerounais~; les 137~districts ecclésiaux, qui
-coordonnent les activités locales~; et les 565~paroisses, qui constituent le
+couvrent l'ensemble du territoire camerounais~; les 159~districts ecclésiaux, qui
+coordonnent les activités locales~; et les 858~paroisses, qui constituent le
 maillage de base de la présence de l'EEC sur le terrain. À ces entités s'ajoutent
 311~œuvres sociales et éducatives --- établissements scolaires, centres médicaux,
 exploitations agropastorales, immeubles et terrains --- et plus de
@@ -521,7 +522,7 @@ pastorales ou d'optimiser l'affectation des ouvriers~; la dispersion des donnée
 dans des fichiers non interconnectés rend toute consolidation statistique nationale
 laborieuse et sujette aux erreurs~; l'absence de contrôle d'accès formalisé
 compromet l'intégrité des informations institutionnelles~; et l'audit des données
-sources révèle que 127~paroisses, soit 22~\% de l'effectif total, ne disposent
+sources révèle que 480~paroisses, soit 56~\% de l'effectif total, ne disposent
 d'aucune coordonnée GPS valide, ce qui illustre l'inexistence d'un processus
 structuré de collecte et de validation des données de localisation.
 
@@ -562,7 +563,7 @@ backend Django~5 avec GeoDjango et Django REST Framework pour la logique métier
 les interfaces de programmation (API), une base de données PostgreSQL avec
 l'extension PostGIS pour la persistance des données spatiales, un serveur
 cartographique GeoServer~2.26 pour la publication des couches géographiques selon
-les standards OGC (WMS et WFS), et une interface Next.js~14 pour la consultation
+les standards OGC (WMS et WFS), et une interface Next.js~16 pour la consultation
 publique et l'administration --- permettrait de répondre à cette problématique. La
 sécurité reposerait sur un mécanisme d'authentification par sessions Django
 (\textit{HttpOnly}, \textit{Secure}, \textit{SameSite}) et un contrôle d'accès
@@ -595,7 +596,7 @@ Pour répondre à cette problématique, ce travail se fixe les objectifs suivant
     filtres hiérarchiques multicritères, popups de détail par entité et contrôle
     dynamique des couches cartographiques~;
 
-  \item \textbf{Réaliser} un module d'administration multi-niveaux en Next.js~14
+  \item \textbf{Réaliser} un module d'administration multi-niveaux en Next.js~16
     permettant le CRUD des entités selon le périmètre du rôle, l'import des
     données depuis les fichiers sources, l'export PDF et Excel, et la
     visualisation des statistiques avancées par région et par année~;
@@ -683,7 +684,7 @@ géomatique internationale. Un SIG intègre trois grandes dimensions~: la dimens
 \textbf{temporelle} (évolution des données dans le temps).
 
 Dans le contexte de ce projet, le SIG constitue la couche centrale permettant de
-lier les 553~paroisses importées, 137~districts et 22~régions synodales de l'EEC
+lier les 858~paroisses importées, 159~districts et 22~régions synodales de l'EEC
 à leurs coordonnées géographiques sur le territoire camerounais. Il permet non seulement
 la visualisation cartographique de ces entités, mais aussi leur interrogation
 spatiale~: identification des paroisses proches d'une localité, calcul de densité
@@ -760,7 +761,7 @@ la \textbf{maintenabilité} et l'\textbf{interopérabilité} des services web.
 implémenter des API REST avec le framework Django~[14]. Dans ce projet, la couche
 API du backend expose l'ensemble des ressources institutionnelles de l'EEC ---
 paroisses, districts, régions, œuvres, ouvriers, statistiques, journaux d'audit
---- consommées par le frontend Next.js~14. Cette séparation stricte entre backend
+--- consommées par le frontend Next.js~16. Cette séparation stricte entre backend
 API et frontend constitue un pilier de l'architecture à services découplés retenue.
 
 \subsection{Contrôle d'Accès Basé sur les Rôles (RBAC)}
@@ -808,7 +809,7 @@ Ce projet déploie cinq services orchestrés par Docker Compose~:
   \item \texttt{db} --- PostgreSQL~16 avec l'extension PostGIS~3.4~;
   \item \texttt{geoserver} --- GeoServer~2.26 pour la publication WMS/WFS~;
   \item \texttt{redis} --- le serveur de cache Redis~7~;
-  \item \texttt{frontend} --- le serveur Next.js~14.
+  \item \texttt{frontend} --- le serveur Next.js~16.
 \end{enumerate}
 
 Cette configuration garantit la reproductibilité de l'environnement d'exécution
@@ -1044,70 +1045,12 @@ natif des standards OGC WMS et WFS.
 \section{Bilan et Positionnement}
 \label{sec:bilan}
 
-\subsection{Tableau Comparatif des Solutions}
-
-Le tableau~\ref{tab:comparatif} confronte les quatre solutions analysées aux onze
-critères jugés déterminants pour une plateforme institutionnelle cartographique de
-l'EEC. Les symboles employés sont les suivants~: \oui~critère entièrement satisfait,
-\non~critère non satisfait, \partiel~critère partiellement satisfait, N/A~critère
-sans objet pour cette catégorie de solution.
-
-\begin{table}[H]
-\centering
-\caption{Tableau comparatif des solutions existantes et de la solution proposée}
-\label{tab:comparatif}
-\resizebox{\linewidth}{!}{%
-\begin{tabular}{>{\bfseries}m{4.8cm}
-                >{\centering\arraybackslash}m{2.0cm}
-                >{\centering\arraybackslash}m{2.1cm}
-                >{\centering\arraybackslash}m{2.1cm}
-                >{\centering\arraybackslash}m{2.0cm}
-                >{\centering\arraybackslash}m{2.2cm}}
-\toprule
-\textbf{Critère}
-  & \textbf{GeoEEC v1.0}
-  & \textbf{ArcGIS Online}
-  & \textbf{Google Maps}
-  & \textbf{QGIS / OL}
-  & \textbf{Notre solution} \\
-\midrule
-Plateforme web multi-utilisateurs
-  & \oui & \oui & \partiel & \non & \oui \\
-\addlinespace[3pt]
-Hiérarchie institutionnelle configurable
-  & \partiel & \non & \non & \non & \oui \\
-\addlinespace[3pt]
-Authentification sécurisée (sessions)
-  & \non & \oui & \oui & \non & \oui \\
-\addlinespace[3pt]
-RBAC à 4 niveaux synodaux
-  & \partiel & \non & \non & \non & \oui \\
-\addlinespace[3pt]
-Serveur cartographique OGC (WMS/WFS)
-  & \non & \oui & \non & \oui & \oui \\
-\addlinespace[3pt]
-Base de données spatiale (PostGIS)
-  & \partiel & \oui & \oui & \oui & \oui \\
-\addlinespace[3pt]
-Journal d'audit des modifications
-  & \non & \partiel & \non & \non & \oui \\
-\addlinespace[3pt]
-Import données Excel institutionnel
-  & \oui & \non & \non & \non & \oui \\
-\addlinespace[3pt]
-Déploiement conteneurisé (Docker)
-  & \non & N/A & N/A & \non & \oui \\
-\addlinespace[3pt]
-Logiciel libre / sans licence commerciale
-  & \oui & \non & \non & \oui & \oui \\
-\addlinespace[3pt]
-Adapté au contexte institutionnel EEC
-  & \partiel & \non & \non & \non & \oui \\
-\bottomrule
-\end{tabular}}
-\end{table}
-
 \subsection{Positionnement de Notre Solution}
+
+Cette sous-section positionne qualitativement notre solution par rapport à
+l'existant~; une comparaison chiffrée détaillée (tableau~\ref{tab:comparatif})
+est présentée en section~\ref{ssec:disc-comparatif} du Chapitre~3, une fois les
+résultats concrets de l'implémentation exposés.
 
 L'analyse comparative met en évidence que notre solution est la seule à réunir
 simultanément l'ensemble des caractéristiques requises pour une plateforme
@@ -1173,7 +1116,7 @@ conception de l'architecture technique retenue.
       \item ingénierie des exigences~: 22~exigences fonctionnelles et 10~non-fonctionnelles~;
       \item diagramme de contexte~: six acteurs externes identifiés~;
       \item diagramme de packages~: trois couches (frontend, backend, infrastructure)~;
-      \item cas d'utilisation UC01--UC06 avec tableaux de description structurés~;
+      \item cas d'utilisation UC01--UC29 avec tableau de description structuré~;
       \item diagramme de classes métier~: huit entités du domaine institutionnel~;
       \item diagramme d'activité~: flux d'import de données depuis Excel.
     \end{itemize}
@@ -1183,6 +1126,12 @@ conception de l'architecture technique retenue.
       \item modèle de données~: quinze tables PostGIS avec champs géospatiaux~;
       \item diagramme de séquence~: flux d'authentification sécurisée par sessions Django~;
       \item diagramme de classes technique~: modèles Django et relations inter-classes.
+    \end{itemize}
+  \item \textbf{Section~\ref{sec:modelisation-math} --- Modélisation Mathématique}~:
+    \begin{itemize}[noitemsep, topsep=3pt, leftmargin=1.2cm]
+      \item modélisation du réseau routier comme graphe pondéré $G=(V,E,w)$~;
+      \item formule de Haversine pour la distance à vol d'oiseau~;
+      \item algorithmes Dijkstra et A\* pour le calcul de plus court chemin.
     \end{itemize}
 \end{chapplan}
 
@@ -1196,7 +1145,11 @@ puis une série de modèles UML couvrant les acteurs, les modules, les cas
 d'utilisation, les entités du domaine et les flux de traitement.
 La section~\ref{sec:conception} s'appuie sur cette analyse pour définir
 l'architecture technique retenue, le schéma de la base de données spatiale,
-les diagrammes de séquence et de classes de l'implémentation.
+les diagrammes de séquence et de classes de l'implémentation. Enfin, la
+section~\ref{sec:modelisation-math} formalise mathématiquement le service de
+calcul d'itinéraire~: modélisation du réseau routier en graphe pondéré,
+formule de Haversine et algorithmes de recherche de plus court chemin
+(Dijkstra, A\*).
 
 %------------------------------------------------------------
 \section{Analyse des Besoins}
@@ -1257,9 +1210,11 @@ des comptes et services du visiteur authentifié (EF19--EF22).
 EF01 & Le système doit permettre à tout utilisateur d'accéder à un formulaire
   de connexion sécurisé et de se déconnecter en invalidant la session active. &
   Sécurité & Haute \\
-EF02 & Le système doit gérer cinq rôles hiérarchiques --- SUPER, REGION,
-  DISTRICT, PAROISSE, VISITEUR --- chacun disposant d'un périmètre d'accès
-  aux données strictement défini. & RBAC synodal & Haute \\
+EF02 & Le système doit gérer quatre rôles hiérarchiques administratifs
+  --- SUPER, REGION, DISTRICT, PAROISSE --- chacun disposant d'un périmètre
+  d'accès aux données strictement défini, ainsi qu'un cinquième profil
+  VISITEUR non hiérarchique réservé à l'accès public et personnel. &
+  RBAC synodal & Haute \\
 \rowcolor{eeclightgreen!60}
 EF03 & Le système doit afficher une carte interactive Leaflet.js superposant
   les couches institutionnelles publiées par GeoServer~: paroisses (points),
@@ -1456,7 +1411,7 @@ Le diagramme de packages (Figure~\ref{fig:diag-packages}) décompose le système
 en grands modules et représente leurs dépendances. Trois couches principales
 sont identifiées.
 
-\noindent\textbf{Couche frontend (Next.js~14)~:}
+\noindent\textbf{Couche frontend (Next.js~16)~:}
 \begin{itemize}[itemsep=2pt, topsep=3pt, leftmargin=1.5cm]
   \item \texttt{app/(public)}~: interface publique avec carte Leaflet, clustering,
     filtres et panneau de détail~;
@@ -1502,13 +1457,13 @@ spatiale), GeoServer~2.26 (publication WMS/WFS), Redis~7 (cache), Docker Compose
 
 Les diagrammes de cas d'utilisation modélisent les interactions entre les acteurs
 et le système du point de vue fonctionnel. La Figure~\ref{fig:diag-uc} présente
-le diagramme global consolidé de la plateforme, mettant en évidence les douze
-cas d'utilisation principaux et leur distribution selon les six acteurs identifiés.
-Les sous-sections suivantes détaillent les six cas d'utilisation les plus
-représentatifs à travers des tableaux de description structurés~: UC01
-(authentification), UC02 (carte interactive), UC03 (gestion des paroisses),
-UC04 (import Excel), UC05 (journal d'audit) et UC06 (espace visiteur
-authentifié).
+le diagramme global consolidé de la plateforme, mettant en évidence les
+vingt-neuf cas d'utilisation identifiés (UC01--UC29) et leur distribution
+selon les six acteurs identifiés. Le tableau~\ref{tab:uc-recap} qui suit
+détaille chacun de ces vingt-neuf cas d'utilisation --- intitulé, acteur
+principal et description --- regroupés par périmètre d'accès~: public,
+visiteur authentifié, administrateur paroissial, de district, régional,
+national, et système cartographique.
 
 \begin{figure}[H]
   \center
@@ -1864,9 +1819,9 @@ Figure~\ref{fig:diag-modele-bd} en présente le schéma entité-relation.
 \endlastfoot
 \rowcolor{eeclightgreen!60}
 geo\_regionsynodale & \texttt{polygone} MultiPolygonField (SRID=4326) & Entité de niveau 1~; racine de la hiérarchie synodale \\
-geo\_district & FK région (PROTECT) & Entité de niveau 2~; 137 districts \\
+geo\_district & FK région (PROTECT) & Entité de niveau 2~; 159 districts \\
 \rowcolor{eeclightgreen!60}
-geo\_paroisse & \texttt{localisation} PointField (SRID=4326) & Entité de base~; FK district (PROTECT)~; 565 paroisses \\
+geo\_paroisse & \texttt{position} PointField (SRID=4326) & Entité de base~; FK district (PROTECT)~; \texttt{categorie} (classe~: C1--C4, B1--B2, A1--A2, A++)~; 858 paroisses \\
 oeuvres\_oeuvre & \texttt{localisation} PointField (SRID=4326) & Établissements sociaux/éducatifs~; FK paroisse (SET\_NULL) \\
 \rowcolor{eeclightgreen!60}
 ouvriers\_ouvrier & --- & Personnel ecclésiastique~; FK paroisse (SET\_NULL) \\
@@ -1994,8 +1949,251 @@ compte. ProfilVisiteur est en OneToOne avec Utilisateur (CASCADE).
   \center
   \includegraphics[width=1.15\textwidth]{diagrammes-classetechnique.png}
   \caption{Diagramme de classes technique  }
-  \label{fig:diag-contexte}
+  \label{fig:diag-classes-tech}
 \end{figure}
+%-------------
+
+%============================================================
+\section{Modélisation Mathématique et Algorithmique du Calcul d'Itinéraire}
+\label{sec:modelisation-math}
+%============================================================
+
+Au-delà de la gestion des entités institutionnelles, la plateforme offre au
+visiteur authentifié un service de calcul d'itinéraire réel entre deux points
+géographiques (paroisse, œuvre, ou position GPS de l'utilisateur). Ce service ne
+se limite pas à une mesure de distance~: il repose sur une modélisation
+mathématique rigoureuse du réseau routier sous forme de graphe et sur des
+algorithmes de recherche de plus court chemin. Cette section formalise cette
+modélisation, indépendamment de son implémentation technique détaillée en
+section~\ref{ssec:justification-algo} du Chapitre~3.
+
+\subsection{Le Réseau Routier comme Graphe Pondéré}
+\label{ssec:modele-graphe}
+
+\subsubsection{Définition formelle}
+
+Le réseau routier est modélisé comme un graphe orienté pondéré
+$G = (V, E, w)$, où~:
+\begin{itemize}[itemsep=2pt, topsep=4pt, leftmargin=1.5cm]
+  \item $V$ est l'ensemble des \textbf{sommets} (\textit{vertices})~: chaque
+    sommet $v \in V$ représente une intersection ou un carrefour du réseau
+    routier camerounais~;
+  \item $E \subseteq V \times V$ est l'ensemble des \textbf{arêtes}
+    (\textit{edges})~: chaque arête $(u, v) \in E$ représente un tronçon de
+    route reliant directement deux intersections, praticable dans le sens
+    $u \rightarrow v$~;
+  \item $w : E \rightarrow \mathbb{R}^{+}$ est la \textbf{fonction de poids}~:
+    à chaque arête $(u, v)$ est associé un coût $w(u, v) > 0$, exprimé en
+    temps de parcours plutôt qu'en simple distance.
+\end{itemize}
+
+Ce graphe est \textbf{orienté} (une rue à sens unique n'autorise le
+déplacement que dans une direction) et ses poids sont \textbf{strictement
+positifs}, propriété indispensable à la validité des algorithmes présentés en
+section~\ref{ssec:dijkstra-astar}. Dans notre application, ce graphe n'est
+pas construit ni maintenu par nos soins~: il est fourni par les données
+\textbf{OpenStreetMap} et exploité par le moteur de routing externe (voir
+section~\ref{ssec:justification-algo}).
+
+\subsubsection{Fonction de poids~: le coût temporel}
+
+Le poids d'une arête $(u, v)$ n'est pas sa seule longueur $d(u, v)$~: c'est le
+\textbf{temps de parcours} de ce tronçon, qui dépend du mode de déplacement
+choisi par l'utilisateur~: voiture, vélo ou piéton. Formellement~:
+
+\begin{equation}
+  w(u, v) = \frac{d(u, v)}{v_{\text{max}}(u, v, m)}
+  \label{eq:poids-arete}
+\end{equation}
+
+où $d(u, v)$ est la longueur du tronçon (en kilomètres), et
+$v_{\text{max}}(u, v, m)$ est la vitesse maximale autorisée sur ce tronçon
+pour le mode $m \in \{\text{auto}, \text{bicycle}, \text{pedestrian}\}$. Cette
+formulation a une conséquence importante~: \textbf{le graphe effectif change
+avec le mode de transport}. Une arête correspondant à une autoroute a un
+poids faible en voiture mais un poids infini ($w \rightarrow \infty$) pour le
+mode piéton, puisque l'autoroute y est interdite~; elle disparaît donc
+effectivement du sous-graphe accessible au piéton.
+
+\subsubsection{Formulation du problème}
+
+Étant donné un sommet de départ $s \in V$ (position de l'utilisateur ou
+entité choisie) et un sommet d'arrivée $t \in V$ (entité de destination), le
+problème à résoudre est celui du \textbf{plus court chemin}~: trouver la
+séquence de sommets $s = v_0, v_1, \dots, v_k = t$ telle que la somme des
+poids des arêtes traversées soit minimale~:
+
+\begin{equation}
+  \min_{\substack{(v_0, \dots, v_k) \\ \text{chemin de } s \text{ à } t}}
+  \sum_{i=0}^{k-1} w(v_i, v_{i+1})
+  \label{eq:plus-court-chemin}
+\end{equation}
+
+Ce problème d'optimisation combinatoire porte le nom de \textit{Single-Pair
+Shortest Path Problem} (SPSPP) dans la littérature algorithmique. C'est
+exactement le problème que résout un service de navigation type Google
+Maps~: minimiser non pas la distance, mais le \textbf{temps total de
+trajet}.
+
+\subsection{Distance Euclidienne Sphérique~: la Formule de Haversine}
+\label{ssec:haversine}
+
+Avant même de raisonner sur le graphe routier, la plateforme a besoin de
+mesurer une distance \og à vol d'oiseau \fg{} entre deux points GPS --- pour
+un affichage rapide de proximité, et comme composante de l'heuristique de
+l'algorithme A\* (section~\ref{ssec:dijkstra-astar}). La Terre étant
+assimilable à une sphère, une simple différence de coordonnées cartésiennes
+serait erronée~; on utilise la \textbf{formule de Haversine}.
+
+Pour deux points de latitude et longitude $(\varphi_1, \lambda_1)$ et
+$(\varphi_2, \lambda_2)$, exprimés en radians~:
+
+\begin{align}
+  a &= \sin^2\!\left(\frac{\Delta\varphi}{2}\right)
+       + \cos(\varphi_1)\cos(\varphi_2)\sin^2\!\left(\frac{\Delta\lambda}{2}\right) \label{eq:haversine-a}\\
+  c &= 2 \cdot \operatorname{atan2}\!\left(\sqrt{a},\, \sqrt{1-a}\right) \label{eq:haversine-c}\\
+  d &= R \cdot c \label{eq:haversine-d}
+\end{align}
+
+où $\Delta\varphi = \varphi_2 - \varphi_1$, $\Delta\lambda = \lambda_2 -
+\lambda_1$, et $R = 6\,371$~km est le rayon moyen terrestre. La distance $d$
+obtenue est une \textbf{borne inférieure} de la distance réelle sur route~:
+c'est cette propriété qui la rend utilisable comme heuristique admissible
+pour A\* (section~\ref{ssec:astar-heuristique}).
+
+\subsection{Algorithmes de Recherche du Plus Court Chemin}
+\label{ssec:dijkstra-astar}
+
+\subsubsection{Algorithme de Dijkstra}
+
+L'algorithme de \textbf{Dijkstra} (1956) résout le problème~\eqref{eq:plus-court-chemin}
+pour un graphe à poids positifs. Il maintient, pour chaque sommet $v$, une
+distance provisoire $\delta(v)$ --- le meilleur coût connu pour atteindre $v$
+depuis $s$ --- initialisée à $\delta(s) = 0$ et $\delta(v) = +\infty$ pour
+tout $v \neq s$. À chaque itération, l'algorithme extrait d'une file de
+priorité le sommet $u$ non visité de plus petite distance $\delta(u)$, puis
+\textbf{relâche} chacune de ses arêtes sortantes~: pour tout voisin $v$ tel
+que $(u, v) \in E$,
+
+\begin{equation}
+  \text{si } \delta(u) + w(u, v) < \delta(v) \text{, alors }
+  \delta(v) \leftarrow \delta(u) + w(u, v) \text{ et } \pi(v) \leftarrow u
+  \label{eq:relaxation}
+\end{equation}
+
+où $\pi(v)$ mémorise le prédécesseur de $v$ sur le meilleur chemin trouvé.
+L'algorithme se termine lorsque $t$ est extrait de la file~; le chemin optimal
+se reconstruit en remontant $\pi(t), \pi(\pi(t)), \dots$ jusqu'à $s$.
+
+\textbf{Correction de l'algorithme.} La preuve de correction repose sur
+l'invariant suivant~: lorsqu'un sommet $u$ est extrait de la file avec la
+distance minimale parmi les sommets non visités, $\delta(u)$ est
+\textbf{définitivement} optimale. En effet, tout chemin alternatif vers $u$
+devrait nécessairement passer par un sommet encore non visité $u'$ avec
+$\delta(u') \geq \delta(u)$~; comme tous les poids sont strictement positifs
+(hypothèse de la section~\ref{ssec:modele-graphe}), ce chemin ne pourrait pas
+être plus court. Cette propriété échoue en présence de poids négatifs, ce qui
+justifie l'exigence $w(u,v) > 0$ posée en~\eqref{eq:poids-arete}.
+
+\textbf{Complexité.} Avec une file de priorité implémentée par un tas
+binaire, la complexité de Dijkstra est~:
+
+\begin{equation}
+  O\big((|V| + |E|) \log |V|\big)
+  \label{eq:complexite-dijkstra}
+\end{equation}
+
+Sur un graphe représentant le réseau routier d'un pays entier, $|V|$ se
+compte en millions de sommets~: appliqué naïvement à chaque requête,
+Dijkstra est trop lent pour un usage interactif, d'où le recours à
+l'heuristique A\* puis aux pré-calculs décrits ci-après.
+
+\subsubsection{Algorithme A\* et heuristique admissible}
+\label{ssec:astar-heuristique}
+
+L'algorithme \textbf{A\*} (A-star) améliore Dijkstra en orientant la
+recherche vers la destination $t$ au moyen d'une \textbf{heuristique}
+$h : V \rightarrow \mathbb{R}^{+}$. Pour chaque sommet $v$ exploré, A\*
+calcule~:
+
+\begin{equation}
+  f(v) = g(v) + h(v)
+  \label{eq:astar-f}
+\end{equation}
+
+où $g(v)$ est le coût réel déjà parcouru depuis $s$ jusqu'à $v$ (identique au
+$\delta(v)$ de Dijkstra), et $h(v)$ est une \textbf{estimation optimiste} du
+coût restant de $v$ à $t$. Contrairement à Dijkstra, qui explore les sommets
+par ordre croissant de $g(v)$ dans toutes les directions, A\* explore par
+ordre croissant de $f(v)$~: il privilégie les sommets qui semblent
+\og prometteurs \fg{} vis-à-vis de la destination.
+
+\textbf{Choix de l'heuristique.} Dans notre contexte, $h(v)$ est la distance
+de Haversine (équation~\eqref{eq:haversine-d}) entre $v$ et $t$, divisée par
+la vitesse maximale autorisée pour le mode choisi~:
+
+\begin{equation}
+  h(v) = \frac{d_{\text{Haversine}}(v, t)}{v_{\text{max}}(m)}
+  \label{eq:heuristique-h}
+\end{equation}
+
+Cette heuristique est \textbf{admissible}~: elle ne surestime jamais le coût
+réel restant, puisque la distance en ligne droite est, par construction,
+inférieure ou égale à la distance réelle sur route
+($d_{\text{Haversine}}(v,t) \leq d_{\text{route}}(v,t)$). Cette propriété
+d'admissibilité \textbf{garantit} que A\* retourne toujours le chemin
+optimal, exactement comme Dijkstra, mais en explorant un nombre de sommets
+significativement inférieur~: intuitivement, Dijkstra explore un disque
+centré sur $s$, tandis que A\* explore une ellipse étirée en direction de
+$t$.
+
+\subsubsection{Accélération par hiérarchies de contraction}
+
+Même A\* reste trop lent pour répondre en quelques millisecondes sur un
+graphe de plusieurs millions de sommets. Les moteurs de routing en production
+(dont Valhalla, utilisé par la plateforme --- section~\ref{ssec:justification-algo})
+ajoutent un \textbf{pré-calcul hors-ligne} appelé \textbf{Contraction
+Hierarchies} (hiérarchies de contraction)~: le graphe est prétraité une fois
+pour toutes en classant les arêtes par importance (autoroute $>$ route
+nationale $>$ voie locale) et en insérant des arêtes de raccourci
+(\textit{shortcuts}) qui résument de longs segments de route principale en
+une seule arête équivalente. À la requête, le moteur exécute un \textbf{A\*
+bidirectionnel}~: deux recherches simultanées, l'une progressant depuis $s$,
+l'autre depuis $t$, qui se rencontrent au milieu du graphe enrichi de
+raccourcis. Cette combinaison ramène le temps de réponse de plusieurs
+secondes à quelques millisecondes, pour un résultat toujours optimal.
+
+\medskip
+\noindent\textbf{Synthèse.} Le tableau ci-dessous récapitule la correspondance
+entre les concepts mathématiques formalisés dans cette section et leur rôle
+concret dans la plateforme.
+
+\begin{table}[H]
+\centering
+\caption{Correspondance entre concepts mathématiques et éléments applicatifs}
+\label{tab:synthese-math}
+\begin{tabular}{>{\bfseries}m{4.2cm} m{9.5cm}}
+\toprule
+\rowcolor{eecgreen}
+\multicolumn{1}{>{\bfseries\color{white}}m{4.2cm}}{Concept} &
+\multicolumn{1}{>{\bfseries\color{white}}m{9.5cm}}{Rôle dans la plateforme} \\
+\midrule
+\rowcolor{eeclightgreen!60}
+Graphe $G=(V,E,w)$ & Réseau routier camerounais (données OpenStreetMap) \\
+Sommet $v \in V$ & Intersection / carrefour routier \\
+\rowcolor{eeclightgreen!60}
+Arête $(u,v) \in E$ & Tronçon de route entre deux intersections \\
+Poids $w(u,v)$ & Temps de parcours du tronçon, selon le mode choisi \\
+\rowcolor{eeclightgreen!60}
+Plus court chemin & Itinéraire optimal entre point de départ et entité EEC \\
+Dijkstra & Algorithme de base garantissant l'optimalité \\
+\rowcolor{eeclightgreen!60}
+A\* et heuristique $h$ & Recherche guidée, accélérée par la distance de Haversine \\
+Contraction Hierarchies & Pré-calcul assurant une réponse en temps réel \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 %-------------
 
 \medskip
@@ -2011,7 +2209,10 @@ acteurs, les modules, les interactions et les entités du domaine institutionnel
 La section de conception a complété cette analyse en présentant l'architecture
 technique à cinq services Docker, le modèle de données PostGIS (quinze tables),
 le diagramme de séquence d'authentification sécurisée et le diagramme de
-classes technique des modèles Django.
+classes technique des modèles Django. Enfin, la section de modélisation
+mathématique a formalisé le graphe pondéré du réseau routier, la formule de
+Haversine et les algorithmes Dijkstra et A\* qui fondent scientifiquement le
+service de calcul d'itinéraire de la plateforme.
 Le \textbf{Chapitre~3} présentera l'environnement de développement retenu,
 justifiera les choix technologiques et exposera les résultats concrets de
 l'implémentation.
@@ -2027,7 +2228,9 @@ l'implémentation.
 \begin{chapplan}
   \item \textbf{Section~\ref{sec:outils} --- Outils et Technologies}~:
     justification des choix technologiques pour chaque composant de la
-    pile logicielle~; tableau récapitulatif des outils, versions et rôles.
+    pile logicielle~; algorithmes et moteur de calcul d'itinéraire
+    (OSRM, Valhalla, décodage de polyligne)~; tableau récapitulatif des
+    outils, versions et rôles.
   \item \textbf{Section~\ref{sec:deploiement} --- Diagramme de Déploiement}~:
     distribution des cinq services sur les nœuds physiques et virtuels~;
     configuration réseau Docker Compose.
@@ -2113,16 +2316,16 @@ publication de fichiers GeoJSON statiques, utilisée dans la version
 antérieure, était incompatible avec la mise à jour dynamique des couches
 et ne répondait pas aux exigences ENF05 d'interopérabilité OGC.
 
-\subsubsection{Next.js~14}
+\subsubsection{Next.js~16}
 
-Next.js~14~[18] avec l'App Router a été retenu pour le frontend
+Next.js~16~[18] avec l'App Router a été retenu pour le frontend
 pour sa capacité à combiner rendu côté serveur (\textit{SSR}) et rendu côté
 client (\textit{CSR}) dans la même application. Le \textit{SSR} est
 utilisé pour les pages d'administration~: les données sensibles ne sont
 jamais envoyées au navigateur avant vérification de la session, ce qui
 réduit la surface d'attaque. Le rendu côté client est utilisé pour la carte
 interactive, qui requiert des interactions dynamiques non compatibles avec
-le \textit{SSR}. L'App Router de Next.js~14 permet de définir des
+le \textit{SSR}. L'App Router de Next.js~16 permet de définir des
 \textit{layouts} partagés par rôle d'administration (SUPER/REGION,
 DISTRICT, PAROISSE), ce qui simplifie l'implémentation du RBAC côté
 frontend.
@@ -2133,7 +2336,7 @@ Leaflet.js~[19] a été retenu pour la bibliothèque
 cartographique cliente pour sa légèreté (environ 42~Ko minifié), sa licence
 libre et l'étendue de son écosystème de plugins. Le plugin
 \texttt{Leaflet.MarkerCluster} implémente le regroupement automatique des
-565~marqueurs de paroisses en indicateurs numériques~: sans ce mécanisme,
+858~marqueurs de paroisses en indicateurs numériques~: sans ce mécanisme,
 la densité des marqueurs rendrait la carte illisible aux niveaux de zoom
 nationaux. La prise en charge native des couches \textit{TileLayer.WMS}
 permet de consommer directement les couches GeoServer sans adaptation.
@@ -2148,6 +2351,114 @@ cinq services dans une configuration déclarative reproductible sur toute
 machine hôte disposant de Docker~: c'est la réponse directe à l'exigence
 ENF06 de portabilité et à la limite de déploiement identifiée dans la
 plateforme GeoEEC~v1.0.
+
+%-----
+\subsection{Algorithmes et Moteur de Calcul d'Itinéraire}
+\label{ssec:justification-algo}
+
+La section~\ref{sec:modelisation-math} a formalisé mathématiquement le
+problème du plus court chemin sur un graphe routier. Cette sous-section
+détaille l'implémentation concrète de cette modélisation~: le moteur
+utilisé, la stratégie de résilience à trois niveaux, et l'algorithme de
+décodage des tracés.
+
+\subsubsection{Choix du moteur de routing~: Valhalla et OSRM}
+
+Construire et maintenir un graphe routier national --- avec ses millions de
+sommets, ses sens interdits, ses limitations de vitesse et ses mises à jour
+continues --- représente un travail d'infrastructure considérable, hors du
+périmètre raisonnable d'un projet institutionnel. La plateforme délègue donc
+le calcul brut du plus court chemin à des \textbf{moteurs de routing
+externes, gratuits et open source}, construits sur les données
+\textbf{OpenStreetMap}~:
+\begin{itemize}[itemsep=2pt, topsep=4pt, leftmargin=1.5cm]
+  \item \textbf{OSRM} (\textit{Open Source Routing Machine}) --- instance
+    publique de démonstration --- est sollicité en premier~: il implémente
+    l'algorithme de Contraction Hierarchies décrit en
+    section~\ref{ssec:dijkstra-astar} et répond en quelques centaines de
+    millisecondes pour le mode voiture~;
+  \item \textbf{Valhalla} (instance publique FOSSGIS) est sollicité en
+    second recours~: il est \textbf{multimodal} (voiture, vélo, piéton) et
+    implémente la même famille d'algorithmes --- A\* bidirectionnel
+    accéléré par hiérarchies --- avec un support natif des trois profils de
+    vitesse nécessaires à la plateforme~;
+  \item en \textbf{dernier recours}, si aucun des deux services n'est
+    joignable, la plateforme retombe sur un calcul de distance directe
+    (formule de Haversine, équations~\eqref{eq:haversine-a}
+    à~\eqref{eq:haversine-d}), garantissant que le service reste toujours
+    fonctionnel, avec un tracé rectiligne explicitement signalé comme tel à
+    l'utilisateur.
+\end{itemize}
+
+Cette architecture à trois niveaux de repli (\textit{fallback en cascade})
+est implémentée dans le module isolé \texttt{backend/apps/visitors/routing.py}~:
+si l'institution héberge un jour sa propre instance Valhalla ou OSRM, seule
+l'URL du service change --- aucune autre partie de l'application n'est
+affectée.
+
+\subsubsection{Algorithme de sélection du fournisseur}
+
+La fonction \texttt{calculer\_route()} implémente l'algorithme de
+résilience suivant~:
+
+\begin{enumerate}[itemsep=2pt, topsep=4pt, leftmargin=1.5cm]
+  \item tenter le calcul via OSRM (profil voiture)~;
+  \item en cas d'échec (service injoignable, délai dépassé, aucun itinéraire
+    trouvé), tenter Valhalla avec le \textit{costing} correspondant au mode
+    demandé (\texttt{auto}, \texttt{bicycle} ou \texttt{pedestrian})~;
+  \item en cas de double échec, calculer un trajet direct par la formule de
+    Haversine, avec une vitesse moyenne conventionnelle par mode
+    (40~km/h en voiture par défaut, 15~km/h à vélo, 5~km/h à pied)~;
+  \item dans tous les cas, retourner une structure de données uniforme~:
+    mode, distance en kilomètres, durée en minutes, géométrie du tracé
+    (liste de points \texttt{[latitude, longitude]}) et liste d'instructions
+    virage-par-virage.
+\end{enumerate}
+
+Cette fonction ne lève \textbf{jamais} d'exception vers l'appelant~: la
+disponibilité du service de calcul d'itinéraire prime sur l'exactitude
+optimale du tracé, conformément à l'exigence ENF03 de disponibilité
+(section~\ref{ssec:exigences}).
+
+\subsubsection{Estimation de la durée par mode}
+
+Lorsque le tracé provient d'OSRM (profil voiture uniquement), la durée pour
+les modes vélo et piéton n'est pas fournie par le service~: elle est
+recalculée à partir de la distance du tracé routier suivi et d'une vitesse
+moyenne conventionnelle par mode~:
+
+\begin{equation}
+  \text{durée}_{\min} = \frac{\text{distance}_{\text{km}}}{v_{\text{mode}}} \times 60
+  \label{eq:duree-mode}
+\end{equation}
+
+avec $v_{\text{bicycle}} = 15$~km/h et $v_{\text{pedestrian}} = 5$~km/h. Le
+tracé géographique suivi reste néanmoins celui du réseau routier réel~;
+seule l'estimation temporelle est ajustée au mode, une approximation
+acceptée en l'absence d'un service multimodal unique répondant de façon
+fiable pour les trois profils.
+
+\subsubsection{Décodage de la polyligne encodée}
+
+Les moteurs de routing ne transmettent pas les centaines de points GPS d'un
+tracé en clair~: ils les compressent au format \textit{encoded polyline}.
+L'algorithme de décodage, implémenté dans \texttt{decode\_polyline()},
+repose sur trois principes~:
+\begin{enumerate}[itemsep=2pt, topsep=4pt, leftmargin=1.5cm]
+  \item chaque coordonnée n'est pas stockée en valeur absolue mais en
+    \textbf{delta} par rapport au point précédent --- les écarts entre
+    points consécutifs d'un tracé routier étant faibles, ils se compressent
+    fortement~;
+  \item chaque delta est encodé en base~64 modifiée, par blocs successifs de
+    5~bits, avec un bit de continuation indiquant si le nombre se poursuit
+    sur le caractère suivant~;
+  \item la précision est fixée à $10^{-6}$ degré~: chaque entier décodé est
+    divisé par $1\,000\,000$ pour retrouver la coordonnée décimale.
+\end{enumerate}
+Le décodage reconstruit ainsi la liste de points
+\texttt{[[latitude, longitude], \ldots]} directement exploitable par la
+bibliothèque cartographique Leaflet côté frontend, sans transformation
+supplémentaire.
 
 %-----
 \subsection{Récapitulatif des Outils Utilisés}
@@ -2200,6 +2511,9 @@ reportlab        & 4.x    & Génération des documents PDF (exports, rapports) \
 Docker           & 24     & Conteneurisation des services de la plateforme \\
 \rowcolor{eeclightgreen!60}
 Docker Compose   & 2.x    & Orchestration des cinq services en environnement multi-conteneurs \\
+MapLibre GL JS & 5.24 & Rendu cartographique 3D (WebGL) pour la navigation guidée \\
+\rowcolor{eeclightgreen!60}
+OSRM / Valhalla & --- & Services de routing externes~; calcul d'itinéraire réel sur route \\
 draw.io / diagrams.net & --- & Conception des diagrammes UML du rapport \\
 \bottomrule
 \end{tabular}}
@@ -2457,7 +2771,7 @@ conteneur \texttt{backend} (Django~5, port~8000) expose l'API REST au
 frontend et interroge \texttt{db} (PostgreSQL/PostGIS, port~5432) et
 \texttt{cache} (Redis, port~6379)~; le conteneur \texttt{geoserver}
 (port~8080) accède à \texttt{db} pour lire les données géographiques et
-répond aux requêtes WMS/WFS~; le conteneur \texttt{frontend} (Next.js~14,
+répond aux requêtes WMS/WFS~; le conteneur \texttt{frontend} (Next.js~16,
 port~3000) sert l'interface web. Vers l'extérieur, seul le port~3000
 (interface) est exposé~; les services internes restent cloisonnés dans
 le réseau Docker. Les volumes persistants (\texttt{postgres\_data},
@@ -2497,7 +2811,7 @@ de la plateforme. Elle répond directement aux exigences EF03, EF04, EF05
 et EF16 relatives à la cartographie interactive.
 
 La Figure~\ref{fig:res-carte-publique} illustre la carte au niveau de zoom
-national~: les 553~paroisses importées sont regroupées en indicateurs de
+national~: les 858~paroisses importées sont regroupées en indicateurs de
 cluster numériques selon leur densité géographique. Le fond de carte
 OpenStreetMap fournit le contexte géographique camerounais~; les couches
 institutionnelles (polygones des régions synodales, marqueurs des paroisses
@@ -2603,7 +2917,7 @@ insérées avec succès, le nombre de lignes rejetées et, pour chaque
 rejet, la raison précise (coordonnées GPS hors territoire, district
 inexistant, doublon détecté). Cette traçabilité de l'import répond
 directement au problème de qualité des données identifié lors de l'audit
-préliminaire~: 127~paroisses sources sans coordonnées GPS valides ont ainsi
+préliminaire~: 480~paroisses sources sans coordonnées GPS valides ont ainsi
 été identifiées et signalées lors de la première importation.
 
 begin{figure}[H]
@@ -2629,12 +2943,90 @@ après la mise à jour. Ce module répond aux exigences EF14 et EF15 relatives
 à la traçabilité, et constitue l'un des apports distinctifs par rapport
 à la plateforme GeoEEC~v1.0 qui ne disposait d'aucun mécanisme d'audit.
 
-begin{figure}[H]
+\begin{figure}[H]
   \center
   \includegraphics[width=1\textwidth]{test11.png}
-  \captionInterface{ Journal d’audit — Historique des opérations d’écriture sur les données}
-  \label{fig:diag-contexte}
+  \caption{Journal d'audit --- Historique des opérations d'écriture sur les données}
+  \label{fig:res-audit}
 \end{figure}
+
+%-----
+\subsection{Fonctionnalités Avancées~: Itinéraire Réel et Navigation~3D}
+\label{ssec:res-avance}
+
+Au-delà des modules d'administration, la plateforme intègre deux
+fonctionnalités destinées au visiteur authentifié, directement issues de la
+modélisation mathématique du chapitre précédent (section~\ref{sec:modelisation-math})
+et de son implémentation algorithmique (section~\ref{ssec:justification-algo}).
+
+\subsubsection{Calcul d'itinéraire réel sur le réseau routier}
+
+L'onglet \og Parcours \fg{} permet au visiteur de définir un point de départ
+--- sa position GPS (via \texttt{navigator.geolocation}) ou une entité de la
+carte --- et une destination --- une paroisse ou une œuvre --- puis de
+choisir un mode de déplacement (voiture, vélo, à pied). Le point d'entrée
+\texttt{POST~/api/visitor/itineraires/route/} invoque la chaîne de
+résilience OSRM~$\rightarrow$~Valhalla~$\rightarrow$~Haversine décrite en
+section~\ref{ssec:justification-algo} et renvoie la distance, la durée, le
+tracé géographique complet et les instructions virage-par-virage. Le
+frontend dessine ce tracé sur la carte Leaflet~: un contour sombre
+(\textit{casing}), une ligne colorée animée de pointillés défilants, des
+marqueurs de départ et d'arrivée distincts, et un cadrage automatique de la
+vue sur l'ensemble du trajet.
+
+\subsubsection{Navigation~3D en temps réel}
+
+Une fois l'itinéraire calculé, le visiteur peut démarrer une
+\textbf{navigation guidée en trois dimensions}, comparable en expérience à
+une application de navigation grand public. Cette vue est assurée par un
+composant dédié, chargé paresseusement (\textit{lazy loading}) uniquement au
+déclenchement de la navigation --- le reste de l'application demeure sur
+Leaflet en 2D, conformément à l'exigence de légèreté du cahier des charges.
+Elle repose sur \textbf{MapLibre~GL~JS} (rendu WebGL), qui permet une
+inclinaison de caméra ($\textit{pitch} = 62°$) et une rotation dynamique
+selon le cap de déplacement, à la différence de Leaflet qui ne rend qu'en
+projection plane.
+
+Trois mécanismes techniques assurent le réalisme du suivi~:
+\begin{itemize}[itemsep=2pt, topsep=4pt, leftmargin=1.5cm]
+  \item \textbf{Suivi GPS continu}~: l'API navigateur
+    \texttt{watchPosition()} fournit la position en temps réel (haute
+    précision, rafraîchissement sous la seconde)~;
+  \item \textbf{Recalage sur trajectoire} (\textit{map matching})~: la
+    position brute du GPS, sujette à des imprécisions, est projetée
+    mathématiquement sur le segment du tracé le plus proche --- un problème
+    de projection orthogonale d'un point sur un ensemble de segments
+    consécutifs --- afin d'afficher un déplacement fluide et réaliste plutôt
+    que \og bruité \fg{}~;
+  \item \textbf{Cap dynamique}~: lorsque la vitesse mesurée dépasse un seuil
+    significatif, le cap de la caméra suit le \textit{heading} du capteur
+    GPS~; sinon, il retombe sur le relèvement (\textit{bearing}) calculé
+    géométriquement entre les points consécutifs du tracé, évitant les
+    rotations erratiques à l'arrêt.
+\end{itemize}
+
+Le temps et la distance restants sont recalculés à chaque position reçue~:
+la distance restante est la différence entre la longueur totale du tracé et
+la distance déjà parcourue le long de celui-ci (calculée par cumul des
+segments Haversine), et la durée restante est réestimée à partir de la
+vitesse instantanée du visiteur lorsqu'elle est disponible, avec un repli
+sur une extrapolation proportionnelle à la distance restante sinon. L'arrivée
+est détectée lorsque la distance restante descend sous un seuil de
+30~mètres, ce qui déclenche un message de confirmation puis la fermeture
+automatique de la vue~3D.
+
+\subsubsection{Nouvelles bibliothèques intégrées}
+
+Ces fonctionnalités ont nécessité l'ajout de deux dépendances au frontend,
+récapitulées dans le tableau~\ref{tab:outils}~:
+\texttt{maplibre-gl} pour le rendu cartographique~3D par WebGL, et
+l'utilisation des services publics \textbf{OSRM} et \textbf{Valhalla} côté
+backend (aucune bibliothèque supplémentaire n'étant requise, ces services
+étant consommés par simples requêtes HTTP dans le module
+\texttt{routing.py}). Ce choix préserve la légèreté de la pile logicielle~:
+la carte 2D principale continue de reposer sur Leaflet~1.9 (42~Ko minifié),
+tandis que MapLibre~GL n'est chargé --- à la demande --- que pour la durée
+effective d'une navigation active.
 
 %------------------------------------------------------------
 \section{Discussion}
@@ -2647,7 +3039,7 @@ begin{figure}[H]
 Les six objectifs formulés en Introduction Générale sont confrontés aux
 résultats obtenus. L'objectif~1 (modélisation du schéma de données
 hiérarchique) est atteint~: le schéma PostGIS implémenté couvre les
-22~régions synodales, 137~districts, 553~paroisses importées, 311~œuvres
+22~régions synodales, 159~districts, 858~paroisses importées, 311~œuvres
 et 685~ouvriers, avec toutes les contraintes d'intégrité référentielle et
 les champs de géolocalisation. L'objectif~2 (API REST sécurisée avec RBAC)
 est atteint~: l'API expose 47~endpoints documentés, protégés par le
@@ -2661,6 +3053,81 @@ est atteint~: les quatre interfaces de rôle, les modules d'import Excel et
 d'export PDF/Excel sont fonctionnels. L'objectif~6 (conteneurisation Docker)
 est atteint~: la plateforme est entièrement déployable avec une commande
 unique sur tout serveur disposant de Docker.
+
+%-----
+\subsection{Comparaison Chiffrée avec les Solutions Existantes}
+\label{ssec:disc-comparatif}
+
+Les résultats obtenus permettent à présent de confronter chiffrément notre
+solution aux quatre solutions analysées au Chapitre~1 (section~\ref{sec:etat-art}).
+Le tableau~\ref{tab:comparatif} reprend les onze critères jugés déterminants pour
+une plateforme institutionnelle cartographique de l'EEC. Les symboles employés
+sont les suivants~: \oui~critère entièrement satisfait, \non~critère non
+satisfait, \partiel~critère partiellement satisfait, N/A~critère sans objet
+pour cette catégorie de solution.
+
+\begin{table}[H]
+\centering
+\caption{Tableau comparatif des solutions existantes et de la solution proposée}
+\label{tab:comparatif}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{>{\bfseries}m{4.8cm}
+                >{\centering\arraybackslash}m{2.0cm}
+                >{\centering\arraybackslash}m{2.1cm}
+                >{\centering\arraybackslash}m{2.1cm}
+                >{\centering\arraybackslash}m{2.0cm}
+                >{\centering\arraybackslash}m{2.2cm}}
+\toprule
+\textbf{Critère}
+  & \textbf{GeoEEC v1.0}
+  & \textbf{ArcGIS Online}
+  & \textbf{Google Maps}
+  & \textbf{QGIS / OL}
+  & \textbf{Notre solution} \\
+\midrule
+Plateforme web multi-utilisateurs
+  & \oui & \oui & \partiel & \non & \oui \\
+\addlinespace[3pt]
+Hiérarchie institutionnelle configurable
+  & \partiel & \non & \non & \non & \oui \\
+\addlinespace[3pt]
+Authentification sécurisée (sessions)
+  & \non & \oui & \oui & \non & \oui \\
+\addlinespace[3pt]
+RBAC à 4 niveaux synodaux
+  & \partiel & \non & \non & \non & \oui \\
+\addlinespace[3pt]
+Serveur cartographique OGC (WMS/WFS)
+  & \non & \oui & \non & \oui & \oui \\
+\addlinespace[3pt]
+Base de données spatiale (PostGIS)
+  & \partiel & \oui & \oui & \oui & \oui \\
+\addlinespace[3pt]
+Journal d'audit des modifications
+  & \non & \partiel & \non & \non & \oui \\
+\addlinespace[3pt]
+Import données Excel institutionnel
+  & \oui & \non & \non & \non & \oui \\
+\addlinespace[3pt]
+Déploiement conteneurisé (Docker)
+  & \non & N/A & N/A & \non & \oui \\
+\addlinespace[3pt]
+Logiciel libre / sans licence commerciale
+  & \oui & \non & \non & \oui & \oui \\
+\addlinespace[3pt]
+Adapté au contexte institutionnel EEC
+  & \partiel & \non & \non & \non & \oui \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+Comme au Chapitre~1, l'analyse comparative confirme, résultats à l'appui, que
+notre solution est la seule à réunir simultanément l'ensemble des
+caractéristiques requises~: elle ajoute désormais à cet acquis un calcul
+d'itinéraire réel sur le réseau routier (section~\ref{ssec:disc-forces}) et une
+navigation 3D, deux capacités qu'aucune des quatre solutions comparées
+n'offre dans une configuration institutionnelle équivalente, gratuite et
+souveraine.
 
 %-----
 \subsection{Forces de la Solution}
@@ -2706,23 +3173,23 @@ causer des défaillances à l'installation.
 \label{ssec:disc-limites}
 
 \textbf{Couverture GPS incomplète.}
-L'audit des données sources a révélé que 127~paroisses sur 565, soit
-22~\% de l'effectif total, ne disposent d'aucune coordonnée GPS valide
-dans les fichiers Excel fournis par l'EEC. Ces paroisses sont importées
-en base mais ne s'affichent pas sur la carte. La plateforme ne peut donc
+L'état actuel de la base révèle que 480~paroisses sur 858, soit
+56~\% de l'effectif total, ne disposent d'aucune coordonnée GPS valide.
+Ces paroisses sont enregistrées en base mais ne s'affichent pas sur la
+carte. La plateforme ne peut donc
 pas prétendre à une couverture cartographique complète du réseau
 ecclésiastique~; son utilité pour les décisions de planification
 territoriale nationale reste limitée tant que ce taux n'est pas réduit.
 
-\textbf{Distance à vol d'oiseau.}
-La fonction de calcul d'itinéraire utilise la formule de Haversine, qui
-mesure la distance géodésique entre deux points en ligne droite. Cette
-mesure surestime systématiquement la durée réelle de trajet sur un réseau
-routier camerounais caractérisé par des voies sinueuses et un relief
-accidenté~; elle ne tient pas compte des barrières physiques (fleuves,
-massifs montagneux). La durée estimée à 60~km/h de moyenne est donc
-approximative et ne peut servir de base à des décisions opérationnelles
-précises.
+\textbf{Dépendance à des services de routing externes.}
+Le calcul d'itinéraire réel (section~\ref{ssec:justification-algo}) repose
+sur des instances publiques et gratuites d'OSRM et de Valhalla, non
+hébergées par l'institution. La plateforme reste fonctionnelle en cas
+d'indisponibilité de ces services --- repli automatique sur la distance de
+Haversine (section~\ref{ssec:haversine}) --- mais la qualité et la
+disponibilité du tracé routier réel dépendent alors d'une infrastructure
+tierce hors du contrôle de l'EEC, ce qui pose une question de souveraineté
+et de continuité de service à long terme.
 
 \textbf{Absence d'application mobile.}
 La plateforme est conçue pour des écrans desktop et tablette
@@ -2730,7 +3197,7 @@ La plateforme est conçue pour des écrans desktop et tablette
 adaptée aux smartphones, qui constituent pourtant le principal outil
 numérique des administrateurs paroissiaux en zone rurale camerounaise.
 En l'absence d'application mobile dédiée, la collecte terrain des
-coordonnées GPS des 127~paroisses non géolocalisées reste manuelle et
+coordonnées GPS des 480~paroisses non géolocalisées reste manuelle et
 sans outillage dédié.
 
 \textbf{Authentification à facteur unique.}
@@ -2743,8 +3210,11 @@ risques de compromission par capture ou réutilisation de mot de passe.
 \medskip
 \noindent\textbf{Bilan du chapitre.}
 Ce chapitre a présenté et justifié les choix technologiques de la
-plateforme, puis exposé les résultats à travers sept interfaces fonctionnelles
-commentées au regard des exigences du Chapitre~2. La discussion critique a
+plateforme, détaillé l'algorithmique du calcul d'itinéraire (moteurs OSRM et
+Valhalla, décodage de polyligne), puis exposé les résultats à travers huit
+interfaces fonctionnelles --- dont l'itinéraire réel et la navigation~3D ---
+commentées au regard des exigences du Chapitre~2, et confronté chiffrément la
+solution aux quatre solutions existantes. La discussion critique a
 mis en évidence cinq forces distinctives --- sécurité des sessions, RBAC
 synodal, interopérabilité OGC, audit automatique et déploiement conteneurisé
 --- et quatre limites structurelles auxquelles la \textbf{Conclusion
@@ -2760,9 +3230,9 @@ Générale} propose des perspectives d'amélioration concrètes.
 \markboth{Conclusion Générale}{Conclusion Générale}
 
 \noindent
-L'Église Évangélique du Cameroun gérait jusqu'alors ses 565~paroisses,
+L'Église Évangélique du Cameroun gérait jusqu'alors ses 858~paroisses,
 311~œuvres sociales et 685~ouvriers ecclésiastiques répartis sur
-22~régions synodales et 137~districts sans aucun outil numérique
+22~régions synodales et 159~districts sans aucun outil numérique
 centralisé~: pas de visualisation géographique, pas de contrôle d'accès
 formalisé selon les périmètres synodaux, pas de journal d'audit des
 modifications, pas de publication cartographique interopérable. Ce travail
@@ -2777,8 +3247,8 @@ répondre de façon complète et déployable dans un contexte institutionnel
 Cette hypothèse est validée par les résultats obtenus~: la plateforme
 implémentée déploie en une seule commande cinq services
 --- Django~5~+~GeoDjango, PostgreSQL~+~PostGIS~3.4, GeoServer~2.26,
-Next.js~14 et Redis~7~--- et offre une carte interactive avec clustering
-de 553~paroisses, des filtres hiérarchiques par région et district, un
+Next.js~16 et Redis~7~--- et offre une carte interactive avec clustering
+de 858~paroisses, des filtres hiérarchiques par région et district, un
 tableau de bord adaptatif par rôle, un module d'import/export des données
 institutionnelles, et un journal d'audit automatique et exhaustif de toutes
 les opérations d'écriture. L'ensemble des six objectifs formulés en
@@ -2793,18 +3263,18 @@ d'exécution par conteneurisation complète.
 \medskip
 \noindent\textbf{Limites.}
 Quatre limites structurelles tempèrent la portée de ces résultats. Premièrement,
-127~paroisses sur 565 (22~\%) ne disposent d'aucune coordonnée GPS valide
-dans les fichiers sources de l'EEC~: la plateforme les importe mais ne peut
-pas les afficher sur la carte, ce qui réduit d'autant sa capacité à soutenir
-des décisions de planification territoriale fondées sur la couverture
-cartographique réelle. Deuxièmement, la fonction de calcul d'itinéraire
-repose sur la formule de Haversine, qui mesure une distance en ligne droite
-et ne tient pas compte du réseau routier camerounais réel, induisant des
-estimations de durée de trajet systématiquement sous-évaluées pour les
-zones à relief accidenté ou à voies sinueuses. Troisièmement, l'interface
+480~paroisses sur 858 (56~\%) ne disposent d'aucune coordonnée GPS valide~:
+la plateforme les enregistre mais ne peut pas les afficher sur la carte, ce
+qui réduit d'autant sa capacité à soutenir des décisions de planification
+territoriale fondées sur la couverture cartographique réelle. Deuxièmement,
+le calcul d'itinéraire réel dépend de services de routing externes (OSRM,
+Valhalla) non hébergés par l'institution~: en cas d'indisponibilité
+prolongée de ces services publics, la plateforme retombe sur une distance
+à vol d'oiseau (Haversine), moins précise pour les décisions opérationnelles.
+Troisièmement, l'interface d'administration classique
 n'est pas adaptée aux smartphones, qui constituent le principal outil
 numérique des administrateurs paroissiaux en zone rurale~; la collecte
-terrain des coordonnées GPS manquantes reste donc sans outillage dédié.
+terrain des coordonnées GPS manquantes reste donc largement manuelle.
 Quatrièmement, l'authentification ne propose pas de double facteur~: les
 comptes d'administrateurs nationaux, qui disposent d'un accès complet à
 toutes les données de l'institution, restent exposés aux risques de
@@ -2817,21 +3287,21 @@ La première perspective est le développement d'une application mobile
 légère (React Native ou Progressive Web App) permettant aux administrateurs
 paroissiaux de saisir ou de corriger les coordonnées GPS directement sur le
 terrain~: cette seule fonctionnalité permettrait de résorber le déficit de
-géolocalisation des 127~paroisses non couvertes et de faire passer le taux
-de couverture cartographique de 78~\% à 100~\%. La deuxième perspective est
-l'intégration d'un moteur de calcul d'itinéraires routiers~--- via l'API
-OSRM (\textit{Open Source Routing Machine}) ou une instance locale de
-GraphHopper~--- pour remplacer la distance à vol d'oiseau par des temps de
-trajet réalistes sur les routes camerounaises. La troisième perspective est
-l'activation de la double authentification par TOTP (\textit{Time-based
-One-Time Password}) pour les comptes d'administrateurs nationaux et
-régionaux, en s'appuyant sur la bibliothèque \texttt{django-otp}
-déjà compatible avec l'infrastructure Django. Enfin, la réintégration
-du module de questions-réponses en langage naturel développé dans
-GeoEEC~v1.0 --- enrichi des nouvelles entités et des statistiques annuelles
---- ouvrirait la plateforme à des usages analytiques avancés permettant
-aux responsables synodaux d'interroger les données institutionnelles sans
-compétences techniques.
+géolocalisation des 480~paroisses non couvertes et de faire passer le taux
+de couverture cartographique de 44~\% à 100~\%. La deuxième perspective est
+l'hébergement d'une instance propre de Valhalla ou d'OSRM sur
+l'infrastructure de l'institution, afin de s'affranchir de la dépendance
+aux services publics identifiée ci-dessus tout en conservant la même
+famille d'algorithmes (section~\ref{sec:modelisation-math}). La troisième
+perspective est l'activation de la double authentification par TOTP
+(\textit{Time-based One-Time Password}) pour les comptes d'administrateurs
+nationaux et régionaux, en s'appuyant sur la bibliothèque
+\texttt{django-otp} déjà compatible avec l'infrastructure Django. Enfin, la
+réintégration du module de questions-réponses en langage naturel développé
+dans GeoEEC~v1.0 --- enrichi des nouvelles entités, des classes de
+paroisses et des statistiques annuelles --- ouvrirait la plateforme à des
+usages analytiques avancés permettant aux responsables synodaux
+d'interroger les données institutionnelles sans compétences techniques.
 
 \noindent\rule{\linewidth}{0.8pt}
 
@@ -2855,20 +3325,20 @@ même numéro à chacune de ses citations ultérieures dans le rapport.
 \setlength{\tabcolsep}{6pt}
 \renewcommand{\arraystretch}{1.3}
 \begin{longtable}{%
-  >{\bfseries\color{eccdarkgreen}\centering\arraybackslash}m{1.6cm}
-  m{11.4cm}}
+  >{\bfseries\color{eccdarkgreen}\centering\arraybackslash}p{1.6cm}
+  >{\raggedright\arraybackslash}p{11.4cm}}
 \caption{Références bibliographiques du rapport}\label{tab:references} \\
 \toprule
 \rowcolor{eecgreen}
-\multicolumn{1}{>{\bfseries\color{white}\centering\arraybackslash}m{1.6cm}}{Numéro} &
-\multicolumn{1}{>{\bfseries\color{white}}m{11.4cm}}{Référence bibliographique} \\
+\multicolumn{1}{>{\bfseries\color{white}\centering\arraybackslash}p{1.6cm}}{Numéro} &
+\multicolumn{1}{>{\bfseries\color{white}}p{11.4cm}}{Référence bibliographique} \\
 \midrule
 \endfirsthead
 \caption[]{\textit{(suite)~Références bibliographiques du rapport}} \\
 \toprule
 \rowcolor{eecgreen}
-\multicolumn{1}{>{\bfseries\color{white}\centering\arraybackslash}m{1.6cm}}{Numéro} &
-\multicolumn{1}{>{\bfseries\color{white}}m{11.4cm}}{Référence bibliographique} \\
+\multicolumn{1}{>{\bfseries\color{white}\centering\arraybackslash}p{1.6cm}}{Numéro} &
+\multicolumn{1}{>{\bfseries\color{white}}p{11.4cm}}{Référence bibliographique} \\
 \midrule
 \endhead
 \midrule
@@ -2876,34 +3346,24 @@ même numéro à chacune de ses citations ultérieures dans le rapport.
 \endfoot
 \bottomrule
 \endlastfoot
-\rowcolor{eeclightgreen!60}
 [1] & International Telecommunication Union, \textit{Measuring Digital Development: Facts and Figures 2023}, ITU, Genève, 2023. Disponible sur~: \url{https://www.itu.int/en/ITU-D/Statistics/Pages/facts/default.aspx} \\
 [2] & GSMA Intelligence, \textit{The Mobile Economy Sub-Saharan Africa 2023}, GSM Association, Londres, 2023. Disponible sur~: \url{https://www.gsma.com/mobileeconomy/sub-saharan-africa/} \\
-\rowcolor{eeclightgreen!60}
 [3] & République du Cameroun, \textit{Stratégie Nationale de Développement 2020--2030~: Pour la transformation structurelle et le développement inclusif}, Ministère de l'Économie, de la Planification et de l'Aménagement du Territoire, Yaoundé, 2020. \\
 [4] & P.~A. Longley, M.~F. Goodchild, D.~J. Maguire, D.~W. Rhind, \textit{Geographic Information Science and Systems}, 4\textsuperscript{e} édition, Wiley, Hoboken, NJ, 2015. \\
-\rowcolor{eeclightgreen!60}
 [5] & Open Geospatial Consortium, \textit{OpenGIS Web Map Service (WMS) Implementation Specification}, version~1.3.0, OGC~06-042, 2006. Disponible sur~: \url{https://www.ogc.org/standards/wms} \\
 [6] & Open Geospatial Consortium, \textit{OpenGIS Web Feature Service (WFS) Implementation Standard}, version~2.0.0, OGC~09-025r2, 2010. Disponible sur~: \url{https://www.ogc.org/standards/wfs} \\
-\rowcolor{eeclightgreen!60}
 [7] & P.~Gifford, «~Christianity, Development and Modernity in Africa~», \textit{African Affairs}, vol.~114, n\textsuperscript{o}~454, p.~1--19, 2015. \\
 [8] & Esri, \textit{ArcGIS Online: Cloud-Based Mapping and Analysis}, 2024. Disponible sur~: \url{https://www.esri.com/en-us/arcgis/products/arcgis-online/overview} \\
-\rowcolor{eeclightgreen!60}
 [9] & Google LLC, \textit{Google Maps Platform Documentation}, 2024. Disponible sur~: \url{https://developers.google.com/maps} \\
 [10] & QGIS Development Team, \textit{QGIS Geographic Information System}, Open Source Geospatial Foundation Project, 2024. Disponible sur~: \url{https://www.qgis.org} \\
-\rowcolor{eeclightgreen!60}
 [11] & OWASP Foundation, \textit{OWASP Top Ten 2021: The Ten Most Critical Web Application Security Risks}, 2021. Disponible sur~: \url{https://owasp.org/www-project-top-ten/} \\
 [12] & PostGIS Development Team, \textit{PostGIS 3.4 Documentation}, 2023. Disponible sur~: \url{https://postgis.net/documentation/} \\
-\rowcolor{eeclightgreen!60}
 [13] & R.~T. Fielding, \textit{Architectural Styles and the Design of Network-based Software Architectures}, thèse de doctorat, University of California, Irvine, 2000. \\
 [14] & T.~Christie, \textit{Django REST Framework Documentation}, 2024. Disponible sur~: \url{https://www.django-rest-framework.org} \\
-\rowcolor{eeclightgreen!60}
 [15] & Docker, Inc., \textit{Docker Documentation}, 2024. Disponible sur~: \url{https://docs.docker.com} \\
 [16] & Django Software Foundation, \textit{Django Documentation}, version~5.0, 2024. Disponible sur~: \url{https://docs.djangoproject.com/en/5.0/} \\
-\rowcolor{eeclightgreen!60}
 [17] & GeoServer Development Team, \textit{GeoServer 2.26 User Manual}, 2024. Disponible sur~: \url{https://docs.geoserver.org/stable/en/user/} \\
 [18] & Vercel, \textit{Next.js Documentation}, version~14, 2024. Disponible sur~: \url{https://nextjs.org/docs} \\
-\rowcolor{eeclightgreen!60}
 [19] & V.~Agafonkin, \textit{Leaflet: An open-source JavaScript library for mobile-friendly interactive maps}, 2024. Disponible sur~: \url{https://leafletjs.com} \\
 [20] & Redis Ltd., \textit{Redis Documentation}, 2024. Disponible sur~: \url{https://redis.io/docs} \\
 \end{longtable}
