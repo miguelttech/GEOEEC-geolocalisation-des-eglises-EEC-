@@ -92,6 +92,23 @@ def filter_by_scope(queryset, user, region_field="district__region", district_fi
     return queryset.none()
 
 
+def filter_districts_by_scope(queryset, user):
+    """Filtre spécialisé pour le modèle District — un admin REGION/DISTRICT/
+    PAROISSE ne doit voir que les districts de sa propre zone."""
+    if not getattr(user, "is_admin", False):
+        return queryset
+
+    if user.role == "SUPER":
+        return queryset
+    if user.role == "REGION" and user.region_id:
+        return queryset.filter(region_id=user.region_id)
+    if user.role == "DISTRICT" and user.district_id:
+        return queryset.filter(id=user.district_id)
+    if user.role == "PAROISSE" and user.paroisse_id:
+        return queryset.filter(paroisses__id=user.paroisse_id)
+    return queryset.none()
+
+
 def filter_paroisses_by_scope(queryset, user):
     """Filtre spécialisé pour le modèle Paroisse."""
     # Visiteur / rôle non-administrateur → données publiques complètes (comme un anonyme)

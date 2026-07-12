@@ -8,7 +8,7 @@ export default function Direction() {
         <div className="section-head">
           <div>
             <div className="section-num">— 05 / Direction</div>
-            <h2 className="lp-serif">Le <em>Synode Général</em> de l&apos;EEC.</h2>
+            <h2 className="lp-serif"><em>Direction Générale</em> de l&apos;EEC.</h2>
           </div>
           <div className="meta">
             Élus pour servir l&apos;Église dans la fidélité, le discernement
@@ -33,7 +33,8 @@ export default function Direction() {
                 fontSize: 10.5,
                 fontFamily: 'var(--lp-mono)',
                 letterSpacing: '0.15em',
-                color: 'rgba(245,197,24,0.60)',
+                color: 'var(--lp-gold-deep)',
+                fontWeight: 700,
                 textTransform: 'uppercase',
                 marginBottom: 6,
               }}>

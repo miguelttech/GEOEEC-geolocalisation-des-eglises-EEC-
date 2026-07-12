@@ -24,13 +24,27 @@ export default function AdminGuard({ children }: { children: ReactNode }) {
     (async () => {
       try {
         const r = await fetch(`${BACKEND}/api/auth/me/`, { credentials: 'include' });
-        if (!r.ok) throw new Error('non authentifié');
+        if (cancelled) return;
+        // EXIGENCE : seule une réponse d'authentification explicitement négative
+        // (401/403) doit éjecter l'utilisateur. Une panne réseau ou une lenteur
+        // transitoire (ex. plusieurs requêtes concurrentes sur la page carte)
+        // ne doit jamais le faire sortir de son espace admin — on réessaie
+        // silencieusement au prochain rendu plutôt que de rediriger à tort.
+        if (r.status === 401 || r.status === 403) {
+          setAllowed(false);
+          router.replace('/login');
+          return;
+        }
+        if (!r.ok) { setAllowed(prev => (prev === null ? true : prev)); return; }
         const me = await r.json();
         if (cancelled) return;
         if (ADMIN_ROLES.has(me.role)) setAllowed(true);
         else { setAllowed(false); router.replace('/carte'); }        // visiteur → carte
       } catch {
-        if (!cancelled) { setAllowed(false); router.replace('/login'); } // anonyme → connexion
+        // Réseau indisponible — on ne redirige pas ; si l'utilisateur n'est
+        // vraiment pas authentifié, chaque appel API admin échouera de toute
+        // façon (double barrière déjà assurée côté backend).
+        if (!cancelled) setAllowed(prev => (prev === null ? true : prev));
       }
     })();
     return () => { cancelled = true; };

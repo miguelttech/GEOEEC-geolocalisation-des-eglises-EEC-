@@ -47,9 +47,6 @@ export default function FicheParoissePage() {
   const [description, setDescription] = React.useState(MOCK_PAROISSE.description);
   const [communiants, setCommuniants] = React.useState(String(MOCK_PAROISSE.communiants));
   const [nonCommuniants, setNonCommuniants] = React.useState(String(MOCK_PAROISSE.nonCommuniants));
-  const [baptemes, setBaptemes] = React.useState(String(MOCK_PAROISSE.baptemes));
-  const [mariages, setMariages] = React.useState(String(MOCK_PAROISSE.mariages));
-  const [deces, setDeces] = React.useState(String(MOCK_PAROISSE.deces));
   const [lat, setLat] = React.useState(String(MOCK_PAROISSE.lat));
   const [lng, setLng] = React.useState(String(MOCK_PAROISSE.lng));
 
@@ -131,9 +128,6 @@ export default function FicheParoissePage() {
               {[
                 { label:'COMMUNIANTS',    val:communiants,    set:setCommuniants,    color:'#5AC472' },
                 { label:'NON-COMMUNIANTS',val:nonCommuniants, set:setNonCommuniants, color:'var(--text)' },
-                { label:'BAPTÊMES',       val:baptemes,       set:setBaptemes,       color:'#5B9BD5' },
-                { label:'MARIAGES',       val:mariages,       set:setMariages,       color:'#5AC472' },
-                { label:'DÉCÈS',          val:deces,          set:setDeces,          color:'#94A3B8' },
               ].map(f => (
                 <div key={f.label}>
                   <div style={{ fontSize:10, color:'var(--text-3)', fontWeight:600, letterSpacing:'0.06em', marginBottom:4 }}>{f.label}</div>

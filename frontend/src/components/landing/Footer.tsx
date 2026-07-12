@@ -10,7 +10,7 @@ export default function Footer() {
             <EECLogo size={56} />
             <p className="footer-brand-text">
               <em>EEC Cameroun.</em><br />
-              Geolocaliser votre Église, pour la marche ensemble.
+              Géolocalisation de votre Église, pour la marche ensemble.
             </p>
             <div className="footer-meta">
               SIÈGE · Douala, Akwa (13 rue Alfred Saker)<br />

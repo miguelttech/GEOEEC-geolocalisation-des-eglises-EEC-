@@ -1,5 +1,5 @@
 /* =======================================================================
-   EEC Console Synodale — Admin CSS
+   EEC Administration — Admin CSS
    Scoped under .admin-shell to avoid conflicts with globals.css
    ======================================================================= */
 
@@ -186,7 +186,7 @@
 .admin-shell .slide-panel { position:fixed; top:0; right:0; height:100vh; width:480px; background:var(--canvas); border-left:1px solid rgba(245,197,24,0.20); z-index:100; display:flex; flex-direction:column; animation:a-slide-in 350ms cubic-bezier(0.4,0,0.2,1); }
 
 /* Modal */
-.admin-shell .modal { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:120; background:rgba(0,0,0,0.60); animation:a-fade 200ms ease; }
+.admin-shell .modal { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:120; background:rgba(0,0,0,0.55); backdrop-filter:blur(3px); animation:a-fade 200ms ease; }
 .admin-shell .modal-panel { background:var(--canvas); border:1px solid rgba(245,197,24,0.20); border-radius:8px; width:440px; padding:24px; box-shadow:0 24px 64px rgba(0,0,0,0.6); animation:a-fade-up 240ms cubic-bezier(0.4,0,0.2,1); }
 
 /* Toast */
@@ -244,6 +244,11 @@
    (seule la barre latérale d'icônes demeure visible à côté). */
 .admin-shell .admin-topbar-wrap { overflow: hidden; max-height: 200px; transition: max-height 320ms cubic-bezier(.4,0,.2,1), opacity 220ms ease; opacity: 1; flex-shrink: 0; }
 .admin-shell .admin-topbar-wrap.collapsed { max-height: 0; opacity: 0; }
+
+/* EXIGENCE : la barre latérale se replie elle aussi sur la carte plein écran,
+   pour maximiser la surface d'affichage. */
+.admin-shell .admin-sidebar-wrap { flex-shrink: 0; overflow: hidden; max-width: 240px; transition: max-width 320ms cubic-bezier(.4,0,.2,1), opacity 220ms ease; opacity: 1; }
+.admin-shell .admin-sidebar-wrap.collapsed { max-width: 0; opacity: 0; }
 .admin-shell .admin-content.admin-content--flush { padding: 0; overflow: hidden; }
 .admin-shell .admin-main.admin-main--fullmap { animation: admin-fullmap-in 320ms cubic-bezier(.4,0,.2,1); }
 @keyframes admin-fullmap-in { from { opacity: 0.4; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }

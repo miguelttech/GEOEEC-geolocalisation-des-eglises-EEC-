@@ -3,6 +3,7 @@ import React from 'react';
 export const PATHS: Record<string, React.ReactNode> = {
   search:       <><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></>,
   close:        <><path d="M18 6L6 18"/><path d="M6 6l12 12"/></>,
+  menu:         <><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></>,
   chevron:      <path d="M9 18l6-6-6-6"/>,
   chevronD:     <path d="M6 9l6 6 6-6"/>,
   chevronL:     <path d="M15 18l-6-6 6-6"/>,
@@ -18,7 +19,7 @@ export const PATHS: Record<string, React.ReactNode> = {
   share:        <><circle cx="6" cy="12" r="3"/><circle cx="18" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><path d="M9 11l6-4"/><path d="M9 13l6 4"/></>,
   route:        <><circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M6 17V8a3 3 0 0 1 3-3h6"/><path d="M18 7v9a3 3 0 0 1-3 3H9"/></>,
   car:          <><path d="M5 13l1.6-3.8A2 2 0 0 1 8.4 8h7.2a2 2 0 0 1 1.8 1.2L19 13"/><path d="M4 13h16v4h-2"/><path d="M6 17H4v-4"/><circle cx="7.5" cy="17" r="1.6"/><circle cx="16.5" cy="17" r="1.6"/><path d="M9 17h6"/></>,
-  bike:         <><circle cx="6" cy="17" r="3.2"/><circle cx="18" cy="17" r="3.2"/><path d="M6 17l3.5-6h5l-2.5 6"/><path d="M9.5 11l2 6"/><circle cx="15" cy="6" r="1"/><path d="M14 7l-2 4"/></>,
+  moto:         <><circle cx="5" cy="17" r="3"/><circle cx="19" cy="17" r="3"/><path d="M5 17h4l2-5h4l2 3h2"/><path d="M11 12l2-4h3"/><path d="M8 17h8"/></>,
   walk:         <><circle cx="13" cy="4.5" r="1.8"/><path d="M13 8l-2 4 2 2 1 5"/><path d="M11 12l-3 1"/><path d="M11 21l1.5-4"/><path d="M14 11l3 1.5"/></>,
   crosshair:    <><circle cx="12" cy="12" r="8"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="2.5"/></>,
   swap:         <><path d="M7 4v16"/><path d="M4 7l3-3 3 3"/><path d="M17 20V4"/><path d="M20 17l-3 3-3-3"/></>,

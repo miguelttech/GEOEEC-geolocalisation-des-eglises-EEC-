@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import AuthVerse from '@/components/landing/AuthVerse';
 
 const BACKEND = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api')
   .replace(/\/api\/?$/, '');
@@ -82,11 +83,7 @@ export default function ChangerMotDePassePage() {
             <img src="/logo-eec.png" alt="EEC" style={{ width:40, height:40, objectFit:'contain', borderRadius:6, padding:4, background:'rgba(255,255,255,0.12)' }} />
             <div>Géolocalisation<small>Église Évangélique du cameroun </small></div>
           </div>
-          <div className="ls-quote">
-            <q>" Sois fort et courageux.</q>
-            <q>Car l&apos;Éternel, ton Dieu, <em>est avec toi.</em> "</q>
-            <p className="ls-ref">— Josué 1 : 9</p>
-          </div>
+          <AuthVerse />
         </div>
       </div>
 

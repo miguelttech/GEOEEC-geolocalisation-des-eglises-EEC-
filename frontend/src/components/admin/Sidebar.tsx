@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { I } from './icons';
 import { Avatar } from './atoms';
+import AdminBrand from './AdminBrand';
 
 const BACKEND = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api')
   .replace(/\/api\/?$/, '');
@@ -29,15 +30,6 @@ const NAV = [
     { key: 'journal', label: "Journal d'activité",   icon: 'list' },
   ]},
 ];
-
-const EECLogo = ({ size = 32 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 48 48" fill="none">
-    <rect x="2" y="2" width="44" height="44" rx="6" fill="#0D2515" stroke="rgba(255,214,0,0.35)" strokeWidth="1.2"/>
-    <path d="M24 9v30M14 24h20" stroke="#F0F4F1" strokeWidth="2.4" strokeLinecap="round"/>
-    <circle cx="24" cy="24" r="3.5" fill="#2E9744"/>
-    <path d="M24 6l1.6 3.2 3.4.4-2.5 2.3.6 3.4-3.1-1.7-3.1 1.7.6-3.4-2.5-2.3 3.4-.4L24 6z" fill="#FFD600" opacity="0.85"/>
-  </svg>
-);
 
 interface MeUser { first_name: string; last_name: string; email: string; role_display: string; avatar_url?: string | null; }
 
@@ -114,14 +106,7 @@ export default function Sidebar() {
       height: '100vh', position: 'sticky', top: 0,
       display: 'flex', flexDirection: 'column', overflowY: 'auto',
     }}>
-      {/* Brand */}
-      <div style={{ height: 72, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-        <EECLogo />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-          <span className="fr" style={{ fontSize: 15, color: '#fff', letterSpacing: '0.005em' }}>EEC Cameroun</span>
-          <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.50)', fontWeight: 500 }}>Console Synodale</span>
-        </div>
-      </div>
+      <AdminBrand spaceLabel="Bureau National" />
 
       {/* Compte connecté */}
       <div style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: 12, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>

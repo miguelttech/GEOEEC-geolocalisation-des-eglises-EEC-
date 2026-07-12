@@ -64,7 +64,7 @@ type FilterState = {
 };
 
 /* Routing types (itinéraire type Google Maps) */
-export type TravelMode = 'auto' | 'bicycle' | 'pedestrian';
+export type TravelMode = 'auto' | 'moto' | 'pedestrian';
 export type RoutePoint = { lat: number; lng: number; label: string; kind: string };
 export type RouteStep = { instruction: string; distance_km: number; duration_min: number; type: number };
 export type RouteData = {
@@ -664,7 +664,7 @@ function useLeafletMap(
     const layer = L.layerGroup();
     const latlngs = route.geometry as L.LatLngExpression[];
     const color = route.mode === 'pedestrian' ? '#1F7331'
-                : route.mode === 'bicycle'    ? '#0277BD'
+                : route.mode === 'moto'       ? '#0277BD'
                 : '#1A73E8'; // voiture — bleu Google
 
     // 1. Casing (contour sombre, donne la profondeur)
@@ -756,6 +756,12 @@ const MapNavbar = ({ view, setView, stats, theme, setTheme, user, mode, onLogout
     document.addEventListener('mousedown', h);
     return () => document.removeEventListener('mousedown', h);
   }, [menuOpen]);
+  // Nom affiché : repli sur l'email puis "Visiteur" si prénom/nom vides
+  // (ex. inscription sans prénom renseigné) plutôt qu'une pastille vide.
+  const displayName = user
+    ? ([user.first_name, user.last_name].filter(Boolean).join(' ').trim() || user.email || 'Visiteur')
+    : '';
+  const displayInitial = (user?.first_name || user?.email || '?').charAt(0).toUpperCase();
   const NAV_STATS = [
     { id: 'regions',   icon: 'compass',   value: stats.regions,   label: 'Régions Synodales', bg: '#FFF6C8',               fg: '#E8B600', prefix: ''  },
     { id: 'districts', icon: 'network',   value: stats.districts, label: 'Districts',          bg: 'rgba(46,151,68,0.12)',  fg: '#1F7331', prefix: ''  },
@@ -801,17 +807,17 @@ const MapNavbar = ({ view, setView, stats, theme, setTheme, user, mode, onLogout
           <div className="account-menu" ref={menuRef}>
             <button className="admin-pill" title={user.email} onClick={() => setMenuOpen(o => !o)}>
               <span className="ap-avatar" style={{ background: 'var(--eec-green)' }}>
-                {user.first_name.charAt(0).toUpperCase()}
+                {displayInitial}
               </span>
-              <span className="ap-label">{user.first_name} {user.last_name}</span>
+              <span className="ap-label">{displayName}</span>
               <Icon name="chevronD" size={13} stroke={2} />
             </button>
             {menuOpen && (
               <div className="account-dropdown">
                 <div className="ad-head">
-                  <span className="ad-avatar">{user.first_name.charAt(0).toUpperCase()}</span>
+                  <span className="ad-avatar">{displayInitial}</span>
                   <div style={{ minWidth: 0 }}>
-                    <div className="ad-name">{user.first_name} {user.last_name}</div>
+                    <div className="ad-name">{displayName}</div>
                     <div className="ad-mail">{user.email}</div>
                     <div className="ad-role">{user.role === 'VISITEUR' ? 'Compte visiteur' : user.role}</div>
                   </div>
@@ -840,12 +846,14 @@ const MapNavbar = ({ view, setView, stats, theme, setTheme, user, mode, onLogout
 /* ============================================================
    MODE-AWARE RAIL
    ============================================================ */
-const MapRail = ({ active, setActive, badges, mode, onLockedClick }: {
+const MapRail = ({ active, setActive, badges, mode, onLockedClick, open }: {
   active: string | null; setActive: (id: string | null) => void;
   badges: Record<string, number | null>;
   mode: MapMode; onLockedClick: () => void;
+  /** Tiroir ouvert sur mobile (<=600px) ; sans effet sur desktop. */
+  open: boolean;
 }) => (
-  <nav className="rail">
+  <nav className={'rail' + (open ? ' rail-open' : '')}>
     {ALL_RAIL_TABS.map(t => {
       const locked = mode === 'public' && LOCKED_FOR_PUBLIC.has(t.id);
       return (
@@ -1272,7 +1280,7 @@ const EntityListPanel = ({ title, items, kind, onPick, onClose, totalLabel }: {
    ============================================================ */
 const TRAVEL_MODES: { id: TravelMode; label: string; icon: string }[] = [
   { id: 'auto',       label: 'Voiture', icon: 'car' },
-  { id: 'bicycle',    label: 'Vélo',    icon: 'bike' },
+  { id: 'moto',       label: 'Moto',    icon: 'moto' },
   { id: 'pedestrian', label: 'À pied',  icon: 'walk' },
 ];
 
@@ -1981,13 +1989,6 @@ const DetailPanel = ({ item, onClose, saved, onToggleSave, onPick, mode, onLogin
             <div className="big-stat orange"><div className="bs-value">{fmt((item as ParishItem).stats.nonCommuniants)}</div><div className="bs-label">Non-communiants</div></div>
             <div className="big-stat blue"><div className="bs-value">{fmt((item as ParishItem).stats.fideles)}</div><div className="bs-label">Total fidèles</div></div>
           </div>
-          {(item as any).stats.baptemes > 0 && (
-            <div className="big-stat-row" style={{ marginTop: 8 }}>
-              <div className="big-stat"><div className="bs-value">{(item as any).stats.baptemes}</div><div className="bs-label">Baptêmes</div></div>
-              <div className="big-stat"><div className="bs-value">{(item as any).stats.mariages}</div><div className="bs-label">Mariages</div></div>
-              <div className="big-stat"><div className="bs-value">{(item as any).stats.deces}</div><div className="bs-label">Décès</div></div>
-            </div>
-          )}
         </div>
       )}
       {tab === 'workers' && isParish && (
@@ -2068,6 +2069,10 @@ export default function EECMapApp({ mode, user, embedded = false }: { mode: MapM
   // arrive sur une carte propre et ouvre lui-même ce dont il a besoin.
   const [theme, setTheme]               = useState<string>('light');
   const [activeTab, setActiveTab]       = useState<string | null>(null);
+  // Tiroir hamburger (mobile uniquement, <=600px) : le rail complet est
+  // masqué par défaut sur mobile pour ne garder visibles que la carte, la
+  // recherche flottante et les boutons essentiels, façon Google Maps.
+  const [railOpen, setRailOpen]         = useState(false);
   const [basemap, setBasemap]           = useState<'light' | 'sat'>('light');
   const [filters, setFilters]           = useState<FilterState>(DEFAULT_FILTERS);
   const [floatQ, setFloatQ]             = useState('');
@@ -2518,8 +2523,24 @@ export default function EECMapApp({ mode, user, embedded = false }: { mode: MapM
 
         <div className={'main' + (activeTab ? ' panel-open' : '') + (fullscreen ? ' fullscreen' : '')}>
           {!fullscreen && (
-            <MapRail active={activeTab} setActive={setActiveTab}
-              badges={badges} mode={mode} onLockedClick={() => setShowLoginPrompt(true)} />
+            <MapRail active={activeTab}
+              setActive={(id) => { setActiveTab(id); setRailOpen(false); }}
+              badges={badges} mode={mode} onLockedClick={() => setShowLoginPrompt(true)}
+              open={railOpen} />
+          )}
+          {/* Fond semi-transparent derrière le tiroir hamburger ouvert (mobile) */}
+          {!fullscreen && railOpen && (
+            <div className="rail-backdrop" onClick={() => setRailOpen(false)} />
+          )}
+          {/* Bouton hamburger — visible uniquement sur mobile (<=600px), révèle le rail */}
+          {!fullscreen && (
+            <button
+              className="hamburger-btn"
+              aria-label="Ouvrir le menu"
+              onClick={() => setRailOpen(o => !o)}
+            >
+              <Icon name={railOpen ? 'close' : 'menu'} size={20} stroke={2} />
+            </button>
           )}
 
           {!fullscreen && (
@@ -2708,7 +2729,7 @@ export default function EECMapApp({ mode, user, embedded = false }: { mode: MapM
                 <div className="nav-banner-sub">
                   {navInfo?.gpsError
                     ? 'Localisation requise'
-                    : <>Suivi GPS en temps réel · {routeMode === 'pedestrian' ? 'à pied' : routeMode === 'bicycle' ? 'à vélo' : 'en voiture'}{navInfo?.speedKmh != null && navInfo.speedKmh > 1 ? ` · ${Math.round(navInfo.speedKmh)} km/h` : ''}</>}
+                    : <>Suivi GPS en temps réel · {routeMode === 'pedestrian' ? 'à pied' : routeMode === 'moto' ? 'à moto' : 'en voiture'}{navInfo?.speedKmh != null && navInfo.speedKmh > 1 ? ` · ${Math.round(navInfo.speedKmh)} km/h` : ''}</>}
                 </div>
               </div>
               <button className="nav-quit" onClick={stopNav} title="Quitter la navigation"><Icon name="close" size={18} stroke={2.4} /></button>

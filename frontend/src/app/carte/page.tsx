@@ -16,15 +16,36 @@ export default function CartePage() {
   const [user, setUser] = useState<MapUser | null>(null);
 
   useEffect(() => {
-    fetch(`${BACKEND}/api/auth/me/`, { credentials: 'include' })
-      .then(r => (r.ok ? r.json() : Promise.reject()))
-      .then((d: MapUser) => {
-        setUser(d);
-        // Seul le rôle VISITEUR voit la carte débloquée
-        // Les admins restent en mode public sur la carte publique (leur outil = l'admin dashboard)
-        setState(d.role === 'VISITEUR' ? 'visitor' : 'public');
-      })
-      .catch(() => setState('public'));
+    const checkSession = () => {
+      fetch(`${BACKEND}/api/auth/me/`, { credentials: 'include', cache: 'no-store' })
+        .then(r => (r.ok ? r.json() : Promise.reject()))
+        .then((d: MapUser) => {
+          // Seul le rôle VISITEUR voit la carte débloquée avec son identité affichée.
+          // Les admins restent en mode public sur la carte publique (leur outil = l'admin
+          // dashboard) : on ne conserve donc PAS leur identité ici, sinon la navbar
+          // afficherait le nom d'un compte admin sur une page censée être anonyme.
+          if (d.role === 'VISITEUR') {
+            setUser(d);
+            setState('visitor');
+          } else {
+            setUser(null);
+            setState('public');
+          }
+        })
+        .catch(() => { setUser(null); setState('public'); });
+    };
+
+    checkSession();
+
+    // Le bouton "Précédent" du navigateur peut restaurer cette page depuis le
+    // bfcache (état figé, sans réexécuter ce useEffect) après une déconnexion
+    // ailleurs dans l'app : on force une revérification de session à chaque
+    // restauration pour éviter d'afficher un compte qui n'est plus connecté.
+    const onPageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) checkSession();
+    };
+    window.addEventListener('pageshow', onPageShow);
+    return () => window.removeEventListener('pageshow', onPageShow);
   }, []);
 
   if (state === 'loading') {

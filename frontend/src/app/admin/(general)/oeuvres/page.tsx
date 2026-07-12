@@ -171,7 +171,7 @@ function formFromOeuvre(o: Oeuvre): FormState {
 }
 
 // ─── GPS Map Picker ──────────────────────────────────────────────────────────
-function GpsMapPicker({ lat, lng, onChange }: { lat: number|null; lng: number|null; onChange: (la: number, lo: number) => void }) {
+function GpsMapPicker({ lat, lng }: { lat: number|null; lng: number|null }) {
   const mapDiv  = useRef<HTMLDivElement>(null);
   const mapInst = useRef<any>(null);
   const marker  = useRef<any>(null);
@@ -185,12 +185,8 @@ function GpsMapPicker({ lat, lng, onChange }: { lat: number|null; lng: number|nu
       L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: '© OSM · CartoDB', maxZoom: 19, subdomains: 'abcd' }).addTo(map);
       const mkIcon = (L: any) => L.divIcon({ html: `<div style="width:16px;height:16px;background:#5B9BD5;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.4)"></div>`, iconSize:[16,16], iconAnchor:[8,8], className:'' });
       if (lat !== null && lng !== null) { marker.current = L.marker([lat,lng],{icon:mkIcon(L)}).addTo(map); }
-      map.on('click', (e: any) => {
-        const {lat:la,lng:lo} = e.latlng;
-        if (marker.current) marker.current.setLatLng([la,lo]);
-        else { marker.current = L.marker([la,lo],{icon:mkIcon(L)}).addTo(map); }
-        onChange(parseFloat(la.toFixed(6)), parseFloat(lo.toFixed(6)));
-      });
+      // EXIGENCE : le marqueur n'est plus déplaçable directement sur la carte —
+      // il ne fait que visualiser les coordonnées saisies (aucun clic ne le repositionne).
       mapInst.current = map;
     });
     return () => { cancelled=true; if(mapInst.current){mapInst.current.remove();mapInst.current=null;marker.current=null;} };
@@ -518,10 +514,9 @@ function OeuvreFormPanel({ mode, oeuvre, types, isSuper, onClose, onSaved }: {
           {tab === 2 && (
             <>
               <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: 8, padding: '10px 14px', fontSize: 12.5, color: '#1D4ED8', display: 'flex', gap: 8, alignItems: 'center' }}>
-                <I.pin size={14} /> Cliquez sur la carte pour géolocaliser l'œuvre.
+                <I.pin size={14} /> Saisissez les coordonnées Latitude/Longitude ci-dessous — le marqueur apparaît uniquement pour visualiser la position saisie.
               </div>
-              <GpsMapPicker lat={gpsValid ? latNum : null} lng={gpsValid ? lngNum : null}
-                onChange={(la, lo) => { set('latitude', String(la)); set('longitude', String(lo)); }} />
+              <GpsMapPicker lat={gpsValid ? latNum : null} lng={gpsValid ? lngNum : null} />
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14 }}>
                 <div>
                   <label style={Lbl}>Coord. Y — Latitude</label>

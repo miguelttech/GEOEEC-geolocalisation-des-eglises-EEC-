@@ -26,7 +26,7 @@ export interface ParishItem {
   lat: number; lng: number;
   stats: {
     fideles: number; communiants: number; nonCommuniants: number;
-    baptemes: number; mariages: number; deces: number; annee: number;
+    annee: number;
   };
   active: boolean;
 }
@@ -192,9 +192,6 @@ export async function loadMapData(): Promise<MapDataResult> {
           fideles,
           communiants:    st ? communiants    : 0,
           nonCommuniants: st ? nonCommuniants : 0,
-          baptemes: (st?.baptemes as number) ?? 0,
-          mariages: (st?.mariages as number) ?? 0,
-          deces:    (st?.deces    as number) ?? 0,
           annee:    (st?.annee    as number) ?? 0,
         },
       };

@@ -119,16 +119,16 @@ function AccountViewPanel({ user: u, onClose }: {
 // ─── Form state (création uniquement — un compte existant n'est plus modifiable) ─
 interface FormState {
   first_name: string; last_name: string; email: string;
-  telephone: string; role: string; password: string;
+  telephone: string; role: string;
   region: string; district: string; paroisse: string;
 }
 function emptyForm(): FormState {
-  return { first_name: '', last_name: '', email: '', telephone: '', role: 'PAROISSE', password: '', region: '', district: '', paroisse: '' };
+  return { first_name: '', last_name: '', email: '', telephone: '', role: 'PAROISSE', region: '', district: '', paroisse: '' };
 }
 
 // ─── Form Panel (création) ─────────────────────────────────────────────────────
 function AccountCreatePanel({ onClose, onSaved }: {
-  onClose: () => void; onSaved: () => void;
+  onClose: () => void; onSaved: (emailSent: boolean, generatedPassword?: string) => void;
 }) {
   const [form, setForm] = useState<FormState>(emptyForm());
   const [regions, setRegions] = useState<RegionSynodale[]>([]);
@@ -137,6 +137,30 @@ function AccountCreatePanel({ onClose, onSaved }: {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
+  // EXIGENCE : un admin REGION ne crée que des admins DISTRICT (dans SA région,
+  // imposée et non modifiable) ; un admin DISTRICT ne crée que des admins
+  // PAROISSE (dans SON district, imposé et non modifiable).
+  const [myRole, setMyRole] = useState<string | null>(null);
+  const [myScope, setMyScope] = useState<{ regionId?: string; regionNom?: string; districtId?: string; districtNom?: string }>({});
+
+  useEffect(() => {
+    api.get<{ role: string; region: number | null; region_nom: string | null; district: number | null; district_nom: string | null }>('/api/auth/me/')
+      .then(me => {
+        setMyRole(me.role);
+        if (me.role === 'REGION' && me.region) {
+          setMyScope({ regionId: String(me.region), regionNom: me.region_nom || '' });
+          setForm(f => ({ ...f, role: 'DISTRICT', region: String(me.region) }));
+        } else if (me.role === 'DISTRICT' && me.district) {
+          setMyScope({
+            regionId: String(me.region), regionNom: me.region_nom || '',
+            districtId: String(me.district), districtNom: me.district_nom || '',
+          });
+          setForm(f => ({ ...f, role: 'PAROISSE', region: String(me.region), district: String(me.district) }));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   const set = (k: keyof FormState, v: string) => setForm(f => ({ ...f, [k]: v }));
 
   useEffect(() => { api.get<RegionSynodale[]>('/api/geo/regions/liste/').then(setRegions).catch(() => {}); }, []);
@@ -144,8 +168,10 @@ function AccountCreatePanel({ onClose, onSaved }: {
   useEffect(() => {
     if (!form.region) { setDistricts([]); return; }
     api.get<PagedResult<District>>(`/api/geo/districts/?region=${form.region}`).then(r => setDistricts(r.results)).catch(() => {});
+    // Un admin DISTRICT crée dans SON district imposé — ne pas le réinitialiser.
+    if (myScope.districtId) return;
     setForm(f => ({ ...f, district: '', paroisse: '' }));
-  }, [form.region]);
+  }, [form.region, myScope.districtId]);
 
   useEffect(() => {
     if (!form.district) { setParoisses([]); return; }
@@ -159,22 +185,20 @@ function AccountCreatePanel({ onClose, onSaved }: {
 
   async function handleSave() {
     if (!form.first_name || !form.last_name || !form.email) { setError('Prénom, nom et email sont obligatoires.'); return; }
-    if (!form.password) { setError('Mot de passe obligatoire pour la création.'); return; }
-    if (form.password.length < 12) { setError('Le mot de passe doit contenir au moins 12 caractères.'); return; }
 
     setSaving(true); setError('');
     try {
       const payload: Record<string, unknown> = {
         first_name: form.first_name, last_name: form.last_name,
         email: form.email, telephone: form.telephone,
-        role: form.role, password: form.password,
+        role: form.role,
         username: form.email,
       };
       if (form.region)   payload.region   = Number(form.region);
       if (form.district) payload.district = Number(form.district);
       if (form.paroisse) payload.paroisse = Number(form.paroisse);
-      await api.post('/api/auth/users/create/', payload);
-      onSaved();
+      const res = await api.post<{ email_envoye: boolean; mot_de_passe_genere?: string }>('/api/auth/users/create/', payload);
+      onSaved(res.email_envoye, res.mot_de_passe_genere);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Erreur lors de l\'enregistrement.');
     } finally { setSaving(false); }
@@ -186,7 +210,7 @@ function AccountCreatePanel({ onClose, onSaved }: {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 22px', borderBottom: '1px solid var(--border)', background: 'var(--chrome)' }}>
           <div>
             <h2 className="sg-md" style={{ fontSize: 18, margin: 0, color: '#F0F4F1' }}>Créer un compte admin</h2>
-            <div style={{ fontSize: 11, color: 'rgba(240,244,241,0.50)', marginTop: 2 }}>Console Synodale · EEC Cameroun</div>
+            <div style={{ fontSize: 11, color: 'rgba(240,244,241,0.50)', marginTop: 2 }}>Bureau National · EEC Cameroun</div>
           </div>
           <button className="icon-btn" style={{ color: 'rgba(240,244,241,0.60)' }} onClick={onClose}><I.x size={16}/></button>
         </div>
@@ -217,15 +241,21 @@ function AccountCreatePanel({ onClose, onSaved }: {
             </div>
             <div>
               <div className="label">Rôle *</div>
-              <select className="input" value={form.role} onChange={e => set('role', e.target.value)}>
-                <option value="REGION">Admin Régional</option>
-                <option value="DISTRICT">Admin District</option>
-                <option value="PAROISSE">Admin Paroisse</option>
-              </select>
+              {myRole === 'REGION' ? (
+                <input className="input" value="Admin District" disabled style={{ opacity: 0.7, cursor: 'not-allowed' }} />
+              ) : myRole === 'DISTRICT' ? (
+                <input className="input" value="Admin Paroisse" disabled style={{ opacity: 0.7, cursor: 'not-allowed' }} />
+              ) : (
+                <select className="input" value={form.role} onChange={e => set('role', e.target.value)}>
+                  <option value="REGION">Admin Régional</option>
+                  <option value="DISTRICT">Admin District</option>
+                  <option value="PAROISSE">Admin Paroisse</option>
+                </select>
+              )}
             </div>
-            <div style={{ gridColumn: form.role === 'REGION' ? 'auto' : '1/-1' }}>
-              <div className="label">Mot de passe temporaire * (12 car. min.)</div>
-              <input className="input mono" type="password" placeholder="••••••••••••" value={form.password} onChange={e => set('password', e.target.value)}/>
+            <div style={{ gridColumn: '1/-1', background: 'rgba(46,151,68,0.08)', border: '1px solid rgba(46,151,68,0.25)', borderRadius: 6, padding: '10px 14px', fontSize: 12, color: '#5AC472', display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+              <I.shield size={14} style={{ marginTop: 1, flexShrink: 0 }}/>
+              Un mot de passe temporaire sera généré automatiquement et envoyé par e-mail à l'adresse ci-dessus.
             </div>
 
             {needsRegion && (
@@ -235,18 +265,26 @@ function AccountCreatePanel({ onClose, onSaved }: {
                 </div>
                 <div>
                   <div className="label">Région synodale *</div>
-                  <select className="input" value={form.region} onChange={e => set('region', e.target.value)}>
-                    <option value="">— Sélectionner —</option>
-                    {regions.map(r => <option key={r.id} value={String(r.id)}>{r.nom}</option>)}
-                  </select>
+                  {myScope.regionId ? (
+                    <input className="input" value={myScope.regionNom || ''} disabled style={{ opacity: 0.7, cursor: 'not-allowed' }} />
+                  ) : (
+                    <select className="input" value={form.region} onChange={e => set('region', e.target.value)}>
+                      <option value="">— Sélectionner —</option>
+                      {regions.map(r => <option key={r.id} value={String(r.id)}>{r.nom}</option>)}
+                    </select>
+                  )}
                 </div>
                 {needsDistrict && (
                   <div>
                     <div className="label">District {form.role === 'DISTRICT' ? '*' : ''}</div>
-                    <select className="input" value={form.district} onChange={e => set('district', e.target.value)} disabled={!form.region}>
-                      <option value="">— Sélectionner —</option>
-                      {districts.map(d => <option key={d.id} value={String(d.id)}>{d.nom}</option>)}
-                    </select>
+                    {myScope.districtId ? (
+                      <input className="input" value={myScope.districtNom || ''} disabled style={{ opacity: 0.7, cursor: 'not-allowed' }} />
+                    ) : (
+                      <select className="input" value={form.district} onChange={e => set('district', e.target.value)} disabled={!form.region}>
+                        <option value="">— Sélectionner —</option>
+                        {districts.map(d => <option key={d.id} value={String(d.id)}>{d.nom}</option>)}
+                      </select>
+                    )}
                   </div>
                 )}
                 {needsParoisse && (
@@ -495,7 +533,19 @@ export default function ComptesPage() {
 
       {viewPanel && <AccountViewPanel user={viewPanel} onClose={() => setViewPanel(null)}/>}
       {createPanel && <AccountCreatePanel onClose={() => setCreatePanel(false)}
-        onSaved={() => { setCreatePanel(false); addToast({ type: 'success', title: 'Compte créé avec succès.' }); doRefresh(); }}/>}
+        onSaved={(emailSent, generatedPassword) => {
+          setCreatePanel(false);
+          if (emailSent) {
+            addToast({ type: 'success', title: 'Compte créé — un e-mail avec le mot de passe a été envoyé.' });
+          } else {
+            addToast({
+              type: 'warn',
+              title: "Compte créé, mais l'e-mail n'a pas pu être envoyé.",
+              body: generatedPassword ? `Mot de passe temporaire à transmettre : ${generatedPassword}` : undefined,
+            });
+          }
+          doRefresh();
+        }}/>}
       {deleteModal && <DeleteAccountModal user={deleteModal} onClose={() => setDeleteModal(null)} onDeleted={handleDeleted}/>}
       <ToastStack toasts={toasts}/>
     </div>

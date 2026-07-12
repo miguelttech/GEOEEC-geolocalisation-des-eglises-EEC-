@@ -131,6 +131,38 @@ export default function DashboardPage() {
       .finally(() => setLoading(false));
   }, [annee]);
 
+  // ── Affichage du nombre de fidèles : purement visuel, ne touche jamais
+  // la base de données. La vraie valeur (s.total_fideles) reste intacte ;
+  // seul ce qui est AFFICHÉ peut être modifié par l'administrateur général,
+  // et cette préférence est propre à son navigateur (localStorage).
+  const FIDELES_OVERRIDE_KEY = 'eec_dashboard_fideles_override';
+  const [fidelesOverride, setFidelesOverride] = React.useState<number | null>(null);
+  const [editingFideles, setEditingFideles]   = React.useState(false);
+  const [fidelesInput, setFidelesInput]       = React.useState('');
+
+  React.useEffect(() => {
+    const saved = window.localStorage.getItem(FIDELES_OVERRIDE_KEY);
+    if (saved !== null && !Number.isNaN(Number(saved))) setFidelesOverride(Number(saved));
+  }, []);
+
+  const startEditFideles = () => {
+    setFidelesInput(String(fidelesOverride ?? s?.total_fideles ?? 0));
+    setEditingFideles(true);
+  };
+  const saveFidelesOverride = () => {
+    const n = parseInt(fidelesInput, 10);
+    if (!Number.isNaN(n) && n >= 0) {
+      setFidelesOverride(n);
+      window.localStorage.setItem(FIDELES_OVERRIDE_KEY, String(n));
+    }
+    setEditingFideles(false);
+  };
+  const resetFidelesOverride = () => {
+    setFidelesOverride(null);
+    window.localStorage.removeItem(FIDELES_OVERRIDE_KEY);
+    setEditingFideles(false);
+  };
+
   if (error) return (
     <div style={{ padding: 32, color: '#FF6B6B' }}>
       <I.alert size={18} /> {error}
@@ -156,12 +188,40 @@ export default function DashboardPage() {
 
       {/* Row 2 — 4 widgets */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 16 }}>
-        <Widget title={`Total fidèles ${annee}`}>
-          {loading ? <Skeleton h={80} /> : (
+        <Widget title={`Total fidèles ${annee}`} action={
+          !loading && !editingFideles ? (
+            <button className="btn-ghost btn" style={{ padding: '4px 6px', fontSize: 11 }} onClick={startEditFideles}>
+              <I.pencil size={12} /> Modifier
+            </button>
+          ) : undefined
+        }>
+          {loading ? <Skeleton h={80} /> : editingFideles ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <input
+                className="input" type="number" min={0} autoFocus
+                value={fidelesInput} onChange={e => setFidelesInput(e.target.value)}
+                style={{ fontSize: 20, fontWeight: 700 }}
+              />
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <button className="btn btn-primary" style={{ fontSize: 12, padding: '6px 10px' }} onClick={saveFidelesOverride}>Enregistrer</button>
+                <button className="btn-ghost btn" style={{ fontSize: 12, padding: '6px 10px' }} onClick={() => setEditingFideles(false)}>Annuler</button>
+                {fidelesOverride !== null && (
+                  <button className="btn-ghost btn" style={{ fontSize: 12, padding: '6px 10px', color: 'var(--text-3)' }} onClick={resetFidelesOverride}>
+                    Réinitialiser
+                  </button>
+                )}
+              </div>
+            </div>
+          ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <div className="sg" style={{ fontSize: 28, lineHeight: 1 }}>
-                {(s?.total_fideles ?? 0).toLocaleString('fr')}
+                {(fidelesOverride ?? s?.total_fideles ?? 0).toLocaleString('fr')}
               </div>
+              {fidelesOverride !== null && (
+                <div style={{ fontSize: 10, color: 'var(--text-3)', fontStyle: 'italic' }}>
+                  Affichage personnalisé — la donnée réelle de la base n&apos;est pas modifiée
+                </div>
+              )}
               <div style={{ fontSize: 12, color: 'var(--text-2)', display: 'flex', flexDirection: 'column', gap: 3, marginTop: 4 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span style={{ width: 8, height: 8, background: '#2E9744', borderRadius: 2 }} />
@@ -196,10 +256,6 @@ export default function DashboardPage() {
                 {s?.validations_attente ?? 0}
               </div>
               <div style={{ fontSize: 12, color: 'var(--text-2)' }}>Statistiques soumises à valider</div>
-              {!!s?.validations_attente && (
-                <button className="btn" style={{ background: 'rgba(230,81,0,0.15)', color: '#FF8A3D', border: '1px solid rgba(230,81,0,0.30)', padding: '6px 12px', fontSize: 12, marginTop: 8, alignSelf: 'flex-start' }}
-                  onClick={() => nav('stats')}>Traiter →</button>
-              )}
             </>
           )}
         </Widget>

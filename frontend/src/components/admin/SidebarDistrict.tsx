@@ -4,6 +4,10 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { I } from './icons';
 import { Avatar } from './atoms';
+import AdminBrand from './AdminBrand';
+
+const BACKEND = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api')
+  .replace(/\/api\/?$/, '');
 
 const NAV = [
   { group: 'Ma zone', items: [
@@ -27,14 +31,27 @@ const NAV = [
 
 const C = '#9B72CF';
 
-const EECLogo = ({ size = 32 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 48 48" fill="none">
-    <rect x="2" y="2" width="44" height="44" rx="6" fill="#0D2040" stroke="rgba(155,114,207,0.35)" strokeWidth="1.2"/>
-    <path d="M24 9v30M14 24h20" stroke="#F0F4F1" strokeWidth="2.4" strokeLinecap="round"/>
-    <circle cx="24" cy="24" r="3.5" fill={C}/>
-    <path d="M24 6l1.6 3.2 3.4.4-2.5 2.3.6 3.4-3.1-1.7-3.1 1.7.6-3.4-2.5-2.3 3.4-.4L24 6z" fill={C} opacity="0.85"/>
-  </svg>
-);
+interface MeUser {
+  first_name: string; last_name: string; email: string;
+  role_display: string; district_nom?: string | null; avatar_url?: string | null;
+}
+
+function getInitials(u: MeUser | null): string {
+  if (!u) return '–';
+  const f = (u.first_name || '').trim();
+  const l = (u.last_name  || '').trim();
+  if (f && l) return `${f[0]}${l[0]}`.toUpperCase();
+  if (f)      return f.slice(0, 2).toUpperCase();
+  return (u.email || '?')[0].toUpperCase();
+}
+
+function getDisplayName(u: MeUser | null): string {
+  if (!u) return '—';
+  const f = (u.first_name || '').trim();
+  const l = (u.last_name  || '').trim();
+  if (f && l) return `${f} ${l}`;
+  return f || u.email || '—';
+}
 
 function LogoutBtn() {
   const handleLogout = async () => {
@@ -60,6 +77,21 @@ function activeKey(pathname: string): string {
 export default function SidebarDistrict() {
   const pathname = usePathname();
   const active = activeKey(pathname);
+  const [me, setMe] = React.useState<MeUser | null>(null);
+
+  const loadMe = React.useCallback(() => {
+    fetch(`${BACKEND}/api/auth/me/`, { credentials: 'include' })
+      .then(r => (r.ok ? r.json() : Promise.reject()))
+      .then(setMe)
+      .catch(() => {});
+  }, []);
+
+  React.useEffect(() => { loadMe(); }, [loadMe]);
+
+  React.useEffect(() => {
+    window.addEventListener('eec-profile-updated', loadMe);
+    return () => window.removeEventListener('eec-profile-updated', loadMe);
+  }, [loadMe]);
 
   return (
     <aside style={{
@@ -68,23 +100,20 @@ export default function SidebarDistrict() {
       height: '100vh', position: 'sticky', top: 0,
       display: 'flex', flexDirection: 'column', overflowY: 'auto',
     }}>
-      {/* Brand */}
-      <div style={{ height: 72, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-        <EECLogo />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-          <span className="fr" style={{ fontSize: 15, color: '#fff', letterSpacing: '0.005em' }}>EEC Cameroun</span>
-          <span style={{ fontSize: 11, color: 'rgba(155,114,207,0.80)', fontWeight: 500 }}>Console District</span>
-        </div>
-      </div>
+      <AdminBrand spaceLabel="Bureau de District" />
 
       {/* District admin user */}
       <div style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: 12, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-        <Avatar initials="DA" size={38} bg="rgba(155,114,207,0.20)" color={C} ringColor="rgba(155,114,207,0.50)" />
+        {me?.avatar_url ? (
+          <img src={me.avatar_url} alt={getDisplayName(me)} width={38} height={38} style={{ borderRadius: '50%', objectFit: 'cover', border: `1px solid rgba(155,114,207,0.50)`, flexShrink: 0 }} />
+        ) : (
+          <Avatar initials={getInitials(me)} size={38} bg="rgba(155,114,207,0.20)" color={C} ringColor="rgba(155,114,207,0.50)" />
+        )}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 5, minWidth: 0 }}>
-          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Daniel AWONO</span>
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{getDisplayName(me)}</span>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <span className="pill" style={{ alignSelf: 'flex-start', padding: '2px 6px', background: 'rgba(155,114,207,0.18)', color: C, borderColor: 'rgba(155,114,207,0.35)', fontSize: 10 }}>Admin District</span>
-            <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.40)' }}>District Bafoussam Centre</span>
+            <span className="pill" style={{ alignSelf: 'flex-start', padding: '2px 6px', background: 'rgba(155,114,207,0.18)', color: C, borderColor: 'rgba(155,114,207,0.35)', fontSize: 10 }}>{me?.role_display ?? 'Admin District'}</span>
+            <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.40)' }}>{me?.district_nom ? `District ${me.district_nom}` : '—'}</span>
           </div>
         </div>
       </div>

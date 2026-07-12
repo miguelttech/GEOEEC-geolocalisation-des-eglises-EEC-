@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import AuthVerse from '@/components/landing/AuthVerse';
 
 // Appel direct au backend Django — bypass le proxy Next.js (bug Turbopack)
 const BACKEND = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api')
@@ -77,13 +78,9 @@ export default function LoginPage() {
         <div className="ls-left-body">
           <div className="ls-brand">
             <img src="/logo-eec.png" alt="EEC" style={{ width:40, height:40, objectFit:'contain', borderRadius:6, padding:4, background:'rgba(255,255,255,0.12)' }} />
-            <div>EEC Cameroun<small>Console synodale · SIG</small></div>
+            <div>EEC Cameroun<small>Géolocalisation · SIG</small></div>
           </div>
-          <div className="ls-quote">
-            <q>" Allez, faites de toutes les nations <em>des disciples.</em></q>
-            <q>les baptisant au nom du Père, <em>du Fils et du Saint-Esprit. "</em></q>
-            <p className="ls-ref">— Matthieu 28 : 19</p>
-          </div>
+          <AuthVerse />
         </div>
       </div>
 
@@ -92,7 +89,7 @@ export default function LoginPage() {
 
           <p className="ls-eyebrow">
             <span className="ls-dot" />
-            Console synodale EEC
+            Espace Administration EEC
           </p>
 
           <h1 className="ls-h1">Connexion <em>sécurisée.</em></h1>

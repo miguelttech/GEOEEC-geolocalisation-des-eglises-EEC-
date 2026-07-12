@@ -238,11 +238,5 @@ export interface StatistiqueAnnuelle {
   communiants: number;
   non_communiants: number;
   total_fideles: number;
-  baptemes: number;
-  confirmations: number;
-  mariages: number;
-  deces: number;
-  offrandes: number;
-  dimes: number;
   validee: boolean;
 }

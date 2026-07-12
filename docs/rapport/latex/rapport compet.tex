@@ -161,6 +161,22 @@
   \vspace{8pt}%
 }
 
+% ---- Fiche de cas d'utilisation (bordure verte, en-tête coloré) ----
+\newenvironment{ucfiche}[2]{%
+  \vspace{6pt}%
+  \noindent\colorbox{eccdarkgreen}{\parbox{\dimexpr\linewidth-2\fboxsep}{%
+    \color{white}\bfseries\small #1~--- #2}}\par
+  \noindent\fcolorbox{eecgreen!40!white}{white}{%
+    \begin{minipage}[t]{\dimexpr\linewidth-2\fboxsep-2\fboxrule}%
+      \vspace{4pt}%
+      \small
+}{%
+      \vspace{2pt}%
+    \end{minipage}%
+  }%
+  \vspace{6pt}%
+}
+
 % ============================================================
 \begin{document}
 \pagenumbering{roman}
@@ -1111,9 +1127,16 @@ conception de l'architecture technique retenue.
 \label{chap:analyse-conception}
 
 \begin{chapplan}
+  \item \textbf{Section~\ref{sec:audit-donnees} --- Audit et Préparation des Données}~:
+    \begin{itemize}[noitemsep, topsep=3pt, leftmargin=1.2cm]
+      \item fichiers sources analysés~: paroisses, catégorisation officielle, ouvriers, œuvres~;
+      \item anomalies détectées~: doublons, incohérences, coordonnées inversées, structures hétérogènes~;
+      \item méthodologie de nettoyage et de rapprochement flou outillée par scripts Python~;
+      \item résultats chiffrés~: 858~paroisses intégrées, 333~correspondances établies.
+    \end{itemize}
   \item \textbf{Section~\ref{sec:analyse} --- Analyse des Besoins}~:
     \begin{itemize}[noitemsep, topsep=3pt, leftmargin=1.2cm]
-      \item ingénierie des exigences~: 22~exigences fonctionnelles et 10~non-fonctionnelles~;
+      \item ingénierie des exigences~: 24~exigences fonctionnelles et 12~non-fonctionnelles~;
       \item diagramme de contexte~: six acteurs externes identifiés~;
       \item diagramme de packages~: trois couches (frontend, backend, infrastructure)~;
       \item cas d'utilisation UC01--UC29 avec tableau de description structuré~;
@@ -1137,9 +1160,14 @@ conception de l'architecture technique retenue.
 
 \lettrine[lines=2, loversize=0.05]{L}{a} compréhension précise des besoins et
 la définition rigoureuse d'une architecture sont les deux prérequis fondamentaux
-d'une implémentation réussie. Ce chapitre traduit les contraintes institutionnelles
-et techniques identifiées au Chapitre~1 en exigences mesurables et en décisions
-de conception concrètes. La section~\ref{sec:analyse} formalise les besoins du
+d'une implémentation réussie. Ce chapitre s'ouvre par la
+section~\ref{sec:audit-donnees}, consacrée à l'audit et à la préparation des
+données sources --- étape préalable à toute modélisation, tant les
+incohérences relevées dans les fichiers fournis par l'EEC ont conditionné
+les choix de conception qui suivent. Ce chapitre traduit ensuite les
+contraintes institutionnelles et techniques identifiées au Chapitre~1 en
+exigences mesurables et en décisions de conception concrètes. La
+section~\ref{sec:analyse} formalise les besoins du
 système à travers un tableau d'exigences fonctionnelles et non-fonctionnelles,
 puis une série de modèles UML couvrant les acteurs, les modules, les cas
 d'utilisation, les entités du domaine et les flux de traitement.
@@ -1150,6 +1178,180 @@ section~\ref{sec:modelisation-math} formalise mathématiquement le service de
 calcul d'itinéraire~: modélisation du réseau routier en graphe pondéré,
 formule de Haversine et algorithmes de recherche de plus court chemin
 (Dijkstra, A\*).
+
+%============================================================
+\section{Audit et Préparation des Données}
+\label{sec:audit-donnees}
+%============================================================
+
+\subsection{Contexte et Objectifs de l'Audit}
+
+Avant toute modélisation, une phase d'audit approfondi des données sources
+fournies par l'EEC a été menée. Cette étape s'imposait pour une raison
+simple~: la qualité d'une plateforme de géolocalisation dépend directement
+de la qualité des données qu'elle expose~; modéliser un schéma de base de
+données sans connaître précisément la structure réelle, les incohérences et
+les lacunes des fichiers sources aurait exposé le projet à des
+retraitements coûteux en cours d'implémentation. L'audit visait trois
+objectifs~: (1)~inventorier exhaustivement les fichiers disponibles et leur
+structure réelle~; (2)~détecter et catégoriser les anomalies (doublons,
+incohérences, données manquantes)~; (3)~définir une méthodologie de
+nettoyage et de rapprochement reproductible, outillée par des scripts
+Python dédiés plutôt que par des corrections manuelles ponctuelles.
+
+\subsection{Fichiers de Données Analysés}
+
+Quatre familles de fichiers hétérogènes ont été soumises à l'audit~:
+\begin{itemize}[itemsep=2pt, topsep=4pt, leftmargin=1.5cm]
+  \item un tableur \textbf{paroisses} issu d'une enquête de géolocalisation
+    de terrain, comportant les coordonnées GPS relevées et une structure en
+    deux feuilles (données brutes et données consolidées)~;
+  \item un document \textbf{officiel de catégorisation} des paroisses
+    (format traitement de texte), listant le nom, la région synodale et la
+    classe (catégorie C1--C4, B1--B2, A1--A2, A++) de chaque paroisse
+    reconnue par le Bureau National~;
+  \item un tableur \textbf{ouvriers ecclésiastiques}, où chaque ligne
+    combine une paroisse et la liste de ses ouvriers dans une colonne texte
+    libre (\og Grade \fg{}), plutôt que des enregistrements individuels~;
+  \item un tableur \textbf{œuvres sociales et éducatives}, structuré en
+    tableau croisé (\textit{pivot})~: une ligne par région synodale, les
+    types d'œuvres en colonnes --- format inexploitable directement par un
+    modèle relationnel, qui suppose une ligne par entité.
+\end{itemize}
+
+\subsection{Anomalies et Difficultés Rencontrées}
+
+L'audit a mis en évidence des anomalies de nature et de gravité variables,
+résumées au tableau~\ref{tab:audit-anomalies}.
+
+\begin{table}[H]
+\centering
+\caption{Principales anomalies détectées lors de l'audit des données}
+\label{tab:audit-anomalies}
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.22}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{>{\bfseries}m{3.6cm} m{8.2cm} m{2.4cm}}
+\toprule
+\rowcolor{eecgreen}
+\multicolumn{1}{>{\bfseries\color{white}}m{3.6cm}}{Anomalie} &
+\multicolumn{1}{>{\bfseries\color{white}}m{8.2cm}}{Description} &
+\multicolumn{1}{>{\bfseries\color{white}}m{2.4cm}}{Sévérité} \\
+\midrule
+\rowcolor{eeclightgreen!60}
+Doublons de paroisses & Une même paroisse enregistrée plusieurs fois sous des
+  intitulés légèrement différents (ex.~\og Jourdain de Beka Hossere \fg{} et
+  \og Le Jourdain de Beka Hossere \fg{}) & Haute \\
+Incohérences de nommage & Écarts orthographiques entre le fichier d'enquête
+  et le fichier officiel de catégorisation (ex.~\og Bamemba \fg{} vs
+  \og Bameba \fg{}), ainsi qu'entre les noms de régions synodales du tableur
+  et du Shapefile & Haute \\
+\rowcolor{eeclightgreen!60}
+Coordonnées GPS inversées & Dans le fichier source, la colonne
+  \texttt{Coord\_x} contient en réalité la latitude et \texttt{Coord\_y} la
+  longitude --- l'inverse de la convention géographique standard & Haute \\
+Données manquantes & Absence de coordonnées GPS pour une majorité de
+  paroisses~; absence de classe (catégorie) pour les paroisses non recensées
+  dans le fichier officiel & Haute \\
+\rowcolor{eeclightgreen!60}
+Structure hétérogène & Le fichier des œuvres sociales est organisé en
+  tableau croisé (région en ligne, type d'œuvre en colonne) et nécessite une
+  opération de \og dépivotage \fg{} avant tout import relationnel & Moyenne \\
+Enregistrements composites & Le fichier des ouvriers combine plusieurs
+  ouvriers par paroisse dans une seule cellule texte, empêchant un import
+  direct en enregistrements individuels & Moyenne \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+Le rapprochement entre les deux sources de vérité relatives aux
+paroisses --- l'enquête de géolocalisation et le fichier officiel de
+catégorisation --- a constitué la difficulté la plus significative de
+l'audit~: les deux fichiers, produits indépendamment à des dates et par des
+services différents, ne partageaient ni identifiant commun ni orthographe
+strictement normalisée pour les noms de paroisses.
+
+\subsection{Méthodologie de Nettoyage et de Rapprochement}
+
+Une méthodologie outillée, plutôt qu'une correction manuelle fichier par
+fichier, a été retenue afin de garantir la reproductibilité du traitement à
+chaque nouvelle livraison de données par l'EEC. Elle s'appuie sur une suite
+de scripts Python dédiés (répertoire \texttt{backend/data\_audit/})~:
+\begin{enumerate}[itemsep=2pt, topsep=4pt, leftmargin=1.5cm]
+  \item \textbf{Inventaire structurel} --- inspection automatique de chaque
+    fichier source (types de colonnes, taux de remplissage, valeurs
+    distinctes) afin d'établir un état des lieux exhaustif avant tout
+    traitement~;
+  \item \textbf{Extraction du référentiel officiel} --- conversion du
+    document de catégorisation (format traitement de texte) en table
+    structurée exploitable par les scripts suivants~;
+  \item \textbf{Nettoyage et normalisation} --- correction de la casse, des
+    espaces superflus, harmonisation des intitulés de région synodale entre
+    le tableur d'enquête et le Shapefile, inversion corrective des colonnes
+    de coordonnées GPS~;
+  \item \textbf{Rapprochement flou} (\textit{fuzzy matching}) --- comparaison
+    algorithmique de chaque nom de paroisse de l'enquête avec le référentiel
+    officiel par un score de similarité textuelle, classant chaque
+    correspondance en \textit{exacte}, \textit{approchée} (au-delà d'un
+    seuil de similarité) ou \textit{absente}~;
+  \item \textbf{Intégration des classes} --- attribution de la catégorie
+    officielle (C1--C4, B1--B2, A1--A2, A++) à chaque paroisse rapprochée
+    avec succès, et création des paroisses présentes uniquement dans le
+    référentiel officiel (sans coordonnées GPS, district à préciser)~;
+  \item \textbf{Génération d'un rapport de comparaison} --- production d'un
+    document de traçabilité exhaustif, ligne par ligne, de chaque décision
+    de rapprochement, soumis à validation avant intégration définitive en
+    base.
+\end{enumerate}
+
+\subsection{Résultats de l'Audit}
+
+Le tableau~\ref{tab:audit-resultats} synthétise les résultats obtenus après
+application de cette méthodologie sur le jeu de données des paroisses.
+
+\begin{table}[H]
+\centering
+\caption{Résultats du rapprochement des données de paroisses}
+\label{tab:audit-resultats}
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.22}
+\begin{tabular}{>{\bfseries}m{7.5cm} >{\centering\arraybackslash}m{3.5cm}}
+\toprule
+\rowcolor{eecgreen}
+\multicolumn{1}{>{\bfseries\color{white}}m{7.5cm}}{Indicateur} &
+\multicolumn{1}{>{\bfseries\color{white}\centering\arraybackslash}m{3.5cm}}{Valeur} \\
+\midrule
+\rowcolor{eeclightgreen!60}
+Paroisses issues de l'enquête de géolocalisation & 516 \\
+Paroisses ajoutées depuis le référentiel officiel (sans GPS) & 354 \\
+\rowcolor{eeclightgreen!60}
+Total de paroisses intégrées en base & 858 \\
+Correspondances exactes (nom identique) & 267 \\
+\rowcolor{eeclightgreen!60}
+Correspondances approchées (similarité orthographique) & 66 \\
+Paroisses sans correspondance officielle (classe non définie) & 183 \\
+\rowcolor{eeclightgreen!60}
+Paroisses géolocalisées (coordonnées GPS valides) & 378 \\
+Paroisses sans coordonnées GPS valides & 480 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Ces résultats appellent deux commentaires. Premièrement, le taux de
+correspondance automatique (267~exactes~+~66~approchées, soit
+333~paroisses sur 516 issues de l'enquête, environ 65~\%) confirme que le
+rapprochement flou était nécessaire~: une comparaison stricte des chaînes de
+caractères aurait manqué les 66~correspondances approchées, soit près de
+13~\% de rapprochements supplémentaires. Deuxièmement, les
+183~paroisses sans correspondance officielle et les 480~paroisses sans
+coordonnées GPS ne sont pas silencieusement écartées~: elles sont intégrées
+en base avec un statut explicite (\texttt{categorie} vide, \texttt{position}
+nulle), consultables et corrigibles depuis l'interface d'administration,
+plutôt que d'être perdues ou approximées automatiquement. C'est directement
+ce constat --- la nécessité d'un contrôle humain sur les cas ambigus --- qui a
+motivé le retrait du module d'import automatisé de masse
+(section~\ref{ssec:activite}) au profit d'une saisie et d'une correction
+supervisées dans l'application elle-même.
 
 %------------------------------------------------------------
 \section{Analyse des Besoins}
@@ -1171,10 +1373,15 @@ l'art du Chapitre~1.
 
 \subsubsection{Exigences Fonctionnelles}
 
-Le Tableau~\ref{tab:ef} recense les vingt-deux exigences fonctionnelles du système,
-organisées par domaine~: authentification et contrôle d'accès, cartographie,
-administration des entités, import/export, statistiques, traçabilité, gestion
-des comptes et services du visiteur authentifié (EF19--EF22).
+Le Tableau~\ref{tab:ef} recense les vingt-quatre exigences fonctionnelles du
+système dans sa version actuelle, organisées par domaine~: authentification
+et contrôle d'accès, cartographie, administration des entités, export,
+statistiques, traçabilité, gestion hiérarchique des comptes et services du
+visiteur authentifié (EF18--EF24), dont le calcul d'itinéraire réel et la
+navigation guidée en trois dimensions. Conformément à l'évolution du projet
+documentée dans l'audit technique (section~\ref{sec:audit-donnees}), le
+module d'import de fichiers Excel, présent dans une version antérieure de la
+plateforme, a été retiré du périmètre fonctionnel~; seul l'export subsiste.
 
 \setlength{\tabcolsep}{5pt}
 \renewcommand{\arraystretch}{1.22}
@@ -1224,14 +1431,16 @@ EF04 & La carte doit regrouper automatiquement les marqueurs proches en clusters
   zoome. & Cartographie & Haute \\
 \rowcolor{eeclightgreen!60}
 EF05 & La carte doit proposer des filtres hiérarchiques multicritères~:
-  sélection d'une région synodale, d'un district et d'un type d'entité
-  (paroisse, œuvre, ouvrier). & Cartographie & Haute \\
+  région synodale, district, type d'entité (paroisse, œuvre, ouvrier) et
+  classe de paroisse (catégorie C1--C4, B1--B2, A1--A2, A++). &
+  Cartographie & Haute \\
 EF06 & Un clic sur un marqueur de la carte doit ouvrir une popup affichant
   les informations détaillées de l'entité (nom, type, contacts, statut GPS). &
   Cartographie & Haute \\
 \rowcolor{eeclightgreen!60}
 EF07 & Les administrateurs autorisés doivent pouvoir créer, lire, modifier et
-  supprimer des paroisses dans les limites de leur périmètre synodal. &
+  supprimer des paroisses dans les limites de leur périmètre synodal, y
+  compris l'attribution de leur classe (catégorie). &
   Administration & Haute \\
 EF08 & Les administrateurs autorisés doivent pouvoir créer, lire, modifier et
   supprimer des œuvres sociales et éducatives dans leur périmètre. &
@@ -1240,60 +1449,80 @@ EF08 & Les administrateurs autorisés doivent pouvoir créer, lire, modifier et
 EF09 & Les administrateurs autorisés doivent pouvoir créer, lire, modifier et
   supprimer des ouvriers ecclésiastiques et gérer leurs affectations à une
   paroisse. & Administration & Haute \\
-EF10 & Le système doit permettre l'import groupé des paroisses, ouvriers et
-  œuvres depuis des fichiers Excel fournis par l'EEC, avec validation des
-  données avant toute insertion en base de données. & Import & Haute \\
-\rowcolor{eeclightgreen!60}
-EF11 & Le système doit permettre l'export des listes d'entités au format
+EF10 & Le système doit permettre l'export des listes d'entités au format
   Excel (.xlsx) et PDF depuis l'interface d'administration. & Export & Moyenne \\
-EF12 & Le tableau de bord doit afficher des indicateurs synthétiques~:
+\rowcolor{eeclightgreen!60}
+EF11 & Le tableau de bord doit afficher des indicateurs synthétiques~:
   nombre de paroisses, districts, ouvriers, œuvres et taux de couverture
   GPS par région. & Statistiques & Haute \\
-\rowcolor{eeclightgreen!60}
-EF13 & Le système doit permettre la saisie, la modification et la
+EF12 & Le système doit permettre la saisie, la modification et la
   consultation des statistiques annuelles de chaque paroisse (membres,
   baptisés, enfants, finances). & Statistiques & Haute \\
-EF14 & Toute opération d'écriture (création, modification, suppression) sur
+\rowcolor{eeclightgreen!60}
+EF13 & Toute opération d'écriture (création, modification, suppression) sur
   les données institutionnelles doit être enregistrée automatiquement dans
   un journal d'audit horodaté. & Traçabilité & Haute \\
-\rowcolor{eeclightgreen!60}
-EF15 & Le journal d'audit doit être consultable par le rôle SUPER, avec des
+EF14 & Le journal d'audit doit être consultable par le rôle SUPER, avec des
   filtres par type d'action, entité concernée et période temporelle. &
   Traçabilité & Moyenne \\
-EF16 & Le système doit proposer une recherche d'entités (paroisses, œuvres,
-  ouvriers) par nom depuis la carte et depuis l'interface d'administration. &
-  Ergonomie & Moyenne \\
 \rowcolor{eeclightgreen!60}
-EF17 & Les visiteurs non authentifiés doivent pouvoir consulter la carte
+EF15 & Le système doit proposer une recherche d'entités (paroisses, œuvres,
+  ouvriers) par nom, combinable avec les filtres de région, district et
+  classe de paroisse, depuis la carte et depuis l'administration. &
+  Ergonomie & Moyenne \\
+EF16 & Les visiteurs non authentifiés doivent pouvoir consulter la carte
   publique et les informations générales des paroisses sans accéder au module
   d'administration. & Accès public & Moyenne \\
-EF18 & L'administrateur SUPER doit pouvoir créer, désactiver et paramétrer
-  les comptes utilisateurs (rôle, périmètre synodal, mot de passe). &
-  Gestion comptes & Haute \\
 \rowcolor{eeclightgreen!60}
-EF19 & Le système doit permettre à un visiteur de s'inscrire avec un email
+EF17 & Le rôle SUPER doit pouvoir créer, désactiver et paramétrer tout
+  compte administrateur~; les rôles REGION et DISTRICT doivent pouvoir
+  créer des comptes administrateurs limités à leur propre périmètre
+  synodal (délégation hiérarchique de la gestion des comptes). &
+  Gestion comptes & Haute \\
+EF18 & Le système doit permettre à un visiteur de s'inscrire avec un email
   et un mot de passe~; un profil visiteur est créé automatiquement à
   l'inscription et persiste entre les sessions. &
   Visiteur auth. & Haute \\
-EF20 & Le visiteur authentifié doit pouvoir enregistrer des paroisses en
+\rowcolor{eeclightgreen!60}
+EF19 & Le visiteur authentifié doit pouvoir enregistrer des paroisses en
   favoris depuis la carte et les retrouver dans son espace personnel. &
   Visiteur auth. & Haute \\
+EF20 & Le système doit proposer deux modes d'affichage cartographique~: la
+  carte standard en deux dimensions (Leaflet) pour la consultation courante,
+  et une vue de navigation guidée en trois dimensions (MapLibre~GL) pendant
+  un déplacement actif. & Cartographie & Haute \\
 \rowcolor{eeclightgreen!60}
-EF21 & Le système doit calculer et afficher l'itinéraire vers la paroisse
-  la plus proche du visiteur, avec distance (km) et durée estimée~; le calcul
-  utilise la fonction PostGIS \texttt{Distance()}. &
+EF21 & Le système doit calculer un itinéraire réel sur le réseau routier
+  entre un point de départ et une entité de destination, pour trois modes
+  de déplacement (voiture, vélo, à pied), avec distance, durée et tracé
+  détaillé~; en cas d'indisponibilité du service de routing, un repli sur
+  la distance à vol d'oiseau (Haversine) est appliqué automatiquement. &
   Visiteur auth. & Haute \\
-EF22 & Le système doit conserver l'historique des recherches géographiques
+EF22 & Une fois l'itinéraire calculé, le visiteur doit pouvoir démarrer une
+  navigation guidée en~3D avec suivi de sa position GPS en temps réel,
+  recalage sur le tracé et détection automatique de l'arrivée. &
+  Visiteur auth. & Haute \\
+\rowcolor{eeclightgreen!60}
+EF23 & Le système doit conserver l'historique des recherches géographiques
   du visiteur authentifié et lui permettre de le consulter et de le vider
   depuis son profil personnel. &
   Visiteur auth. & Moyenne \\
+EF24 & Chaque profil doit être restreint aux seules actions et données de
+  son périmètre~: un visiteur non authentifié n'a accès ni aux favoris, ni
+  à l'itinéraire, ni à l'historique~; un administrateur REGION, DISTRICT ou
+  PAROISSE n'agit que sur les entités de son périmètre synodal, quelle que
+  soit l'opération demandée. &
+  Sécurité & Haute \\
 \end{longtable}
 
 \subsubsection{Exigences Non-Fonctionnelles}
 
-Le Tableau~\ref{tab:enf} liste les dix exigences non-fonctionnelles définissant
-les contraintes qualitatives de la plateforme sur les axes sécurité, performance,
-interopérabilité, portabilité et maintenabilité.
+Le Tableau~\ref{tab:enf} liste les douze exigences non-fonctionnelles
+définissant les contraintes qualitatives de la plateforme sur les axes
+sécurité, performance, interopérabilité, portabilité, maintenabilité,
+fiabilité et performance temps réel (ces deux dernières, ENF11 et ENF12,
+ajoutées pour couvrir la dépendance aux services de routing externes et les
+exigences de fluidité de la navigation~3D).
 
 \setlength{\tabcolsep}{5pt}
 \renewcommand{\arraystretch}{1.22}
@@ -1348,9 +1577,10 @@ ENF06 & Portabilité & La plateforme complète (cinq services) est conteneurisé
   avec Docker et Docker Compose, permettant le déploiement sur tout serveur
   Linux disposant de Docker. & Haute \\
 \rowcolor{eeclightgreen!60}
-ENF07 & Intégrité & L'import Excel déclenche une validation systématique des
-  coordonnées GPS (plage territoire camerounais), du nommage des entités et
-  des relations hiérarchiques avant toute insertion. & Haute \\
+ENF07 & Intégrité & Les formulaires de saisie déclenchent une validation
+  systématique des coordonnées GPS (plage du territoire camerounais), du
+  nommage des entités, de la classe de paroisse et des relations
+  hiérarchiques avant tout enregistrement. & Haute \\
 ENF08 & Traçabilité & Chaque entrée d'audit contient~: l'auteur, le type
   d'action (CREATE / UPDATE / DELETE), l'entité cible, l'identifiant de
   l'objet et l'horodatage UTC. & Haute \\
@@ -1361,6 +1591,16 @@ ENF09 & Ergonomie & L'interface d'administration est responsive et utilisable
 ENF10 & Extensibilité & Le schéma de données et l'API REST sont conçus pour
   accueillir de nouvelles régions synodales, types d'entités ou rôles sans
   refactorisation majeure du cœur du système. & Basse \\
+\rowcolor{eeclightgreen!60}
+ENF11 & Fiabilité & Le service de calcul d'itinéraire doit rester
+  fonctionnel même en cas d'indisponibilité des services de routing
+  externes~: une chaîne de repli à trois niveaux (OSRM, puis Valhalla, puis
+  Haversine) garantit qu'un résultat exploitable est toujours renvoyé, sans
+  jamais faire échouer la requête. & Haute \\
+ENF12 & Performance temps réel & Pendant la navigation guidée~3D, la
+  position de l'utilisateur doit être rafraîchie au moins une fois par
+  seconde et le rendu cartographique doit rester fluide sur les
+  navigateurs mobiles courants (WebGL matériel requis). & Moyenne \\
 \end{longtable}
 
 %------------------------------------------------------------
@@ -1399,7 +1639,7 @@ internes. Six acteurs externes sont identifiés.
 \begin{figure}[H]
   \centering
   \hspace{1cm} % Déplace l'image vers la droite
-  \includegraphics[width=1.8\textwidth]{diagrammes-Diagramme de Contexte.png}
+  \includegraphics[width=1\textwidth]{diagrammes-Diagramme de Contexte.png}
   \caption{Diagramme de contexte du système de géolocalisation EEC}
   \label{fig:diag-contexte}
 \end{figure}
@@ -1684,7 +1924,213 @@ UC29 & Répondre aux requêtes de la carte
 \end{longtable}
 \endgroup
 
- 
+%------------------------------------------------------------
+\subsection{Description Textuelle des Cas d'Utilisation Principaux}
+\label{ssec:uc-detail}
+
+Parmi les vingt-neuf cas d'utilisation recensés au tableau~\ref{tab:uc-recap},
+dix ont été retenus comme représentatifs de l'ensemble des profils et des
+domaines fonctionnels de la plateforme~: consultation cartographique,
+recherche et localisation, authentification, services du visiteur
+authentifié, administration des entités, export et pilotage. Chacun est
+décrit ci-après selon un format structuré~: acteur principal, préconditions,
+postconditions et scénario nominal.
+
+\begin{ucfiche}{UC01}{Consulter la carte interactive}
+\textbf{Acteur~:} Tout utilisateur (y compris non authentifié).\\[2pt]
+\textbf{Préconditions~:} Aucune~; la carte publique est accessible sans
+connexion.\\[2pt]
+\textbf{Postconditions~:} La carte affiche les marqueurs des paroisses et
+des œuvres regroupés en clusters selon le niveau de zoom courant.\\[2pt]
+\textbf{Scénario nominal~:}
+\begin{enumerate}[itemsep=1pt, topsep=2pt, leftmargin=1.2cm]
+  \item L'utilisateur accède à la page d'accueil publique de la plateforme.
+  \item Le frontend interroge GeoServer (WMS) et l'API backend (GeoJSON) pour
+    récupérer les entités géolocalisées.
+  \item Leaflet affiche la carte avec les couches institutionnelles
+    superposées au fond OpenStreetMap, marqueurs regroupés en clusters.
+  \item L'utilisateur navigue (zoom, déplacement)~; les clusters se
+    subdivisent dynamiquement en marqueurs individuels.
+\end{enumerate}
+\end{ucfiche}
+
+\begin{ucfiche}{UC02}{Rechercher une entité}
+\textbf{Acteur~:} Tout utilisateur.\\[2pt]
+\textbf{Préconditions~:} La carte est chargée (UC01).\\[2pt]
+\textbf{Postconditions~:} La carte se recentre sur l'entité trouvée et
+affiche son marqueur mis en évidence.\\[2pt]
+\textbf{Scénario nominal~:}
+\begin{enumerate}[itemsep=1pt, topsep=2pt, leftmargin=1.2cm]
+  \item L'utilisateur saisit un nom (paroisse, œuvre) dans la barre de
+    recherche.
+  \item Le frontend interroge l'API avec le terme saisi, combiné le cas
+    échéant aux filtres actifs (région, district, classe de paroisse).
+  \item L'API retourne la liste des entités correspondantes, triée par
+    pertinence.
+  \item L'utilisateur sélectionne un résultat~; la carte se recentre et
+    ouvre la popup de détail correspondante.
+\end{enumerate}
+\end{ucfiche}
+
+\begin{ucfiche}{UC03}{Localiser la paroisse la plus proche}
+\textbf{Acteur~:} Tout utilisateur.\\[2pt]
+\textbf{Préconditions~:} L'utilisateur autorise la géolocalisation de son
+navigateur, ou clique sur un point de la carte.\\[2pt]
+\textbf{Postconditions~:} La paroisse géographiquement la plus proche de la
+position de référence est identifiée et mise en évidence.\\[2pt]
+\textbf{Scénario nominal~:}
+\begin{enumerate}[itemsep=1pt, topsep=2pt, leftmargin=1.2cm]
+  \item L'utilisateur déclenche la géolocalisation ou sélectionne un point
+    de départ sur la carte.
+  \item Le backend calcule, via la fonction spatiale
+    \texttt{ST\_Distance()} de PostGIS, la paroisse géolocalisée la plus
+    proche de ce point.
+  \item Le résultat (nom, distance à vol d'oiseau) est renvoyé et affiché à
+    l'utilisateur.
+\end{enumerate}
+\end{ucfiche}
+
+\begin{ucfiche}{UC04}{S'authentifier}
+\textbf{Acteur~:} Tout utilisateur enregistré (administrateur ou visiteur).\\[2pt]
+\textbf{Préconditions~:} L'utilisateur dispose d'un compte actif.\\[2pt]
+\textbf{Postconditions~:} Une session sécurisée est ouverte~; l'utilisateur
+est redirigé vers l'interface correspondant à son rôle.\\[2pt]
+\textbf{Scénario nominal~:}
+\begin{enumerate}[itemsep=1pt, topsep=2pt, leftmargin=1.2cm]
+  \item L'utilisateur accède au formulaire de connexion et saisit ses
+    identifiants.
+  \item Le frontend récupère un jeton CSRF puis soumet les identifiants à
+    l'API d'authentification.
+  \item Le backend vérifie les identifiants et ouvre une session Django
+    (cookie \textit{HttpOnly}, \textit{Secure}, \textit{SameSite}).
+  \item L'utilisateur est redirigé vers le tableau de bord de son rôle~;
+    si la première connexion est détectée, il est redirigé vers le
+    changement de mot de passe obligatoire.
+\end{enumerate}
+\textbf{Scénario alternatif~:} identifiants invalides~$\rightarrow$ message
+d'erreur générique, sans révéler si l'email ou le mot de passe est erroné
+(bonne pratique OWASP~[11]).
+\end{ucfiche}
+
+\begin{ucfiche}{UC05}{Consulter l'historique des recherches}
+\textbf{Acteur~:} Visiteur authentifié.\\[2pt]
+\textbf{Préconditions~:} L'utilisateur est connecté (UC04) et a effectué au
+moins une recherche ou un calcul d'itinéraire antérieur.\\[2pt]
+\textbf{Postconditions~:} La liste chronologique des recherches passées est
+affichée dans l'espace personnel.\\[2pt]
+\textbf{Scénario nominal~:}
+\begin{enumerate}[itemsep=1pt, topsep=2pt, leftmargin=1.2cm]
+  \item Le visiteur accède à son profil personnel, onglet \og Historique \fg{}.
+  \item Le frontend interroge l'API de l'historique du visiteur connecté.
+  \item Les entrées sont affichées par ordre chronologique inversé (les plus
+    récentes en premier).
+  \item Le visiteur peut effacer tout ou partie de son historique.
+\end{enumerate}
+\end{ucfiche}
+
+\begin{ucfiche}{UC06}{Créer une paroisse}
+\textbf{Acteur~:} Administrateur SUPER, REGION ou DISTRICT (selon son
+périmètre synodal).\\[2pt]
+\textbf{Préconditions~:} L'administrateur est authentifié (UC04) et dispose
+des droits de création dans le périmètre concerné.\\[2pt]
+\textbf{Postconditions~:} La nouvelle paroisse est enregistrée en base,
+géolocalisée si les coordonnées sont fournies, et une entrée d'audit
+CREATE est journalisée.\\[2pt]
+\textbf{Scénario nominal~:}
+\begin{enumerate}[itemsep=1pt, topsep=2pt, leftmargin=1.2cm]
+  \item L'administrateur ouvre le formulaire de création de paroisse et
+    saisit les informations générales (nom, district, classe/catégorie).
+  \item Il positionne la localisation GPS via la carte interactive
+    intégrée au formulaire.
+  \item Le frontend valide les champs obligatoires et soumet la requête
+    \texttt{POST} à l'API.
+  \item Le backend applique le contrôle RBAC (le district doit appartenir
+    au périmètre de l'administrateur), valide les coordonnées et
+    enregistre la paroisse.
+  \item Une entrée d'audit est créée automatiquement (signal Django).
+\end{enumerate}
+\end{ucfiche}
+
+\begin{ucfiche}{UC07}{Exporter les données}
+\textbf{Acteur~:} Administrateur SUPER, REGION, DISTRICT ou PAROISSE.\\[2pt]
+\textbf{Préconditions~:} L'administrateur est authentifié et consulte une
+liste d'entités (paroisses, œuvres, ouvriers).\\[2pt]
+\textbf{Postconditions~:} Un fichier Excel ou PDF contenant les données du
+périmètre de l'utilisateur est généré et téléchargé.\\[2pt]
+\textbf{Scénario nominal~:}
+\begin{enumerate}[itemsep=1pt, topsep=2pt, leftmargin=1.2cm]
+  \item L'administrateur sélectionne le format d'export souhaité (Excel ou
+    PDF) depuis l'interface de liste.
+  \item Le backend vérifie le rôle de l'utilisateur puis extrait les
+    données de son périmètre par une requête SQL agrégée unique.
+  \item Le fichier est généré (\texttt{openpyxl} pour Excel,
+    \texttt{WeasyPrint} pour PDF) selon la charte graphique EEC.
+  \item Le fichier est renvoyé au navigateur et l'opération est journalisée
+    dans le journal d'audit.
+\end{enumerate}
+\end{ucfiche}
+
+\begin{ucfiche}{UC08}{Consulter le tableau de bord}
+\textbf{Acteur~:} Tout administrateur (SUPER, REGION, DISTRICT, PAROISSE).\\[2pt]
+\textbf{Préconditions~:} L'administrateur est authentifié (UC04).\\[2pt]
+\textbf{Postconditions~:} Les indicateurs de synthèse du périmètre de
+l'utilisateur sont affichés.\\[2pt]
+\textbf{Scénario nominal~:}
+\begin{enumerate}[itemsep=1pt, topsep=2pt, leftmargin=1.2cm]
+  \item L'administrateur accède à la page d'accueil de son espace
+    d'administration.
+  \item Le backend calcule dynamiquement les indicateurs (nombre de
+    paroisses, districts, ouvriers, œuvres, taux de couverture GPS) filtrés
+    selon le rôle et le périmètre de l'utilisateur.
+  \item Le tableau de bord affiche ces indicateurs, ainsi que l'évolution
+    statistique sur les dernières années.
+\end{enumerate}
+\end{ucfiche}
+
+\begin{ucfiche}{UC09}{Calculer un itinéraire}
+\textbf{Acteur~:} Visiteur authentifié.\\[2pt]
+\textbf{Préconditions~:} L'utilisateur est connecté (UC04) et a défini un
+point de départ (sa position GPS ou une entité) et une destination.\\[2pt]
+\textbf{Postconditions~:} Un itinéraire réel (distance, durée, tracé,
+étapes) est calculé et affiché sur la carte~; le visiteur peut ensuite
+démarrer la navigation guidée en~3D.\\[2pt]
+\textbf{Scénario nominal~:}
+\begin{enumerate}[itemsep=1pt, topsep=2pt, leftmargin=1.2cm]
+  \item Le visiteur ouvre l'onglet \og Parcours \fg{}, définit départ,
+    destination et mode de déplacement (voiture, vélo, à pied).
+  \item Le frontend envoie une requête \texttt{POST~/api/visitor/itineraires/route/}.
+  \item Le backend interroge successivement OSRM puis Valhalla
+    (section~\ref{ssec:justification-algo})~; en cas de double échec, un
+    calcul Haversine est appliqué en repli.
+  \item Le tracé, la distance et la durée sont renvoyés et dessinés sur la
+    carte Leaflet, avec les instructions virage-par-virage.
+\end{enumerate}
+\textbf{Scénario alternatif~:} le visiteur clique sur \og Démarrer la
+navigation \fg{}~$\rightarrow$ enchaîne vers la vue~3D guidée (suivi GPS en
+temps réel, décrite en section~\ref{ssec:res-avance}).
+\end{ucfiche}
+
+\begin{ucfiche}{UC10}{Gérer les comptes utilisateurs}
+\textbf{Acteur~:} Administrateur SUPER (tout compte)~; administrateurs
+REGION et DISTRICT (comptes de leur périmètre uniquement).\\[2pt]
+\textbf{Préconditions~:} L'administrateur est authentifié et dispose des
+droits de gestion des comptes.\\[2pt]
+\textbf{Postconditions~:} Le compte administrateur est créé, modifié ou
+désactivé, avec un mot de passe temporaire à changer à la première
+connexion.\\[2pt]
+\textbf{Scénario nominal~:}
+\begin{enumerate}[itemsep=1pt, topsep=2pt, leftmargin=1.2cm]
+  \item L'administrateur accède à la gestion des comptes et sélectionne
+    \og Créer un administrateur \fg{}.
+  \item Il saisit les informations du compte (identité, rôle, périmètre
+    synodal --- limité à son propre périmètre pour REGION et DISTRICT).
+  \item Le backend applique le contrôle RBAC hiérarchique~: un
+    administrateur REGION ne peut créer que des comptes DISTRICT ou
+    PAROISSE de sa propre région.
+  \item Le compte est créé avec un mot de passe temporaire~; l'indicateur
+    de première connexion force son changement dès la prochaine connexion.
+\end{enumerate}
+\end{ucfiche}
 
 %------------------------------------------------------------
 \subsection{Diagramme de Classes Métier}
@@ -1707,11 +2153,19 @@ identifiées~:
 \subsection{Diagramme d'Activité}
 \label{ssec:activite}
 
-Le diagramme d'activité  modélise le flux de
-traitement du processus d'import de données depuis Excel --- le processus métier
-le plus critique et le plus complexe du système, car il constitue le seul point
-d'entrée de masse pour les données institutionnelles et implique une chaîne de
-validation multi-étapes avant toute persistance.
+Le diagramme d'activité modélise le flux de traitement du processus d'import
+de données depuis Excel tel que conçu et implémenté lors de la phase initiale
+du projet --- le processus métier le plus critique et le plus complexe du
+système à cette étape, car il constituait alors le seul point d'entrée de
+masse pour les données institutionnelles et impliquait une chaîne de
+validation multi-étapes avant toute persistance. L'audit approfondi des
+données sources (section~\ref{sec:audit-donnees}) a toutefois révélé des
+incohérences trop nombreuses pour être fiabilisées par une validation
+automatique~: ce module a donc été retiré de la version finale au profit
+d'une saisie directement contrôlée dans l'interface d'administration. Ce
+diagramme est conservé ici à titre de documentation de conception, la
+logique de validation multi-étapes qu'il décrit ayant directement inspiré
+les contrôles de saisie de l'interface actuelle.
 
 Le flux se déroule en cinq phases~: (1)~téléversement et validation du format
 du fichier Excel~; (2)~extraction et validation ligne par ligne (coordonnées GPS,
@@ -2066,8 +2520,9 @@ pour A\* (section~\ref{ssec:astar-heuristique}).
 
 \subsubsection{Algorithme de Dijkstra}
 
-L'algorithme de \textbf{Dijkstra} (1956) résout le problème~\eqref{eq:plus-court-chemin}
-pour un graphe à poids positifs. Il maintient, pour chaque sommet $v$, une
+L'algorithme de \textbf{Dijkstra}~[16], publié en 1959, résout le
+problème~\eqref{eq:plus-court-chemin} pour un graphe à poids positifs. Il
+maintient, pour chaque sommet $v$, une
 distance provisoire $\delta(v)$ --- le meilleur coût connu pour atteindre $v$
 depuis $s$ --- initialisée à $\delta(s) = 0$ et $\delta(v) = +\infty$ pour
 tout $v \neq s$. À chaque itération, l'algorithme extrait d'une file de
@@ -2111,7 +2566,7 @@ l'heuristique A\* puis aux pré-calculs décrits ci-après.
 \subsubsection{Algorithme A\* et heuristique admissible}
 \label{ssec:astar-heuristique}
 
-L'algorithme \textbf{A\*} (A-star) améliore Dijkstra en orientant la
+L'algorithme \textbf{A\*}~[17] (A-star), publié en 1968, améliore Dijkstra en orientant la
 recherche vers la destination $t$ au moyen d'une \textbf{heuristique}
 $h : V \rightarrow \mathbb{R}^{+}$. Pour chaque sommet $v$ exploré, A\*
 calcule~:
@@ -2199,12 +2654,13 @@ Contraction Hierarchies & Pré-calcul assurant une réponse en temps réel \\
 \medskip
 \noindent\textbf{Bilan du chapitre.}
 Ce chapitre a formalisé l'ensemble des besoins de la plateforme en
-vingt-deux exigences fonctionnelles et dix exigences non-fonctionnelles,
+vingt-quatre exigences fonctionnelles et douze exigences non-fonctionnelles,
 couvrant les domaines de l'authentification, de la cartographie, de
-l'administration des entités, de l'import/export, des statistiques, de la
-traçabilité et des services du visiteur authentifié. Les six modèles UML
+l'administration des entités, de l'export, des statistiques, de la
+traçabilité, de la gestion hiérarchique des comptes et des services du
+visiteur authentifié --- dont l'itinéraire réel et la navigation~3D. Les six modèles UML
 d'analyse --- contexte (six acteurs), packages, cas d'utilisation
-(UC01--UC06), classes métier et activité --- ont défini avec précision les
+(UC01--UC29), classes métier et activité --- ont défini avec précision les
 acteurs, les modules, les interactions et les entités du domaine institutionnel.
 La section de conception a complété cette analyse en présentant l'architecture
 technique à cinq services Docker, le modèle de données PostGIS (quinze tables),
@@ -2236,8 +2692,9 @@ l'implémentation.
     configuration réseau Docker Compose.
   \item \textbf{Section~\ref{sec:resultats} --- Résultats}~:
     présentation annotée des interfaces fonctionnelles~: carte interactive,
-    authentification, tableaux de bord par rôle, import/export et journal
-    d'audit~; confrontation aux exigences du Chapitre~2.
+    authentification, tableaux de bord par rôle, export, journal d'audit,
+    itinéraire réel et navigation~3D~; confrontation aux exigences du
+    Chapitre~2.
   \item \textbf{Section~\ref{sec:discussion} --- Discussion}~:
     vérification des objectifs, analyse critique des forces et des limites
     de la solution réalisée.
@@ -2272,7 +2729,7 @@ hiérarchique, publication OGC) et contraintes de maintenabilité
 
 \subsubsection{Django~5 et Django REST Framework}
 
-Django~5~[16] a été retenu comme framework backend principal
+Django~5~[18] a été retenu comme framework backend principal
 pour trois raisons déterminantes. En premier lieu, son extension spatiale
 native GeoDjango offre une intégration directe avec PostGIS~: les requêtes
 de distance (\texttt{Distance()}), les filtres spatiaux (\texttt{contains},
@@ -2305,7 +2762,7 @@ ces fonctionnalités spatiales et une intégration aussi mature avec GeoDjango.
 
 \subsubsection{GeoServer~2.26}
 
-GeoServer~2.26~[17] a été retenu pour la publication des
+GeoServer~2.26~[19] a été retenu pour la publication des
 couches cartographiques institutionnelles au regard de sa conformité native
 aux protocoles OGC WMS~1.3.0 et WFS~2.0.0, qui garantissent
 l'interopérabilité avec tout client cartographique standard. La
@@ -2318,7 +2775,7 @@ et ne répondait pas aux exigences ENF05 d'interopérabilité OGC.
 
 \subsubsection{Next.js~16}
 
-Next.js~16~[18] avec l'App Router a été retenu pour le frontend
+Next.js~16~[20] avec l'App Router a été retenu pour le frontend
 pour sa capacité à combiner rendu côté serveur (\textit{SSR}) et rendu côté
 client (\textit{CSR}) dans la même application. Le \textit{SSR} est
 utilisé pour les pages d'administration~: les données sensibles ne sont
@@ -2332,7 +2789,7 @@ frontend.
 
 \subsubsection{Leaflet.js et MarkerCluster}
 
-Leaflet.js~[19] a été retenu pour la bibliothèque
+Leaflet.js~[21] a été retenu pour la bibliothèque
 cartographique cliente pour sa légèreté (environ 42~Ko minifié), sa licence
 libre et l'étendue de son écosystème de plugins. Le plugin
 \texttt{Leaflet.MarkerCluster} implémente le regroupement automatique des
@@ -2341,9 +2798,30 @@ la densité des marqueurs rendrait la carte illisible aux niveaux de zoom
 nationaux. La prise en charge native des couches \textit{TileLayer.WMS}
 permet de consommer directement les couches GeoServer sans adaptation.
 
+\subsubsection{MapLibre~GL~JS}
+\label{ssec:justification-maplibre}
+
+\textbf{MapLibre~GL~JS}~[25] a été retenu pour assurer la vue de navigation
+guidée en trois dimensions (section~\ref{ssec:res-avance}), en complément de
+Leaflet qui reste la bibliothèque cartographique principale de
+l'application. Ce choix répond à un besoin que Leaflet ne couvre pas
+nativement~: le rendu vectoriel accéléré par \textbf{WebGL}, seul capable
+d'afficher une carte inclinée ($\textit{pitch}$) et pivotée dynamiquement
+selon le cap de déplacement de l'utilisateur, à la manière d'une application
+de navigation grand public. Trois raisons ont motivé ce choix plutôt qu'une
+alternative propriétaire (Google Maps, Mapbox GL)~: une licence entièrement
+libre et sans clé d'API~; la compatibilité directe avec les styles
+vectoriels ouverts (\textit{OpenFreeMap}), évitant toute dépendance à un
+fournisseur commercial~; et une empreinte limitée sur l'application
+principale, puisque le composant n'est chargé qu'à la demande
+(\textit{lazy loading}), au déclenchement d'une navigation, puis démonté
+immédiatement à son arrêt. La carte publique et les interfaces
+d'administration continuent ainsi de reposer exclusivement sur Leaflet~1.9,
+plus léger (42~Ko minifié) et suffisant pour un usage non immersif.
+
 \subsubsection{Redis~7 et Docker Compose}
 
-Redis~7~[20] assure deux fonctions complémentaires~:
+Redis~7~[22] assure deux fonctions complémentaires~:
 le stockage des sessions Django côté serveur (évitant leur persistance
 en base de données relationnelle) et la mise en cache des réponses API
 fréquentes. Docker Compose~[15] orchestre l'ensemble des
@@ -2372,12 +2850,12 @@ le calcul brut du plus court chemin à des \textbf{moteurs de routing
 externes, gratuits et open source}, construits sur les données
 \textbf{OpenStreetMap}~:
 \begin{itemize}[itemsep=2pt, topsep=4pt, leftmargin=1.5cm]
-  \item \textbf{OSRM} (\textit{Open Source Routing Machine}) --- instance
+  \item \textbf{OSRM}~[23] (\textit{Open Source Routing Machine}) --- instance
     publique de démonstration --- est sollicité en premier~: il implémente
     l'algorithme de Contraction Hierarchies décrit en
     section~\ref{ssec:dijkstra-astar} et répond en quelques centaines de
     millisecondes pour le mode voiture~;
-  \item \textbf{Valhalla} (instance publique FOSSGIS) est sollicité en
+  \item \textbf{Valhalla}~[24] (instance publique FOSSGIS) est sollicité en
     second recours~: il est \textbf{multimodal} (voiture, vélo, piéton) et
     implémente la même famille d'algorithmes --- A\* bidirectionnel
     accéléré par hiérarchies --- avec un support natif des trois profils de
@@ -2498,7 +2976,7 @@ PostGIS          & 3.4    & Extension spatiale~; types géométriques~; requête
 GeoServer        & 2.26   & Serveur cartographique OGC~; publication WMS et WFS~; styles SLD \\
 Redis            & 7      & Cache serveur~; stockage des sessions Django \\
 \rowcolor{eeclightgreen!60}
-Next.js          & 14     & Framework frontend React~; App Router~; SSR et CSR \\
+Next.js          & 16     & Framework frontend React~; App Router~; SSR et CSR \\
 TypeScript       & 5.x    & Typage statique du code frontend \\
 \rowcolor{eeclightgreen!60}
 Tailwind CSS     & 3.x    & Framework de mise en forme CSS utilitaire \\
@@ -2803,12 +3281,27 @@ grands modules~: interface publique cartographique, authentification,
 administration multi-niveaux et gestion des données.
 
 %-----
+\subsection{Page d'Accueil (\textit{Landing Page})}
+\label{ssec:res-landing}
+
+La page d'accueil est la première page présentée à tout visiteur accédant à
+la plateforme. Elle met en avant trois actions principales~: se connecter
+(administrateurs et visiteurs enregistrés), s'inscrire (nouveau visiteur) et
+explorer la carte publique sans authentification.
+
+\begin{figure}[H]
+  \center
+  \includegraphics[width=1\textwidth]{Capture d'écran 2026-07-03 035902.png}
+  \caption{Page d'accueil de la plateforme}
+  \label{fig:res-landing}
+\end{figure}
+
 \subsection{Interface Publique Cartographique}
 \label{ssec:res-carte}
 
 L'interface publique est accessible sans authentification depuis la racine
-de la plateforme. Elle répond directement aux exigences EF03, EF04, EF05
-et EF16 relatives à la cartographie interactive.
+de la plateforme. Elle répond directement aux exigences EF03, EF04, EF05,
+EF15 et EF16 relatives à la cartographie interactive et à l'accès public.
 
 La Figure~\ref{fig:res-carte-publique} illustre la carte au niveau de zoom
 national~: les 858~paroisses importées sont regroupées en indicateurs de
@@ -2822,10 +3315,9 @@ sans rechargement de page.
 
 \begin{figure}[H]
   \center
-  \includegraphics[width=1\textwidth]{deploiement.png}
-   \captionInterface{ publique Carte interactive 
-   Compose}
-  \label{fig:diag-contexte}
+  \includegraphics[width=1\textwidth]{Capture d'écran 2026-07-03 003106.png}
+  \caption{Carte interactive publique --- vue nationale avec clustering}
+  \label{fig:res-carte-publique}
 \end{figure}
 
 La Figure~\ref{fig:res-popup} montre le panneau de détail qui s'affiche lors
@@ -2837,9 +3329,8 @@ sans connexion.
 \begin{figure}[H]
   \center
   \includegraphics[width=1\textwidth]{indi.png}
-  \captionInterface{  carte vu sous le detail
-Compose}
-  \label{fig:diag-contexte}
+  \caption{Panneau de détail d'une entité, affiché depuis la carte}
+  \label{fig:res-popup}
 \end{figure}
 
 %-----
@@ -2856,11 +3347,11 @@ passe est la source de l'erreur, conformément aux bonnes pratiques de
 sécurité recommandées par l'OWASP~[11]. Pour un compte dont
 l'indicateur de première connexion est actif, la redirection s'effectue
 automatiquement vers le formulaire de changement de mot de passe.
-begin{figure}[H]
+\begin{figure}[H]
   \center
   \includegraphics[width=1\textwidth]{Capture d'écran 2026-05-28 060539.png}
-  \captionInterface{ Interface d’administration — Tableau de bord de l’administrateur national}
-  \label{fig:diag-contexte}
+  \caption{Page de connexion de l'espace d'administration}
+  \label{fig:res-login}
 \end{figure}
 
  
@@ -2883,11 +3374,11 @@ indicateurs sont calculés dynamiquement par le backend en filtrant les
 données selon le périmètre du rôle~: un administrateur régional voit les
 mêmes indicateurs mais limités à sa région synodale.
 
-begin{figure}[H]
+\begin{figure}[H]
   \center
   \includegraphics[width=1\textwidth]{Capture d'écran 2026-05-28 060821.png}
-  \captionInterface{ Interface d’administration — Tableau de bord de l’administrateur national}
-  \label{fig:diag-contexte}
+  \caption{Tableau de bord de l'administrateur national (rôle SUPER)}
+  \label{fig:res-dashboard}
 \end{figure}
 
 La Figure~\ref{fig:res-paroisses} présente l'interface de gestion des
@@ -2898,33 +3389,34 @@ d'accès RBAC restreint les opérations à la liste des paroisses appartenant
 au périmètre synodal de l'utilisateur~: un administrateur de district ne
 peut visualiser ni modifier les paroisses d'un autre district.
 
-begin{figure}[H]
+\begin{figure}[H]
   \center
   \includegraphics[width=1\textwidth]{paroisse.png}
-  \captionInterface{ nterface d’administration — Gestion des paroisses avec contrôle RBA}
-  \label{fig:diag-contexte}
+  \caption{Interface d'administration --- Gestion des paroisses avec contrôle RBAC}
+  \label{fig:res-paroisses}
 \end{figure}
 
 %-----
-\subsection{Module d'Import et d'Export}
+\subsection{Module d'Export}
 \label{ssec:res-import}
 
-Le module d'import (Figure~\ref{fig:res-import}) répond à l'exigence EF10~:
-il permet de charger les fichiers Excel fournis par les services de l'EEC
-directement dans la base de données, après une validation ligne par ligne.
-Le rapport d'import affiché après traitement détaille le nombre de lignes
-insérées avec succès, le nombre de lignes rejetées et, pour chaque
-rejet, la raison précise (coordonnées GPS hors territoire, district
-inexistant, doublon détecté). Cette traçabilité de l'import répond
-directement au problème de qualité des données identifié lors de l'audit
-préliminaire~: 480~paroisses sources sans coordonnées GPS valides ont ainsi
-été identifiées et signalées lors de la première importation.
+\noindent\textit{Note de version~:} une version antérieure de la plateforme
+proposait également un module d'import de fichiers Excel~; il a été retiré
+du périmètre fonctionnel (voir section~\ref{sec:audit-donnees}) au profit
+d'une saisie directement contrôlée dans l'interface d'administration, jugée
+plus fiable au regard des incohérences relevées dans les fichiers sources.
+Seul l'export subsiste dans la version actuelle.
 
-begin{figure}[H]
+Le module d'export (Figure~\ref{fig:res-import}) répond à l'exigence EF10~:
+il permet de télécharger les listes d'entités --- paroisses, œuvres,
+ouvriers --- filtrées selon le périmètre de l'utilisateur, au format Excel
+(\texttt{.xlsx}) ou PDF, directement depuis l'interface d'administration.
+
+\begin{figure}[H]
   \center
   \includegraphics[width=1\textwidth]{import.png}
-  \captionInterface{ Module d’import — Chargement de données Excel et rapport de validation}
-  \label{fig:diag-contexte}
+  \caption{Module d'export --- Téléchargement des données au format Excel et PDF}
+  \label{fig:res-import}
 \end{figure}
 
 %-----
@@ -2939,7 +3431,7 @@ avec l'auteur de l'action, le type d'entité concernée, l'identifiant de
 l'objet et l'horodatage UTC. Des filtres par type d'action, type d'entité
 et période permettent de cibler une recherche. En cliquant sur une entrée,
 l'administrateur accède au détail de la modification~: valeurs avant et
-après la mise à jour. Ce module répond aux exigences EF14 et EF15 relatives
+après la mise à jour. Ce module répond aux exigences EF13 et EF14 relatives
 à la traçabilité, et constitue l'un des apports distinctifs par rapport
 à la plateforme GeoEEC~v1.0 qui ne disposait d'aucun mécanisme d'audit.
 
@@ -2959,12 +3451,21 @@ fonctionnalités destinées au visiteur authentifié, directement issues de la
 modélisation mathématique du chapitre précédent (section~\ref{sec:modelisation-math})
 et de son implémentation algorithmique (section~\ref{ssec:justification-algo}).
 
+\begin{figure}[H]
+  \center
+  \includegraphics[width=1\textwidth]{Capture d'écran 2026-07-03 002903.png}
+  \caption{Jtinéraire Réel}
+  \label{fig:res-audit}
+\end{figure}
+
 \subsubsection{Calcul d'itinéraire réel sur le réseau routier}
 
 L'onglet \og Parcours \fg{} permet au visiteur de définir un point de départ
 --- sa position GPS (via \texttt{navigator.geolocation}) ou une entité de la
 carte --- et une destination --- une paroisse ou une œuvre --- puis de
 choisir un mode de déplacement (voiture, vélo, à pied). Le point d'entrée
+
+
 \texttt{POST~/api/visitor/itineraires/route/} invoque la chaîne de
 résilience OSRM~$\rightarrow$~Valhalla~$\rightarrow$~Haversine décrite en
 section~\ref{ssec:justification-algo} et renvoie la distance, la durée, le
@@ -2974,6 +3475,13 @@ frontend dessine ce tracé sur la carte Leaflet~: un contour sombre
 marqueurs de départ et d'arrivée distincts, et un cadrage automatique de la
 vue sur l'ensemble du trajet.
 
+\begin{figure}[H]
+  \center
+  \includegraphics[width=1\textwidth]{Capture d'écran 2026-07-03 002823.png}
+  \caption{Calcul d’itinéraire réel sur le réseau routier}
+  \label{fig:res-audit}
+\end{figure}
+
 \subsubsection{Navigation~3D en temps réel}
 
 Une fois l'itinéraire calculé, le visiteur peut démarrer une
@@ -2982,7 +3490,7 @@ une application de navigation grand public. Cette vue est assurée par un
 composant dédié, chargé paresseusement (\textit{lazy loading}) uniquement au
 déclenchement de la navigation --- le reste de l'application demeure sur
 Leaflet en 2D, conformément à l'exigence de légèreté du cahier des charges.
-Elle repose sur \textbf{MapLibre~GL~JS} (rendu WebGL), qui permet une
+Elle repose sur \textbf{MapLibre~GL~JS}~[25] (rendu WebGL), qui permet une
 inclinaison de caméra ($\textit{pitch} = 62°$) et une rotation dynamique
 selon le cap de déplacement, à la différence de Leaflet qui ne rend qu'en
 projection plane.
@@ -3015,18 +3523,20 @@ est détectée lorsque la distance restante descend sous un seuil de
 30~mètres, ce qui déclenche un message de confirmation puis la fermeture
 automatique de la vue~3D.
 
-\subsubsection{Nouvelles bibliothèques intégrées}
+\begin{figure}[H]
+  \center
+  \includegraphics[width=1\textwidth]{Capture d'écran 2026-07-03 003407.png}
+  \caption{demarage de nanvigation 3D}
+  \label{fig:res-audit}
+\end{figure}
 
-Ces fonctionnalités ont nécessité l'ajout de deux dépendances au frontend,
-récapitulées dans le tableau~\ref{tab:outils}~:
-\texttt{maplibre-gl} pour le rendu cartographique~3D par WebGL, et
-l'utilisation des services publics \textbf{OSRM} et \textbf{Valhalla} côté
-backend (aucune bibliothèque supplémentaire n'étant requise, ces services
-étant consommés par simples requêtes HTTP dans le module
-\texttt{routing.py}). Ce choix préserve la légèreté de la pile logicielle~:
-la carte 2D principale continue de reposer sur Leaflet~1.9 (42~Ko minifié),
-tandis que MapLibre~GL n'est chargé --- à la demande --- que pour la durée
-effective d'une navigation active.
+
+
+
+Le choix technologique de MapLibre~GL~JS et son rôle dans l'architecture de
+la plateforme sont justifiés en section~\ref{ssec:justification-maplibre}~;
+le tableau~\ref{tab:outils} en récapitule la version et le rôle aux côtés
+des autres outils du projet.
 
 %------------------------------------------------------------
 \section{Discussion}
@@ -3167,6 +3677,44 @@ La configuration Docker Compose en cinq services garantit que l'environnement
 d'exécution est identique en développement et en production~: plus aucune
 divergence de versions de bibliothèques ou de configuration système ne peut
 causer des défaillances à l'installation.
+
+%-----
+\subsection{Difficultés Rencontrées}
+\label{ssec:disc-difficultes}
+
+Si l'implémentation technique --- backend, cartographie, RBAC, algorithmes
+de routing --- a représenté un volume de travail conséquent, ce n'est pas la
+difficulté qui a le plus mis à l'épreuve la rigueur méthodologique de ce
+projet. La phase d'\textbf{audit et de préparation des données}
+(section~\ref{sec:audit-donnees}) a constitué, de loin, le défi le plus
+exigeant~: contrairement à un développement logiciel classique où les
+structures de données sont définies dès la conception, ce projet a dû
+composer avec des données réelles, produites sur le terrain par des
+services différents, à des dates différentes, sans référentiel commun.
+
+Trois difficultés se sont révélées particulièrement coûteuses en temps
+d'analyse. Premièrement, l'absence d'identifiant commun entre le fichier
+d'enquête de géolocalisation et le référentiel officiel de catégorisation a
+imposé le développement d'un algorithme de rapprochement flou
+(\textit{fuzzy matching}) plutôt qu'une simple jointure~: sur les
+516~paroisses de l'enquête, seules 267~présentaient un nom rigoureusement
+identique dans les deux sources, la comparaison textuelle approchée ayant
+permis d'en récupérer 66~supplémentaires. Deuxièmement, l'inversion des
+colonnes de coordonnées GPS dans le fichier source --- \texttt{Coord\_x}
+contenant en réalité la latitude --- est le type d'erreur silencieuse la
+plus dangereuse~: elle ne provoque aucune erreur technique visible, mais
+place chaque paroisse concernée à une position géographique incorrecte si
+elle n'est pas détectée et corrigée en amont. Troisièmement, l'hétérogénéité
+structurelle des fichiers (tableau croisé pour les œuvres, enregistrements
+composites pour les ouvriers) a nécessité des traitements de restructuration
+spécifiques à chaque source, aucune approche générique n'étant applicable.
+
+Cette phase, bien qu'invisible dans l'interface finale de la plateforme,
+constitue une part significative de la valeur ajoutée du projet~: une
+plateforme cartographique n'a de valeur que si les données qu'elle expose
+sont fiables, et c'est précisément ce travail de fiabilisation --- documenté,
+outillé et reproductible plutôt qu'artisanal --- qui conditionne la
+pertinence de l'ensemble des fonctionnalités présentées dans ce chapitre.
 
 %-----
 \subsection{Limites et Contraintes}
@@ -3361,11 +3909,16 @@ même numéro à chacune de ses citations ultérieures dans le rapport.
 [13] & R.~T. Fielding, \textit{Architectural Styles and the Design of Network-based Software Architectures}, thèse de doctorat, University of California, Irvine, 2000. \\
 [14] & T.~Christie, \textit{Django REST Framework Documentation}, 2024. Disponible sur~: \url{https://www.django-rest-framework.org} \\
 [15] & Docker, Inc., \textit{Docker Documentation}, 2024. Disponible sur~: \url{https://docs.docker.com} \\
-[16] & Django Software Foundation, \textit{Django Documentation}, version~5.0, 2024. Disponible sur~: \url{https://docs.djangoproject.com/en/5.0/} \\
-[17] & GeoServer Development Team, \textit{GeoServer 2.26 User Manual}, 2024. Disponible sur~: \url{https://docs.geoserver.org/stable/en/user/} \\
-[18] & Vercel, \textit{Next.js Documentation}, version~14, 2024. Disponible sur~: \url{https://nextjs.org/docs} \\
-[19] & V.~Agafonkin, \textit{Leaflet: An open-source JavaScript library for mobile-friendly interactive maps}, 2024. Disponible sur~: \url{https://leafletjs.com} \\
-[20] & Redis Ltd., \textit{Redis Documentation}, 2024. Disponible sur~: \url{https://redis.io/docs} \\
+[16] & E.~W. Dijkstra, «~A note on two problems in connexion with graphs~», \textit{Numerische Mathematik}, vol.~1, n\textsuperscript{o}~1, p.~269--271, 1959. \\
+[17] & P.~E. Hart, N.~J. Nilsson, B.~Raphael, «~A Formal Basis for the Heuristic Determination of Minimum Cost Paths~», \textit{IEEE Transactions on Systems Science and Cybernetics}, vol.~4, n\textsuperscript{o}~2, p.~100--107, 1968. \\
+[18] & Django Software Foundation, \textit{Django Documentation}, version~5.0, 2024. Disponible sur~: \url{https://docs.djangoproject.com/en/5.0/} \\
+[19] & GeoServer Development Team, \textit{GeoServer 2.26 User Manual}, 2024. Disponible sur~: \url{https://docs.geoserver.org/stable/en/user/} \\
+[20] & Vercel, \textit{Next.js Documentation}, version~16, 2024. Disponible sur~: \url{https://nextjs.org/docs} \\
+[21] & V.~Agafonkin, \textit{Leaflet: An open-source JavaScript library for mobile-friendly interactive maps}, 2024. Disponible sur~: \url{https://leafletjs.com} \\
+[22] & Redis Ltd., \textit{Redis Documentation}, 2024. Disponible sur~: \url{https://redis.io/docs} \\
+[23] & OSRM Contributors, \textit{Project OSRM --- Open Source Routing Machine}, 2024. Disponible sur~: \url{https://project-osrm.org} \\
+[24] & Valhalla Contributors, \textit{Valhalla Routing Engine Documentation}, FOSSGIS, 2024. Disponible sur~: \url{https://valhalla.github.io/valhalla/} \\
+[25] & MapLibre Organization, \textit{MapLibre GL JS Documentation}, 2024. Disponible sur~: \url{https://maplibre.org/maplibre-gl-js/docs/} \\
 \end{longtable}
 
 \end{document}

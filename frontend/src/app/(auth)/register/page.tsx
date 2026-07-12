@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import AuthVerse from '@/components/landing/AuthVerse';
 
 const BACKEND = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api')
   .replace(/\/api\/?$/, '');
@@ -31,6 +32,10 @@ export default function RegisterPage() {
     e.preventDefault();
     setError('');
 
+    if (!firstName.trim() || !lastName.trim()) {
+      setError('Veuillez renseigner votre prénom et votre nom.');
+      shake600(); return;
+    }
     if (password.length < 8) {
       setError('Le mot de passe doit contenir au moins 8 caractères.');
       shake600(); return;
@@ -85,11 +90,7 @@ export default function RegisterPage() {
             <img src="/logo-eec.png" alt="EEC" style={{ width:40, height:40, objectFit:'contain', borderRadius:6, padding:4, background:'rgba(255,255,255,0.12)' }} />
             <div>EEC Cameroun<small>Plateforme SIG · Visiteurs</small></div>
           </div>
-          <div className="ls-quote">
-            <q>" Vous n&apos;êtes plus des étrangers ni des gens de passage,</q>
-            <q>mais vous êtes <em>concitoyens des saints,</em> membres de la famille de Dieu. "</q>
-            <p className="ls-ref">— Éphésiens 2 : 19</p>
-          </div>
+          <AuthVerse />
         </div>
       </div>
 
@@ -132,14 +133,14 @@ export default function RegisterPage() {
                   <label htmlFor="rs-fn">Prénom</label>
                   <div className="ls-iw">
                     <IconUser />
-                    <input id="rs-fn" type="text" value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Jean" autoComplete="given-name" />
+                    <input id="rs-fn" type="text" value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Jean" autoComplete="given-name" required />
                   </div>
                 </div>
                 <div className="ls-field">
                   <label htmlFor="rs-ln">Nom</label>
                   <div className="ls-iw">
                     <IconUser />
-                    <input id="rs-ln" type="text" value={lastName} onChange={e => setLastName(e.target.value)} placeholder="ATEBA" autoComplete="family-name" />
+                    <input id="rs-ln" type="text" value={lastName} onChange={e => setLastName(e.target.value)} placeholder="ATEBA" autoComplete="family-name" required />
                   </div>
                 </div>
               </div>

@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import { createPortal } from 'react-dom';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { I } from './icons';
 import { Avatar } from './atoms';
 
@@ -25,9 +25,9 @@ const PAGE_META: Record<string, { title: string; crumb: string }> = {
 };
 
 const SCOPE_LABELS: Record<string, string> = {
-  district: 'Console District',
-  paroisse: 'Console Paroisse',
-  regional: 'Console Régionale',
+  district: 'Bureau de District',
+  paroisse: 'Bureau de Paroisse',
+  regional: 'Bureau Régional',
 };
 
 interface MeUser {
@@ -63,10 +63,9 @@ function displayName(u: MeUser | null): string {
 
 export default function Topbar() {
   const pathname = usePathname();
-  const router   = useRouter();
 
   const seg    = pathname.split('/').filter(Boolean);
-  const scope  = SCOPE_LABELS[seg[1]] ?? 'Console Synodale';
+  const scope  = SCOPE_LABELS[seg[1]] ?? 'Bureau National';
   const key    = seg[seg.length - 1] || 'dashboard';
   const meta   = PAGE_META[key] || { title: 'EEC', crumb: '' };
 
@@ -170,22 +169,7 @@ export default function Topbar() {
             <I.chevD size={14} style={{ opacity: 0.6, transform: openUser ? 'rotate(180deg)' : 'none', transition: 'transform 200ms' }} />
           </div>
           {openUser && typeof document !== 'undefined' && createPortal(
-            <div ref={menuRef} className="menu" style={{ position: 'fixed', top: menuPos.top, right: menuPos.right, width: 240, zIndex: 1000 }}>
-              <div style={{ padding: '10px 14px 8px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{displayName(me)}</div>
-                <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 2 }}>{me?.email ?? '—'}</div>
-                <div style={{ fontSize: 10, color: '#5AC472', marginTop: 3, fontWeight: 500 }}>{me?.scope_label ?? '—'}</div>
-              </div>
-              <button onClick={() => { setOpenUser(false); router.push('/admin/parametres'); }}>
-                <I.user size={14}/>Mon profil
-              </button>
-              <button onClick={() => { setOpenUser(false); router.push('/admin/parametres'); }}>
-                <I.gear size={14}/>Paramètres
-              </button>
-              <button onClick={() => { setOpenUser(false); router.push('/admin/changer-mot-de-passe'); }}>
-                <I.shield size={14}/>Changer le mot de passe
-              </button>
-              <hr/>
+            <div ref={menuRef} className="menu" style={{ position: 'fixed', top: menuPos.top, right: menuPos.right, width: 200, zIndex: 1000 }}>
               <button className="danger" onClick={handleLogout}>
                 <I.logout size={14}/>Déconnexion
               </button>
