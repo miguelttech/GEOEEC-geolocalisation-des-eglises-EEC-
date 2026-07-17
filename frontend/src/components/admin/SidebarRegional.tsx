@@ -1,5 +1,6 @@
 'use client';
 import React from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { I } from './icons';
@@ -27,12 +28,7 @@ const NAV = [
 ];
 
 const EECLogo = ({ size = 32 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 48 48" fill="none">
-    <rect x="2" y="2" width="44" height="44" rx="6" fill="#0D2040" stroke="rgba(91,155,213,0.35)" strokeWidth="1.2"/>
-    <path d="M24 9v30M14 24h20" stroke="#F0F4F1" strokeWidth="2.4" strokeLinecap="round"/>
-    <circle cx="24" cy="24" r="3.5" fill="#5B9BD5"/>
-    <path d="M24 6l1.6 3.2 3.4.4-2.5 2.3.6 3.4-3.1-1.7-3.1 1.7.6-3.4-2.5-2.3 3.4-.4L24 6z" fill="#5B9BD5" opacity="0.85"/>
-  </svg>
+  <Image src="/logo-eec.png" alt="EEC" width={size} height={size} style={{ objectFit: 'contain' }} />
 );
 
 function LogoutBtn() {

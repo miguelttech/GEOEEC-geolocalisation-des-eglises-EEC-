@@ -214,17 +214,20 @@ export const Donut = ({ segments, total, label }: { segments: DonutSegment[]; to
 // ── StackedBars ───────────────────────────────────────────────────────────────
 interface StackKey { key: string; color: string; }
 export const StackedBars = ({ data, keys }: { data: Record<string, string|number>[]; keys: StackKey[] }) => {
-  const max = Math.max(...data.map(d => keys.reduce((s, k) => s + (d[k.key] as number), 0)));
+  if (!data.length) return <div style={{ height: 200 }} />;
+  const rawMax = Math.max(...data.map(d => keys.reduce((s, k) => s + (d[k.key] as number), 0)));
+  const max = rawMax > 0 ? rawMax : 1;
   return (
     <div style={{ display: 'flex', alignItems: 'flex-end', gap: 18, height: 200, padding: '8px 0 0' }}>
       {data.map((d, i) => {
         const total = keys.reduce((s, k) => s + (d[k.key] as number), 0);
+        const safeTotal = total > 0 ? total : 1;
         return (
           <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
             <div style={{ width: '100%', display: 'flex', flexDirection: 'column-reverse', height: (total / max) * 170, borderRadius: 3, overflow: 'hidden' }}
               data-tip={`${d.name} · ${total} paroisses`}>
               {keys.map(k => (
-                <div key={k.key} style={{ background: k.color, height: ((d[k.key] as number) / total) * 100 + '%' }} />
+                <div key={k.key} style={{ background: k.color, height: ((d[k.key] as number) / safeTotal) * 100 + '%' }} />
               ))}
             </div>
             <div style={{ fontSize: 10, color: 'var(--text-2)', textAlign: 'center', maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.name as string}</div>

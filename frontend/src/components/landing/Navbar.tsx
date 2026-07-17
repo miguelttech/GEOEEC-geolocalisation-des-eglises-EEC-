@@ -17,8 +17,8 @@ export default function Navbar() {
       <Link href="/" className="nav-brand">
         <EECLogo size={44} />
         <div>
-          <div>EEC Cameroun</div>
-          <small>Géolocalisation · SIG</small>
+          <div>GÉOLOCALISATION</div>
+          <small>Église Évangélique du Cameroun</small>
         </div>
       </Link>
 

@@ -1,0 +1,1028 @@
+\documentclass[12pt, a4paper]{report}
+
+%% ─── Encodage & langue ────────────────────────────────────────────────────────
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{csquotes}
+
+%% ─── Mise en page ─────────────────────────────────────────────────────────────
+\usepackage[top=2.5cm, bottom=2.5cm, left=3cm, right=2.5cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{parskip}
+\setlength{\parindent}{0pt}
+
+%% ─── Typographie & couleurs ───────────────────────────────────────────────────
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[dvipsnames, table]{xcolor}
+\definecolor{eecGold}{RGB}{200, 169, 81}
+\definecolor{eecNavy}{RGB}{26, 39, 68}
+\definecolor{eecGreen}{RGB}{46, 151, 68}
+\definecolor{eecLightGray}{RGB}{245, 245, 242}
+\definecolor{eecMid}{RGB}{107, 107, 90}
+
+%% ─── Graphiques & figures ─────────────────────────────────────────────────────
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, decorations.pathreplacing, graphs}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+
+%% ─── Mathématiques ────────────────────────────────────────────────────────────
+\usepackage{amsmath, amssymb, amsthm}
+\theoremstyle{definition}
+\newtheorem{definition}{Définition}[chapter]
+\newtheorem{theoreme}{Théorème}[chapter]
+\newtheorem{propriete}{Propriété}[chapter]
+\newtheorem{exemple}{Exemple}[chapter]
+
+%% ─── Code source ──────────────────────────────────────────────────────────────
+\usepackage{listings}
+\lstset{
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{eecNavy}\bfseries,
+  commentstyle=\color{eecMid}\itshape,
+  stringstyle=\color{eecGreen},
+  breaklines=true,
+  frame=single,
+  backgroundcolor=\color{eecLightGray},
+  rulecolor=\color{eecGold},
+  numbers=left,
+  numberstyle=\tiny\color{eecMid},
+  numbersep=8pt,
+  xleftmargin=16pt,
+}
+
+%% ─── Tableaux ─────────────────────────────────────────────────────────────────
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{array}
+\renewcommand{\arraystretch}{1.4}
+
+%% ─── En-têtes & pieds de page ─────────────────────────────────────────────────
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{eecMid}\nouppercase{\leftmark}}
+\fancyhead[R]{\small\color{eecMid}Rapport SMA — GeoEEC}
+\fancyfoot[C]{\color{eecMid}\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{eecGold}\leaders\hrule height \headrulewidth\hfill}}
+
+%% ─── Chapitres personnalisés ──────────────────────────────────────────────────
+\usepackage{titlesec}
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries\color{eecNavy}}
+  {\color{eecGold}\large\scshape Chapitre \thechapter}
+  {10pt}
+  {\Huge}
+  [\vspace{4pt}\color{eecGold}\titlerule[1.5pt]]
+
+\titleformat{\section}
+  {\normalfont\Large\bfseries\color{eecNavy}}
+  {\color{eecGold}\thesection}
+  {10pt}
+  {}
+
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\color{eecNavy!80}}
+  {\thesubsection}
+  {8pt}
+  {}
+
+%% ─── Boîtes colorées ──────────────────────────────────────────────────────────
+\usepackage{tcolorbox}
+\tcbuselibrary{skins, breakable}
+\tcbset{
+  defbox/.style={
+    colback=eecNavy!5,
+    colframe=eecNavy,
+    fonttitle=\bfseries,
+    title={Définition},
+    arc=3pt,
+    boxrule=0.8pt,
+  },
+  algobox/.style={
+    colback=eecGreen!5,
+    colframe=eecGreen,
+    fonttitle=\bfseries,
+    arc=3pt,
+    boxrule=0.8pt,
+  },
+  notebox/.style={
+    colback=eecGold!10,
+    colframe=eecGold,
+    fonttitle=\bfseries,
+    arc=3pt,
+    boxrule=0.8pt,
+  }
+}
+
+%% ─── Hyperliens & références ──────────────────────────────────────────────────
+\usepackage[hidelinks, colorlinks=false]{hyperref}
+\usepackage{cleveref}
+
+%% ─── Métadonnées PDF ──────────────────────────────────────────────────────────
+\hypersetup{
+  pdftitle={Rapport SMA — Analyse du Système GeoEEC},
+  pdfauthor={MBOUGANG IGOR FRED},
+  pdfsubject={Systèmes Multi-Agents et Systèmes Experts},
+}
+
+%% ═══════════════════════════════════════════════════════════════════════════════
+\begin{document}
+
+%% ─── PAGE DE GARDE ────────────────────────────────────────────────────────────
+\begin{titlepage}
+\begin{center}
+\vspace*{1cm}
+
+{\color{eecNavy}\rule{\linewidth}{2pt}}
+\vspace{0.5cm}
+
+{\color{eecMid}\large\scshape Université — Cours de Systèmes Multi-Agents}\\[0.4cm]
+{\color{eecMid}\normalsize Année académique 2025--2026}
+
+\vspace{1.5cm}
+
+{\color{eecGold}\Huge\bfseries GeoEEC}\\[0.3cm]
+{\color{eecNavy}\LARGE\bfseries Système de Géolocalisation des Églises}\\[0.3cm]
+{\color{eecNavy}\Large de l'Église Évangélique du Cameroun}
+
+\vspace{1cm}
+
+{\color{eecNavy}\rule{\linewidth}{0.5pt}}
+\vspace{0.5cm}
+
+{\color{eecMid}\Large Rapport d'analyse sous le prisme des}\\[0.2cm]
+{\color{eecNavy}\Large\bfseries Systèmes Multi-Agents \& Systèmes Experts}
+
+\vspace{0.5cm}
+{\color{eecNavy}\rule{\linewidth}{0.5pt}}
+
+\vspace{2cm}
+
+\begin{minipage}{0.45\textwidth}
+\begin{flushleft}
+{\color{eecMid}\small\scshape Rédigé par}\\[0.2cm]
+{\color{eecNavy}\bfseries MBOUGANG IGOR FRED}\\[0.1cm]
+{\color{eecMid}\small Développeur Frontend / Analyse SMA}
+\end{flushleft}
+\end{minipage}
+\hfill
+\begin{minipage}{0.45\textwidth}
+\begin{flushright}
+{\color{eecMid}\small\scshape Encadreur}\\[0.2cm]
+{\color{eecNavy}\bfseries [Nom de l'Encadreur]}\\[0.1cm]
+{\color{eecMid}\small Enseignant SMA}
+\end{flushright}
+\end{minipage}
+
+\vfill
+
+{\color{eecNavy}\rule{\linewidth}{2pt}}
+\vspace{0.3cm}
+{\color{eecMid}\small Bafoussam, Cameroun — Juillet 2026}
+
+\end{center}
+\end{titlepage}
+
+%% ─── RÉSUMÉ ───────────────────────────────────────────────────────────────────
+\chapter*{Résumé}
+\addcontentsline{toc}{chapter}{Résumé}
+\markboth{Résumé}{Résumé}
+
+Le présent rapport analyse le projet \textbf{GeoEEC} (Géolocalisation des Églises de l'Église Évangélique du Cameroun) sous le prisme des \textbf{Systèmes Multi-Agents (SMA)} et des \textbf{Systèmes Experts}. GeoEEC est une plateforme web complète permettant de géolocaliser, administrer et visualiser les 532 paroisses de l'EEC réparties sur 22 régions synodales et 134 districts à travers le Cameroun.
+
+L'analyse établit une corrélation profonde entre les concepts théoriques du cours de SMA — graphes, algorithmes de parcours, recherche heuristique, systèmes experts — et les choix architecturaux, algorithmiques et conceptuels effectivement réalisés dans le projet.
+
+Nous démontrons que la hiérarchie organisationnelle de l'EEC constitue un \textbf{graphe orienté acyclique} naturel, que la carte interactive implémente implicitement des algorithmes de type \textbf{Dijkstra} et \textbf{A*} via la bibliothèque Leaflet, et que le système de contrôle d'accès basé sur les rôles (RBAC) s'apparente à un \textbf{système expert à base de règles} dont le moteur d'inférence est le middleware Next.js.
+
+\vspace{0.5cm}
+\textbf{Mots-clés :} SMA, graphes orientés, algorithme de Dijkstra, A*, systèmes experts, RBAC, géolocalisation, Django, Next.js, GeoEEC.
+
+%% ─── ABSTRACT ─────────────────────────────────────────────────────────────────
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+\markboth{Abstract}{Abstract}
+
+This report analyzes the \textbf{GeoEEC} project (Geolocation of Churches of the Evangelical Church of Cameroon) through the lens of \textbf{Multi-Agent Systems (MAS)} and \textbf{Expert Systems}. GeoEEC is a comprehensive web platform for geolocating, administering and visualizing the 532 parishes of the ECC distributed across 22 synodal regions and 134 districts.
+
+The analysis establishes deep correlations between the theoretical concepts from the MAS course — graphs, traversal algorithms, heuristic search, expert systems — and the architectural, algorithmic and conceptual choices made in the project.
+
+\vspace{0.5cm}
+\textbf{Keywords:} MAS, directed graphs, Dijkstra algorithm, A*, expert systems, RBAC, geolocation, GeoEEC.
+
+%% ─── TABLE DES MATIÈRES ───────────────────────────────────────────────────────
+\tableofcontents
+
+%% ─── LISTE DES FIGURES ────────────────────────────────────────────────────────
+\listoffigures
+\addcontentsline{toc}{chapter}{Liste des figures}
+
+%% ─── INTRODUCTION ─────────────────────────────────────────────────────────────
+\chapter{Introduction générale}
+
+\section{Contexte et motivation}
+
+L'Église Évangélique du Cameroun (EEC), fondée en 1957, compte aujourd'hui plus de \textbf{532 paroisses} réparties dans 134 districts et 22 régions synodales sur l'ensemble du territoire camerounais. Avec plus de 685 ouvriers ecclésiaux, cette structure organisationnelle d'une telle ampleur soulève des défis considérables en matière de \textbf{gestion de l'information}, de \textbf{coordination territoriale} et de \textbf{prise de décision décentralisée}.
+
+C'est dans ce contexte qu'est né le projet \textbf{GeoEEC} : une plateforme de géolocalisation et d'administration numérique permettant à chaque niveau hiérarchique de l'EEC — du Synode Général jusqu'à la paroisse locale — de gérer, visualiser et mettre à jour les données de son périmètre.
+
+\section{Problématique}
+
+Comment les concepts théoriques des \textbf{Systèmes Multi-Agents} et des \textbf{Systèmes Experts} se manifestent-ils dans la conception et l'architecture d'une plateforme SIG (Système d'Information Géographique) de cette envergure ?
+
+\section{Objectifs du rapport}
+
+Ce rapport poursuit trois objectifs principaux :
+
+\begin{enumerate}
+  \item \textbf{Identifier} les structures de graphes présentes dans l'architecture de GeoEEC et les modéliser formellement.
+  \item \textbf{Analyser} les algorithmes de recherche et de parcours implicitement ou explicitement mis en œuvre dans la plateforme.
+  \item \textbf{Établir} une correspondance entre les mécanismes du système expert embarqué et les fondements théoriques des SMA.
+\end{enumerate}
+
+\section{Structure du rapport}
+
+Le rapport s'articule en \textbf{huit chapitres} :
+\begin{itemize}
+  \item Le \textbf{Chapitre 1} présente le projet GeoEEC dans sa globalité.
+  \item Les \textbf{Chapitres 2 et 3} posent les fondements théoriques des SMA et la modélisation par graphes.
+  \item Les \textbf{Chapitres 4 et 5} analysent les algorithmes de recherche et de plus court chemin.
+  \item Le \textbf{Chapitre 6} explore le système expert embarqué.
+  \item Le \textbf{Chapitre 7} formalise l'architecture multi-agents.
+  \item Le \textbf{Chapitre 8} dresse une analyse critique et ouvre des perspectives.
+\end{itemize}
+
+%% ─── CHAPITRE 1 ───────────────────────────────────────────────────────────────
+\chapter{Présentation du Projet GeoEEC}
+
+\section{Vision générale}
+
+GeoEEC est une application web fullstack développée avec la stack suivante :
+
+\begin{table}[H]
+\centering
+\caption{Stack technologique de GeoEEC}
+\begin{tabularx}{\textwidth}{>{\bfseries}l X l}
+\toprule
+Couche & Technologie & Rôle \\
+\midrule
+Frontend & Next.js 16.2.6 + TypeScript + Tailwind CSS & Interface utilisateur réactive \\
+Backend & Django 5 + GeoDjango + DRF & API REST \& logique métier \\
+Base de données & PostgreSQL 16 + PostGIS & Stockage \& requêtes géospatiales \\
+Cartographie & Leaflet.js + GeoServer & Rendu des couches cartographiques \\
+Cache & Redis 7 & Sessions et mises en cache \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Architecture fonctionnelle}
+
+L'application implémente un modèle de \textbf{contrôle d'accès basé sur les rôles (RBAC)} avec cinq niveaux hiérarchiques distincts :
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  node distance=1.8cm,
+  box/.style={rectangle, rounded corners=4pt, minimum width=3.5cm, minimum height=0.8cm, draw, thick, font=\small\bfseries},
+  arrow/.style={-Stealth, thick, color=eecGold}
+]
+\node[box, fill=eecNavy, text=white] (super) {SUPER ADMIN};
+\node[box, fill=eecNavy!70, text=white, below=of super] (region) {ADMIN RÉGIONAL};
+\node[box, fill=eecNavy!50, text=white, below=of region] (district) {ADMIN DISTRICT};
+\node[box, fill=eecNavy!30, below=of district] (paroisse) {ADMIN PAROISSE};
+\node[box, fill=eecGold!30, below=of paroisse] (visiteur) {VISITEUR};
+
+\draw[arrow] (super) -- (region) node[midway, right, font=\tiny, color=eecMid] {délègue};
+\draw[arrow] (region) -- (district) node[midway, right, font=\tiny, color=eecMid] {délègue};
+\draw[arrow] (district) -- (paroisse) node[midway, right, font=\tiny, color=eecMid] {délègue};
+\draw[arrow] (paroisse) -- (visiteur) node[midway, right, font=\tiny, color=eecMid] {accès limité};
+\end{tikzpicture}
+\caption{Hiérarchie des rôles dans GeoEEC}
+\end{figure}
+
+\section{Périmètre des données}
+
+Le système gère cinq entités principales :
+
+\begin{table}[H]
+\centering
+\caption{Entités principales et volumes de données}
+\begin{tabularx}{\textwidth}{>{\bfseries}l r X}
+\toprule
+Entité & Volume & Description \\
+\midrule
+Régions synodales & 22 & Découpage administratif de l'EEC \\
+Districts & 134 & Subdivision des régions \\
+Paroisses & 532 & Unités de base (PAROISSE, STATION, ANNEXE) \\
+Ouvriers & 665 & Personnel ecclésiastique \\
+Œuvres & 304 & Écoles, hôpitaux, terrains, universités \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+%% ─── CHAPITRE 2 ───────────────────────────────────────────────────────────────
+\chapter{Fondements Théoriques des Systèmes Multi-Agents}
+
+\section{Définition d'un agent}
+
+\begin{tcolorbox}[defbox, title=Agent Intelligent (Russell \& Norvig)]
+Un \textbf{agent} est toute entité qui perçoit son environnement à travers des \textit{capteurs} et agit sur cet environnement à travers des \textit{actionneurs}. Un agent intelligent choisit ses actions de manière à maximiser une mesure de performance.
+\end{tcolorbox}
+
+Dans le contexte de GeoEEC, un agent correspond à un \textbf{utilisateur connecté} (ou un processus automatisé) qui :
+\begin{itemize}
+  \item \textbf{Perçoit} : les données de sa base de données filtrées selon son périmètre (région, district, paroisse)
+  \item \textbf{Agit} : en créant, modifiant, validant ou exportant des données
+  \item \textbf{Communique} : via l'API REST Django avec d'autres agents
+\end{itemize}
+
+\section{Taxonomie des agents dans GeoEEC}
+
+La littérature SMA distingue plusieurs types d'agents. Nous les retrouvons tous dans GeoEEC :
+
+\begin{table}[H]
+\centering
+\caption{Types d'agents et correspondance dans GeoEEC}
+\begin{tabularx}{\textwidth}{>{\bfseries}l X X}
+\toprule
+Type d'agent & Caractéristiques & Correspondance GeoEEC \\
+\midrule
+Réactif simple & Agit selon règles stimulus-réponse & Visiteur (lecture seule) \\
+Réactif à modèle & Maintient un état interne & Admin Paroisse (scope limité) \\
+Basé sur buts & Planifie pour atteindre des objectifs & Admin District/Région \\
+Basé sur l'utilité & Maximise une fonction d'utilité & Super Admin (vision globale) \\
+Apprenant & S'adapte à l'environnement & Système de statistiques \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Environnement multi-agents}
+
+L'environnement de GeoEEC possède les propriétés suivantes :
+
+\begin{itemize}
+  \item \textbf{Partiellement observable} : chaque agent ne voit que son sous-graphe (région, district ou paroisse)
+  \item \textbf{Stochastique} : les données évoluent en temps réel (modifications concurrentes)
+  \item \textbf{Séquentiel} : les actions ont des effets durables (validations en cascade)
+  \item \textbf{Dynamique} : d'autres agents peuvent modifier l'environnement simultanément
+  \item \textbf{Continu} : la carte géographique est un espace continu $\mathbb{R}^2$
+\end{itemize}
+
+%% ─── CHAPITRE 3 ───────────────────────────────────────────────────────────────
+\chapter{Modélisation par Graphes de GeoEEC}
+
+\section{Rappels théoriques sur les graphes}
+
+\begin{definition}[Graphe]
+Un graphe $G = (V, E)$ est une paire composée d'un ensemble fini $V$ de \textbf{sommets} (ou nœuds) et d'un ensemble $E \subseteq V \times V$ d'\textbf{arêtes} (ou arcs). Si les arêtes ont un sens, le graphe est dit \textbf{orienté} (digraphe).
+\end{definition}
+
+\begin{definition}[Sous-graphe]
+Un graphe $G' = (V', E')$ est un \textbf{sous-graphe} de $G = (V, E)$ si $V' \subseteq V$ et $E' \subseteq E \cap (V' \times V')$.
+\end{definition}
+
+\begin{definition}[Graphe Hamiltonien]
+Un graphe $G$ est dit \textbf{hamiltonien} s'il existe un cycle passant une et une seule fois par chaque sommet de $G$. Un tel cycle est appelé \textit{cycle hamiltonien}.
+\end{definition}
+
+\section{Le graphe hiérarchique de l'EEC}
+
+La structure organisationnelle de l'EEC peut être formalisée comme un \textbf{graphe orienté acyclique (DAG)} :
+
+$$G_{EEC} = (V_{EEC}, E_{EEC})$$
+
+où :
+$$V_{EEC} = V_R \cup V_D \cup V_P$$
+$$V_R = \{r_1, r_2, \ldots, r_{22}\} \quad \text{(22 régions)}$$
+$$V_D = \{d_1, d_2, \ldots, d_{134}\} \quad \text{(134 districts)}$$
+$$V_P = \{p_1, p_2, \ldots, p_{532}\} \quad \text{(532 paroisses)}$$
+
+Les arcs représentent les relations d'appartenance hiérarchique :
+$$E_{EEC} = \{(r_i, d_j) \mid d_j \text{ appartient à } r_i\} \cup \{(d_j, p_k) \mid p_k \text{ appartient à } d_j\}$$
+
+\begin{propriete}
+$G_{EEC}$ est un \textbf{arbre} (cas particulier de DAG) car :
+\begin{enumerate}
+  \item Il est connexe (toute paroisse appartient à exactement un district)
+  \item Il est acyclique (pas de relation circulaire dans la hiérarchie)
+  \item $|E_{EEC}| = |V_{EEC}| - 1 = (22 + 134 + 532) - 1 = 687$
+\end{enumerate}
+\end{propriete}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  level 1/.style={sibling distance=5cm, level distance=1.8cm},
+  level 2/.style={sibling distance=2cm, level distance=1.8cm},
+  level 3/.style={sibling distance=1.2cm, level distance=1.5cm},
+  every node/.style={rectangle, draw, rounded corners=2pt, font=\tiny, fill=white},
+  edge from parent/.style={-Stealth, draw, color=eecGold}
+]
+\node[fill=eecNavy, text=white, font=\small\bfseries] {EEC Synode}
+  child { node[fill=eecNavy!60, text=white] {Région MIFI}
+    child { node {District BFS-Centre}
+      child { node[fill=eecGreen!20] {Paroisse $p_1$} }
+      child { node[fill=eecGreen!20] {Paroisse $p_2$} }
+    }
+    child { node {District BFS-Nord}
+      child { node[fill=eecGreen!20] {Paroisse $p_3$} }
+    }
+  }
+  child { node[fill=eecNavy!60, text=white] {Région MÉNOUA}
+    child { node {District Dschang}
+      child { node[fill=eecGreen!20] {Paroisse $p_k$} }
+    }
+  };
+\end{tikzpicture}
+\caption{Représentation partielle du graphe hiérarchique $G_{EEC}$}
+\end{figure}
+
+\section{Le graphe géographique}
+
+La carte interactive ajoute une dimension spatiale. Chaque paroisse possède des coordonnées GPS $(\lambda_i, \phi_i)$ (longitude, latitude). On définit alors un \textbf{graphe géographique pondéré} :
+
+$$G_{geo} = (V_P, E_{geo}, w)$$
+
+où $w : E_{geo} \rightarrow \mathbb{R}^+$ associe à chaque paire de paroisses la \textbf{distance géodésique} (formule de Haversine) :
+
+$$d(p_i, p_j) = 2R \cdot \arcsin\left(\sqrt{\sin^2\!\left(\frac{\phi_j - \phi_i}{2}\right) + \cos\phi_i \cdot \cos\phi_j \cdot \sin^2\!\left(\frac{\lambda_j - \lambda_i}{2}\right)}\right)$$
+
+avec $R = 6371$ km (rayon moyen de la Terre).
+
+\section{Sous-graphes et périmètres d'agents}
+
+Chaque agent (utilisateur) opère sur un \textbf{sous-graphe induit} de $G_{EEC}$ :
+
+\begin{table}[H]
+\centering
+\caption{Sous-graphes induits par rôle}
+\begin{tabularx}{\textwidth}{>{\bfseries}l X l}
+\toprule
+Rôle & Sous-graphe induit & Notation \\
+\midrule
+SUPER & $G_{EEC}$ complet & $G_{EEC}$ \\
+RÉGION & Sous-graphe induit par $V_{r_i} = \{r_i\} \cup D(r_i) \cup P(r_i)$ & $G[V_{r_i}]$ \\
+DISTRICT & Sous-graphe induit par $V_{d_j} = \{d_j\} \cup P(d_j)$ & $G[V_{d_j}]$ \\
+PAROISSE & Sous-graphe induit par $\{p_k\}$ & $G[\{p_k\}]$ \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+où $D(r_i)$ désigne les districts de la région $r_i$ et $P(d_j)$ les paroisses du district $d_j$.
+
+\section{Graphe hamiltonien et tournée des paroisses}
+
+\begin{exemple}[Tournée de visite]
+Supposons qu'un responsable régional souhaite visiter toutes les paroisses de sa région en parcourant le minimum de distance. Ce problème est exactement le \textbf{Problème du Voyageur de Commerce (PVC)} sur le graphe géographique $G_{geo}[V_{P(r_i)}]$.
+
+Un cycle hamiltonien $\mathcal{C}$ dans ce graphe correspond à un ordre de visite optimal tel que :
+$$\mathcal{C}^* = \arg\min_{\mathcal{C} \in \mathcal{H}} \sum_{(p_i, p_j) \in \mathcal{C}} d(p_i, p_j)$$
+
+où $\mathcal{H}$ est l'ensemble de tous les cycles hamiltoniens du graphe.
+\end{exemple}
+
+Ce problème NP-difficile peut être approché grâce aux algorithmes heuristiques étudiés dans le cours (A*, heuristiques gloutonnes), ce qui justifie leur intégration dans la carte interactive de GeoEEC.
+
+%% ─── CHAPITRE 4 ───────────────────────────────────────────────────────────────
+\chapter{Algorithmes de Recherche et de Parcours}
+
+\section{Parcours en Largeur (BFS)}
+
+\subsection{Principe théorique}
+
+\begin{tcolorbox}[algobox, title=Algorithme BFS (Breadth-First Search)]
+\begin{lstlisting}[language=Python, numbers=none]
+def BFS(G, source):
+    visited = set()
+    queue = deque([source])
+    visited.add(source)
+    result = []
+    while queue:
+        node = queue.popleft()
+        result.append(node)
+        for neighbor in G.adjacents(node):
+            if neighbor not in visited:
+                visited.add(neighbor)
+                queue.append(neighbor)
+    return result
+\end{lstlisting}
+\end{tcolorbox}
+
+\textbf{Complexité} : $O(|V| + |E|)$ en temps, $O(|V|)$ en espace.
+
+\subsection{Application dans GeoEEC : chargement de la carte régionale}
+
+Lorsqu'un Admin Régional accède à sa carte, l'API Django effectue une requête hiérarchique équivalente à un BFS depuis le nœud région :
+
+\begin{lstlisting}[language=Python, caption=Requête BFS implicite dans geo/views.py]
+# Niveau 0 : la region
+region = RegionSynodale.objects.get(pk=region_id)
+
+# Niveau 1 : les districts (voisins directs de la region)
+districts = District.objects.filter(region=region) \
+                            .prefetch_related('paroisses')
+
+# Niveau 2 : les paroisses (voisins des districts)
+paroisses = Paroisse.objects.filter(district__region=region) \
+                            .select_related('district')
+\end{lstlisting}
+
+La stratégie \texttt{prefetch\_related} de Django ORM réalise exactement un parcours BFS en \textbf{deux niveaux} : d'abord tous les districts (niveau 1), puis toutes les paroisses (niveau 2), en minimisant les aller-retours vers la base de données.
+
+\subsection{Application dans la recherche en temps réel}
+
+Le moteur de recherche de l'interface admin implémente également un BFS textuel :
+
+\begin{lstlisting}[language=Python, caption=Recherche BFS textuelle sur le graphe hiérarchique]
+def search_entities(query, user):
+    """Recherche en largeur : Region -> Districts -> Paroisses"""
+    results = {}
+
+    # Niveau 0 : recherche dans les regions
+    if user.role == 'SUPER':
+        results['regions'] = RegionSynodale.objects.filter(
+            nom__icontains=query
+        )
+
+    # Niveau 1 : recherche dans les districts
+    results['districts'] = District.objects.filter(
+        nom__icontains=query,
+        region__in=user.get_accessible_regions()
+    )
+
+    # Niveau 2 : recherche dans les paroisses
+    results['paroisses'] = Paroisse.objects.filter(
+        nom__icontains=query,
+        district__in=user.get_accessible_districts()
+    )
+    return results
+\end{lstlisting}
+
+\section{Parcours en Profondeur (DFS)}
+
+\subsection{Principe théorique}
+
+\begin{tcolorbox}[algobox, title=Algorithme DFS (Depth-First Search)]
+\begin{lstlisting}[language=Python, numbers=none]
+def DFS(G, source, visited=None):
+    if visited is None:
+        visited = set()
+    visited.add(source)
+    for neighbor in G.adjacents(source):
+        if neighbor not in visited:
+            DFS(G, neighbor, visited)
+    return visited
+\end{lstlisting}
+\end{tcolorbox}
+
+\textbf{Complexité} : $O(|V| + |E|)$ en temps.
+
+\subsection{Application dans GeoEEC : export hiérarchique}
+
+La fonctionnalité d'export CSV/Excel implémente un DFS pour sérialiser l'arbre complet :
+
+\begin{lstlisting}[language=Python, caption=Export DFS de la hiérarchie EEC]
+def export_hierarchy_dfs(region, writer):
+    """Parcours en profondeur pour l'export structuré"""
+    for district in region.districts.all():          # Branche 1
+        for paroisse in district.paroisses.all():    # Feuilles
+            writer.writerow([
+                region.nom,
+                district.nom,
+                paroisse.nom,
+                paroisse.niveau,
+                paroisse.nb_communiants,
+                paroisse.position.y if paroisse.position else '',
+                paroisse.position.x if paroisse.position else '',
+            ])
+\end{lstlisting}
+
+\section{Comparaison BFS vs DFS dans GeoEEC}
+
+\begin{table}[H]
+\centering
+\caption{Comparaison des parcours dans le contexte de GeoEEC}
+\begin{tabularx}{\textwidth}{>{\bfseries}l X X}
+\toprule
+Critère & BFS & DFS \\
+\midrule
+Stratégie & Niveau par niveau & Branche par branche \\
+Structure auxiliaire & File (FIFO) & Pile (LIFO) / Récursion \\
+Usage dans GeoEEC & Chargement carte, recherche & Export, validation en cascade \\
+Mémoire & $O(\text{max largeur})$ & $O(\text{max profondeur})$ \\
+Profondeur max dans EEC & 3 niveaux & 3 niveaux \\
+Pertinence & ++ (niveaux bien délimités) & + (export séquentiel) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+%% ─── CHAPITRE 5 ───────────────────────────────────────────────────────────────
+\chapter{Algorithmes de Plus Court Chemin}
+
+\section{Algorithme de Dijkstra}
+
+\subsection{Principe théorique}
+
+\begin{tcolorbox}[algobox, title=Algorithme de Dijkstra]
+\textbf{Entrée :} Graphe pondéré $G = (V, E, w)$ avec $w \geq 0$, source $s$.\\
+\textbf{Sortie :} Distance minimale de $s$ vers tout $v \in V$.
+
+\begin{lstlisting}[language=Python, numbers=none]
+def dijkstra(G, source):
+    dist = {v: float('inf') for v in G.vertices}
+    dist[source] = 0
+    pq = [(0, source)]   # (distance, sommet)
+
+    while pq:
+        d, u = heappop(pq)
+        if d > dist[u]:
+            continue
+        for v, w in G.neighbors(u):
+            if dist[u] + w < dist[v]:
+                dist[v] = dist[u] + w
+                heappush(pq, (dist[v], v))
+    return dist
+\end{lstlisting}
+\end{tcolorbox}
+
+\textbf{Complexité :} $O((|V| + |E|) \log |V|)$ avec un tas binaire.
+
+\subsection{Application dans GeoEEC : recherche de la paroisse la plus proche}
+
+La carte interactive propose une fonctionnalité de \textbf{localisation de la paroisse la plus proche} d'un point GPS donné. Ceci correspond exactement à Dijkstra sur $G_{geo}$ :
+
+\begin{lstlisting}[language=Python, caption=Recherche de la paroisse la plus proche (Dijkstra)]
+from django.contrib.gis.measure import Distance
+from django.contrib.gis.geos import Point
+
+def nearest_paroisse(lat, lon, max_radius_km=50):
+    """
+    Equivalent Dijkstra : source = point GPS utilisateur,
+    graphe = paroisses avec poids = distance geodesique.
+    """
+    user_point = Point(lon, lat, srid=4326)
+
+    # PostGIS realise le calcul de distance optimise
+    # equivalent a relaxer les aretes dans Dijkstra
+    nearest = Paroisse.objects \
+        .filter(position__isnull=False) \
+        .annotate(
+            distance=Distance('position', user_point)
+        ) \
+        .filter(distance__lte=Distance(km=max_radius_km)) \
+        .order_by('distance') \
+        .first()
+
+    return nearest
+\end{lstlisting}
+
+PostGIS utilise en interne un \textbf{index spatial R-Tree} qui permet d'implémenter Dijkstra de manière optimisée sur les données géographiques, avec une complexité réduite à $O(\log n)$ pour les recherches de proximité.
+
+\section{Algorithme A* (A étoile)}
+
+\subsection{Principe théorique}
+
+L'algorithme A* améliore Dijkstra en utilisant une \textbf{heuristique admissible} $h(n)$ pour guider la recherche :
+
+$$f(n) = g(n) + h(n)$$
+
+où :
+\begin{itemize}
+  \item $g(n)$ : coût réel du chemin depuis la source jusqu'à $n$
+  \item $h(n)$ : estimation heuristique du coût de $n$ jusqu'à la destination
+\end{itemize}
+
+\begin{propriete}[Admissibilité de A*]
+A* est optimal si et seulement si $h(n)$ est \textbf{admissible}, c'est-à-dire qu'elle ne surestime jamais le coût réel : $h(n) \leq h^*(n)$ pour tout sommet $n$.
+\end{propriete}
+
+\subsection{Heuristique dans le contexte géographique}
+
+Pour le graphe géographique $G_{geo}$, l'heuristique naturellement admissible est la \textbf{distance à vol d'oiseau} (distance euclidienne en projection équirectangulaire) :
+
+$$h(p_i, \text{cible}) = R \cdot \sqrt{(\phi_i - \phi_t)^2 + (\lambda_i - \lambda_t)^2 \cdot \cos^2\bar{\phi}}$$
+
+Cette heuristique est admissible car la distance réelle (route) est toujours supérieure ou égale à la distance à vol d'oiseau.
+
+\subsection{Application dans GeoEEC : routage sur la carte Leaflet}
+
+La bibliothèque \textbf{Leaflet.js}, utilisée dans GeoEEC pour la carte interactive, intègre nativement des capacités de routage basées sur A* via le plugin \texttt{leaflet-routing-machine}. Lorsqu'un utilisateur clique sur deux paroisses pour calculer un itinéraire, l'algorithme A* est déclenché :
+
+\begin{lstlisting}[language=TypeScript, caption=Intégration A* via Leaflet dans LandingMap.tsx]
+// Routage A* implicite via Leaflet
+const routing = L.Routing.control({
+  waypoints: [
+    L.latLng(paroisse1.lat, paroisse1.lng),
+    L.latLng(paroisse2.lat, paroisse2.lng),
+  ],
+  router: L.Routing.osrmv1({
+    serviceUrl: 'https://router.project-osrm.org/route/v1',
+    // OSRM utilise A* en interne
+  }),
+  lineOptions: {
+    styles: [{ color: '#2E9744', weight: 4 }]
+  }
+});
+\end{lstlisting}
+
+\section{Algorithme Minimax et Winamax}
+
+\subsection{Principe de Minimax}
+
+Dans le contexte des jeux à deux joueurs, l'algorithme \textbf{Minimax} explore un arbre de décision en alternant entre un joueur maximisant et un joueur minimisant :
+
+$$\text{Minimax}(n) = \begin{cases}
+\text{Évaluer}(n) & \text{si } n \text{ est terminal} \\
+\max_{s \in \text{Succ}(n)} \text{Minimax}(s) & \text{si } n \text{ est nœud MAX} \\
+\min_{s \in \text{Succ}(n)} \text{Minimax}(s) & \text{si } n \text{ est nœud MIN}
+\end{cases}$$
+
+\subsection{Application dans GeoEEC : optimisation de couverture territoriale}
+
+Bien que GeoEEC ne soit pas un jeu, la logique Minimax peut être appliquée au problème de \textbf{couverture optimale} des paroisses sans GPS :
+
+\begin{itemize}
+  \item \textbf{Joueur MAX} : le Super Admin cherche à maximiser le score de complétude des données
+  \item \textbf{Joueur MIN} : les contraintes (budget, personnel, distance) minimisent les interventions possibles
+  \item \textbf{Arbre de décision} : chaque nœud représente une paroisse à géolocaliser
+\end{itemize}
+
+L'optimisation des tournées de collecte de données GPS dans les zones rurales correspond à ce schéma Minimax avec élagage $\alpha$-$\beta$.
+
+%% ─── CHAPITRE 6 ───────────────────────────────────────────────────────────────
+\chapter{Système Expert dans GeoEEC}
+
+\section{Architecture d'un système expert}
+
+\begin{tcolorbox}[defbox, title=Système Expert]
+Un \textbf{système expert} est un programme informatique qui simule le raisonnement d'un expert humain dans un domaine spécifique. Il est composé de :
+\begin{itemize}
+  \item Une \textbf{base de connaissances} (faits + règles)
+  \item Un \textbf{moteur d'inférence} (mécanisme de raisonnement)
+  \item Une \textbf{interface utilisateur}
+\end{itemize}
+\end{tcolorbox}
+
+\section{Le système RBAC comme système expert}
+
+Le système de contrôle d'accès de GeoEEC est un \textbf{système expert à base de règles} :
+
+\subsection{Base de connaissances : les faits}
+
+Les faits correspondent aux données de l'utilisateur connecté :
+\begin{lstlisting}[language=Python, caption=Faits du système expert (modèle User)]
+class User(AbstractUser):
+    role    = CharField(choices=['SUPER','REGION','DISTRICT',
+                                 'PAROISSE','VISITEUR'])
+    region   = ForeignKey(RegionSynodale, null=True)
+    district = ForeignKey(District, null=True)
+    paroisse = ForeignKey(Paroisse, null=True)
+\end{lstlisting}
+
+\subsection{Base de connaissances : les règles}
+
+Les règles sont encodées dans le fichier \texttt{permissions.py} :
+
+\begin{lstlisting}[language=Python, caption=Règles du système expert (permissions.py)]
+# REGLE R1 : Super Admin voit tout
+IF user.role == 'SUPER':
+    THEN scope = ALL_DATA
+
+# REGLE R2 : Admin Regional voit sa region
+IF user.role == 'REGION' AND user.region IS NOT NULL:
+    THEN scope = DATA WHERE region = user.region
+
+# REGLE R3 : Admin District voit son district
+IF user.role == 'DISTRICT' AND user.district IS NOT NULL:
+    THEN scope = DATA WHERE district = user.district
+
+# REGLE R4 : Admin Paroisse voit sa paroisse
+IF user.role == 'PAROISSE' AND user.paroisse IS NOT NULL:
+    THEN scope = DATA WHERE paroisse = user.paroisse
+
+# REGLE R5 : Visiteur - lecture seule, carte publique
+IF user.role == 'VISITEUR':
+    THEN scope = PUBLIC_MAP_ONLY
+\end{lstlisting}
+
+\subsection{Moteur d'inférence : le middleware Next.js}
+
+Le moteur d'inférence du système expert est implémenté dans \texttt{proxy.ts} (middleware Next.js) :
+
+\begin{lstlisting}[language=TypeScript, caption=Moteur d'inférence dans proxy.ts]
+export default function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // Fait initial : pathname de la requete
+  // Regle R0 : route non-admin => autoriser
+  if (!pathname.startsWith('/admin')) {
+    return NextResponse.next();
+  }
+
+  // Regle R6 : route admin sans session => rediriger
+  const session = request.cookies.get('eec_sessionid');
+  if (!session) {
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('next', pathname);
+    return NextResponse.redirect(loginUrl);   // CONCLUSION : REDIRECTION
+  }
+
+  return NextResponse.next();   // CONCLUSION : ACCES AUTORISE
+}
+\end{lstlisting}
+
+\section{Chaîne d'inférence complète}
+
+La Figure \ref{fig:inference} illustre la chaîne d'inférence complète lors d'une connexion :
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  node distance=1.2cm,
+  fact/.style={rectangle, rounded corners=2pt, draw=eecNavy, fill=eecNavy!10,
+               minimum width=4cm, minimum height=0.7cm, font=\small},
+  rule/.style={diamond, draw=eecGold, fill=eecGold!15,
+               minimum width=3cm, minimum height=0.7cm, font=\tiny, aspect=2},
+  concl/.style={rectangle, rounded corners=4pt, draw=eecGreen, fill=eecGreen!15,
+                minimum width=4cm, minimum height=0.7cm, font=\small\bfseries},
+  arr/.style={-Stealth, thick}
+]
+\node[fact] (f1) {FAIT: role = REGION};
+\node[rule, below=of f1] (r2) {R2: role=REGION?};
+\node[fact, below=of r2] (f2) {FAIT: region = MIFI};
+\node[rule, below=of f2] (r3) {R3: region IS NOT NULL?};
+\node[concl, below=of r3] (c1) {CONCLUSION: scope = MIFI uniquement};
+
+\draw[arr] (f1) -- (r2);
+\draw[arr] (r2) -- node[right, font=\tiny, color=eecGreen] {OUI} (f2);
+\draw[arr] (f2) -- (r3);
+\draw[arr] (r3) -- node[right, font=\tiny, color=eecGreen] {OUI} (c1);
+\end{tikzpicture}
+\caption{Chaîne d'inférence pour un Admin Régional MIFI}
+\label{fig:inference}
+\end{figure}
+
+\section{Système expert de validation des données}
+
+GeoEEC intègre un second système expert : le \textbf{moteur de validation des statistiques} (score de complétude) :
+
+\begin{table}[H]
+\centering
+\caption{Règles du système expert de scoring}
+\begin{tabularx}{\textwidth}{l >{\ttfamily\small}X r}
+\toprule
+Règle & Condition & Score \\
+\midrule
+R\_GPS & position IS NOT NULL & +20\% \\
+R\_STAT & statistiques.annee\_courante EXISTS & +20\% \\
+R\_OUVRIER & nb\_ouvriers $>$ 0 & +20\% \\
+R\_CONTACT & adresse IS NOT NULL & +20\% \\
+R\_OEUVRE & nb\_oeuvres $\geq$ 1 & +20\% \\
+\midrule
+\multicolumn{2}{r}{\textbf{Score total}} & \textbf{100\%} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+%% ─── CHAPITRE 7 ───────────────────────────────────────────────────────────────
+\chapter{Architecture Multi-Agents de GeoEEC}
+
+\section{Identification des agents}
+
+GeoEEC réalise une \textbf{société d'agents} au sens de Minsky (1986), où chaque agent a une capacité perceptuelle et actionnelle limitée à son périmètre :
+
+\begin{table}[H]
+\centering
+\caption{Agents identifiés dans GeoEEC}
+\begin{tabularx}{\textwidth}{>{\bfseries}l X X X}
+\toprule
+Agent & Capteurs (Perceptions) & Actionneurs (Actions) & Rationalité \\
+\midrule
+Super Admin & Toutes les données (532 paroisses) & CRUD global, gestion comptes & Basé sur buts \\
+Admin Région & Paroisses de sa région & CRUD région, validation & Basé sur buts \\
+Admin District & Paroisses de son district & CRUD district & Réactif à modèle \\
+Admin Paroisse & Sa seule paroisse & Modifier sa fiche & Réactif à modèle \\
+Visiteur & Carte publique uniquement & Consulter, rechercher & Réactif simple \\
+Système & Toutes les données & Audit, notifications & Agent autonome \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Protocoles de communication inter-agents}
+
+Les agents communiquent via l'API REST Django. Les messages suivent le protocole \textbf{HTTP} avec des verbes sémantiques :
+
+\begin{lstlisting}[caption=Protocole de communication inter-agents]
+# Agent Admin District -> Agent Admin Region
+# (demande de validation d'une modification)
+
+POST /api/geo/paroisses/{id}/soumettre-modification/
+{
+  "champ": "nb_communiants",
+  "ancienne_valeur": 450,
+  "nouvelle_valeur": 523,
+  "justification": "Recensement mars 2026"
+}
+
+# L'agent Region recoit une notification
+# et peut VALIDER ou REJETER
+PATCH /api/geo/paroisses/{id}/valider/
+{ "action": "VALIDER" }
+\end{lstlisting}
+
+\section{Coopération et coordination}
+
+La coordination entre agents dans GeoEEC suit le modèle \textbf{Contract Net Protocol (CNP)} adapté :
+
+\begin{enumerate}
+  \item \textbf{Annonce} : l'Agent District soumet une modification (appel d'offres)
+  \item \textbf{Proposition} : le système génère un log d'audit (proposition)
+  \item \textbf{Attribution} : l'Agent Région évalue et décide (attribution)
+  \item \textbf{Résultat} : la modification est validée ou rejetée (résultat)
+\end{enumerate}
+
+\section{Émergence et comportement collectif}
+
+Un phénomène d'\textbf{émergence} est observable dans GeoEEC : aucun agent individuel ne voit la totalité du tableau de bord national, mais leur collaboration produit une \textbf{intelligence collective} — les statistiques synodales agrégées sur le tableau de bord du Super Admin.
+
+$$\text{Intelligence collective} = \bigcup_{i=1}^{5} \text{Agent}_i(\text{scope}_i)$$
+
+%% ─── CHAPITRE 8 ───────────────────────────────────────────────────────────────
+\chapter{Analyse Critique et Perspectives}
+
+\section{Forces du système}
+
+\subsection{Cohérence avec les fondements SMA}
+La correspondance entre la structure organisationnelle réelle de l'EEC et les structures de graphes théoriques est \textbf{naturelle et non forcée}. La hiérarchie à 3 niveaux forme un arbre parfaitement adapté aux algorithmes BFS et DFS.
+
+\subsection{Scalabilité du graphe}
+L'ajout de nouvelles paroisses, districts ou régions n'impacte pas la complexité algorithmique, car les algorithmes opèrent en $O(|V| + |E|)$ sur un graphe qui reste sparse (chaque nœud a un faible degré moyen).
+
+\section{Limites identifiées}
+
+\subsection{Graphe géographique incomplet}
+Avec 130 paroisses sans coordonnées GPS (24\% du total), le graphe géographique $G_{geo}$ est \textbf{incomplet}. Les algorithmes de plus court chemin ne peuvent opérer que sur la composante connexe visible.
+
+\subsection{Absence d'apprentissage automatique}
+Le système expert est à base de règles statiques. Il n'intègre pas de mécanisme d'apprentissage (reinforcement learning, mise à jour des règles). Un SMA plus avancé pourrait intégrer des agents apprenants.
+
+\section{Perspectives d'amélioration}
+
+\begin{enumerate}
+  \item \textbf{Agent de complétion GPS} : un agent autonome qui identifie les paroisses sans GPS et suggère des coordonnées à partir du nom et de la localité (géocodage inversé via Nominatim).
+
+  \item \textbf{Algorithme A* pour tournées de collecte} : proposer aux admins des itinéraires optimaux pour collecter les données manquantes.
+
+  \item \textbf{Graphe dynamique} : transformer $G_{EEC}$ en graphe temporel $G_{EEC}(t)$ pour suivre l'évolution des paroisses dans le temps.
+
+  \item \textbf{Multi-agents apprenants} : intégrer des agents ML qui détectent des anomalies dans les statistiques (baisse anormale de communiants, paroisse sans ouvriers depuis 2 ans, etc.).
+\end{enumerate}
+
+%% ─── CONCLUSION ───────────────────────────────────────────────────────────────
+\chapter*{Conclusion}
+\addcontentsline{toc}{chapter}{Conclusion}
+\markboth{Conclusion}{Conclusion}
+
+Ce rapport a démontré que le projet \textbf{GeoEEC} constitue une application concrète et riche des concepts fondamentaux des Systèmes Multi-Agents et des Systèmes Experts.
+
+La structure organisationnelle de l'EEC — 22 régions, 134 districts, 532 paroisses — forme naturellement un \textbf{graphe orienté acyclique (arbre)}, support des algorithmes de parcours BFS et DFS effectivement utilisés par l'API Django. La carte interactive mobilise des algorithmes de type \textbf{Dijkstra} et \textbf{A*} via PostGIS et Leaflet pour les fonctionnalités de proximité et de routage.
+
+Le système de contrôle d'accès RBAC se révèle être un \textbf{système expert à base de règles} complet, avec une base de connaissances encodée dans les modèles Django, un moteur d'inférence implémenté dans le middleware Next.js, et cinq classes d'agents aux capacités perceptuelles et actionnelles distinctement bornées.
+
+Enfin, le phénomène d'\textbf{émergence} observable dans le tableau de bord national — où la somme des contributions locales de chaque agent produit une intelligence synodale globale — illustre parfaitement la philosophie des systèmes multi-agents : \textit{``l'intelligence du tout dépasse la somme de ses parties''.}
+
+%% ─── BIBLIOGRAPHIE ────────────────────────────────────────────────────────────
+\chapter*{Bibliographie}
+\addcontentsline{toc}{chapter}{Bibliographie}
+\markboth{Bibliographie}{Bibliographie}
+
+\begin{enumerate}
+\item \textbf{Russell, S. \& Norvig, P.} (2020). \textit{Artificial Intelligence: A Modern Approach} (4e éd.). Pearson. [Fondements des agents intelligents et des algorithmes de recherche]
+
+\item \textbf{Weiss, G.} (1999). \textit{Multiagent Systems: A Modern Approach to Distributed Artificial Intelligence}. MIT Press. [Architecture multi-agents, protocoles de communication]
+
+\item \textbf{Cormen, T., Leiserson, C., Rivest, R. \& Stein, C.} (2009). \textit{Introduction to Algorithms} (3e éd.). MIT Press. [BFS, DFS, Dijkstra, A*]
+
+\item \textbf{Hart, P., Nilsson, N. \& Raphael, B.} (1968). A Formal Basis for the Heuristic Determination of Minimum Cost Paths. \textit{IEEE Transactions on Systems Science and Cybernetics}, 4(2), 100--107. [Article fondateur de A*]
+
+\item \textbf{Dijkstra, E. W.} (1959). A Note on Two Problems in Connexion with Graphs. \textit{Numerische Mathematik}, 1(1), 269--271. [Article original de Dijkstra]
+
+\item \textbf{Django Software Foundation} (2024). \textit{Django 5.0 Documentation}. \url{https://docs.djangoproject.com/} [GeoDjango, ORM, système de permissions]
+
+\item \textbf{Vercel} (2024). \textit{Next.js 16 Documentation — Proxy (anciennement Middleware)}. \url{https://nextjs.org/docs} [Middleware/Proxy, système de routage]
+
+\item \textbf{PostGIS Team} (2024). \textit{PostGIS 3.4 Manual}. \url{https://postgis.net/documentation/} [Fonctions géospatiales, distance géodésique, index R-Tree]
+
+\item \textbf{Leaflet contributors} (2024). \textit{Leaflet.js Documentation}. \url{https://leafletjs.com/} [Routage, rendu cartographique]
+
+\item \textbf{Jackson, P.} (1998). \textit{Introduction to Expert Systems} (3e éd.). Addison-Wesley. [Architecture des systèmes experts, moteur d'inférence]
+\end{enumerate}
+
+\end{document}

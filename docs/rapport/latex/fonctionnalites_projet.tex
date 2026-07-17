@@ -1,0 +1,134 @@
+% ============================================================
+%  GEOEEC — Rapport des grandes fonctionnalités du projet
+%  pdfLaTeX
+%  Compilation : pdflatex fonctionnalites_projet.tex
+% ============================================================
+\documentclass[11pt, a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[a4paper, top=2cm, bottom=2.2cm, left=2.2cm, right=2.2cm]{geometry}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{enumitem}
+\setlist{itemsep=1pt, topsep=2pt, parsep=0pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+
+% ---- Couleurs (palette EEC) ----
+\usepackage{xcolor}
+\definecolor{eecgreen}{RGB}{27,94,32}
+\definecolor{eecyellow}{RGB}{249,168,37}
+\definecolor{eeclightgreen}{RGB}{232,245,233}
+
+% ---- Titres ----
+\usepackage{titlesec}
+\titleformat{\section}
+  {\normalfont\large\bfseries\color{eecgreen}}
+  {\thesection.}{0.5em}{}
+\titlespacing*{\section}{0pt}{10pt}{4pt}
+\titleformat{\subsection}
+  {\normalfont\bfseries\color{eecgreen}}
+  {\thesubsection}{0.5em}{}
+\titlespacing*{\subsection}{0pt}{8pt}{2pt}
+
+% ---- En-tête / pied de page ----
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textit{GEOEEC --- Rapport des fonctionnalités}}
+\fancyhead[R]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\usepackage{titling}
+\pretitle{\begin{center}\Large\bfseries\color{eecgreen}}
+\posttitle{\end{center}}
+\preauthor{\begin{center}\normalsize}
+\postauthor{\end{center}}
+\predate{\begin{center}\small}
+\postdate{\end{center}\vspace{-0.5cm}}
+
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=eecgreen, urlcolor=eecgreen, citecolor=eecgreen}
+
+\title{GEOEEC --- Rapport des grandes fonctionnalités du projet}
+\author{Église Évangélique du Cameroun --- Plateforme de géolocalisation}
+\date{}
+
+\begin{document}
+\maketitle
+\thispagestyle{fancy}
+\vspace{-0.8cm}
+
+\section*{Présentation générale}
+
+GEOEEC est une plateforme web de géolocalisation institutionnelle développée pour l'Église
+Évangélique du Cameroun (EEC). Elle centralise, sur une carte interactive et un back-office
+d'administration, l'ensemble des entités territoriales de l'Église --- régions synodales,
+districts, paroisses --- ainsi que les œuvres sociales/éducatives et les ouvriers ecclésiastiques
+qui y sont rattachés. Le projet répond à un besoin concret de la Direction Nationale : remplacer
+une gestion manuelle par tableurs (dispersée, non traçable, sans vue géographique d'ensemble)
+par un système numérique unique, hiérarchisé et sécurisé.
+
+\textbf{Stack technique} : backend Django~5 + GeoDjango + Django REST Framework (API + PostGIS),
+GeoServer pour la diffusion cartographique (WMS/WFS), frontend Next.js~14 / TypeScript /
+Tailwind / Leaflet, cache Redis, le tout orchestré via Docker Compose.
+
+\section{Grandes fonctionnalités}
+
+\subsection{Vitrine publique et carte interactive}
+Une landing page présente l'Église (mission, direction, statistiques clés, œuvres) et
+redirige vers une \textbf{carte publique} (\texttt{/carte}) permettant à tout visiteur de
+localiser une paroisse, un district ou une région, de consulter ses informations de base et
+de naviguer dans la hiérarchie territoriale sans authentification.
+
+\subsection{Administration hiérarchisée à 4 niveaux (RBAC)}
+Le cœur du système est un contrôle d'accès basé sur les rôles, calqué sur l'organisation
+synodale de l'EEC :
+\begin{itemize}
+  \item \textbf{Administrateur Général} --- accès national complet ;
+  \item \textbf{Administrateur Régional} --- périmètre limité à sa région synodale ;
+  \item \textbf{Administrateur District} --- périmètre limité à son district ;
+  \item \textbf{Administrateur Paroissial} --- gestion de sa seule paroisse.
+\end{itemize}
+Chaque rôle dispose de son propre espace d'administration (tableau de bord, listes filtrées
+à son périmètre géographique) avec authentification, inscription et récupération de mot de
+passe.
+
+\subsection{Gestion des données métier (CRUD)}
+Interfaces d'administration pour créer, consulter, modifier et supprimer :
+\begin{itemize}
+  \item les entités géographiques (régions, districts, paroisses) avec leurs coordonnées ;
+  \item les \textbf{œuvres} de l'Église (écoles, centres de santé, exploitations agropastorales, immeubles, terrains, etc.) ;
+  \item les \textbf{ouvriers ecclésiastiques} (pasteurs, évangélistes, diacres\ldots) et leurs affectations ;
+  \item les \textbf{statistiques annuelles} par paroisse (communiants, baptêmes, offrandes\ldots).
+\end{itemize}
+
+\subsection{Cartographie SIG}
+Les couches géographiques (polygones des régions/districts, points des paroisses) sont
+servies par \textbf{GeoServer} en WMS/WFS et affichées via \textbf{Leaflet}, avec des styles
+cartographiques dédiés (SLD) par niveau hiérarchique et par type d'entité.
+
+\subsection{Import / Export de données}
+Des modules dédiés permettent l'import en masse de paroisses, œuvres et ouvriers depuis des
+fichiers Excel, ainsi que l'export des données (Excel) et des statistiques (PDF), pour
+fluidifier la migration depuis les anciens fichiers tableur et faciliter le reporting.
+
+\subsection{Journal d'audit et traçabilité}
+Chaque action de création, modification ou suppression effectuée dans le back-office est
+consignée dans un journal d'activité consultable par les administrateurs, répondant à
+l'exigence de traçabilité absente du système manuel précédent.
+
+\subsection{Suivi des visiteurs et analytics}
+Un module dédié trace les consultations de paroisses et l'historique de recherche des
+visiteurs authentifiés (préférences de langue, paroisse/région affiliée), alimentant des
+statistiques d'usage (paroisses les plus consultées, tendances de recherche).
+
+\section*{En résumé}
+
+GEOEEC combine une vitrine cartographique publique et un back-office multi-rôles pour
+donner à l'EEC, pour la première fois, une vue géographique unifiée et une administration
+hiérarchisée, traçable et sécurisée de ses régions, districts, paroisses, œuvres et
+ouvriers.
+
+\end{document}
