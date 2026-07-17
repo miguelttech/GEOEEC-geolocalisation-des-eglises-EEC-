@@ -1,9 +1,12 @@
 'use client';
-import { useRef, useEffect } from 'react';
+import { Fragment, useRef, useEffect } from 'react';
 import Image from 'next/image';
+import { useBibleVerse } from '@/lib/bible-verses';
 
 export default function ScriptureBand() {
   const ref = useRef<HTMLElement>(null);
+  const { verse, visible } = useBibleVerse(9000);
+  const lines = verse.pre.split('\n');
 
   useEffect(() => {
     const onScroll = () => {
@@ -27,11 +30,15 @@ export default function ScriptureBand() {
         <div className="section-num" style={{ textAlign: 'center', display: 'block', marginBottom: '20px' }}>
           — Lumière sur nos pas
         </div>
-        <q className="lp-serif">
-          Ta parole est une lampe à mes pieds,<br />
-          <em>et une lumière sur mon sentier.</em>
+        <q className={`lp-serif verse-fade ${visible ? 'verse-in' : 'verse-out'}`}>
+          {lines.map((line, i) => (
+            <Fragment key={i}>
+              {line}<br />
+            </Fragment>
+          ))}
+          <em>{verse.emphasis}</em>
         </q>
-        <div className="scripture-attr">PSAUME 119 : 105</div>
+        <div className="scripture-attr">{verse.ref.toUpperCase()}</div>
       </div>
     </section>
   );

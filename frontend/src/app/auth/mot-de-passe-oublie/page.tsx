@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import AuthVerse from '@/components/landing/AuthVerse';
 
 const BACKEND = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api')
   .replace(/\/api\/?$/, '');
@@ -67,13 +68,9 @@ export default function MotDePasseOubliePage() {
         <div className="ls-left-body">
           <div className="ls-brand">
             <img src="/logo-eec.png" alt="EEC" style={{ width:40, height:40, objectFit:'contain', borderRadius:6, padding:4, background:'rgba(255,255,255,0.12)' }} />
-            <div>EEC Cameroun<small>Console synodale · SIG</small></div>
+            <div>EEC Cameroun<small>Géolocalisation · SIG</small></div>
           </div>
-          <div className="ls-quote">
-            <q>" Invoque-moi, et je te répondrai ;</q>
-            <q>je t&apos;annoncerai <em>de grandes choses.</em> "</q>
-            <p className="ls-ref">— Jérémie 33 : 3</p>
-          </div>
+          <AuthVerse />
         </div>
       </div>
 
@@ -88,7 +85,7 @@ export default function MotDePasseOubliePage() {
           <h1 className="ls-h1">Mot de passe <em>oublié.</em></h1>
           <p className="ls-sub">
             Entrez l&apos;adresse e-mail associée à votre compte.
-            Nous vous enverrons un lien pour réinitialiser votre mot de passe.
+            Nous vous enverrons directement un nouveau mot de passe par e-mail.
           </p>
 
           {error && (
@@ -104,8 +101,8 @@ export default function MotDePasseOubliePage() {
               <div>
                 <strong>Demande envoyée !</strong>
                 <div style={{ marginTop: 4, fontSize: 12 }}>
-                  Si cet e-mail est associé à un compte actif, vous recevrez un lien
-                  de réinitialisation valable 1 heure.
+                  Si cet e-mail est associé à un compte actif, un nouveau mot de passe
+                  vient de vous être envoyé par e-mail.
                 </div>
               </div>
             </div>
@@ -128,7 +125,7 @@ export default function MotDePasseOubliePage() {
               </div>
               <div style={{ marginBottom: 24 }} />
               <button type="submit" disabled={loading || !email} className="ls-submit">
-                {loading ? <span className="ls-spinner" /> : <><span>Envoyer le lien de réinitialisation</span> <IconArrow /></>}
+                {loading ? <span className="ls-spinner" /> : <><span>Envoyer un nouveau mot de passe</span> <IconArrow /></>}
               </button>
             </form>
           )}

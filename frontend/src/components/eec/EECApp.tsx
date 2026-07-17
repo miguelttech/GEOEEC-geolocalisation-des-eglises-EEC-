@@ -763,8 +763,6 @@ const StatsPanel = ({ filters, layerCounts, onClose, onFocusRegion }: {
 }) => {
   const totalFideles = useMemo(() => PARISHES.reduce((s, p) => s + p.stats.fideles, 0), []);
   const totalCommun = useMemo(() => PARISHES.reduce((s, p) => s + p.stats.communiants, 0), []);
-  const totalBapt = useMemo(() => PARISHES.reduce((s, p) => s + p.stats.baptemes, 0), []);
-  const totalMar = useMemo(() => PARISHES.reduce((s, p) => s + p.stats.mariages, 0), []);
   const regionStats = useMemo(() => {
     const max = Math.max(...REGIONS.map(r => PARISHES.filter(p => p.regionId === r.id).length));
     return REGIONS.map(r => {
@@ -793,8 +791,6 @@ const StatsPanel = ({ filters, layerCounts, onClose, onFocusRegion }: {
               <div className="sc-value">{fmt(totalCommun)}</div>
               <div className="sc-delta">{Math.round(totalCommun / totalFideles * 100)} % du total</div>
             </div>
-            <div className="stat-card"><div className="sc-label">Baptêmes</div><div className="sc-value">{fmt(totalBapt)}</div></div>
-            <div className="stat-card"><div className="sc-label">Mariages</div><div className="sc-value">{fmt(totalMar)}</div></div>
           </div>
         </div>
         <div className="panel-section">

@@ -3,8 +3,8 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.middleware.csrf import get_token
 from django.db.models import Sum
-from django.utils.encoding import force_bytes, force_str
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_str
+from django.utils.http import urlsafe_base64_decode
 from django.conf import settings
 
 from rest_framework import status
@@ -131,17 +131,27 @@ def me_view(request):
     return Response(UserSerializer(request.user, context={"request": request}).data)
 
 
-@api_view(["POST"])
+@api_view(["POST", "DELETE"])
 @permission_classes([IsAuthenticated])
 def upload_avatar(request):
     """
-    POST /api/auth/me/avatar/ — multipart/form-data, champ « file ».
-    Valide le type et la taille via Pillow, redimensionne (max 512×512),
-    remplace l'ancienne photo, renvoie l'URL absolue de la nouvelle image.
+    POST   /api/auth/me/avatar/ — multipart/form-data, champ « file ».
+           Valide le type et la taille via Pillow, redimensionne (max 512×512),
+           remplace l'ancienne photo, renvoie l'URL absolue de la nouvelle image.
+    DELETE /api/auth/me/avatar/ — supprime la photo de profil courante.
     """
     from PIL import Image, UnidentifiedImageError
     from django.core.files.base import ContentFile
     import io
+
+    if request.method == "DELETE":
+        from apps.audit.utils import log_action
+        user = request.user
+        if user.avatar:
+            user.avatar.delete(save=True)
+        log_action(request, "UPDATE", "user", objet_id=user.id,
+                   objet_nom=user.get_full_name(), description="Photo de profil supprimée")
+        return Response(UserSerializer(user, context={"request": request}).data)
 
     file_obj = request.FILES.get("file")
     if not file_obj:
@@ -346,11 +356,15 @@ def user_detail(request, pk):
                 {"detail": "Cette opération n'est pas autorisée."},
                 status=status.HTTP_403_FORBIDDEN,
             )
-        target.is_active = False
-        target.save()
-        log_action(request, "DELETE", "user", objet_id=target.id,
-                   objet_nom=target.get_full_name(), description="Désactivation compte utilisateur")
-        return Response({"detail": "Compte désactivé."})
+        # EXIGENCE : suppression effective, immédiate et définitive — pas une
+        # simple désactivation. Le journal d'audit conserve la trace (l'entrée
+        # ci-dessous est enregistrée AVANT la suppression, avec utilisateur=SET_NULL
+        # sur les logs déjà existants de ce compte).
+        target_id, target_nom = target.id, target.get_full_name() or target.username
+        log_action(request, "DELETE", "user", objet_id=target_id,
+                   objet_nom=target_nom, description="Suppression définitive du compte")
+        target.delete()
+        return Response({"detail": "Compte supprimé définitivement."})
 
 
 @api_view(["POST"])
@@ -466,8 +480,10 @@ def dashboard_stats(request):
         else (districts_reels.filter(region=user.region).count() if user.role == "REGION" else 1)
     )
 
-    # ── Évolution fidèles par année (2020 → annee) ──────────────────────────
-    annees_range = range(max(2020, annee - 6), annee + 1)
+    # ── Évolution fidèles par année ──────────────────────────────────────────
+    # EXIGENCE : ne conserver que les années réellement renseignées (2024, 2025) —
+    # pas d'années obsolètes/vides affichées comme si elles étaient réelles.
+    annees_range = [2024, 2025]
     fideles_par_annee = []
     for yr in annees_range:
         t = stats_qs.filter(annee=yr).aggregate(c=Sum("communiants"), nc=Sum("non_communiants"))
@@ -622,43 +638,65 @@ def password_reset_request(request):
     """
     POST /api/auth/password-reset/
     Body : { "email": "..." }
-    Génère un token et envoie un email avec le lien de réinitialisation.
-    En dev (EMAIL_BACKEND console), l'email s'affiche dans les logs backend.
+    EXIGENCE : pas de lien de réinitialisation — un nouveau mot de passe est
+    généré immédiatement et envoyé directement par e-mail (même mécanisme
+    que la création de compte). L'utilisateur devra le changer à sa prochaine
+    connexion (force_password_change=True).
     """
+    import secrets
+    import string
+    from apps.audit.utils import log_action
+
     email = request.data.get("email", "").strip().lower()
     if not email:
         return Response({"detail": "Email requis."}, status=status.HTTP_400_BAD_REQUEST)
+
+    generic_response = Response({
+        "detail": "Si cet email est associé à un compte, un nouveau mot de passe vient de vous être envoyé."
+    })
 
     try:
         user = User.objects.get(email__iexact=email, is_active=True)
     except User.DoesNotExist:
         # Ne pas révéler si l'email existe ou non (sécurité)
-        return Response({"detail": "Si cet email est associé à un compte, vous recevrez un lien de réinitialisation."})
+        return generic_response
 
-    uid   = urlsafe_base64_encode(force_bytes(user.pk))
-    token = default_token_generator.make_token(user)
-    reset_url = f"{settings.FRONTEND_URL}/auth/reset-password/{uid}/{token}/"
+    alphabet = string.ascii_letters + string.digits + "!#%*+-"
+    new_password = "".join(secrets.choice(alphabet) for _ in range(16))
+    user.set_password(new_password)
+    user.force_password_change = True
+    user.save()
+
+    log_action(request, "UPDATE", "user", objet_id=user.id,
+               objet_nom=user.get_full_name() or user.username,
+               description="Mot de passe réinitialisé via 'mot de passe oublié'")
 
     try:
         send_mail(
-            subject="Réinitialisation de votre mot de passe — EEC Géolocalisation",
+            subject="Votre nouveau mot de passe — EEC Géolocalisation",
             message=(
                 f"Bonjour {user.get_full_name() or user.username},\n\n"
-                f"Vous avez demandé la réinitialisation de votre mot de passe.\n\n"
-                f"Cliquez sur ce lien pour définir un nouveau mot de passe (valable 1 heure) :\n"
-                f"{reset_url}\n\n"
-                f"Si vous n'êtes pas à l'origine de cette demande, ignorez cet email.\n\n"
-                f"— L'équipe EEC Cameroun"
+                f"Vous avez demandé la réinitialisation de votre mot de passe sur la "
+                f"plateforme de géolocalisation de l'Église Évangélique du Cameroun.\n\n"
+                f"Identifiant : {user.username}\n"
+                f"Nouveau mot de passe : {new_password}\n\n"
+                f"Ce mot de passe est temporaire. Il vous sera demandé de le changer "
+                f"à votre prochaine connexion.\n\n"
+                f"Si vous n'êtes pas à l'origine de cette demande, contactez immédiatement "
+                f"votre administrateur.\n\n"
+                f"— Plateforme EEC Géolocalisation"
             ),
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[user.email],
             fail_silently=False,
         )
     except Exception:
-        # En cas d'erreur SMTP, on renvoie quand même un succès (évite la fuite d'info)
+        # En cas d'erreur SMTP, le mot de passe a déjà été changé en base —
+        # on ne le révèle pas dans la réponse (évite la fuite d'info), mais
+        # on ne fait pas non plus échouer la requête (évite de révéler l'échec SMTP).
         pass
 
-    return Response({"detail": "Si cet email est associé à un compte, vous recevrez un lien de réinitialisation."})
+    return generic_response
 
 
 @api_view(["POST"])

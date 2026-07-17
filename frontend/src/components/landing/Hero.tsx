@@ -55,8 +55,8 @@ export default function Hero() {
             Plateforme officielle · Église Évangélique du Cameroun
           </span>
           <h1>
-            Geolocaliser<br />
-            <em>votre Église</em><br />
+            Géolocalisation<br />
+            <em>de votre Église</em><br />
             <span className="underline">à travers le Cameroun.</span>
           </h1>
           <p className="lede">

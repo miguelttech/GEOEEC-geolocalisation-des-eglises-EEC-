@@ -142,47 +142,6 @@ function formFromOuvrier(o: Ouvrier): FormState {
   };
 }
 
-// ─── GPS Map Picker (inline) ──────────────────────────────────────────────────
-function GpsMapPicker({ lat, lng, onChange }: { lat: number|null; lng: number|null; onChange: (la: number, lo: number) => void }) {
-  const mapDiv  = useRef<HTMLDivElement>(null);
-  const mapInst = useRef<any>(null);
-  const marker  = useRef<any>(null);
-
-  useEffect(() => {
-    if (!mapDiv.current || mapInst.current) return;
-    let cancelled = false;
-    import('leaflet').then(({ default: L }) => {
-      if (cancelled || !mapDiv.current || mapInst.current) return;
-      const initLat = lat ?? 4.5, initLng = lng ?? 12.5;
-      const map = L.map(mapDiv.current, { center: [initLat, initLng], zoom: lat ? 11 : 6 });
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: '© OSM · CartoDB', maxZoom: 19, subdomains: 'abcd' }).addTo(map);
-      const mkIcon = (L: any) => L.divIcon({ html: `<div style="width:16px;height:16px;background:#2E9744;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.4)"></div>`, iconSize:[16,16], iconAnchor:[8,8], className:'' });
-      if (lat !== null && lng !== null) { marker.current = L.marker([lat,lng],{icon:mkIcon(L)}).addTo(map); }
-      map.on('click', (e: any) => {
-        const {lat:la,lng:lo} = e.latlng;
-        if (marker.current) marker.current.setLatLng([la,lo]);
-        else { marker.current = L.marker([la,lo],{icon:mkIcon(L)}).addTo(map); }
-        onChange(parseFloat(la.toFixed(6)), parseFloat(lo.toFixed(6)));
-      });
-      mapInst.current = map;
-    });
-    return () => { cancelled=true; if(mapInst.current){mapInst.current.remove();mapInst.current=null;marker.current=null;} };
-  }, []); // eslint-disable-line
-
-  useEffect(() => {
-    if (!mapInst.current || lat===null || lng===null) return;
-    import('leaflet').then(({default:L}) => {
-      if(!mapInst.current) return;
-      const mkIcon = (L:any) => L.divIcon({html:`<div style="width:16px;height:16px;background:#2E9744;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.4)"></div>`,iconSize:[16,16],iconAnchor:[8,8],className:''});
-      if (marker.current) marker.current.setLatLng([lat,lng]);
-      else { marker.current = L.marker([lat,lng],{icon:mkIcon(L)}).addTo(mapInst.current); }
-      mapInst.current.panTo([lat,lng]);
-    });
-  }, [lat, lng]);
-
-  return <div ref={mapDiv} style={{ height:280, borderRadius:8, overflow:'hidden', zIndex:0, border:'1px solid rgba(46,151,68,0.25)' }} />;
-}
-
 // ─── Form Tabs ────────────────────────────────────────────────────────────────
 const FORM_TABS_OUV = [
   { label: 'Identité',    icon: 'user'   as const },
@@ -203,6 +162,9 @@ function OuvrierFormPanel({ mode, ouvrier, grades, onClose, onSaved }: {
   const [districtId, setDistrictId] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [lockedRegion, setLockedRegion]     = useState<{ id: string; nom: string } | null>(null);
+  const [lockedDistrict, setLockedDistrict] = useState<{ id: string; nom: string } | null>(null);
+  const [lockedParoisse, setLockedParoisse] = useState<{ id: string; nom: string } | null>(null);
   const L = { label: { fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 6, display: 'block' as const } };
 
   const set = (k: keyof FormState, v: string) => setForm(f => ({ ...f, [k]: v }));
@@ -212,14 +174,49 @@ function OuvrierFormPanel({ mode, ouvrier, grades, onClose, onSaved }: {
     api.get<RegionSynodale[]>('/api/geo/regions/liste/').then(setRegions).catch(() => {});
   }, []);
 
+  // EXIGENCE : chaque niveau d'administration ne crée des ouvriers que dans
+  // SA propre zone — région/district/paroisse imposés automatiquement, non
+  // modifiables, sans liste de choix pour le(s) niveau(x) déjà déterminé(s).
+  useEffect(() => {
+    if (ouvrier) return; // en réaffectation, la pré-sélection existe déjà
+    api.get<{
+      role: string;
+      region: number | null; region_nom: string | null;
+      district: number | null; district_nom: string | null;
+      paroisse: number | null; paroisse_nom: string | null;
+    }>('/api/auth/me/')
+      .then(me => {
+        if (me.role === 'REGION' && me.region) {
+          setLockedRegion({ id: String(me.region), nom: me.region_nom || '' });
+          setRegionId(String(me.region));
+        } else if (me.role === 'DISTRICT' && me.district) {
+          setLockedRegion({ id: String(me.region), nom: me.region_nom || '' });
+          setLockedDistrict({ id: String(me.district), nom: me.district_nom || '' });
+          setRegionId(String(me.region));
+          setDistrictId(String(me.district));
+        } else if (me.role === 'PAROISSE' && me.paroisse) {
+          setLockedRegion({ id: String(me.region), nom: me.region_nom || '' });
+          setLockedDistrict({ id: String(me.district), nom: me.district_nom || '' });
+          setLockedParoisse({ id: String(me.paroisse), nom: me.paroisse_nom || '' });
+          setRegionId(String(me.region));
+          setDistrictId(String(me.district));
+          set('paroisse', String(me.paroisse));
+        }
+      })
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Load districts when region changes
   useEffect(() => {
     if (!regionId) { setDistricts([]); setDistrictId(''); setForm(f => ({ ...f, paroisse: '' })); return; }
     api.get<PagedResult<District>>(`/api/geo/districts/?region=${regionId}`)
       .then(r => setDistricts(r.results))
       .catch(() => {});
+    // Un admin DISTRICT/PAROISSE crée dans SON district imposé — ne pas le réinitialiser.
+    if (lockedDistrict) return;
     setDistrictId(''); setForm(f => ({ ...f, paroisse: '' }));
-  }, [regionId]);
+  }, [regionId, lockedDistrict]);
 
   // Load paroisses when district changes
   useEffect(() => {
@@ -227,8 +224,10 @@ function OuvrierFormPanel({ mode, ouvrier, grades, onClose, onSaved }: {
     api.get<PagedResult<Paroisse>>(`/api/geo/paroisses/?district=${districtId}`)
       .then(r => setParoisses(r.results))
       .catch(() => {});
+    // Un admin PAROISSE crée dans SA paroisse imposée — ne pas la réinitialiser.
+    if (lockedParoisse) return;
     setForm(f => ({ ...f, paroisse: '' }));
-  }, [districtId]);
+  }, [districtId, lockedParoisse]);
 
   // Pre-select region/district when editing
   useEffect(() => {
@@ -399,24 +398,36 @@ function OuvrierFormPanel({ mode, ouvrier, grades, onClose, onSaved }: {
               </div>
               <div>
                 <label style={L.label}>Région synodiale</label>
-                <select className="input" style={{ color: '#111827' }} value={regionId} onChange={e => setRegionId(e.target.value)}>
-                  <option value="">— Choisir une région —</option>
-                  {regions.map(r => <option key={r.id} value={String(r.id)}>{r.nom}</option>)}
-                </select>
+                {lockedRegion ? (
+                  <input className="input" value={lockedRegion.nom} disabled style={{ color: '#111827', opacity: 0.7, cursor: 'not-allowed' }} />
+                ) : (
+                  <select className="input" style={{ color: '#111827' }} value={regionId} onChange={e => setRegionId(e.target.value)}>
+                    <option value="">— Choisir une région —</option>
+                    {regions.map(r => <option key={r.id} value={String(r.id)}>{r.nom}</option>)}
+                  </select>
+                )}
               </div>
               <div>
                 <label style={L.label}>District</label>
-                <select className="input" style={{ color: '#111827' }} value={districtId} onChange={e => setDistrictId(e.target.value)} disabled={!regionId}>
-                  <option value="">— Choisir un district —</option>
-                  {districts.map(d => <option key={d.id} value={String(d.id)}>{d.nom}</option>)}
-                </select>
+                {lockedDistrict ? (
+                  <input className="input" value={lockedDistrict.nom} disabled style={{ color: '#111827', opacity: 0.7, cursor: 'not-allowed' }} />
+                ) : (
+                  <select className="input" style={{ color: '#111827' }} value={districtId} onChange={e => setDistrictId(e.target.value)} disabled={!regionId}>
+                    <option value="">— Choisir un district —</option>
+                    {districts.map(d => <option key={d.id} value={String(d.id)}>{d.nom}</option>)}
+                  </select>
+                )}
               </div>
               <div style={{ gridColumn: '1/-1' }}>
                 <label style={L.label}>Paroisse d'affectation *</label>
-                <select className="input" style={{ color: '#111827' }} value={form.paroisse} onChange={e => set('paroisse', e.target.value)} disabled={!districtId}>
-                  <option value="">— Choisir une paroisse —</option>
-                  {paroisses.map(p => <option key={p.id} value={String(p.id)}>{p.nom}</option>)}
-                </select>
+                {lockedParoisse ? (
+                  <input className="input" value={lockedParoisse.nom} disabled style={{ color: '#111827', opacity: 0.7, cursor: 'not-allowed' }} />
+                ) : (
+                  <select className="input" style={{ color: '#111827' }} value={form.paroisse} onChange={e => set('paroisse', e.target.value)} disabled={!districtId}>
+                    <option value="">— Choisir une paroisse —</option>
+                    {paroisses.map(p => <option key={p.id} value={String(p.id)}>{p.nom}</option>)}
+                  </select>
+                )}
               </div>
               {!form.paroisse && (
                 <div style={{ gridColumn: '1/-1', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 6, padding: '10px 14px', fontSize: 12, color: '#92400E' }}>

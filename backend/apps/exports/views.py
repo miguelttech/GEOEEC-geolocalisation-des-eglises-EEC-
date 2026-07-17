@@ -11,7 +11,29 @@ from django.http import HttpResponse
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
-from apps.accounts.permissions import IsAdminUser
+from apps.accounts.permissions import (
+    IsAdminUser,
+    filter_paroisses_by_scope,
+    filter_oeuvres_by_scope,
+    filter_ouvriers_by_scope,
+)
+
+
+def _filter_statistiques_by_scope(queryset, user):
+    """Filtre spécialisé pour StatistiqueAnnuelle (rattachée via paroisse) —
+    EXIGENCE : un export de statistiques ne doit jamais sortir du périmètre
+    administratif de l'utilisateur."""
+    if not getattr(user, "is_admin", False):
+        return queryset
+    if user.role == "SUPER":
+        return queryset
+    if user.role == "REGION" and user.region_id:
+        return queryset.filter(paroisse__district__region_id=user.region_id)
+    if user.role == "DISTRICT" and user.district_id:
+        return queryset.filter(paroisse__district_id=user.district_id)
+    if user.role == "PAROISSE" and user.paroisse_id:
+        return queryset.filter(paroisse_id=user.paroisse_id)
+    return queryset.none()
 from rest_framework.response import Response
 
 from apps.geo.models import RegionSynodale, District, Paroisse
@@ -120,6 +142,10 @@ def export_paroisses_excel(request):
     if p.get("sans_gps") == "1":
         qs = qs.filter(position__isnull=True)
 
+    # EXIGENCE : un export ne peut jamais contenir de données hors du
+    # périmètre administratif de l'utilisateur (isolation stricte).
+    qs = filter_paroisses_by_scope(qs, request.user)
+
     wb  = openpyxl.Workbook()
     ws  = wb.active
     ws.title = "Paroisses EEC"
@@ -168,6 +194,7 @@ def export_oeuvres_excel(request):
         )
         .order_by("type_oeuvre__nom", "nom")
     )
+    qs = filter_oeuvres_by_scope(qs, request.user)
 
     wb  = openpyxl.Workbook()
     ws  = wb.active
@@ -247,6 +274,7 @@ def export_ouvriers_excel(request):
         qs = qs.filter(sexe=p["sexe"])
     if p.get("search"):
         qs = qs.filter(nom__icontains=p["search"])
+    qs = filter_ouvriers_by_scope(qs, request.user)
 
     wb = openpyxl.Workbook()
     ws = wb.active
@@ -287,6 +315,7 @@ def export_statistiques_excel(request):
         .select_related("paroisse", "paroisse__district", "paroisse__district__region")
         .order_by("paroisse__district__region__nom", "paroisse__district__nom", "paroisse__nom")
     )
+    qs = _filter_statistiques_by_scope(qs, request.user)
 
     wb  = openpyxl.Workbook()
     ws  = wb.active
@@ -350,12 +379,13 @@ def export_statistiques_pdf(request):
 
     annee = int(request.query_params.get("annee", date.today().year))
 
-    qs = list(
+    qs = (
         StatistiqueAnnuelle.objects
         .filter(annee=annee)
         .select_related("paroisse", "paroisse__district", "paroisse__district__region")
         .order_by("paroisse__district__region__nom", "paroisse__district__nom", "paroisse__nom")
     )
+    qs = list(_filter_statistiques_by_scope(qs, request.user))
 
     tot_com = sum(s.communiants     for s in qs)
     tot_non = sum(s.non_communiants for s in qs)

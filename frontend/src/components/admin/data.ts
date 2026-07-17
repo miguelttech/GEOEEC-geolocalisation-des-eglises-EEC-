@@ -161,7 +161,6 @@ export const statsByRegion = REGIONS_22.map((r, i) => {
   const score = [88,72,91,84,46,68,42,55,76,82,79,71,58,65,49,52,38,44,73,93,86,69][i] || 60;
   return {
     region:r, communiants:comm, noncomm:nonc, total:comm+nonc,
-    baptemes: Math.round(comm*0.03), mariages: Math.round(comm*0.012), deces: Math.round(comm*0.008),
     ouvriers: Math.round(comm*0.012), score, paroisses: Math.round(comm/220),
   };
 });

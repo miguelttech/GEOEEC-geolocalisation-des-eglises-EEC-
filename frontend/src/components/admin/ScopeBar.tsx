@@ -2,17 +2,30 @@
 import React from 'react';
 import { I } from './icons';
 
-interface ScopeBarProps {
-  regionNom?: string;
-  nbParoisses?: number;
-  nbDistricts?: number;
+const BACKEND = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api')
+  .replace(/\/api\/?$/, '');
+
+interface DashboardStats {
+  nb_paroisses: number;
+  nb_districts: number;
 }
 
-export default function ScopeBar({
-  regionNom = 'MIFI',
-  nbParoisses = 48,
-  nbDistricts = 6,
-}: ScopeBarProps) {
+export default function ScopeBar() {
+  const [regionNom, setRegionNom] = React.useState('—');
+  const [nbParoisses, setNbParoisses] = React.useState<number | null>(null);
+  const [nbDistricts, setNbDistricts] = React.useState<number | null>(null);
+
+  React.useEffect(() => {
+    fetch(`${BACKEND}/api/auth/me/`, { credentials: 'include' })
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then((d: { region_nom?: string | null }) => setRegionNom(d.region_nom || '—'))
+      .catch(() => {});
+    fetch(`${BACKEND}/api/auth/dashboard-stats/`, { credentials: 'include' })
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then((d: DashboardStats) => { setNbParoisses(d.nb_paroisses); setNbDistricts(d.nb_districts); })
+      .catch(() => {});
+  }, []);
+
   return (
     <div style={{
       background: 'rgba(91,155,213,0.07)',
@@ -44,13 +57,13 @@ export default function ScopeBar({
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <I.church size={13} style={{ color: 'var(--text-3)' }} />
           <span style={{ fontSize: 12, color: 'var(--text-2)' }}>
-            <span style={{ fontWeight: 700, color: 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>{nbParoisses}</span> paroisses
+            <span style={{ fontWeight: 700, color: 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>{nbParoisses ?? '—'}</span> paroisses
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <I.network size={13} style={{ color: 'var(--text-3)' }} />
           <span style={{ fontSize: 12, color: 'var(--text-2)' }}>
-            <span style={{ fontWeight: 700, color: 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>{nbDistricts}</span> districts
+            <span style={{ fontWeight: 700, color: 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>{nbDistricts ?? '—'}</span> districts
           </span>
         </div>
       </div>

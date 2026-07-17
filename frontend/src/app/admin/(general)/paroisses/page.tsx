@@ -49,9 +49,8 @@ function ToastStack({ toasts, remove }: { toasts: (Toast & { id: string })[]; re
       n'existent plus — ni ici, ni côté serveur (RowMenu et DeleteModal retirés). ── */
 
 /* ── GPS Map Picker ────────────────────────────────────────────────────── */
-function GpsMapPicker({ lat, lng, onChange }: {
+function GpsMapPicker({ lat, lng }: {
   lat: number | null; lng: number | null;
-  onChange: (lat: number, lng: number) => void;
 }) {
   const mapDiv   = useRef<HTMLDivElement>(null);
   const mapInst  = useRef<any>(null);
@@ -79,21 +78,9 @@ function GpsMapPicker({ lat, lng, onChange }: {
         }).addTo(map);
       }
 
-      map.on('click', (e: any) => {
-        const { lat: la, lng: lo } = e.latlng;
-        if (marker.current) {
-          marker.current.setLatLng([la, lo]);
-        } else {
-          marker.current = L.marker([la, lo], {
-            icon: L.divIcon({
-              html: `<div style="width:18px;height:18px;background:#2E9744;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.4)"></div>`,
-              iconSize: [18, 18], iconAnchor: [9, 9], className: '',
-            }),
-          }).addTo(map);
-        }
-        onChange(parseFloat(la.toFixed(6)), parseFloat(lo.toFixed(6)));
-      });
-
+      // EXIGENCE : le marqueur n'est plus déplaçable directement sur la carte —
+      // il ne fait que visualiser les coordonnées saisies dans les champs
+      // Latitude/Longitude (aucun clic ni glisser-déposer ne le repositionne).
       mapInst.current = map;
     });
 
@@ -324,7 +311,7 @@ function OeuvreSelector({ selected, onChange }: {
 }
 
 /* ── View Panel ────────────────────────────────────────────────────────── */
-function ParoisseViewPanel({ paroisse: p, onClose, onEdit }: { paroisse: Paroisse; onClose: () => void; onEdit: () => void }) {
+function ParoisseViewPanel({ paroisse: p, onClose, onEdit, canEdit = true }: { paroisse: Paroisse; onClose: () => void; onEdit: () => void; canEdit?: boolean }) {
   const complete = computeComplete(p);
   const hasGps   = p.latitude !== null && p.longitude !== null;
   return (
@@ -341,7 +328,7 @@ function ParoisseViewPanel({ paroisse: p, onClose, onEdit }: { paroisse: Paroiss
             </div>
           </div>
           <div style={{ display: 'flex', gap: 6 }}>
-            <button className="btn btn-outline" style={{ padding: '6px 12px', fontSize: 12 }} onClick={onEdit}><I.pencil size={13} />Modifier</button>
+            {canEdit && <button className="btn btn-outline" style={{ padding: '6px 12px', fontSize: 12 }} onClick={onEdit}><I.pencil size={13} />Modifier</button>}
             <button className="icon-btn" onClick={onClose}><I.x size={16} /></button>
           </div>
         </div>
@@ -710,14 +697,13 @@ function ParoisseFormPanel({ mode, paroisse, onClose, onSaved }: {
             <>
               <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: 8, padding: '10px 14px', fontSize: 12.5, color: '#1D4ED8', display: 'flex', gap: 8, alignItems: 'center' }}>
                 <I.pin size={14} />
-                Cliquez sur la carte pour placer le marqueur, ou saisissez les coordonnées manuellement.
+                Saisissez les coordonnées Latitude/Longitude ci-dessous — le marqueur apparaît uniquement pour visualiser la position saisie.
               </div>
 
-              {/* Interactive map */}
+              {/* Map preview (lecture seule) */}
               <GpsMapPicker
                 lat={gpsValid ? latNum : null}
                 lng={gpsValid ? lngNum : null}
-                onChange={(la, lo) => { set('lat', String(la)); set('lng', String(lo)); }}
               />
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14 }}>
@@ -885,6 +871,17 @@ const PAGE_SIZE = 50;
 export default function ParoissesPage() {
   const { toasts, add: addToast, remove } = useToast();
 
+  // EXIGENCE : seul l'Administrateur Général (SUPER) peut créer une paroisse
+  // (backend renvoie 403 pour tout autre rôle) ; un administrateur régional
+  // ne peut en plus jamais la modifier (backend renvoie 403).
+  const [canCreate, setCanCreate] = useState(false);
+  const [canEdit, setCanEdit] = useState(true);
+  useEffect(() => {
+    api.get<{ role: string }>('/api/auth/me/')
+      .then(me => { setCanCreate(me.role === 'SUPER'); setCanEdit(me.role !== 'REGION'); })
+      .catch(() => {});
+  }, []);
+
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch]           = useState('');
   const [filterRegionId, setFilterRegionId]     = useState(0);
@@ -1015,9 +1012,11 @@ export default function ParoissesPage() {
           }}>
             <I.download size={14} />Exporter Excel
           </button>
-          <button className="btn btn-primary" onClick={() => setFormPanel({ mode: 'create' })}>
-            <I.plus size={14} />Créer une paroisse
-          </button>
+          {canCreate && (
+            <button className="btn btn-primary" onClick={() => setFormPanel({ mode: 'create' })}>
+              <I.plus size={14} />Créer une paroisse
+            </button>
+          )}
         </div>
       </div>
 
@@ -1098,7 +1097,7 @@ export default function ParoissesPage() {
                         <div style={{ color: 'var(--text-2)', fontSize: 13 }}>Modifiez vos filtres ou créez une nouvelle paroisse.</div>
                         <div style={{ display: 'flex', gap: 10 }}>
                           {hasFilter && <button className="btn btn-outline" onClick={resetFilters}>Réinitialiser les filtres</button>}
-                          <button className="btn btn-primary" onClick={() => setFormPanel({ mode: 'create' })}><I.plus size={14} />Créer une paroisse</button>
+                          {canCreate && <button className="btn btn-primary" onClick={() => setFormPanel({ mode: 'create' })}><I.plus size={14} />Créer une paroisse</button>}
                         </div>
                       </div>
                     </td></tr>
@@ -1129,7 +1128,7 @@ export default function ParoissesPage() {
                         <td>
                           <div style={{ display: 'flex', gap: 2 }}>
                             <button className="icon-btn" title="Voir les détails" onClick={() => setViewPanel(p)}><I.eye size={15} /></button>
-                            <button className="icon-btn green" title="Modifier (nom uniquement)" onClick={() => setFormPanel({ mode: 'edit', paroisse: p })}><I.pencil size={15} /></button>
+                            {canEdit && <button className="icon-btn green" title="Modifier (nom uniquement)" onClick={() => setFormPanel({ mode: 'edit', paroisse: p })}><I.pencil size={15} /></button>}
                           </div>
                         </td>
                       </tr>
@@ -1165,7 +1164,7 @@ export default function ParoissesPage() {
       )}
 
       {/* Panels & Modals */}
-      {viewPanel && <ParoisseViewPanel paroisse={viewPanel} onClose={() => setViewPanel(null)} onEdit={() => { setFormPanel({ mode: 'edit', paroisse: viewPanel }); setViewPanel(null); }} />}
+      {viewPanel && <ParoisseViewPanel paroisse={viewPanel} canEdit={canEdit} onClose={() => setViewPanel(null)} onEdit={() => { setFormPanel({ mode: 'edit', paroisse: viewPanel }); setViewPanel(null); }} />}
       {formPanel && <ParoisseFormPanel mode={formPanel.mode} paroisse={formPanel.paroisse} onClose={() => setFormPanel(null)} onSaved={handleSaved} />}
 
       <ToastStack toasts={toasts} remove={remove} />

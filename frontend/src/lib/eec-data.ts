@@ -104,7 +104,7 @@ function parishName(idx: number, city: string) {
 }
 
 function buildParishes(districts: ReturnType<typeof buildDistricts>) {
-  const out: { id: string; type: string; regionId: string; districtId: string; name: string; lat: number; lng: number; stats: { fideles: number; communiants: number; nonCommuniants: number; baptemes: number; mariages: number; deces: number }; photo: boolean }[] = [];
+  const out: { id: string; type: string; regionId: string; districtId: string; name: string; lat: number; lng: number; stats: { fideles: number; communiants: number; nonCommuniants: number }; photo: boolean }[] = [];
   const TARGET = 576;
   const perDistrict = Math.max(2, Math.floor(TARGET / districts.length));
   let pId = 1;
@@ -122,7 +122,7 @@ function buildParishes(districts: ReturnType<typeof buildDistricts>) {
         name: parishName(pId, region.city),
         lat: jitter(d.lat, 0.08),
         lng: jitter(d.lng, 0.08),
-        stats: { fideles: fid, communiants: commun, nonCommuniants: fid - commun, baptemes: Math.floor(8 + rand() * 30), mariages: Math.floor(2 + rand() * 12), deces: Math.floor(rand() * 6) },
+        stats: { fideles: fid, communiants: commun, nonCommuniants: fid - commun },
         photo: pId % 7 === 0,
       });
       pId++;

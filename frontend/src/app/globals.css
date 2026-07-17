@@ -398,6 +398,8 @@ body:has(.eec-lp) {
   overflow: hidden;
   border-right: 1px solid var(--border);
 }
+/* Hamburger et fond de tiroir : outils mobile uniquement, masqués sur desktop */
+.hamburger-btn, .rail-backdrop { display: none; }
 .rail-tab {
   width: 100%;
   height: 58px;
@@ -2130,7 +2132,10 @@ img.leaflet-tile {
 
 /* ── Mobile (< 600px) : style Google Maps ── */
 @media (max-width: 600px) {
-  :root { --panel-w: calc(100vw - var(--rail-w)); --detail-w: 100vw; --rail-w: 52px; }
+  /* Le rail devient un tiroir hamburger en overlay : il ne réserve plus de
+     colonne dans la grille (--rail-w: 0), seule la carte reste visible par
+     défaut, comme sur Google Maps. */
+  :root { --panel-w: 100vw; --detail-w: 100vw; --rail-w: 0px; }
 
   /* Navbar compacte */
   .navbar { padding: 0 10px; min-height: 48px; gap: 8px; }
@@ -2140,13 +2145,45 @@ img.leaflet-tile {
   .nav-actions .admin-pill .ap-label { display: none; }
   .view-toggle span:not(.icon) { display: none; }
 
-  /* Rail latéral vertical → icons uniquement */
-  .rail { width: var(--rail-w); padding: 6px 0; gap: 2px; }
-  .rail-btn { padding: 8px 0; font-size: 9px; gap: 2px; }
-  .rail-btn span.rb-label { display: none; }
+  /* Panel ouvert sur mobile : la carte garde toute la largeur en dessous,
+     le panneau se pose par-dessus en feuille du bas (voir .panel plus bas). */
+  .main.panel-open { grid-template-columns: 0 0 1fr; }
 
-  /* Barre de recherche flottante */
-  .floating-search { width: calc(100vw - 76px); left: 56px !important; right: 8px; }
+  /* Rail latéral → tiroir hamburger plein-hauteur, caché par défaut,
+     révélé par le bouton hamburger (glissement depuis la gauche). */
+  .rail {
+    position: fixed; top: 48px; bottom: 0; left: 0; width: 240px;
+    padding: 10px 0; gap: 0;
+    transform: translateX(-100%);
+    transition: transform 220ms ease;
+    z-index: 1400;
+    box-shadow: 2px 0 20px rgba(0,0,0,0.22);
+  }
+  .rail.rail-open { transform: translateX(0); }
+  .rail-tab {
+    width: 100%; height: 46px; flex-direction: row; justify-content: flex-start;
+    gap: 12px; padding: 0 18px; font-size: 13px;
+  }
+  .rail-tab .lbl { opacity: 1; font-size: 13px; }
+
+  /* Fond semi-transparent derrière le tiroir ouvert */
+  .rail-backdrop {
+    display: block;
+    position: fixed; top: 48px; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.35); z-index: 1300;
+  }
+
+  /* Bouton hamburger flottant — seul point d'accès au tiroir sur mobile */
+  .hamburger-btn {
+    display: flex !important; align-items: center; justify-content: center;
+    position: absolute; top: 14px; left: 14px; width: 40px; height: 40px;
+    border-radius: 50%; border: 0; background: var(--surface-1);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.22); z-index: 950; cursor: pointer;
+    color: var(--t-1);
+  }
+
+  /* Barre de recherche flottante — décalée après le bouton hamburger */
+  .floating-search { width: calc(100vw - 84px); left: 64px !important; right: 8px; }
 
   /* Panel latéral → feuille du bas (bottom sheet) sur mobile */
   .panel { border-radius: 18px 18px 0 0; position: fixed; bottom: 0; left: 0; right: 0;
@@ -2427,6 +2464,17 @@ img.leaflet-tile {
   font-family: var(--mono);
   font-size: 11px; letter-spacing: .24em;
   color: var(--g); text-transform: uppercase;
+}
+
+/* ── Versets bibliques rotatifs : fondu + léger glissement ────────────── */
+.verse-fade {
+  transition: opacity .55s ease, transform .55s ease;
+  will-change: opacity, transform;
+}
+.verse-fade.verse-in  { opacity: 1; transform: translateY(0); }
+.verse-fade.verse-out { opacity: 0; transform: translateY(-10px); }
+@media (prefers-reduced-motion: reduce) {
+  .verse-fade { transition: opacity .3s ease; transform: none !important; }
 }
 
 /* ── Panneau droit ── */

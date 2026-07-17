@@ -9,9 +9,6 @@ export const MOCK_PAROISSE = {
   communiants: 520,
   nonCommuniants: 210,
   totalFideles: 730,
-  baptemes: 24,
-  mariages: 9,
-  deces: 6,
   lat: 5.475,
   lng: 10.418,
   gps: true,
@@ -39,12 +36,12 @@ export const OEUVRES_PAROISSE = [
 ];
 
 export const STATS_ANNUELLES_PAROISSE = [
-  { annee:2020, communiants:460, noncomm:185, baptemes:18, mariages:7,  deces:4 },
-  { annee:2021, communiants:476, noncomm:190, baptemes:20, mariages:8,  deces:5 },
-  { annee:2022, communiants:490, noncomm:198, baptemes:22, mariages:9,  deces:5 },
-  { annee:2023, communiants:505, noncomm:204, baptemes:23, mariages:8,  deces:6 },
-  { annee:2024, communiants:512, noncomm:207, baptemes:23, mariages:9,  deces:5 },
-  { annee:2025, communiants:520, noncomm:210, baptemes:24, mariages:9,  deces:6 },
+  { annee:2020, communiants:460, noncomm:185 },
+  { annee:2021, communiants:476, noncomm:190 },
+  { annee:2022, communiants:490, noncomm:198 },
+  { annee:2023, communiants:505, noncomm:204 },
+  { annee:2024, communiants:512, noncomm:207 },
+  { annee:2025, communiants:520, noncomm:210 },
 ];
 
 export const HISTORIQUE_IO_PAROISSE = [

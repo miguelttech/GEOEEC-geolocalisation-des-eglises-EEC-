@@ -20,6 +20,7 @@ from .serializers import (
 from apps.accounts.permissions import (
     ReadPublicWriteAdmin,
     filter_paroisses_by_scope,
+    filter_districts_by_scope,
 )
 
 
@@ -136,6 +137,12 @@ class DistrictViewSet(viewsets.ReadOnlyModelViewSet):
         region_id = self.request.query_params.get("region")
         if region_id:
             qs = qs.filter(region_id=region_id)
+
+        # Pour les admins : filtrer par leur scope (REGION ne voit que ses
+        # propres districts, etc.) — cohérent avec ParoisseViewSet.
+        if self.request.user.is_authenticated:
+            qs = filter_districts_by_scope(qs, self.request.user)
+
         return qs
 
 
@@ -219,6 +226,13 @@ class ParoisseViewSet(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         paroisse = self.get_object()
         user = request.user
+        # EXIGENCE : l'administrateur régional ne peut ni créer ni modifier
+        # une paroisse (contrairement aux autres niveaux d'administration).
+        if user.role == "REGION":
+            return Response(
+                {"detail": "Un administrateur régional ne peut pas modifier une paroisse."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         if not _can_write_paroisse(user, paroisse):
             return Response(status=status.HTTP_403_FORBIDDEN)
         interdits = set(request.data.keys()) - self.CHAMPS_MODIFIABLES

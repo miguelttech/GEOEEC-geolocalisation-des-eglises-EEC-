@@ -1,10 +1,10 @@
 'use client';
 import React from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { I } from './icons';
 import { Avatar } from './atoms';
+import AdminBrand from './AdminBrand';
 
 const BACKEND = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api')
   .replace(/\/api\/?$/, '');
@@ -30,10 +30,6 @@ const NAV = [
     { key: 'journal', label: "Journal d'activité",   icon: 'list' },
   ]},
 ];
-
-const EECLogo = ({ size = 32 }: { size?: number }) => (
-  <Image src="/logo-eec.png" alt="EEC" width={size} height={size} style={{ objectFit: 'contain' }} />
-);
 
 interface MeUser { first_name: string; last_name: string; email: string; role_display: string; avatar_url?: string | null; }
 
@@ -110,14 +106,7 @@ export default function Sidebar() {
       height: '100vh', position: 'sticky', top: 0,
       display: 'flex', flexDirection: 'column', overflowY: 'auto',
     }}>
-      {/* Brand */}
-      <div style={{ height: 72, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-        <EECLogo />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-          <span className="fr" style={{ fontSize: 15, color: '#fff', letterSpacing: '0.005em' }}>EEC Cameroun</span>
-          <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.50)', fontWeight: 500 }}>Console Synodale</span>
-        </div>
-      </div>
+      <AdminBrand spaceLabel="Bureau National" />
 
       {/* Compte connecté */}
       <div style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: 12, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>

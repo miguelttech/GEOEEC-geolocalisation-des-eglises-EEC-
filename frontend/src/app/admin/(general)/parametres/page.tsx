@@ -111,6 +111,30 @@ function PrefProfil({ me, onAddToast, onSaved }: {
     }
   }
 
+  async function handleRemove() {
+    setUploading(true);
+    try {
+      const csrf = await getCsrf();
+      const BACKEND = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api').replace(/\/api\/?$/, '');
+      const res = await fetch(`${BACKEND}/api/auth/me/avatar/`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: { 'X-CSRFToken': csrf },
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || 'Erreur lors de la suppression.');
+      }
+      onAddToast({ type: 'success', title: 'Photo de profil supprimée.' });
+      onSaved();
+      window.dispatchEvent(new Event('eec-profile-updated'));
+    } catch (err: unknown) {
+      onAddToast({ type: 'error', title: err instanceof Error ? err.message : 'Erreur lors de la suppression.' });
+    } finally {
+      setUploading(false);
+    }
+  }
+
   return (
     <div className="anim-in card" style={{ padding: 24, maxWidth: 720, display: 'flex', flexDirection: 'column', gap: 18 }}>
       <h3 className="sg" style={{ fontSize: 18, margin: 0 }}>Profil</h3>
@@ -122,9 +146,16 @@ function PrefProfil({ me, onAddToast, onSaved }: {
         )}
         <div>
           <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileChange} />
-          <button className="btn btn-outline-green" style={{ marginBottom: 6 }} disabled={uploading} onClick={() => fileRef.current?.click()}>
-            {uploading ? 'Envoi…' : 'Changer la photo'}
-          </button>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
+            <button className="btn btn-outline-green" disabled={uploading} onClick={() => fileRef.current?.click()}>
+              {uploading ? 'Envoi…' : 'Changer la photo'}
+            </button>
+            {me.avatar_url && (
+              <button className="btn btn-outline" style={{ color: '#FF8A7A', borderColor: 'rgba(198,40,40,0.40)' }} disabled={uploading} onClick={handleRemove}>
+                Supprimer la photo
+              </button>
+            )}
+          </div>
           <div style={{ fontSize: 11, color: 'var(--text-3)' }}>JPG ou PNG, 5 Mo max.</div>
         </div>
       </div>
