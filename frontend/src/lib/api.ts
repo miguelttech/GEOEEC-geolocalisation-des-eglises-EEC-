@@ -10,7 +10,16 @@ const BACKEND = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api')
 
 let csrfToken = '';
 
+// Le cookie CSRF (nom : eec_csrftoken) peut être régénéré côté serveur pendant
+// qu'un onglet reste ouvert. On lit donc TOUJOURS sa valeur courante dans le
+// cookie en priorité — un token mis en cache indéfiniment finit par devenir
+// invalide et fait échouer toutes les mutations (401/403 CSRF) sans jamais se
+// corriger tant que la page n'est pas rechargée.
 export async function getCsrf(): Promise<string> {
+  if (typeof document !== 'undefined') {
+    const m = document.cookie.match(/(?:^|;\s*)eec_csrftoken=([^;]+)/);
+    if (m) return decodeURIComponent(m[1]);
+  }
   if (csrfToken) return csrfToken;
   const res = await fetch(`${BACKEND}/api/auth/csrf/`, { credentials: 'include' });
   const data = await res.json();
@@ -43,11 +52,24 @@ async function request<T>(
 
 async function mutate<T>(method: string, path: string, body?: unknown): Promise<T> {
   const csrf = await getCsrf();
-  return request<T>(path, {
+  const send = (token: string) => request<T>(path, {
     method,
-    headers: { 'X-CSRFToken': csrf },
+    headers: { 'X-CSRFToken': token },
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
+  try {
+    return await send(csrf);
+  } catch (e) {
+    // Filet de sécurité : si le token utilisé était le fallback mis en cache
+    // (cookie illisible) et qu'il est rejeté, on force un nouveau jeton et on
+    // retente une seule fois avant de remonter l'erreur à l'appelant.
+    if (e instanceof Error && e.message.includes('CSRF') && csrfToken === csrf) {
+      csrfToken = '';
+      const fresh = await getCsrf();
+      return send(fresh);
+    }
+    throw e;
+  }
 }
 
 export const api = {
@@ -57,6 +79,24 @@ export const api = {
   put:    <T>(path: string, body: unknown) => mutate<T>('PUT',    path, body),
   delete: <T>(path: string)               => mutate<T>('DELETE', path),
 };
+
+// Déconnexion centralisée — auparavant dupliquée dans chaque barre latérale
+// (Sidebar, SidebarRegional, SidebarDistrict, SidebarParoisse, Topbar), avec
+// une divergence : trois d'entre elles utilisaient une URL relative sans
+// jeton CSRF, ce qui faisait échouer silencieusement l'appel côté serveur
+// (session jamais détruite) tout en redirigeant quand même vers /login.
+export async function logout(): Promise<void> {
+  try {
+    const csrf = await getCsrf();
+    await fetch(`${BACKEND}/api/auth/logout/`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'X-CSRFToken': csrf, 'Content-Type': 'application/json' },
+    });
+  } finally {
+    window.location.href = '/login';
+  }
+}
 
 /* ─── Types communs ─────────────────────────────────────────────────── */
 

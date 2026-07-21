@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import { usePathname } from 'next/navigation';
 import { I } from './icons';
 import { Avatar } from './atoms';
+import { logout } from '@/lib/api';
 
 const BACKEND = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api')
   .replace(/\/api\/?$/, '');
@@ -119,19 +120,6 @@ export default function Topbar() {
     (window as any).__setEECTheme?.(next === 'clair' ? 'light' : 'dark');
   }
 
-  const handleLogout = async () => {
-    try {
-      const csrf = await fetch(`${BACKEND}/api/auth/csrf/`, { credentials: 'include' })
-        .then(r => r.json()).then(d => d.csrfToken ?? '').catch(() => '');
-      await fetch(`${BACKEND}/api/auth/logout/`, {
-        method: 'POST', credentials: 'include',
-        headers: { 'X-CSRFToken': csrf, 'Content-Type': 'application/json' },
-      });
-    } finally {
-      window.location.href = '/login';
-    }
-  };
-
   return (
     <header style={{
       height: 60, background: 'var(--chrome)', borderBottom: '1px solid rgba(245,197,24,0.10)',
@@ -170,7 +158,7 @@ export default function Topbar() {
           </div>
           {openUser && typeof document !== 'undefined' && createPortal(
             <div ref={menuRef} className="menu" style={{ position: 'fixed', top: menuPos.top, right: menuPos.right, width: 200, zIndex: 1000 }}>
-              <button className="danger" onClick={handleLogout}>
+              <button className="danger" onClick={logout}>
                 <I.logout size={14}/>Déconnexion
               </button>
             </div>,

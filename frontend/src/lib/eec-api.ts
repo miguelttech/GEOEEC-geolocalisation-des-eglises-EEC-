@@ -65,7 +65,15 @@ async function fetchAllPages<T>(path: string): Promise<T[]> {
   let url: string | null = `${API}/api/${path}${sep}page_size=3000`;
   try {
     while (url) {
-      const r: Response = await fetch(url, { credentials: 'include' });
+      // Pas de `credentials: 'include'` ici : la carte publique doit toujours
+      // afficher le jeu de données NATIONAL complet, quel que soit le compte
+      // admin éventuellement connecté dans ce navigateur. Ces endpoints
+      // appliquent un filtre RBAC par portée géographique (région/district/
+      // paroisse) dès qu'une session admin authentifiée est détectée — envoyer
+      // les cookies de session ici ferait fuiter ce filtre sur la carte
+      // publique (un admin de district ne verrait plus que son propre
+      // district au lieu des 693 paroisses nationales).
+      const r: Response = await fetch(url);
       if (!r.ok) break;
       const d: { results?: T[]; next?: string | null } | T[] = await r.json();
       if (Array.isArray(d)) { all.push(...d); break; }
@@ -126,7 +134,10 @@ function oeuvreTypeId(nom: string): string {
 
 export async function loadMapData(): Promise<MapDataResult> {
   const [regGeoRes, distRaw, parRaw, oeuRaw, ouvRaw, statsRaw] = await Promise.all([
-    fetch(`${API}/api/geo/regions/`, { credentials: 'include' })
+    // Sans credentials — voir la note dans fetchAllPages() : la carte
+    // publique doit rester non-scopée même pour un navigateur où un admin
+    // est connecté.
+    fetch(`${API}/api/geo/regions/`)
       .then(r => r.json())
       .catch(() => ({ features: [] })),
     fetchAllPages<Record<string, unknown>>('geo/districts/'),

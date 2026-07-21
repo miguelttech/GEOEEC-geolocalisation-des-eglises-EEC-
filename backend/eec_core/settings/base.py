@@ -124,8 +124,9 @@ REST_FRAMEWORK = {
     # apps/accounts/throttles.py et les vues d'authentification).
     "DEFAULT_THROTTLE_CLASSES": [],
     "DEFAULT_THROTTLE_RATES": {
-        "login":    "60/min",
-        "register": "30/hour",
+        "login":           "60/min",
+        "register":        "30/hour",
+        "password_reset":  "5/hour",
     },
 }
 

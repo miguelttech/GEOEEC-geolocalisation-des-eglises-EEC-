@@ -189,3 +189,35 @@ def can_delete_ouvrier(user):
 
 def can_manage_accounts(user):
     return user.role in ("SUPER", "REGION", "DISTRICT")
+
+
+def managed_user_ids(user):
+    """
+    Renvoie les IDs des comptes que `user` a le droit de superviser :
+    lui-même, plus ses sous-administrateurs directs (REGION → admins DISTRICT
+    de sa région ; DISTRICT → admins PAROISSE de son district). Un SUPER n'a
+    pas besoin de ce filtre (accès global).
+
+    Utilisé pour scoper par zone tout ce qui liste des actions/activités
+    d'utilisateurs (journal d'audit, tableau de bord) — évite qu'un admin
+    REGION/DISTRICT ne voie l'activité d'une autre zone.
+    """
+    from .models import User
+
+    base = [user.id]
+    if user.role == "REGION" and user.region_id:
+        sub = list(
+            User.objects
+            .filter(region=user.region)
+            .exclude(role="SUPER")
+            .values_list("id", flat=True)
+        )
+        return base + sub
+    if user.role == "DISTRICT" and user.district_id:
+        sub = list(
+            User.objects
+            .filter(district=user.district, role="PAROISSE")
+            .values_list("id", flat=True)
+        )
+        return base + sub
+    return base

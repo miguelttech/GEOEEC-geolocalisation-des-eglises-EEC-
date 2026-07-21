@@ -7,8 +7,9 @@ des centaines d'enregistrements paginés à chaque affichage — un throttle glo
 bloquerait les visiteurs légitimes (et même le endpoint CSRF, donc la connexion).
 
 On limite désormais uniquement là où ça compte :
-  - login    : anti-brute-force sur le mot de passe
-  - register : anti-spam de création de comptes
+  - login           : anti-brute-force sur le mot de passe
+  - register        : anti-spam de création de comptes
+  - password_reset  : anti-spam d'e-mails de réinitialisation / flood SMTP
 
 Les taux sont définis dans REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"].
 La clé est l'adresse IP du client (comportement de AnonRateThrottle).
@@ -23,3 +24,7 @@ class LoginRateThrottle(AnonRateThrottle):
 
 class RegisterRateThrottle(AnonRateThrottle):
     scope = "register"
+
+
+class PasswordResetRateThrottle(AnonRateThrottle):
+    scope = "password_reset"

@@ -1,7 +1,7 @@
 from rest_framework import viewsets, serializers as drf_serializers
 
 from .models import LogActivite
-from apps.accounts.permissions import IsAdminUser
+from apps.accounts.permissions import IsAdminUser, managed_user_ids
 
 
 class LogActiviteSerializer(drf_serializers.ModelSerializer):
@@ -66,27 +66,6 @@ class LogActiviteViewSet(viewsets.ReadOnlyModelViewSet):
         # REGION/DISTRICT ne voient que les logs de leurs sous-admins
         user = self.request.user
         if user.role != "SUPER":
-            qs = qs.filter(utilisateur_id__in=_managed_user_ids(user))
+            qs = qs.filter(utilisateur_id__in=managed_user_ids(user))
 
         return qs
-
-
-def _managed_user_ids(user):
-    from apps.accounts.models import User
-    base = [user.id]
-    if user.role == "REGION" and user.region_id:
-        sub = list(
-            User.objects
-            .filter(region=user.region)
-            .exclude(role="SUPER")
-            .values_list("id", flat=True)
-        )
-        return base + sub
-    if user.role == "DISTRICT" and user.district_id:
-        sub = list(
-            User.objects
-            .filter(district=user.district, role="PAROISSE")
-            .values_list("id", flat=True)
-        )
-        return base + sub
-    return base

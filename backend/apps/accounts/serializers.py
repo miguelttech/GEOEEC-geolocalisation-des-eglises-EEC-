@@ -62,7 +62,17 @@ class UserSerializer(serializers.ModelSerializer):
             "avatar_url", "theme",
             "date_joined", "last_login",
         ]
-        read_only_fields = ["date_joined", "last_login", "username"]
+        # role/region/district/paroisse/permissions_custom/is_active : jamais
+        # modifiables via ce serializer (utilisé pour le PATCH générique de
+        # user_detail). Un changement de rôle ou de périmètre géographique
+        # doit repasser par la logique stricte de UserCreateSerializer
+        # (hiérarchie + un seul admin actif par zone) — pas par un simple
+        # PATCH de profil, sous peine d'escalade de privilèges.
+        read_only_fields = [
+            "date_joined", "last_login", "username",
+            "role", "region", "district", "paroisse",
+            "permissions_custom", "is_active",
+        ]
 
 
 class UserCreateSerializer(serializers.ModelSerializer):

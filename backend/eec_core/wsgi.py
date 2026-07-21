@@ -9,8 +9,15 @@ https://docs.djangoproject.com/en/5.0/howto/deployment/wsgi/
 
 import os
 
-from django.core.wsgi import get_wsgi_application
+# Pas de valeur par défaut : voir manage.py pour l'explication (éviter un
+# démarrage silencieux en configuration dev si la variable est oubliée).
+if not os.environ.get("DJANGO_SETTINGS_MODULE"):
+    raise RuntimeError(
+        "DJANGO_SETTINGS_MODULE n'est pas défini. Positionnez-le "
+        "explicitement (ex: eec_core.settings.dev en local, "
+        "eec_core.settings.prod en production) avant de démarrer le serveur WSGI."
+    )
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "eec_core.settings.dev")
+from django.core.wsgi import get_wsgi_application
 
 application = get_wsgi_application()

@@ -15,7 +15,7 @@ from rest_framework.response import Response
 from .models import User, StatistiqueAnnuelle
 from .permissions import can_manage_accounts, IsAdminUser
 from .serializers import UserSerializer, UserCreateSerializer
-from .throttles import LoginRateThrottle
+from .throttles import LoginRateThrottle, PasswordResetRateThrottle
 
 
 # ---------------------------------------------------------------------------
@@ -434,7 +434,7 @@ def dashboard_stats(request):
 
     user = request.user
 
-    from .permissions import filter_oeuvres_by_scope
+    from .permissions import filter_oeuvres_by_scope, managed_user_ids
 
     if user.role == "SUPER":
         paroisses_qs = Paroisse.objects.all()
@@ -588,7 +588,13 @@ def dashboard_stats(request):
     validations_attente = stats_qs.filter(validee=False).count()
 
     # ── Activité récente (6 dernières entrées du journal) ────────────────────
-    log_qs = LogActivite.objects.select_related("utilisateur").order_by("-created_at")[:6]
+    # Scopée par zone comme /api/audit/journal/ : un admin REGION/DISTRICT ne
+    # doit voir que l'activité de ses propres sous-administrateurs, jamais
+    # celle d'une autre région/district (SEC-3, audit du 20/07/2026).
+    log_qs = LogActivite.objects.select_related("utilisateur").order_by("-created_at")
+    if user.role != "SUPER":
+        log_qs = log_qs.filter(utilisateur_id__in=managed_user_ids(user))
+    log_qs = log_qs[:6]
     activite_recente = []
     for log in log_qs:
         nom = log.utilisateur.get_full_name() if log.utilisateur else "Système"
@@ -634,6 +640,7 @@ def dashboard_stats(request):
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
+@throttle_classes([PasswordResetRateThrottle])
 def password_reset_request(request):
     """
     POST /api/auth/password-reset/

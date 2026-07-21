@@ -18,6 +18,12 @@ from apps.accounts.permissions import (
     filter_ouvriers_by_scope,
 )
 
+# Limite de taille des fichiers Excel importés (paroisses/œuvres/ouvriers) —
+# évite qu'un fichier volumineux ne sature la mémoire/le CPU du worker lors
+# du parsing openpyxl (aucun de ces imports ne dépasse quelques milliers de
+# lignes en usage réel).
+MAX_IMPORT_SIZE = 10 * 1024 * 1024  # 10 Mo
+
 
 def _filter_statistiques_by_scope(queryset, user):
     """Filtre spécialisé pour StatistiqueAnnuelle (rattachée via paroisse) —
@@ -649,6 +655,11 @@ def import_paroisses(request):
         return Response({"detail": "Champ 'file' manquant."}, status=status.HTTP_400_BAD_REQUEST)
     if not file_obj.name.lower().endswith((".xlsx", ".xls")):
         return Response({"detail": "Format non supporté. Utilisez .xlsx"}, status=status.HTTP_400_BAD_REQUEST)
+    if file_obj.size > MAX_IMPORT_SIZE:
+        return Response(
+            {"detail": f"Fichier trop volumineux ({MAX_IMPORT_SIZE // (1024 * 1024)} Mo maximum)."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     try:
         wb = openpyxl.load_workbook(file_obj, read_only=True, data_only=True)
@@ -840,6 +851,11 @@ def import_oeuvres(request):
         return Response({"detail": "Champ 'file' manquant."}, status=status.HTTP_400_BAD_REQUEST)
     if not file_obj.name.lower().endswith((".xlsx", ".xls")):
         return Response({"detail": "Format non supporté. Utilisez .xlsx"}, status=status.HTTP_400_BAD_REQUEST)
+    if file_obj.size > MAX_IMPORT_SIZE:
+        return Response(
+            {"detail": f"Fichier trop volumineux ({MAX_IMPORT_SIZE // (1024 * 1024)} Mo maximum)."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     try:
         wb = openpyxl.load_workbook(file_obj, read_only=True, data_only=True)
@@ -956,6 +972,11 @@ def import_ouvriers(request):
         return Response({"detail": "Champ 'file' manquant."}, status=status.HTTP_400_BAD_REQUEST)
     if not file_obj.name.lower().endswith((".xlsx", ".xls")):
         return Response({"detail": "Format non supporté. Utilisez .xlsx"}, status=status.HTTP_400_BAD_REQUEST)
+    if file_obj.size > MAX_IMPORT_SIZE:
+        return Response(
+            {"detail": f"Fichier trop volumineux ({MAX_IMPORT_SIZE // (1024 * 1024)} Mo maximum)."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     try:
         wb = openpyxl.load_workbook(file_obj, read_only=True, data_only=True)

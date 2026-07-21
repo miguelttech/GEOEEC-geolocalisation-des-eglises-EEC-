@@ -81,10 +81,18 @@ const TRANSITION_MS = 550;
  * - Le verset change automatiquement toutes les `intervalMs` millisecondes,
  *   avec une transition douce (fondu + léger glissement) laissant le temps
  *   de lire avant de passer au suivant.
+ *
+ * L'index initial est fixe (0) pour que le HTML rendu côté serveur soit
+ * identique à celui de l'hydratation ; le tirage aléatoire se fait ensuite
+ * au montage, côté client uniquement.
  */
 export function useBibleVerse(intervalMs = 8000) {
-  const [index, setIndex] = useState(() => Math.floor(Math.random() * BIBLE_VERSES.length));
+  const [index, setIndex] = useState(0);
   const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    setIndex(Math.floor(Math.random() * BIBLE_VERSES.length));
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {

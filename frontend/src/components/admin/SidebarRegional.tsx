@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { I } from './icons';
 import { Avatar } from './atoms';
 import AdminBrand from './AdminBrand';
+import { logout } from '@/lib/api';
 
 const BACKEND = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api')
   .replace(/\/api\/?$/, '');
@@ -53,13 +54,8 @@ function getDisplayName(u: MeUser | null): string {
 }
 
 function LogoutBtn() {
-  const handleLogout = async () => {
-    try { await fetch('/api/auth/logout/', { method: 'POST', credentials: 'include' }); } finally {
-      window.location.href = '/login';
-    }
-  };
   return (
-    <button onClick={handleLogout} style={{ width: '100%', background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }}>
+    <button onClick={logout} style={{ width: '100%', background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }}>
       <div className="nav-item danger" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: 6 }}>
         <span className="ni-icon"><I.logout size={17} /></span>
         <span>Déconnexion</span>
