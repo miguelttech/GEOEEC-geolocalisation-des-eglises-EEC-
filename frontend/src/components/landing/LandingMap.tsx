@@ -2,6 +2,8 @@
 
 import React from 'react';
 import 'leaflet/dist/leaflet.css';
+import type { Map as LeafletMap, GeoJSON as LeafletGeoJSON, LatLngBounds } from 'leaflet';
+import type { GeoGeometry } from '@/lib/eec-api';
 
 // 22 couleurs vraiment distinctes — spectre complet, aucune paire similaire
 export const PALETTE = [
@@ -35,7 +37,7 @@ export interface RegionData {
   nb_paroisses: number;
   nb_districts: number;
   color: string;
-  geometry: any;
+  geometry: GeoGeometry | null;
 }
 
 interface Props {
@@ -46,8 +48,8 @@ interface Props {
 
 export default function LandingMap({ regions, activeNom, onHover }: Props) {
   const ref      = React.useRef<HTMLDivElement>(null);
-  const mapRef   = React.useRef<any>(null);
-  const layerMap = React.useRef<Map<string, any>>(new Map());
+  const mapRef   = React.useRef<LeafletMap | null>(null);
+  const layerMap = React.useRef<Map<string, LeafletGeoJSON>>(new Map());
 
   // Initialise la carte une seule fois
   React.useEffect(() => {
@@ -81,8 +83,9 @@ export default function LandingMap({ regions, activeNom, onHover }: Props) {
   // Ajoute / met à jour les couches quand les données arrivent
   React.useEffect(() => {
     if (!mapRef.current || regions.length === 0) return;
+    const map = mapRef.current;
     import('leaflet').then(({ default: L }) => {
-      addRegions(L, mapRef.current, regions, onHover);
+      addRegions(L, map, regions, onHover);
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [regions]);
@@ -100,14 +103,18 @@ export default function LandingMap({ regions, activeNom, onHover }: Props) {
     });
   }, [activeNom]);
 
-  function addRegions(L: any, map: any, regs: RegionData[], onHov: (n: string | null) => void) {
+  function addRegions(L: typeof import('leaflet'), map: LeafletMap, regs: RegionData[], onHov: (n: string | null) => void) {
     layerMap.current.forEach(l => l.remove());
     layerMap.current.clear();
 
-    let combined: any = null;
+    let combined: LatLngBounds | null = null;
 
     regs.forEach(region => {
-      const layer = L.geoJSON(region.geometry, {
+      if (!region.geometry) return;
+      // Le type GeoGeometry est délibérément large (réutilisé pour le calcul
+      // de centroïde) — Leaflet attend le type GeoJsonObject plus strict du
+      // paquet "geojson", d'où ce transtypage ciblé.
+      const layer = L.geoJSON(region.geometry as unknown as Parameters<typeof L.geoJSON>[0], {
         style: {
           color:       'rgba(255,255,255,0.7)',
           weight:      1,
@@ -136,10 +143,11 @@ export default function LandingMap({ regions, activeNom, onHover }: Props) {
 
     // Force le recalcul de la taille du conteneur, puis zoom sur le Cameroun
     // (délai court pour que le layout soit finalisé par le navigateur)
-    if (combined) {
+    const bounds = combined;
+    if (bounds) {
       setTimeout(() => {
         map.invalidateSize();
-        map.fitBounds(combined, { padding: [6, 6], animate: false });
+        map.fitBounds(bounds, { padding: [6, 6], animate: false });
       }, 80);
     }
   }

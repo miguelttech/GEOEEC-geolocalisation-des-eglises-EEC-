@@ -117,7 +117,7 @@ export default function Topbar() {
   function toggleTheme() {
     const next = theme === 'clair' ? 'sombre' : 'clair';
     setThemeState(next);
-    (window as any).__setEECTheme?.(next === 'clair' ? 'light' : 'dark');
+    window.__setEECTheme?.(next === 'clair' ? 'light' : 'dark');
   }
 
   return (

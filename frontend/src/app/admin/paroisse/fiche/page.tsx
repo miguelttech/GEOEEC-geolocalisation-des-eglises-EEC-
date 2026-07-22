@@ -1,12 +1,10 @@
 'use client';
 import React from 'react';
-import dynamic from 'next/dynamic';
 import { I } from '@/components/admin/icons';
 import { CompleteBar } from '@/components/admin/atoms';
-import { MOCK_PAROISSE, CHAMPS_COMPLETION } from '@/components/admin/dataParoisse';
+import { api, type Paroisse, type PagedResult } from '@/lib/api';
 
 const C = '#E67A2E';
-const MiniLeafletMap = dynamic(() => import('@/components/admin/MiniLeafletMap'), { ssr: false });
 
 interface Toast { id:number; type:'success'|'info'|'warn'; title:string; body?:string; }
 function useToast() {
@@ -38,20 +36,105 @@ function LockedField({ label, value }: { label:string; value:string }) {
   );
 }
 
+// Mini-carte centrée sur les coordonnées réelles de la paroisse (à la
+// différence de l'ancienne carte nationale générique, sans rapport avec la
+// paroisse affichée). Import de Leaflet différé au montage client, comme
+// dans MiniLeafletMap — pas besoin de next/dynamic pour ça.
+function ParoisseMiniMap({ lat, lng, height = 220 }: { lat: number; lng: number; height?: number }) {
+  const ref = React.useRef<HTMLDivElement>(null);
+  const initRef = React.useRef(false);
+
+  React.useEffect(() => {
+    if (!ref.current || initRef.current) return;
+    initRef.current = true;
+
+    import('leaflet').then(({ default: L }) => {
+      if (!ref.current) return;
+      const map = L.map(ref.current, {
+        zoomControl: false, attributionControl: true,
+        dragging: false, scrollWheelZoom: false,
+        doubleClickZoom: false, touchZoom: false, boxZoom: false,
+      }).setView([lat, lng], 13);
+
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '© OpenStreetMap · © CartoDB',
+        maxZoom: 19, subdomains: 'abcd',
+      }).addTo(map);
+
+      L.circleMarker([lat, lng], {
+        radius: 9, color: C, fillColor: C, fillOpacity: 0.85, weight: 2,
+      }).addTo(map);
+    });
+  }, [lat, lng]);
+
+  return <div ref={ref} style={{ height, width: '100%' }} />;
+}
+
 export default function FicheParoissePage() {
   const { toasts, add: addToast } = useToast();
-  const [editMode, setEditMode] = React.useState(false);
-  const [pasteur, setPasteur] = React.useState(MOCK_PAROISSE.pasteur);
-  const [adresse, setAdresse] = React.useState(MOCK_PAROISSE.adresse);
-  const [contact, setContact] = React.useState(MOCK_PAROISSE.contact);
-  const [description, setDescription] = React.useState(MOCK_PAROISSE.description);
-  const [communiants, setCommuniants] = React.useState(String(MOCK_PAROISSE.communiants));
-  const [nonCommuniants, setNonCommuniants] = React.useState(String(MOCK_PAROISSE.nonCommuniants));
-  const [lat, setLat] = React.useState(String(MOCK_PAROISSE.lat));
-  const [lng, setLng] = React.useState(String(MOCK_PAROISSE.lng));
+  const [loading, setLoading] = React.useState(true);
+  const [notFound, setNotFound] = React.useState(false);
+  const [paroisse, setParoisse] = React.useState<Paroisse | null>(null);
 
-  const renseignes = CHAMPS_COMPLETION.filter(c => c.renseigne).length;
-  const pct = Math.round(renseignes / CHAMPS_COMPLETION.length * 100);
+  const [editMode, setEditMode] = React.useState(false);
+  const [saving, setSaving] = React.useState(false);
+  const [nomDraft, setNomDraft] = React.useState('');
+  const [enProspectionDraft, setEnProspectionDraft] = React.useState(false);
+
+  const load = React.useCallback(() => {
+    setLoading(true);
+    api.get<PagedResult<Paroisse>>('/api/geo/paroisses/')
+      .then(r => {
+        const p = r.results[0] ?? null;
+        setParoisse(p);
+        setNotFound(!p);
+        if (p) { setNomDraft(p.nom); setEnProspectionDraft(p.en_prospection); }
+      })
+      .catch(() => addToast({ type: 'warn', title: 'Impossible de charger la fiche', body: 'Vérifiez votre connexion et réessayez.' }))
+      .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  React.useEffect(() => { load(); }, [load]);
+
+  async function handleSave() {
+    if (!paroisse) return;
+    setSaving(true);
+    try {
+      const updated = await api.patch<Paroisse>(`/api/geo/paroisses/${paroisse.id}/`, {
+        nom: nomDraft,
+        en_prospection: enProspectionDraft,
+      });
+      setParoisse(updated);
+      setEditMode(false);
+      addToast({ type: 'success', title: 'Fiche mise à jour' });
+    } catch (e) {
+      addToast({ type: 'warn', title: 'Échec de l\'enregistrement', body: e instanceof Error ? e.message : undefined });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (loading) {
+    return <div className="card" style={{ padding: 24, fontSize: 13, color: 'var(--text-3)' }}>Chargement de la fiche…</div>;
+  }
+  if (notFound || !paroisse) {
+    return <div className="card" style={{ padding: 24, fontSize: 13, color: 'var(--text-3)' }}>Aucune paroisse n'est associée à votre compte.</div>;
+  }
+
+  const champsCompletion = [
+    { label: 'Nom officiel',        renseigne: !!paroisse.nom },
+    { label: 'Catégorie',           renseigne: !!paroisse.categorie },
+    { label: 'Adresse physique',    renseigne: !!paroisse.adresse },
+    { label: 'Téléphone',           renseigne: !!paroisse.telephone },
+    { label: 'E-mail',              renseigne: !!paroisse.email },
+    { label: 'Coordonnées GPS',     renseigne: paroisse.latitude != null && paroisse.longitude != null },
+    { label: 'Effectif de fidèles', renseigne: paroisse.nombre_fideles != null },
+  ];
+  const renseignes = champsCompletion.filter(c => c.renseigne).length;
+  const pct = Math.round(renseignes / champsCompletion.length * 100);
+  const hasGps = paroisse.latitude != null && paroisse.longitude != null;
+  const totalFideles = (paroisse.communiants ?? 0) + (paroisse.non_communiants ?? 0);
 
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
@@ -60,11 +143,15 @@ export default function FicheParoissePage() {
       <div className="card" style={{ padding:'18px 22px', display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:12 }}>
         <div>
           <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-            <h1 className="sg" style={{ fontSize:22, margin:0 }}>{MOCK_PAROISSE.nom}</h1>
+            <h1 className="sg" style={{ fontSize:22, margin:0 }}>{paroisse.nom}</h1>
             <span style={{ padding:'3px 10px', borderRadius:4, fontSize:12, fontWeight:700, background:`rgba(230,122,46,0.15)`, color:C }}>PAROISSE</span>
-            <span style={{ padding:'3px 10px', borderRadius:4, fontSize:12, fontWeight:700, background:'rgba(90,196,114,0.12)', color:'#5AC472' }}>Actif</span>
+            {paroisse.en_prospection && (
+              <span style={{ padding:'3px 10px', borderRadius:4, fontSize:12, fontWeight:700, background:'rgba(255,193,7,0.12)', color:'#FFC107' }}>En prospection</span>
+            )}
           </div>
-          <div style={{ fontSize:12, color:'var(--text-3)', marginTop:4 }}>{MOCK_PAROISSE.district} · {MOCK_PAROISSE.region} · Modifié {MOCK_PAROISSE.modifie} par {MOCK_PAROISSE.modPar}</div>
+          <div style={{ fontSize:12, color:'var(--text-3)', marginTop:4 }}>
+            {paroisse.district_nom} · {paroisse.region_nom} · Mis à jour le {new Date(paroisse.updated_at).toLocaleDateString('fr')}
+          </div>
         </div>
         <div style={{ display:'flex', gap:8, alignItems:'center' }}>
           <div style={{ fontSize:12, color:'var(--text-3)' }}>Complétion</div>
@@ -72,19 +159,20 @@ export default function FicheParoissePage() {
           <div style={{ fontSize:13, fontWeight:700, color:C }}>{pct}%</div>
           {!editMode
             ? <button className="btn" style={{ background:C, color:'#fff', border:`1px solid ${C}`, marginLeft:8 }} onClick={() => setEditMode(true)}><I.pencil size={14}/>Modifier la fiche</button>
-            : <><button className="btn btn-ghost" onClick={() => setEditMode(false)}>Annuler</button>
-               <button className="btn" style={{ background:C, color:'#fff', border:`1px solid ${C}` }} onClick={()=>{setEditMode(false); addToast({type:'warn',title:'Proposition soumise',body:'Modifications envoyées au district Bafoussam Centre pour validation'});}}>
-                 <I.check size={14}/>Proposer la modification
-               </button></>
+            : <>
+                <button className="btn btn-ghost" disabled={saving} onClick={() => { setEditMode(false); setNomDraft(paroisse.nom); setEnProspectionDraft(paroisse.en_prospection); }}>Annuler</button>
+                <button className="btn" disabled={saving} style={{ background:C, color:'#fff', border:`1px solid ${C}` }} onClick={handleSave}>
+                  <I.check size={14}/>{saving ? 'Enregistrement…' : 'Enregistrer'}
+                </button>
+              </>
           }
         </div>
       </div>
 
-      {/* Bandeau si en édition */}
       {editMode && (
         <div style={{ background:'rgba(255,193,7,0.07)', border:'1px solid rgba(255,193,7,0.25)', borderRadius:6, padding:'10px 14px', fontSize:12, color:'rgba(255,193,7,0.90)', display:'flex', alignItems:'center', gap:8 }}>
           <I.shield size={13}/>
-          Mode édition activé. Vos modifications seront soumises au <b>district Bafoussam Centre</b> pour validation avant publication.
+          Seuls le nom et l'état « en prospection » sont modifiables par un administrateur de paroisse. Les autres informations (adresse, contact, GPS, catégorie) sont gérées par l'administrateur de district.
         </div>
       )}
 
@@ -94,49 +182,41 @@ export default function FicheParoissePage() {
         <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
 
           <Section title="Identité">
-            <LockedField label="RÉGION" value={MOCK_PAROISSE.region + ' — scopée'}/>
-            <LockedField label="DISTRICT" value={MOCK_PAROISSE.district + ' — scopé'}/>
-            <LockedField label="CATÉGORIE" value={MOCK_PAROISSE.categorie + ' — modifiable par Admin District uniquement'}/>
+            <LockedField label="RÉGION" value={paroisse.region_nom}/>
+            <LockedField label="DISTRICT" value={paroisse.district_nom}/>
+            <LockedField label="CATÉGORIE" value={(paroisse.categorie ?? 'Non renseignée') + ' — modifiable par l\'administrateur de district'}/>
             <div>
-              <div style={{ fontSize:11, color:'var(--text-3)', fontWeight:600, marginBottom:4 }}>PASTEUR EN CHARGE</div>
+              <div style={{ fontSize:11, color:'var(--text-3)', fontWeight:600, marginBottom:4 }}>NOM DE LA PAROISSE</div>
               {editMode
-                ? <input className="input" value={pasteur} onChange={e=>setPasteur(e.target.value)} style={{ width:'100%' }}/>
-                : <div style={{ fontSize:13, padding:'9px 0' }}>{pasteur}</div>}
+                ? <input className="input" value={nomDraft} onChange={e=>setNomDraft(e.target.value)} style={{ width:'100%' }}/>
+                : <div style={{ fontSize:13, padding:'9px 0' }}>{paroisse.nom}</div>}
             </div>
-            <div>
-              <div style={{ fontSize:11, color:'var(--text-3)', fontWeight:600, marginBottom:4 }}>ADRESSE PHYSIQUE</div>
-              {editMode
-                ? <input className="input" value={adresse} onChange={e=>setAdresse(e.target.value)} style={{ width:'100%' }}/>
-                : <div style={{ fontSize:13, padding:'9px 0' }}>{adresse}</div>}
-            </div>
-            <div>
-              <div style={{ fontSize:11, color:'var(--text-3)', fontWeight:600, marginBottom:4 }}>CONTACT</div>
-              {editMode
-                ? <input className="input" value={contact} onChange={e=>setContact(e.target.value)} style={{ width:'100%' }}/>
-                : <div style={{ fontSize:13, padding:'9px 0' }}>{contact}</div>}
-            </div>
-            <div>
-              <div style={{ fontSize:11, color:'var(--text-3)', fontWeight:600, marginBottom:4 }}>DESCRIPTION</div>
-              {editMode
-                ? <textarea className="input" value={description} onChange={e=>setDescription(e.target.value)} rows={3} style={{ width:'100%', resize:'vertical' }}/>
-                : <div style={{ fontSize:13, color:'var(--text-2)', lineHeight:1.5, padding:'4px 0' }}>{description}</div>}
-            </div>
+            {editMode && (
+              <label style={{ display:'flex', alignItems:'center', gap:8, fontSize:13, cursor:'pointer' }}>
+                <input type="checkbox" checked={enProspectionDraft} onChange={e=>setEnProspectionDraft(e.target.checked)} />
+                Paroisse en prospection (en cours d'implantation)
+              </label>
+            )}
+            <LockedField label="ADRESSE PHYSIQUE" value={paroisse.adresse || 'Non renseignée'}/>
+            <LockedField label="TÉLÉPHONE" value={paroisse.telephone || 'Non renseigné'}/>
+            <LockedField label="E-MAIL" value={paroisse.email || 'Non renseigné'}/>
           </Section>
 
           <Section title="Statistiques 2025">
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-              {[
-                { label:'COMMUNIANTS',    val:communiants,    set:setCommuniants,    color:'#5AC472' },
-                { label:'NON-COMMUNIANTS',val:nonCommuniants, set:setNonCommuniants, color:'var(--text)' },
-              ].map(f => (
-                <div key={f.label}>
-                  <div style={{ fontSize:10, color:'var(--text-3)', fontWeight:600, letterSpacing:'0.06em', marginBottom:4 }}>{f.label}</div>
-                  {editMode
-                    ? <input className="input" type="number" value={f.val} onChange={e=>f.set(e.target.value)} style={{ width:'100%' }}/>
-                    : <div className="sg-md" style={{ fontSize:22, color:f.color, paddingTop:4 }}>{Number(f.val).toLocaleString('fr')}</div>}
-                </div>
-              ))}
+              <div>
+                <div style={{ fontSize:10, color:'var(--text-3)', fontWeight:600, letterSpacing:'0.06em', marginBottom:4 }}>COMMUNIANTS</div>
+                <div className="sg-md" style={{ fontSize:22, color:'#5AC472', paddingTop:4 }}>{(paroisse.communiants ?? '—').toLocaleString?.('fr') ?? paroisse.communiants ?? '—'}</div>
+              </div>
+              <div>
+                <div style={{ fontSize:10, color:'var(--text-3)', fontWeight:600, letterSpacing:'0.06em', marginBottom:4 }}>NON-COMMUNIANTS</div>
+                <div className="sg-md" style={{ fontSize:22, color:'var(--text)', paddingTop:4 }}>{(paroisse.non_communiants ?? '—').toLocaleString?.('fr') ?? paroisse.non_communiants ?? '—'}</div>
+              </div>
             </div>
+            {(paroisse.communiants != null || paroisse.non_communiants != null) && (
+              <div style={{ fontSize:12, color:'var(--text-3)' }}>Total : {totalFideles.toLocaleString('fr')} fidèles</div>
+            )}
+            <div style={{ fontSize:11, color:'var(--text-3)' }}>Statistiques modifiables uniquement par import (Import / Export).</div>
           </Section>
 
         </div>
@@ -146,29 +226,25 @@ export default function FicheParoissePage() {
 
           <Section title="Géolocalisation GPS">
             <div style={{ display:'flex', alignItems:'center', gap:8, padding:'8px 0' }}>
-              <div style={{ width:8, height:8, borderRadius:'50%', background: MOCK_PAROISSE.gps ? '#5AC472' : '#FF8A7A' }}/>
-              <span style={{ fontSize:13, color: MOCK_PAROISSE.gps ? '#5AC472' : '#FF8A7A', fontWeight:600 }}>
-                {MOCK_PAROISSE.gps ? '✓ Coordonnées GPS renseignées' : '✗ Aucune coordonnée GPS'}
+              <div style={{ width:8, height:8, borderRadius:'50%', background: hasGps ? '#5AC472' : '#FF8A7A' }}/>
+              <span style={{ fontSize:13, color: hasGps ? '#5AC472' : '#FF8A7A', fontWeight:600 }}>
+                {hasGps ? '✓ Coordonnées GPS renseignées' : '✗ Aucune coordonnée GPS'}
               </span>
             </div>
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-              <div>
-                <div style={{ fontSize:11, color:'var(--text-3)', fontWeight:600, marginBottom:4 }}>LATITUDE</div>
-                {editMode
-                  ? <input className="input mono" value={lat} onChange={e=>setLat(e.target.value)} style={{ width:'100%' }}/>
-                  : <div className="mono" style={{ fontSize:13, padding:'9px 0', color:C }}>{lat}</div>}
-              </div>
-              <div>
-                <div style={{ fontSize:11, color:'var(--text-3)', fontWeight:600, marginBottom:4 }}>LONGITUDE</div>
-                {editMode
-                  ? <input className="input mono" value={lng} onChange={e=>setLng(e.target.value)} style={{ width:'100%' }}/>
-                  : <div className="mono" style={{ fontSize:13, padding:'9px 0', color:C }}>{lng}</div>}
-              </div>
+              <LockedField label="LATITUDE" value={hasGps ? String(paroisse.latitude) : '—'}/>
+              <LockedField label="LONGITUDE" value={hasGps ? String(paroisse.longitude) : '—'}/>
             </div>
-            <div style={{ height:220, borderRadius:8, overflow:'hidden' }}>
-              <MiniLeafletMap height={220}/>
-            </div>
-            {editMode && <div style={{ fontSize:11, color:'var(--text-3)' }}>La modification GPS est soumise au district pour validation.</div>}
+            {hasGps ? (
+              <div style={{ height:220, borderRadius:8, overflow:'hidden' }}>
+                <ParoisseMiniMap lat={paroisse.latitude as number} lng={paroisse.longitude as number} height={220}/>
+              </div>
+            ) : (
+              <div style={{ height:120, borderRadius:8, background:'rgba(255,255,255,0.03)', border:'1px dashed var(--border)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, color:'var(--text-3)' }}>
+                Aucune coordonnée GPS enregistrée pour cette paroisse.
+              </div>
+            )}
+            <div style={{ fontSize:11, color:'var(--text-3)' }}>La géolocalisation est gérée par l'administrateur de district.</div>
           </Section>
 
           <Section title="Complétion de la fiche">
@@ -177,7 +253,7 @@ export default function FicheParoissePage() {
               <div style={{ fontSize:18, fontWeight:700, color:C }}>{pct}%</div>
             </div>
             <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
-              {CHAMPS_COMPLETION.map((c,i) => (
+              {champsCompletion.map((c,i) => (
                 <div key={i} style={{ display:'flex', alignItems:'center', gap:8, fontSize:12 }}>
                   <span style={{ color: c.renseigne ? '#5AC472' : '#FF8A7A', flexShrink:0 }}>{c.renseigne ? '✓' : '✗'}</span>
                   <span style={{ color: c.renseigne ? 'var(--text-2)' : 'var(--text-3)' }}>{c.label}</span>

@@ -4,6 +4,13 @@ import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { PALETTE, type RegionData } from './LandingMap';
+import type { GeoGeometry } from '@/lib/eec-api';
+
+interface RegionFeature {
+  id: number;
+  properties: { nom: string; nb_paroisses?: number; nb_districts?: number };
+  geometry: GeoGeometry;
+}
 
 const LandingMap = dynamic(() => import('./LandingMap'), { ssr: false });
 
@@ -18,8 +25,8 @@ export default function MapSection() {
   useEffect(() => {
     fetch(`${API}/api/geo/regions/`)
       .then(r => r.json())
-      .then(data => {
-        const regs: RegionData[] = data.features.map((f: any, i: number) => ({
+      .then((data: { features: RegionFeature[] }) => {
+        const regs: RegionData[] = data.features.map((f, i) => ({
           id:           f.id,
           nom:          f.properties.nom,
           nb_paroisses: f.properties.nb_paroisses ?? 0,

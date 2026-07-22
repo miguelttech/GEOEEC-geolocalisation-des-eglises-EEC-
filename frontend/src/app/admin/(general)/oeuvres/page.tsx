@@ -1,6 +1,7 @@
 'use client';
 import 'leaflet/dist/leaflet.css';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import type { Map as LeafletMap, Marker as LeafletMarker } from 'leaflet';
 import { api, TypeOeuvre, Oeuvre, PagedResult, RegionSynodale, District, Paroisse } from '@/lib/api';
 import { I } from '@/components/admin/icons';
 import { GpsCell } from '@/components/admin/atoms';
@@ -173,8 +174,8 @@ function formFromOeuvre(o: Oeuvre): FormState {
 // ─── GPS Map Picker ──────────────────────────────────────────────────────────
 function GpsMapPicker({ lat, lng }: { lat: number|null; lng: number|null }) {
   const mapDiv  = useRef<HTMLDivElement>(null);
-  const mapInst = useRef<any>(null);
-  const marker  = useRef<any>(null);
+  const mapInst = useRef<LeafletMap | null>(null);
+  const marker  = useRef<LeafletMarker | null>(null);
   useEffect(() => {
     if (!mapDiv.current || mapInst.current) return;
     let cancelled = false;
@@ -183,8 +184,8 @@ function GpsMapPicker({ lat, lng }: { lat: number|null; lng: number|null }) {
       const initLat = lat ?? 4.5, initLng = lng ?? 12.5;
       const map = L.map(mapDiv.current, { center: [initLat, initLng], zoom: lat ? 11 : 6 });
       L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: '© OSM · CartoDB', maxZoom: 19, subdomains: 'abcd' }).addTo(map);
-      const mkIcon = (L: any) => L.divIcon({ html: `<div style="width:16px;height:16px;background:#5B9BD5;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.4)"></div>`, iconSize:[16,16], iconAnchor:[8,8], className:'' });
-      if (lat !== null && lng !== null) { marker.current = L.marker([lat,lng],{icon:mkIcon(L)}).addTo(map); }
+      const mkIcon = () => L.divIcon({ html: `<div style="width:16px;height:16px;background:#5B9BD5;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.4)"></div>`, iconSize:[16,16], iconAnchor:[8,8], className:'' });
+      if (lat !== null && lng !== null) { marker.current = L.marker([lat,lng],{icon:mkIcon()}).addTo(map); }
       // EXIGENCE : le marqueur n'est plus déplaçable directement sur la carte —
       // il ne fait que visualiser les coordonnées saisies (aucun clic ne le repositionne).
       mapInst.current = map;
@@ -195,9 +196,9 @@ function GpsMapPicker({ lat, lng }: { lat: number|null; lng: number|null }) {
     if (!mapInst.current || lat===null || lng===null) return;
     import('leaflet').then(({default:L}) => {
       if(!mapInst.current) return;
-      const mkIcon = (L:any) => L.divIcon({html:`<div style="width:16px;height:16px;background:#5B9BD5;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.4)"></div>`,iconSize:[16,16],iconAnchor:[8,8],className:''});
+      const mkIcon = () => L.divIcon({html:`<div style="width:16px;height:16px;background:#5B9BD5;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.4)"></div>`,iconSize:[16,16],iconAnchor:[8,8],className:''});
       if (marker.current) marker.current.setLatLng([lat,lng]);
-      else { marker.current = L.marker([lat,lng],{icon:mkIcon(L)}).addTo(mapInst.current); }
+      else { marker.current = L.marker([lat,lng],{icon:mkIcon()}).addTo(mapInst.current); }
       mapInst.current.panTo([lat,lng]);
     });
   }, [lat, lng]);
@@ -592,8 +593,8 @@ export default function OeuvresPage() {
 
   // Load types + regions (static reference data)
   useEffect(() => {
-    api.get<PagedResult<TypeOeuvre>>('/api/oeuvres/types/?page_size=100')
-      .then(r => setTypes(Array.isArray(r) ? r : (r as any).results ?? []))
+    api.get<PagedResult<TypeOeuvre> | TypeOeuvre[]>('/api/oeuvres/types/?page_size=100')
+      .then(r => setTypes(Array.isArray(r) ? r : r.results ?? []))
       .catch(() => {});
     api.get<RegionSynodale[]>('/api/geo/regions/liste/').then(setRegions).catch(() => {});
   }, []);

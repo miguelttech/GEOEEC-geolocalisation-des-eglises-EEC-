@@ -1,0 +1,115 @@
+name: CI
+
+# INFRA-6 — jusqu'ici aucune CI n'existait : rien n'empêchait une régression
+# (RBAC ou autre) de partir directement en production. Portée volontairement
+# progressive : les tests (backend) et la compilation (frontend) sont
+# bloquants, ruff/black/eslint sont informatifs pour l'instant — le code
+# existant n'a jamais été passé au crible de ces outils (110 erreurs ruff,
+# 52 fichiers à reformater par black, 209 problèmes ESLint) ; les rendre
+# bloquants du jour au lendemain provoquerait un gros diff de pur formatage
+# à relire plutôt que d'apporter une vraie garantie. À rendre bloquant plus
+# tard, une fois le code existant mis à niveau.
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    services:
+      db:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: eec_user
+          POSTGRES_PASSWORD: eec_test_password
+          POSTGRES_DB: eec_test_db
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U eec_user -d eec_test_db"
+          --health-interval 10s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s --health-timeout 5s --health-retries 5
+
+    env:
+      DJANGO_SETTINGS_MODULE: eec_core.settings.test
+      DB_HOST: localhost
+      DB_PORT: "5432"
+      DB_NAME: eec_test_db
+      DB_USER: eec_user
+      DB_PASSWORD: eec_test_password
+      REDIS_URL: redis://localhost:6379/0
+      SECRET_KEY: ci-test-secret-key-not-for-production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      # GDAL/GEOS/PROJ requis par GeoDjango — mêmes paquets que backend/Dockerfile
+      - name: Install system dependencies (GeoDjango)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            binutils libproj-dev gdal-bin libgdal-dev libgeos-dev
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      # Informatif — voir la note en tête de fichier. N'empêche pas la suite.
+      - name: Lint (ruff) — informatif
+        continue-on-error: true
+        run: ruff check .
+
+      - name: Format check (black) — informatif
+        continue-on-error: true
+        run: black --check .
+
+      # Bloquant : le seul vrai filet de sécurité contre une régression RBAC.
+      - name: Tests
+        run: python manage.py test apps
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - run: npm ci
+
+      # Informatif — voir la note en tête de fichier.
+      - name: Lint (ESLint) — informatif
+        continue-on-error: true
+        run: npm run lint
+
+      # Bloquants : erreurs de type et de build réelles, pas des questions de style.
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Build
+        env:
+          NEXT_PUBLIC_API_URL: https://ci-placeholder.invalid/api
+          NEXT_PUBLIC_GEOSERVER_URL: https://ci-placeholder.invalid/geoserver
+        run: npm run build

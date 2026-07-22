@@ -305,7 +305,10 @@ export default function DashboardPage() {
         <Widget title="Catégories de paroisses par région">
           {loading ? <Skeleton h={180} /> : s?.categories_par_region?.length ? (
             <>
-              <StackedBars data={s.categories_par_region as any} keys={[
+              {/* StackedBars accepte un Record<string, ...> générique (accès dynamique
+                  par clé) — un type nommé avec des propriétés fixes n'a pas de
+                  signature d'index compatible, d'où ce transtypage explicite. */}
+              <StackedBars data={s.categories_par_region as unknown as Record<string, string | number>[]} keys={[
                 { key: 'cat_a', color: '#E8B600' },
                 { key: 'cat_b', color: '#1565C0' },
                 { key: 'cat_c', color: '#2E9744' },

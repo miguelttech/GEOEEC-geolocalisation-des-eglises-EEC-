@@ -18,10 +18,11 @@ const CLUSTERS = [
 
 export default function MiniLeafletMap({ height = 320 }: { height?: number }) {
   const ref = React.useRef<HTMLDivElement>(null);
+  const initRef = React.useRef(false);
 
   React.useEffect(() => {
-    if (!ref.current || (ref.current as any)._init) return;
-    (ref.current as any)._init = true;
+    if (!ref.current || initRef.current) return;
+    initRef.current = true;
 
     import('leaflet').then(({ default: L }) => {
       if (!ref.current) return;

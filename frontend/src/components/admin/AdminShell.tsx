@@ -22,7 +22,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
       })
       .catch(() => {});
 
-    (window as any).__setEECTheme = (t: 'dark' | 'light') => {
+    window.__setEECTheme = (t: 'dark' | 'light') => {
       setTheme(t);
       localStorage.setItem('eec-admin-theme', t);
       api.patch('/api/auth/me/', { theme: t === 'light' ? 'clair' : 'sombre' }).catch(() => {});
@@ -35,7 +35,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
     return () => {
       window.removeEventListener('storage', onStorage);
-      delete (window as any).__setEECTheme;
+      delete window.__setEECTheme;
     };
   }, []);
 

@@ -191,7 +191,7 @@ function PrefPrefs({ me, onAddToast }: { me: UserAccount | null; onAddToast: (t:
 
   function applyTheme(t: 'clair' | 'sombre') {
     setTheme(t);
-    (window as any).__setEECTheme?.(t === 'clair' ? 'light' : 'dark');
+    window.__setEECTheme?.(t === 'clair' ? 'light' : 'dark');
     onAddToast({ type: 'success', title: t === 'clair' ? 'Thème clair activé.' : 'Thème sombre activé.' });
   }
 

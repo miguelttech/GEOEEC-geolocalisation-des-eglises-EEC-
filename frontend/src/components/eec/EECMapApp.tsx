@@ -102,6 +102,20 @@ function useDebounced<T>(value: T, ms = 180): T {
   return v;
 }
 const fmt = (n?: number) => (n || 0).toLocaleString('fr');
+
+// Leaflet insère le contenu de bindPopup()/bindTooltip() en innerHTML dès
+// qu'on lui passe une chaîne — tout texte pouvant provenir de données
+// modifiables (nom de paroisse/œuvre/région, point de recherche externe)
+// doit donc être échappé avant interpolation, sous peine d'injection HTML
+// exécutée pour chaque visiteur de la carte publique (SEC-6).
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 function relTime(ms: number): string {
   const s = Math.floor((Date.now() - ms) / 1000);
   if (s < 60) return "à l'instant";
@@ -334,7 +348,7 @@ function usePOILayer(mapRef: React.RefObject<L.Map | null>, enabled: boolean, sh
         const icon = L.divIcon({ className: 'poi-marker', html: poiSvg(cfg.glyph, cfg.color), iconSize: [22, 22], iconAnchor: [11, 11] });
         const m = L.marker([p.lat, p.lng], { icon, zIndexOffset: 300 });
         // Nom : permanent si l'option est cochée ET zoom rapproché, sinon au survol
-        m.bindTooltip(p.name, { direction: 'top', offset: [0, -12], className: 'eec-map-label poi-label', permanent: showNames && z >= 15 });
+        m.bindTooltip(escapeHtml(p.name), { direction: 'top', offset: [0, -12], className: 'eec-map-label poi-label', permanent: showNames && z >= 15 });
         layer.addLayer(m);
       }
       if (poiRef.current) map.removeLayer(poiRef.current);
@@ -493,7 +507,7 @@ function useLeafletMap(
       const pc = allParishes.filter(p => p.regionId === r.id).length;
       const dc = allDistricts.filter(d => d.regionId === r.id).length;
       // Popup compact
-      const popup = `<div class="region-popup-compact"><div class="rpc-dot" style="background:${color}"></div><div class="rpc-name">${r.city}</div><div class="rpc-stats">${dc} districts · ${pc} paroisses</div></div>`;
+      const popup = `<div class="region-popup-compact"><div class="rpc-dot" style="background:${color}"></div><div class="rpc-name">${escapeHtml(r.city)}</div><div class="rpc-stats">${dc} districts · ${pc} paroisses</div></div>`;
 
       // Pendant l'outil de mesure, les polygones ne captent pas les clics
       // (pour ne pas gêner le placement des points de mesure).
@@ -582,7 +596,7 @@ function useLeafletMap(
       const m = L.marker([it.lat, it.lng], { icon: makeIcon(type, color, false), title: it.name });
       // Noms des paroisses/œuvres : toujours liés (information principale) ;
       // le CSS labels-hidden les masque sous le zoom 13 pour rester lisible.
-      m.bindTooltip(it.name, {
+      m.bindTooltip(escapeHtml(it.name), {
         direction: 'top', offset: [0, -34], className: 'eec-map-label',
         opacity: 1, permanent: true,
       });
@@ -682,9 +696,9 @@ function useLeafletMap(
     });
     // Si départ = Ma position, le marqueur bleu animé suffit (pas de doublon pin A)
     if (routeStart && routeStart.kind !== 'me') L.marker([routeStart.lat, routeStart.lng], { icon: pin('A', '#2E9744'), zIndexOffset: 1000 })
-      .bindTooltip(routeStart.label, { direction: 'top', offset: [0, -30], className: 'eec-map-label', permanent: false }).addTo(layer);
+      .bindTooltip(escapeHtml(routeStart.label), { direction: 'top', offset: [0, -30], className: 'eec-map-label', permanent: false }).addTo(layer);
     if (routeEnd) L.marker([routeEnd.lat, routeEnd.lng], { icon: pin('B', '#D32F2F'), zIndexOffset: 1000 })
-      .bindTooltip(routeEnd.label, { direction: 'top', offset: [0, -30], className: 'eec-map-label', permanent: false }).addTo(layer);
+      .bindTooltip(escapeHtml(routeEnd.label), { direction: 'top', offset: [0, -30], className: 'eec-map-label', permanent: false }).addTo(layer);
 
     layer.addTo(map);
     routeLayerRef.current = layer;
