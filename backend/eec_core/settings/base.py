@@ -42,6 +42,10 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    # Sert les fichiers statiques (admin Django, Swagger) directement depuis
+    # gunicorn — suffisant tant qu'aucun reverse proxy n'est en place devant
+    # le backend (voir docker-compose.prod.yml).
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -106,6 +110,15 @@ STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -178,3 +191,53 @@ FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3004")
 
 # Durée de validité des tokens de réinitialisation (en secondes) — 1 heure
 PASSWORD_RESET_TIMEOUT = 3600
+
+# ---------------------------------------------------------------------------
+# Journalisation (INFRA-5) — base commune console-only. prod.py ajoute un
+# fichier avec rotation (persisté hors du conteneur) et, en option, une
+# alerte e-mail sur erreur serveur (ADMINS_EMAILS).
+# ---------------------------------------------------------------------------
+LOG_LEVEL = os.environ.get("DJANGO_LOG_LEVEL", "INFO")
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{asctime} {levelname} {name} — {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": LOG_LEVEL,
+    },
+    "loggers": {
+        # Django lève déjà des logs propres — on les redirige plutôt que de
+        # les dupliquer avec un logger racine trop bavard.
+        "django": {
+            "handlers": ["console"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
+        # Erreurs serveur (500) — c'est le logger le plus important à ne
+        # jamais perdre, quel que soit l'environnement.
+        "django.request": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+        # Alertes sécurité (CSRF, hôtes suspects, etc.)
+        "django.security": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+    },
+}

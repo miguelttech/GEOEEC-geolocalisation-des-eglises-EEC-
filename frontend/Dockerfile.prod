@@ -1,0 +1,53 @@
+# Build de PRODUCTION uniquement (docker-compose.prod.yml). Le développement
+# local reste "cd frontend && npm run dev" (voir Dockerfile pour le service
+# dev/CI, resté inchangé) — ce fichier ne remplace rien d'existant.
+
+# ---- deps : dépendances de build uniquement ------------------------------
+FROM node:20-alpine AS deps
+WORKDIR /app
+COPY package*.json ./
+# Tolérance réseau : le registre npm peut être lent/instable selon l'hôte de
+# build (proxy, CI) — on retente plutôt que d'échouer sur un simple timeout.
+RUN npm config set fetch-retries 5 \
+    && npm config set fetch-retry-mintimeout 20000 \
+    && npm config set fetch-timeout 120000 \
+    && npm config set maxsockets 3 \
+    && npm ci
+
+# ---- builder : compilation Next.js (sortie "standalone") ----------------
+# Les variables NEXT_PUBLIC_* sont figées PAR NEXT.JS AU BUILD (inlinées
+# dans le bundle client) — elles doivent donc arriver ici en ARG, pas en
+# "environment:" runtime du docker-compose (qui n'aurait aucun effet).
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_GEOSERVER_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
+    NEXT_PUBLIC_GEOSERVER_URL=$NEXT_PUBLIC_GEOSERVER_URL \
+    NEXT_TELEMETRY_DISABLED=1
+
+RUN npm run build
+
+# ---- runner : image finale minimale, sans outils de build ---------------
+FROM node:20-alpine AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production \
+    NEXT_TELEMETRY_DISABLED=1 \
+    PORT=3004 \
+    HOSTNAME=0.0.0.0
+
+RUN addgroup --system --gid 1001 nodejs \
+    && adduser  --system --uid 1001 nextjs
+
+COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+USER nextjs
+EXPOSE 3004
+
+CMD ["node", "server.js"]

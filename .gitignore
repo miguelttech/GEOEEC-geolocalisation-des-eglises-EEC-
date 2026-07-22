@@ -2,6 +2,7 @@
 .env
 .env.local
 .env.*.local
+.env.prod
 
 # Python
 __pycache__/
@@ -34,6 +35,12 @@ out/
 pg_data/
 geoserver_data/
 redis_data/
+
+# Sauvegardes PostgreSQL (INFRA-4) — données réelles, jamais dans Git
+backups/
+
+# Logs applicatifs persistés (INFRA-5) — jamais dans Git
+logs/
 
 # Éditeurs
 .vscode/*

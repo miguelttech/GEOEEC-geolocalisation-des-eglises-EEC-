@@ -29,5 +29,11 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
+RUN chmod +x docker-entrypoint.sh
 
 EXPOSE 8000
+
+# Commande par défaut = PRODUCTION (migrate + collectstatic + gunicorn).
+# Le service dev (docker-compose.yml) écrase toujours cette commande par
+# "python manage.py runserver" — aucun impact sur le développement local.
+CMD ["./docker-entrypoint.sh"]
