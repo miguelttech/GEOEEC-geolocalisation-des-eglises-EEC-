@@ -7,7 +7,7 @@ WORKDIR /app
 # Copier les fichiers de dépendances en premier (cache Docker optimisé)
 COPY package*.json ./
 
-RUN npm install
+RUN npm install --fetch-retries=5 --fetch-retry-mintimeout=20000 --fetch-retry-maxtimeout=120000 --fetch-timeout=600000
 
 COPY . .
 

@@ -41,7 +41,7 @@ export const EEC_REGIONS: Region[] = [
 
 export const EEC_DIRECTION = [
   {
-    grade:  'Révérend Pasteur',
+    grade:  'Pasteur',
     name:   'BILLA MBENGA Alexandre',
     titre:  'Président du Synode Général',
     region: 'Douala · Wouri',
@@ -59,17 +59,17 @@ export const EEC_DIRECTION = [
     name:   'BAUNI KAMGA',
     titre:  '2ème Vice-Président',
     region: '',
-    image:  '/images/dir-vp2.webp',
+    image:  '/images/Bauni.jpeg',
   },
   {
-    grade:  "Ancien d'Église",
+    grade:  "Ancien d'Église Pr",
     name:   'TAMO TATIETSE',
     titre:  '3ème Vice-Président',
     region: '',
-    image:  '/images/dir-vp3.webp',
+    image:  '/images/Tamo.jpeg',
   },
   {
-    grade:  'Révérende Pasteure',
+    grade:  'Pasteure',
     name:   'MEMIAFOH SOBJIO Abestine',
     titre:  'Secrétaire Générale',
     region: 'Bafoussam · Ouest',
@@ -80,14 +80,14 @@ export const EEC_DIRECTION = [
     name:   'MEKAH NYIMI Pierre',
     titre:  'Secrétaire Général Adjoint n°1',
     region: '',
-    image:  '/images/dir-placeholder.svg',
+    image:  '/images/Mekah.jpeg',
   },
   {
     grade:  "Ancien d'Église",
     name:   'MAKA TOCKO Samuel',
     titre:  'Secrétaire Général Adjoint n°2',
     region: '',
-    image:  '/images/dir-placeholder.svg',
+    image:  '/images/Maka.jpeg',
   },
   {
     grade:  "Ancien d'Église",
@@ -101,6 +101,6 @@ export const EEC_DIRECTION = [
     name:   'DJENE Jacques Bruno',
     titre:  'Trésorier Général Adjoint',
     region: '',
-    image:  '/images/dir-placeholder.svg',
+    image:  '/images/Djene.jpeg',
   },
 ];
