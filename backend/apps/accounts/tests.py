@@ -213,3 +213,51 @@ class RbacCreationEtSuppressionCompteTests(APITestCase):
         resp = self.client.delete(f"/api/auth/users/{self.admin_district.id}/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertFalse(User.objects.filter(id=self.admin_district.id).exists())
+
+
+class ResetPasswordEtToggleActiveScopeTests(APITestCase):
+    """
+    SEC-5 (audit du 24/07/2026) : reset_user_password et toggle_user_active
+    ne vérifiaient que can_manage_accounts(request.user) (rôle dans SUPER/
+    REGION/DISTRICT), sans jamais comparer la zone ou le rôle de la cible —
+    contrairement à user_detail qui a bien cette garde. Un admin DISTRICT
+    pouvait donc réinitialiser le mot de passe (et donc usurper) un compte
+    REGION voire SUPER, ou désactiver n'importe quel compte de la plateforme.
+    """
+
+    def setUp(self):
+        self.region_a = RegionSynodale.objects.create(nom="LITTORAL")
+        self.district_a = District.objects.create(nom="WOURI", region=self.region_a)
+
+        self.super_admin = User.objects.create_user(username="super", password="x", role="SUPER")
+        self.admin_district = User.objects.create_user(
+            username="admin_district", password="x", role="DISTRICT",
+            region=self.region_a, district=self.district_a,
+        )
+
+    def test_district_ne_peut_pas_reinitialiser_le_mdp_dun_compte_super(self):
+        self.client.force_authenticate(self.admin_district)
+        resp = self.client.post(
+            f"/api/auth/users/{self.super_admin.id}/reset-password/",
+            {"new_password": "TotalTakeover123!"}, format="json",
+        )
+        self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertTrue(self.super_admin.check_password("x"))
+
+    def test_district_ne_peut_pas_desactiver_un_compte_super(self):
+        self.client.force_authenticate(self.admin_district)
+        resp = self.client.post(f"/api/auth/users/{self.super_admin.id}/toggle-active/")
+        self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
+        self.super_admin.refresh_from_db()
+        self.assertTrue(self.super_admin.is_active)
+
+    def test_super_peut_reinitialiser_le_mdp_dun_compte_district(self):
+        """Non-régression : le SUPER garde ce droit sur tout le monde."""
+        self.client.force_authenticate(self.super_admin)
+        resp = self.client.post(
+            f"/api/auth/users/{self.admin_district.id}/reset-password/",
+            {"new_password": "NouveauMdpValide1"}, format="json",
+        )
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.admin_district.refresh_from_db()
+        self.assertTrue(self.admin_district.check_password("NouveauMdpValide1"))

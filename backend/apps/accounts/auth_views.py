@@ -378,7 +378,12 @@ def toggle_user_active(request, pk):
     except User.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
-    if not can_manage_accounts(request.user) or target == request.user:
+    user = request.user
+    if not can_manage_accounts(user) or target == user:
+        return Response(status=status.HTTP_403_FORBIDDEN)
+    if user.role == "REGION"   and target.region   != user.region:
+        return Response(status=status.HTTP_403_FORBIDDEN)
+    if user.role == "DISTRICT" and target.district != user.district:
         return Response(status=status.HTTP_403_FORBIDDEN)
 
     target.is_active = not target.is_active
@@ -400,7 +405,12 @@ def reset_user_password(request, pk):
     except User.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
-    if not can_manage_accounts(request.user):
+    user = request.user
+    if not can_manage_accounts(user):
+        return Response(status=status.HTTP_403_FORBIDDEN)
+    if user.role == "REGION"   and target.region   != user.region:
+        return Response(status=status.HTTP_403_FORBIDDEN)
+    if user.role == "DISTRICT" and target.district != user.district:
         return Response(status=status.HTTP_403_FORBIDDEN)
 
     new_password = request.data.get("new_password", "")
