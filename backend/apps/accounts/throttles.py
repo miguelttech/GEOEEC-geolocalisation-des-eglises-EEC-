@@ -15,7 +15,7 @@ Les taux sont définis dans REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"].
 La clé est l'adresse IP du client (comportement de AnonRateThrottle).
 """
 
-from rest_framework.throttling import AnonRateThrottle
+from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 
 
 class LoginRateThrottle(AnonRateThrottle):
@@ -28,3 +28,11 @@ class RegisterRateThrottle(AnonRateThrottle):
 
 class PasswordResetRateThrottle(AnonRateThrottle):
     scope = "password_reset"
+
+
+class ExportRateThrottle(UserRateThrottle):
+    """
+    Anti-abus sur les exports PDF/Excel (WeasyPrint est coûteux en CPU/
+    mémoire) — scopé par utilisateur car ces endpoints exigent IsAdminUser.
+    """
+    scope = "export"

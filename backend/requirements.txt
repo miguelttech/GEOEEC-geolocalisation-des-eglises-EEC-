@@ -1,5 +1,7 @@
 # Framework principal
-django==5.0.*
+# django>=5.2.8 : CVE-2025-64459 (injection SQL, CRITICAL) non corrigée sur
+# la branche 5.0 — audit sécurité du 24/07/2026.
+django==5.2.*
 djangorestframework==3.15.*
 djangorestframework-gis==1.0.*
 
@@ -22,7 +24,11 @@ drf-spectacular==0.27.*
 
 # Import/Export données
 openpyxl==3.1.*
-Pillow==10.*
+# Pillow>=12.1.1 : traite directement des fichiers uploadés par les
+# utilisateurs (avatar, apps/accounts/auth_views.py:upload_avatar) — plusieurs
+# CVE sur 10.4 (écriture hors limites via PSD/PCF/BDF forgés) directement
+# exploitables via ce endpoint. Audit sécurité du 24/07/2026.
+Pillow==12.*
 
 # PDF export
 weasyprint==62.*

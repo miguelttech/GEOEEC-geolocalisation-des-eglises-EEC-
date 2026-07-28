@@ -7,10 +7,12 @@ from openpyxl.utils import get_column_letter
 
 from django.contrib.gis.geos import Point
 from django.http import HttpResponse
+from django.utils.html import escape
 
 from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.permissions import IsAuthenticated
+from apps.accounts.throttles import ExportRateThrottle
 from apps.accounts.permissions import (
     IsAdminUser,
     filter_paroisses_by_scope,
@@ -100,6 +102,20 @@ def _excel_response(wb, filename):
     return resp
 
 
+def _xlsx_safe_row(row):
+    """
+    Neutralise l'injection de formule Excel (OWASP CSV/Excel Injection) en
+    préfixant d'une apostrophe toute valeur texte commençant par =, +, -, @
+    — ces champs (nom de paroisse, adresse, téléphone...) sont éditables par
+    des comptes admin de bas niveau (PAROISSE) et relus par des comptes de
+    rang supérieur via l'export.
+    """
+    return [
+        ("'" + v) if isinstance(v, str) and v[:1] in ("=", "+", "-", "@") else v
+        for v in row
+    ]
+
+
 def _set_col_widths(ws, widths):
     for i, w in enumerate(widths, 1):
         ws.column_dimensions[get_column_letter(i)].width = w
@@ -123,6 +139,7 @@ def _parse_gps(lat_raw, lon_raw):
 
 @api_view(["GET"])
 @permission_classes([IsAdminUser])
+@throttle_classes([ExportRateThrottle])
 def export_paroisses_excel(request):
     """GET /api/exports/paroisses/excel/ — EXIGENCE : exporte la liste
     ACTUELLEMENT AFFICHÉE, en tenant compte des filtres appliqués
@@ -167,14 +184,14 @@ def export_paroisses_excel(request):
     for idx, p_ in enumerate(qs, start=2):
         lat = round(p_.position.y, 6) if p_.position else ""
         lon = round(p_.position.x, 6) if p_.position else ""
-        ws.append([
+        ws.append(_xlsx_safe_row([
             p_.id, p_.nom,
             p_.district.nom, p_.district.region.nom,
             p_.categorie or "", p_.nombre_fideles or "",
             p_.adresse, p_.telephone,
             lat, lon,
             "Oui" if p_.position else "Non",
-        ])
+        ]))
         _apply_row(ws, idx, len(headers))
 
     _set_col_widths(ws, [6, 40, 25, 30, 10, 10, 35, 15, 12, 12, 6])
@@ -186,6 +203,7 @@ def export_paroisses_excel(request):
 
 @api_view(["GET"])
 @permission_classes([IsAdminUser])
+@throttle_classes([ExportRateThrottle])
 def export_oeuvres_excel(request):
     """GET /api/exports/oeuvres/excel/"""
     from apps.audit.utils import log_action
@@ -235,14 +253,14 @@ def export_oeuvres_excel(request):
         lat = round(o.position.y, 6) if o.position else ""
         lon = round(o.position.x, 6) if o.position else ""
 
-        ws.append([
+        ws.append(_xlsx_safe_row([
             o.id, o.nom,
             o.type_oeuvre.get_nom_display(), niveau,
             paroisse_nom, district_nom, region_nom,
             o.adresse, lat, lon,
             o.capacite or "", o.annee_creation or "",
             "Oui" if o.est_active else "Non",
-        ])
+        ]))
         _apply_row(ws, idx, len(headers))
 
     _set_col_widths(ws, [6, 40, 18, 12, 35, 25, 30, 35, 12, 12, 10, 10, 6])
@@ -254,6 +272,7 @@ def export_oeuvres_excel(request):
 
 @api_view(["GET"])
 @permission_classes([IsAdminUser])
+@throttle_classes([ExportRateThrottle])
 def export_ouvriers_excel(request):
     """GET /api/exports/ouvriers/excel/ — EXIGENCE : exporte la liste
     affichée en tenant compte des filtres (region, district, paroisse,
@@ -290,7 +309,7 @@ def export_ouvriers_excel(request):
     ws.append(headers)
     _apply_header(ws, 1, len(headers))
     for idx, o in enumerate(qs, start=2):
-        ws.append([
+        ws.append(_xlsx_safe_row([
             o.id, o.nom, o.prenom,
             "Masculin" if o.sexe == "M" else "Féminin",
             o.grade.nom if o.grade_id else "",
@@ -298,7 +317,7 @@ def export_ouvriers_excel(request):
             o.paroisse.district.region.nom,
             "Occupé" if o.statut == "OCCUPE" else "Inoccupé",
             o.telephone,
-        ])
+        ]))
         _apply_row(ws, idx, len(headers))
     _set_col_widths(ws, [6, 22, 22, 10, 24, 32, 25, 28, 10, 16])
     ws.freeze_panes = "A2"
@@ -309,6 +328,7 @@ def export_ouvriers_excel(request):
 
 @api_view(["GET"])
 @permission_classes([IsAdminUser])
+@throttle_classes([ExportRateThrottle])
 def export_statistiques_excel(request):
     """GET /api/exports/statistiques/excel/?annee=2025"""
     from apps.audit.utils import log_action
@@ -337,7 +357,7 @@ def export_statistiques_excel(request):
     _apply_header(ws, 1, len(headers))
 
     for idx, s in enumerate(qs, start=2):
-        ws.append([
+        ws.append(_xlsx_safe_row([
             s.paroisse.nom,
             s.paroisse.district.nom,
             s.paroisse.district.region.nom,
@@ -346,7 +366,7 @@ def export_statistiques_excel(request):
             s.baptemes, s.confirmations, s.mariages, s.deces,
             float(s.offrandes), float(s.dimes),
             "Oui" if s.validee else "Non",
-        ])
+        ]))
         _apply_row(ws, idx, len(headers))
 
     # Ligne totaux
@@ -371,6 +391,7 @@ def export_statistiques_excel(request):
 
 @api_view(["GET"])
 @permission_classes([IsAdminUser])
+@throttle_classes([ExportRateThrottle])
 def export_statistiques_pdf(request):
     """GET /api/exports/statistiques/pdf/?annee=2025"""
     from apps.audit.utils import log_action
@@ -405,9 +426,9 @@ def export_statistiques_pdf(request):
         total = s.communiants + s.non_communiants
         rows_html += (
             f'<tr style="background:{bg};">'
-            f"<td>{s.paroisse.nom}</td>"
-            f"<td>{s.paroisse.district.nom}</td>"
-            f"<td>{s.paroisse.district.region.nom}</td>"
+            f"<td>{escape(s.paroisse.nom)}</td>"
+            f"<td>{escape(s.paroisse.district.nom)}</td>"
+            f"<td>{escape(s.paroisse.district.region.nom)}</td>"
             f'<td class="num">{s.communiants:,}</td>'
             f'<td class="num">{s.non_communiants:,}</td>'
             f'<td class="num bold">{total:,}</td>'

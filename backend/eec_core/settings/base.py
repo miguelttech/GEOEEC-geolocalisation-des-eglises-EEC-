@@ -137,9 +137,12 @@ REST_FRAMEWORK = {
     # apps/accounts/throttles.py et les vues d'authentification).
     "DEFAULT_THROTTLE_CLASSES": [],
     "DEFAULT_THROTTLE_RATES": {
-        "login":           "60/min",
+        # 60/min laissait passer un bruteforce complet (20 tentatives en
+        # quelques secondes sans blocage, audit sécurité du 24/07/2026).
+        "login":           "5/min",
         "register":        "30/hour",
         "password_reset":  "5/hour",
+        "export":          "20/min",
     },
 }
 

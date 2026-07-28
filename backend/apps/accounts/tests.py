@@ -157,6 +157,31 @@ class PasswordResetThrottleTests(APITestCase):
         self.assertEqual(resp.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
 
 
+class LoginThrottleTests(APITestCase):
+    """
+    SEC-6 (audit du 24/07/2026) : login_view était limité à 60/min/IP — 20
+    tentatives de mot de passe erroné consécutives passaient sans blocage
+    (bruteforce en ligne praticable). Taux resserré à 5/min.
+    """
+
+    def setUp(self):
+        cache.clear()
+
+    def test_login_est_limite_en_debit(self):
+        for _ in range(5):
+            resp = self.client.post(
+                "/api/auth/login/",
+                {"username": "inexistant", "password": "mauvais"}, format="json",
+            )
+            self.assertEqual(resp.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        resp = self.client.post(
+            "/api/auth/login/",
+            {"username": "inexistant", "password": "mauvais"}, format="json",
+        )
+        self.assertEqual(resp.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
+
+
 class RbacCreationEtSuppressionCompteTests(APITestCase):
     """
     QA-1 (audit du 20/07/2026) — cas de test T1 (hiérarchie de création) et

@@ -191,3 +191,62 @@ Ajouter un job `security` informatif à `.github/workflows/ci.yml` (bandit, pip-
 npm audit, trufflehog) sur le même modèle que le lint actuel — bloquant plus tard une
 fois la baseline nettoyée. Section 6 (RBAC/IDOR) reste la priorité manuelle vu
 l'historique récent du projet sur ce point précis.
+
+---
+
+## Résultats — 1ère exécution (24/07/2026)
+
+Exécutée pas à pas en local (backend dev sur :8000, frontend dev sur :3004, images
+Docker `geoeec-prod-*` déjà buildées). Comptes de test créés puis supprimés à chaque
+étape RBAC — aucun compte réel modifié à l'exception du correctif ci-dessous.
+
+### ✅ Corrigé pendant l'audit — escalade de privilèges complète
+
+**`POST /api/auth/users/{pk}/reset-password/`** et **`POST /api/auth/users/{pk}/toggle-active/`**
+(`backend/apps/accounts/auth_views.py`) ne vérifiaient que `can_manage_accounts()` (rôle
+dans SUPER/REGION/DISTRICT), sans jamais comparer la zone ni le rôle de la cible — à
+l'inverse de `user_detail` qui a cette garde. **Démontré en conditions réelles** : un
+compte DISTRICT (le plus bas niveau admin après PAROISSE) pouvait réinitialiser le mot
+de passe d'un compte SUPER national et se connecter à sa place — prise de contrôle totale
+de la plateforme depuis le rôle admin le plus bas. Corrigé (garde de portée répliquée
+depuis `user_detail`) + 3 tests de non-régression ajoutés dans `apps/accounts/tests.py`
+(`ResetPasswordEtToggleActiveScopeTests`).
+
+### ✅ Corrigé pendant l'audit — le reste des points identifiés
+
+| # | Constat | Correctif |
+|---|---|---|
+| 1 | CVE Django **CRITICAL** (injection SQL, CVE-2025-64459) — 5.0.14 non patchée | `django==5.2.*` (5.2.16 installé, ≥5.2.8 patché) |
+| 2 | HTML non échappé dans l'export PDF (`s.paroisse.nom` etc.) — combiné à la CVE SSRF WeasyPrint (CVE-2025-68616), un rôle PAROISSE pouvait injecter du HTML/CSS exécuté au rendu par un SUPER | `django.utils.html.escape()` sur les champs texte, `apps/exports/views.py` |
+| 3 | Même défaut côté export **Excel** → injection de formule (`=HYPERLINK(...)`, DDE) | Helper `_xlsx_safe_row()` (préfixe apostrophe OWASP) sur les 4 exports Excel |
+| 4 | **Open redirect** post-login (`params.get('next')` → `window.location.href`) | Validation regex : n'accepte qu'un chemin interne (`/^\/(?!\/)/`) |
+| 5 | Throttle de login trop permissif (60/min/IP) | `5/min` (`DEFAULT_THROTTLE_RATES`) + test de non-régression `LoginThrottleTests` |
+| 6 | Conteneur **backend en root** | `USER`/`gosu` : root uniquement le temps de `chown` le volume de logs bind-monté, puis abandon définitif des privilèges — vérifié en conditions réelles (`docker top` : gunicorn tourne en UID 1000, logs bien écrits sur l'hôte) |
+| 7 | Aucun header de sécurité sur le frontend/nginx | `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy` (`next.config.ts`) + `Strict-Transport-Security` (nginx). **CSP volontairement pas ajoutée** : la carte (Leaflet + MapLibre) charge des tuiles depuis plusieurs domaines externes (CartoDB, ArcGIS, OpenFreeMap) via Web Workers — une CSP mal calibrée casserait silencieusement la fonctionnalité centrale de l'app, et aucun outil navigateur n'était disponible ici pour la valider visuellement. À faire séparément, avec test navigateur réel. |
+| 8 | Next.js 16.2.6 : CVE high (SSRF rewrites, DoS Server Actions, fuite d'endpoints internes) | `next==16.2.11` — build de prod + `tsc` re-testés OK |
+| 9 | Aucun throttle sur les exports PDF/Excel (coûteux, WeasyPrint) | `ExportRateThrottle` (20/min/utilisateur) sur les 5 vues d'export |
+| — | Pillow 10.4 (~30 CVE) traite directement les avatars uploadés par les utilisateurs (`upload_avatar`) — surface d'attaque directe, pas juste du dev-tooling | `Pillow==12.*` (12.3.0 installé) — upload d'avatar retesté en conditions réelles, OK |
+
+33/33 tests passent (`python manage.py test apps`), build frontend + `tsc --noEmit` OK.
+
+### 🟡 Résiduel — non corrigé, à évaluer séparément
+
+- **WeasyPrint** reste en 62.3 (CVE SSRF, fix en 68.0) — écart de 6 versions majeures, risque de casser le rendu PDF sans pouvoir le vérifier visuellement ici. Le vecteur concret (HTML non échappé) est corrigé ; la CVE de la lib elle-même ne l'est pas.
+- `postcss`/`sharp` restent vulnérables mais sont des dépendances **internes** à Next.js lui-même (`node_modules/next/node_modules/...`) — aucun patch en amont disponible sur la branche 16.2.x à ce jour ; `npm audit fix --force` proposerait une régression vers next@9.3.3, à ne surtout pas faire.
+- Black/pytest obsolètes (dev-tooling, jamais expédié en prod) — non prioritaire.
+- Politique de mot de passe incohérente : 12 caractères imposés sur les comptes admin, seulement 8 sans complexité sur l'inscription visiteur publique (`apps/visitors/views.py`) — non corrigé, à trancher (le rôle VISITEUR est bas privilège mais gère des données personnelles).
+- CSP frontend (voir point 7 ci-dessus) — à faire avec test navigateur réel.
+
+### ✅ Points confirmés solides
+
+- Aucun secret dans tout l'historique git (TruffleHog, 135 Mo scannés, 0 résultat).
+- `.env*` réels correctement gitignorés, seuls des `.example` avec placeholders sont versionnés.
+- Déconnexion invalide réellement la session côté serveur (cookie rejoué → 403).
+- Cookies de session `HttpOnly`, `Secure`/`SameSite` corrects en prod (`prod.py`).
+- IDOR sur paroisses/districts : accès hors périmètre → 404 pour les 3 rôles testés (REGION/DISTRICT/PAROISSE), listes correctement filtrées par scope.
+- CORS restrictif : origine non whitelistée → aucun header renvoyé (pas de bypass).
+- `DEBUG=False` par défaut + garde-fou `SECRET_KEY` en prod (refuse de démarrer si non configuré).
+- Console d'administration GeoServer (`/geoserver/web/`) déjà bloquée côté nginx (403) — anticipé par l'équipe (INFRA-7).
+- Ports Docker en prod : seuls 80/443 (nginx) exposés à l'hôte ; DB/Redis/GeoServer/backend/frontend restent en réseau interne.
+- Aucun SQL brut (`.raw()`/`.extra()`/`cursor.execute()`) — ORM pur, pas de surface d'injection SQL applicative.
+- Aucun `CQL_FILTER` GeoServer construit depuis une entrée utilisateur côté frontend.

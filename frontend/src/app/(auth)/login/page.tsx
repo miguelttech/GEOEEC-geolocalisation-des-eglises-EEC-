@@ -59,7 +59,11 @@ export default function LoginPage() {
         window.location.href = '/admin/changer-mot-de-passe';
       } else {
         const params = new URLSearchParams(window.location.search);
-        window.location.href = params.get('next') || '/admin';
+        const next = params.get('next');
+        // N'accepte qu'un chemin interne relatif (jamais une URL absolue ni
+        // protocol-relative "//evil.com") pour éviter l'open redirect.
+        const safeNext = next && /^\/(?!\/)/.test(next) ? next : '/admin';
+        window.location.href = safeNext;
       }
     } catch {
       setError('Erreur réseau. Vérifiez votre connexion.');

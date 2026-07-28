@@ -38,6 +38,11 @@ server {
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_prefer_server_ciphers off;
 
+    # HSTS au niveau de la terminaison TLS (audit du 24/07/2026) — couvre
+    # aussi /geoserver/ et le frontend Next.js, qui ne le définissent pas
+    # eux-mêmes (contrairement à Django : SECURE_HSTS_SECONDS, settings/prod.py).
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
     client_max_body_size 15M;  # cohérent avec MAX_IMPORT_SIZE (backend, 10 Mo) + marge
 
     # --- Backend Django (API, admin, statique, médias) ---------------------
