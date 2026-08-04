@@ -216,10 +216,16 @@ class Command(BaseCommand):
         # os.listdir() : liste tous les fichiers du dossier data
         fichiers = os.listdir(data_dir)
 
-        # Chercher le fichier paroisses (son nom contient "paroisse" ou "geo")
-        # next() : prendre le PREMIER fichier correspondant
+        # Chercher le fichier paroisses (son nom contient "paroisse" ou "geo").
+        # L'extension Excel est OBLIGATOIRE dans le filtre : le dossier data
+        # contient aussi des .docx dont le nom parle de paroisses (documents
+        # de catégorisation), et openpyxl échoue dessus avec une erreur peu
+        # lisible. sorted() rend le choix déterministe quand plusieurs
+        # fichiers correspondent (ex. une copie « (1) » téléchargée deux fois).
         nom_fichier = next(
-            (f for f in fichiers if "paroisse" in f.lower() or "geo" in f.lower()),
+            (f for f in sorted(fichiers)
+             if ("paroisse" in f.lower() or "geo" in f.lower())
+             and f.lower().endswith((".xlsx", ".xlsm", ".xls"))),
             None  # retourner None si aucun fichier ne correspond
         )
 
@@ -356,6 +362,7 @@ class Command(BaseCommand):
 
         nb_crees = 0  # Statistiques nouvellement créées
         nb_maj   = 0  # Statistiques déjà existantes, mises à jour
+        nb_fideles_maj = 0  # Paroisse.nombre_fideles effectivement recopiés
 
         # Itérer sur chaque paroisse et ses meilleures valeurs
         # .items() : retourne les paires (clé, valeur) du dictionnaire
@@ -376,9 +383,12 @@ class Command(BaseCommand):
                 # :4d  = aligner les nombres sur 4 chiffres
                 self.stdout.write(
                     f"  [SIM] {paroisse_obj.nom[:35]:35s} | "
-                    f"comm={communiants:4d} | non_comm={non_communiants:4d}"
+                    f"comm={communiants:4d} | non_comm={non_communiants:4d} | "
+                    f"fideles={communiants + non_communiants:5d}"
                 )
                 nb_crees += 1
+                if paroisse_obj.nombre_fideles != communiants + non_communiants:
+                    nb_fideles_maj += 1
                 continue
 
             # update_or_create() : créer ou mettre à jour la statistique
@@ -402,6 +412,20 @@ class Command(BaseCommand):
             else:
                 nb_maj += 1
 
+            # Recopier le total dans Paroisse.nombre_fideles.
+            # Ce champ est une dénormalisation du total de l'année la plus
+            # récente : il évite une jointure sur StatistiqueAnnuelle pour
+            # chaque paroisse affichée (listes, dashboards, agrégats région
+            # et district, export Excel, colonne « Fidèles » du frontend).
+            # Sans cette recopie, les statistiques existent en base mais la
+            # colonne « Fidèles » reste vide — elle lit le champ brut.
+            # On n'écrase que si la valeur diffère (évite 508 UPDATE inutiles).
+            total_fideles = communiants + non_communiants
+            if paroisse_obj.nombre_fideles != total_fideles:
+                paroisse_obj.nombre_fideles = total_fideles
+                paroisse_obj.save(update_fields=["nombre_fideles"])
+                nb_fideles_maj += 1
+
         # ═══════════════════════════════════════════════════════════════════
         # ÉTAPE 6 : Afficher le bilan final
         # ═══════════════════════════════════════════════════════════════════
@@ -412,7 +436,8 @@ class Command(BaseCommand):
             f"  Creees                : {nb_crees}\n"
             f"  Mises a jour          : {nb_maj}\n"
             f"  Lignes ignorees       : {nb_ignores} (vides/separateurs)\n"
-            f"  Paroisses non trouvees: {nb_introuvables}"
+            f"  Paroisses non trouvees: {nb_introuvables}\n"
+            f"  nombre_fideles recopie: {nb_fideles_maj}"
         ))
         self.stdout.write("")
 

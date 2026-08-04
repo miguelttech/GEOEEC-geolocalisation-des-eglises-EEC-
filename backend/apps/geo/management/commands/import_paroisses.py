@@ -186,9 +186,16 @@ class Command(BaseCommand):
         fichiers = os.listdir(data_dir)
 
         # Chercher le fichier dont le nom contient "paroisse" ou "geo"
-        # (son nom peut varier selon la date de création du fichier)
+        # (son nom peut varier selon la date de création du fichier).
+        # L'extension Excel est OBLIGATOIRE dans le filtre : le dossier data
+        # contient aussi des .docx dont le nom parle de paroisses (documents
+        # de catégorisation), et openpyxl échoue dessus avec une erreur peu
+        # lisible. sorted() rend le choix déterministe quand plusieurs
+        # fichiers correspondent (ex. une copie « (1) » téléchargée deux fois).
         nom_fichier = next(
-            (f for f in fichiers if "paroisse" in f.lower() or "geo" in f.lower()),
+            (f for f in sorted(fichiers)
+             if ("paroisse" in f.lower() or "geo" in f.lower())
+             and f.lower().endswith((".xlsx", ".xlsm", ".xls"))),
             None
         )
 

@@ -69,6 +69,11 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./backend:/app
+      # Fichiers sources Excel/DOCX des commandes d'import (import_paroisses,
+      # import_statistiques, import_ouvriers, import_oeuvres). Ces commandes
+      # cherchent /data par défaut : sans ce montage elles échouent sur le
+      # chemin. En lecture seule — un import ne modifie jamais la source.
+      - ./data:/data:ro
     ports:
       - "8000:8000"
     env_file:
