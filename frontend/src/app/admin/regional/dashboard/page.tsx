@@ -152,6 +152,7 @@ export default function DashboardRegionalPage() {
           <div className="sg-md" style={{ fontSize: 14 }}>Districts de la région</div>
           <a href="/admin/regional/districts" style={{ fontSize: 12, color: '#5B9BD5', textDecoration: 'none' }}>Voir tous →</a>
         </div>
+        <div style={{ overflowX: 'auto' }}>
         <table className="data">
           <thead>
             <tr>
@@ -176,6 +177,7 @@ export default function DashboardRegionalPage() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
     </div>

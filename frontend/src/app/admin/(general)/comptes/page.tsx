@@ -372,15 +372,31 @@ export default function ComptesPage() {
   const [createPanel, setCreatePanel] = useState(false);
   const [deleteModal, setDeleteModal] = useState<UserAccount | null>(null);
   const [isSuper, setIsSuper] = useState(false);
+  const [myRole, setMyRole] = useState('');
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [districtSummary, setDistrictSummary] = useState<{
+    nb_super: number; nb_region: number; nb_district: number; nb_paroisses: number;
+  } | null>(null);
 
   function doRefresh() { setRefresh(r => r + 1); }
 
   useEffect(() => {
     api.get<{ id: number; role: string }>('/api/auth/me/')
-      .then(me => { setIsSuper(me.role === 'SUPER'); setCurrentUserId(me.id); })
+      .then(me => { setIsSuper(me.role === 'SUPER'); setMyRole(me.role); setCurrentUserId(me.id); })
       .catch(() => {});
   }, []);
+
+  // EXIGENCE : un district découle d'une région et d'un admin général — les
+  // cartes doivent refléter cette chaîne (1 admin général, 1 admin régional,
+  // 1 admin district) plutôt que le nombre de comptes PAROISSE que ce
+  // district gère (souvent 0, sans rapport avec sa position hiérarchique).
+  // La 4e carte devient le nombre réel de paroisses du district.
+  useEffect(() => {
+    if (myRole !== 'DISTRICT') { setDistrictSummary(null); return; }
+    api.get<{ nb_super: number; nb_region: number; nb_district: number; nb_paroisses: number }>('/api/auth/users/summary/')
+      .then(setDistrictSummary)
+      .catch(() => {});
+  }, [myRole]);
 
   useEffect(() => {
     setLoading(true);
@@ -416,18 +432,34 @@ export default function ComptesPage() {
 
       {/* Summary */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
-        {(['SUPER','REGION','DISTRICT','PAROISSE'] as const).map(role => {
-          const m = ROLE_META[role];
-          return (
-            <div key={role} className="card" style={{ padding: '12px 16px', cursor: 'pointer', outline: filterRole === role ? `2px solid ${m.initColor}` : 'none' }}
-              onClick={() => setFilterRole(filterRole === role ? '' : role)}>
-              <div style={{ fontSize: 11, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>{m.label}</div>
-              <div className="sg-md" style={{ fontSize: 28, marginTop: 4, color: m.initColor }}>
-                {loading ? '—' : (counts as Record<string,number>)[role]}
+        {myRole === 'DISTRICT' ? (
+          [
+            { label: 'Administrateur Général', value: districtSummary?.nb_super, color: ROLE_META.SUPER.initColor },
+            { label: 'Admin Régional',         value: districtSummary?.nb_region, color: ROLE_META.REGION.initColor },
+            { label: 'Admin District',         value: districtSummary?.nb_district, color: ROLE_META.DISTRICT.initColor },
+            { label: 'Paroisses',              value: districtSummary?.nb_paroisses, color: ROLE_META.PAROISSE.initColor },
+          ].map(card => (
+            <div key={card.label} className="card" style={{ padding: '12px 16px' }}>
+              <div style={{ fontSize: 11, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>{card.label}</div>
+              <div className="sg-md" style={{ fontSize: 28, marginTop: 4, color: card.color }}>
+                {card.value ?? '—'}
               </div>
             </div>
-          );
-        })}
+          ))
+        ) : (
+          (['SUPER','REGION','DISTRICT','PAROISSE'] as const).map(role => {
+            const m = ROLE_META[role];
+            return (
+              <div key={role} className="card" style={{ padding: '12px 16px', cursor: 'pointer', outline: filterRole === role ? `2px solid ${m.initColor}` : 'none' }}
+                onClick={() => setFilterRole(filterRole === role ? '' : role)}>
+                <div style={{ fontSize: 11, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>{m.label}</div>
+                <div className="sg-md" style={{ fontSize: 28, marginTop: 4, color: m.initColor }}>
+                  {loading ? '—' : (counts as Record<string,number>)[role]}
+                </div>
+              </div>
+            );
+          })
+        )}
       </div>
 
       {/* Toolbar */}

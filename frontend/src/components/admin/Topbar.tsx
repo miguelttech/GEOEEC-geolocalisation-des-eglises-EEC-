@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { I } from './icons';
 import { Avatar } from './atoms';
 import { logout } from '@/lib/api';
+import { useAdminSidebar } from './AdminSidebarContext';
 
 const BACKEND = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api')
   .replace(/\/api\/?$/, '');
@@ -64,6 +65,7 @@ function displayName(u: MeUser | null): string {
 
 export default function Topbar() {
   const pathname = usePathname();
+  const { toggle } = useAdminSidebar();
 
   const seg    = pathname.split('/').filter(Boolean);
   const scope  = SCOPE_LABELS[seg[1]] ?? 'Bureau National';
@@ -121,18 +123,23 @@ export default function Topbar() {
   }
 
   return (
-    <header style={{
-      height: 60, background: 'var(--chrome)', borderBottom: '1px solid rgba(245,197,24,0.10)',
-      padding: '0 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      position: 'sticky', top: 0, zIndex: 60,
-    }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <h1 className="sg" style={{ fontSize: 18, color: 'var(--text)', margin: 0 }}>{meta.title}</h1>
-        <div style={{ fontSize: 12, color: 'rgba(240,244,241,0.45)' }}>{scope}{meta.crumb}</div>
+    <header className="admin-topbar">
+      <button
+        type="button"
+        className="admin-hamburger"
+        aria-label="Ouvrir le menu"
+        onClick={toggle}
+      >
+        <span /><span /><span />
+      </button>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
+        <h1 className="sg" style={{ fontSize: 18, color: 'var(--text)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{meta.title}</h1>
+        <div style={{ fontSize: 12, color: 'rgba(240,244,241,0.45)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{scope}{meta.crumb}</div>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-        <div style={{ fontSize: 13, color: 'rgba(240,244,241,0.55)', display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div className="topbar-actions" style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+        <div className="topbar-date" style={{ fontSize: 13, color: 'rgba(240,244,241,0.55)', display: 'flex', alignItems: 'center', gap: 8 }}>
           <I.calendar size={14} style={{ opacity: 0.6 }} />
           {new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
         </div>

@@ -259,6 +259,50 @@ def list_users(request):
     return Response(UserSerializer(qs, many=True).data)
 
 
+@api_view(["GET"])
+@permission_classes([IsAdminUser])
+def users_summary(request):
+    """
+    GET /api/auth/users/summary/ — compteurs pour les cartes de la page
+    Comptes utilisateurs.
+
+    EXIGENCE : contrairement à list_users() (qui ne renvoie QUE les comptes
+    que l'admin peut gérer, donc jamais les niveaux au-dessus du sien), un
+    admin DISTRICT ou RÉGION doit pouvoir situer sa position dans la chaîne
+    de rattachement — combien d'admins généraux, régionaux, de district
+    existent au-dessus/à son niveau. On ne renvoie que des COMPTEURS (jamais
+    les comptes eux-mêmes) pour ne pas exposer les informations personnelles
+    d'admins que cet utilisateur n'est pas censé gérer.
+    """
+    from apps.geo.models import Paroisse
+
+    user = request.user
+    if not can_manage_accounts(user):
+        return Response(status=status.HTTP_403_FORBIDDEN)
+
+    nb_super = User.objects.filter(role="SUPER").count()
+
+    if user.role == "SUPER":
+        nb_region    = User.objects.filter(role="REGION").count()
+        nb_district  = User.objects.filter(role="DISTRICT").count()
+        nb_paroisses = Paroisse.objects.count()
+    elif user.role == "REGION":
+        nb_region    = User.objects.filter(role="REGION", region=user.region).count()
+        nb_district  = User.objects.filter(role="DISTRICT", region=user.region).count()
+        nb_paroisses = Paroisse.objects.filter(district__region=user.region).count()
+    else:  # DISTRICT
+        nb_region    = User.objects.filter(role="REGION", region=user.region).count() if user.region_id else 0
+        nb_district  = User.objects.filter(role="DISTRICT", district=user.district).count()
+        nb_paroisses = Paroisse.objects.filter(district=user.district).count()
+
+    return Response({
+        "nb_super": nb_super,
+        "nb_region": nb_region,
+        "nb_district": nb_district,
+        "nb_paroisses": nb_paroisses,
+    })
+
+
 @api_view(["POST"])
 @permission_classes([IsAdminUser])
 def create_user(request):

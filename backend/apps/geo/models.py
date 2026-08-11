@@ -139,8 +139,11 @@ class Paroisse(models.Model):
     """
 
     # Catégories officielles des paroisses de l'EEC — résolution n° R05/CSG
-    # du Conseil Synodal Général de juillet 2024 (document du 02/06/2026).
-    # De la plus importante (A++) à la plus petite (C4).
+    # du Conseil Synodal Général de juillet 2024.
+    #
+    # Cet ordre est celui de PRÉSENTATION retenu par l'EEC dans ses documents
+    # (sommaire : A++, A1, A2, B1, B2, C1 … C4). Ce n'est PAS un ordre
+    # d'importance — voir CATEGORIES_RANG ci-dessous.
     CATEGORIES = [
         ("A++", "A++"),
         ("A1", "A1"),
@@ -152,6 +155,30 @@ class Paroisse(models.Model):
         ("C3", "C3"),
         ("C4", "C4"),
     ]
+
+    # Rang RÉEL d'importance, du plus petit (1) au plus grand (9).
+    #
+    # PIÈGE : le chiffre CROÎT avec l'importance à l'intérieur de chaque
+    # lettre. C1 est la plus PETITE catégorie, pas la plus grande, et A2 passe
+    # devant A1. Un tri sur la liste CATEGORIES ci-dessus donnerait donc un
+    # classement faux dans les trois bandes.
+    #
+    # Source : « Catégorisation paroisses EEC 050826.docx », matrice
+    # d'évaluation par région synodale. La catégorie y est la traduction
+    # directe d'une NOTE GLOBALE = poids économique + poids démographique,
+    # correspondance vérifiée déterministe sur les 753 lignes catégorisées :
+    #
+    #     note 1 → C1     note 4 → C4     note 7 → A1
+    #     note 2 → C2     note 5 → B1     note 8 → A2
+    #     note 3 → C3     note 6 → B2     note 9 → A++
+    #
+    # L'effectif moyen de fidèles suit exactement ce rang (135 en C1 jusqu'à
+    # 3 328 en A++), ce qui corrobore la lecture sur une seconde source.
+    CATEGORIES_RANG = {
+        "C1": 1, "C2": 2, "C3": 3, "C4": 4,
+        "B1": 5, "B2": 6,
+        "A1": 7, "A2": 8, "A++": 9,
+    }
 
     # Nom de la paroisse (ex: "PAROISSE DE BONANJO", "PAROISSE CENTRALE DE YAOUNDÉ")
     nom = models.CharField(max_length=200)
@@ -192,6 +219,15 @@ class Paroisse(models.Model):
 
     # Effectif déclaré des fidèles (peut être mis à jour via StatistiqueAnnuelle)
     nombre_fideles = models.IntegerField(null=True, blank=True)
+
+    # Cible d'offrande annuelle en FCFA, fixée par le Conseil Synodal.
+    #
+    # Avec l'effectif de fidèles, c'est l'une des deux grandeurs qui déterminent
+    # la catégorie de la paroisse : la matrice d'évaluation attribue un poids
+    # économique à la cible d'offrande, un poids démographique à l'effectif, et
+    # leur somme donne la note globale dont découle la catégorie.
+    # Source : « Catégorisation paroisses EEC 050826.docx ».
+    cible_offrande = models.BigIntegerField(null=True, blank=True)
 
     # Horodatage automatique : Django remplit ces champs automatiquement
     created_at = models.DateTimeField(auto_now_add=True)  # date de création en base

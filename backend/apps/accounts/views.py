@@ -9,6 +9,31 @@ from .serializers import StatistiqueAnnuelleSerializer
 from apps.accounts.permissions import ReadPublicWriteAdmin
 
 
+def _sync_nombre_fideles(paroisse):
+    """Recopie dans Paroisse.nombre_fideles le total (communiants +
+    non_communiants) de l'année StatistiqueAnnuelle la plus récente de cette
+    paroisse — dénormalisation utilisée par les listes, le tableau de bord,
+    les agrégats région/district et l'export Excel (évite une jointure à
+    chaque affichage). Même logique que la commande d'import en masse
+    (import_statistiques.py), appliquée ici pour que toute écriture via
+    l'API (ex. formulaire d'édition d'une paroisse) reste synchronisée —
+    jusqu'ici seul l'import en masse recopiait cette valeur."""
+    latest = paroisse.statistiques.order_by("-annee").first()
+    if latest is None:
+        total = None
+    elif latest.total_declare is not None:
+        # Source donnant l'effectif global sans ventilation (évaluation du
+        # Conseil Synodal) : communiants et non_communiants y valent 0, et
+        # leur somme effacerait l'effectif. `total_declare` fait autorité,
+        # comme dans StatistiqueAnnuelleSerializer et import_evaluation.
+        total = latest.total_declare
+    else:
+        total = (latest.communiants or 0) + (latest.non_communiants or 0)
+    if paroisse.nombre_fideles != total:
+        paroisse.nombre_fideles = total
+        paroisse.save(update_fields=["nombre_fideles"])
+
+
 class StatistiqueAnnuelleViewSet(viewsets.ModelViewSet):
     """
     Statistiques annuelles par paroisse.
@@ -54,9 +79,14 @@ class StatistiqueAnnuelleViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         user = self.request.user
         if user.role == "PAROISSE" and user.paroisse_id:
-            serializer.save(paroisse=user.paroisse)
+            instance = serializer.save(paroisse=user.paroisse)
         else:
-            serializer.save()
+            instance = serializer.save()
+        _sync_nombre_fideles(instance.paroisse)
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        _sync_nombre_fideles(instance.paroisse)
 
     def update(self, request, *args, **kwargs):
         stat = self.get_object()
@@ -70,7 +100,10 @@ class StatistiqueAnnuelleViewSet(viewsets.ModelViewSet):
                 {"detail": "Seul l'administrateur national peut supprimer des statistiques."},
                 status=status.HTTP_403_FORBIDDEN,
             )
-        return super().destroy(request, *args, **kwargs)
+        paroisse = self.get_object().paroisse
+        response = super().destroy(request, *args, **kwargs)
+        _sync_nombre_fideles(paroisse)
+        return response
 
     # ------------------------------------------------------------------
     # Actions personnalisées

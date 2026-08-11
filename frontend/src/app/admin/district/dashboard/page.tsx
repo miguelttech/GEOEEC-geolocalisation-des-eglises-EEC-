@@ -141,6 +141,7 @@ export default function DashboardDistrictPage() {
           <div className="sg-md" style={{ fontSize: 14 }}>Paroisses du district</div>
           <a href="/admin/district/paroisses" style={{ fontSize: 12, color: C, textDecoration: 'none' }}>Voir toutes →</a>
         </div>
+        <div style={{ overflowX: 'auto' }}>
         <table className="data">
           <thead>
             <tr>
@@ -169,6 +170,7 @@ export default function DashboardDistrictPage() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
     </div>

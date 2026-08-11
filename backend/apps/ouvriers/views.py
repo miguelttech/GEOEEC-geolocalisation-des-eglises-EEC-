@@ -1,4 +1,4 @@
-from django.db.models import Count
+from django.db.models import Count, Q
 
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
@@ -26,9 +26,24 @@ class GradeViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = GradeSerializer
 
     def get_queryset(self):
+        # EXIGENCE : nb_ouvriers doit refléter le scope de l'admin connecté
+        # (comme OuvrierViewSet via filter_ouvriers_by_scope) — sinon un
+        # admin régional/district/paroissial voit des totaux nationaux
+        # alors que sa liste d'ouvriers, elle, est bien filtrée.
+        user = self.request.user
+        ouvrier_filter = Q()
+        if getattr(user, "is_authenticated", False) and getattr(user, "is_admin", False):
+            if user.role == "REGION" and user.region_id:
+                ouvrier_filter = Q(ouvriers__paroisse__district__region_id=user.region_id)
+            elif user.role == "DISTRICT" and user.district_id:
+                ouvrier_filter = Q(ouvriers__paroisse__district_id=user.district_id)
+            elif user.role == "PAROISSE" and user.paroisse_id:
+                ouvrier_filter = Q(ouvriers__paroisse_id=user.paroisse_id)
+            # SUPER → aucun filtre, comptage national (comme filter_ouvriers_by_scope)
+
         return (
             Grade.objects
-            .annotate(nb_ouvriers=Count("ouvriers"))
+            .annotate(nb_ouvriers=Count("ouvriers", filter=ouvrier_filter, distinct=True))
             .order_by("niveau")
         )
 

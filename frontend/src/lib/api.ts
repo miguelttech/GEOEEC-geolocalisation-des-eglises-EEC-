@@ -268,6 +268,23 @@ export interface LogEntry {
   created_at: string;
 }
 
+export interface NewsImage {
+  id: number;
+  image_url: string;
+  ordre: number;
+}
+
+export interface News {
+  id: number;
+  titre: string;
+  contenu: string;
+  est_publiee: boolean;
+  auteur_nom: string | null;
+  images: NewsImage[];
+  created_at: string;
+  updated_at: string;
+}
+
 export interface StatistiqueAnnuelle {
   id: number;
   paroisse: number;

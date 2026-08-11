@@ -6,6 +6,7 @@ import { I } from './icons';
 import { Avatar } from './atoms';
 import AdminBrand from './AdminBrand';
 import { logout } from '@/lib/api';
+import { useAdminSidebar } from './AdminSidebarContext';
 
 const BACKEND = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api')
   .replace(/\/api\/?$/, '');
@@ -73,6 +74,7 @@ export default function SidebarRegional() {
   const pathname = usePathname();
   const active = activeKey(pathname);
   const [me, setMe] = React.useState<MeUser | null>(null);
+  const { mobileOpen, close } = useAdminSidebar();
 
   const loadMe = React.useCallback(() => {
     fetch(`${BACKEND}/api/auth/me/`, { credentials: 'include' })
@@ -89,12 +91,10 @@ export default function SidebarRegional() {
   }, [loadMe]);
 
   return (
-    <aside style={{
-      width: 240, flexShrink: 0, background: 'var(--chrome)',
-      borderRight: '1px solid rgba(91,155,213,0.10)',
-      height: '100vh', position: 'sticky', top: 0,
-      display: 'flex', flexDirection: 'column', overflowY: 'auto',
-    }}>
+    <aside
+      className={'admin-sidebar' + (mobileOpen ? ' mobile-open' : '')}
+      style={{ borderRight: '1px solid rgba(91,155,213,0.10)' }}
+    >
       <AdminBrand spaceLabel="Bureau Régional" />
 
       {/* Regional admin user */}
@@ -122,7 +122,7 @@ export default function SidebarRegional() {
               const Ic = I[it.icon];
               const isActive = active === it.key;
               return (
-                <Link key={it.key} href={`/admin/regional/${it.key}`} style={{ textDecoration: 'none' }}>
+                <Link key={it.key} href={`/admin/regional/${it.key}`} style={{ textDecoration: 'none' }} onClick={close}>
                   <div className={'nav-item' + (isActive ? ' active' : '')} style={isActive ? { borderLeftColor: '#5B9BD5' } : {}}>
                     <span className="ni-icon" style={isActive ? { color: '#5B9BD5' } : {}}>{Ic && <Ic size={17} />}</span>
                     <span>{it.label}</span>
@@ -136,7 +136,7 @@ export default function SidebarRegional() {
         {/* Système */}
         <div style={{ marginTop: 10, borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 4 }}>
           <div className="nav-group-label">Système</div>
-          <Link href="/admin/regional/parametres" style={{ textDecoration: 'none' }}>
+          <Link href="/admin/regional/parametres" style={{ textDecoration: 'none' }} onClick={close}>
             <div className={'nav-item' + (active === 'parametres' ? ' active' : '')}>
               <span className="ni-icon"><I.gear size={17} /></span>
               <span>Paramètres</span>

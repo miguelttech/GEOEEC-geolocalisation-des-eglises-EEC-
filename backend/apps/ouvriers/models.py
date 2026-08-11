@@ -4,10 +4,10 @@ FICHIER : apps/ouvriers/models.py
 RÔLE    : Modèles pour les Ouvriers de l'EEC
 
 Un "ouvrier" dans le vocabulaire EEC désigne tout agent de l'église :
-pasteurs, évêques, diacres, catéchistes, secrétaires, etc.
+pasteurs, évangélistes, délégués pastoraux, etc.
 
 Ce fichier définit :
-  - Grade   : le rang ecclésiastique d'un ouvrier (Évêque, Pasteur, Diacre...)
+  - Grade   : le rang ecclésiastique d'un ouvrier (Pasteur, Évangéliste...)
   - Ouvrier : la personne elle-même, avec son grade, sa paroisse et sa position GPS
 
 Les données viennent du fichier Excel 'OUVRIERS.xlsx' (708 ouvriers).
@@ -32,20 +32,25 @@ class Grade(models.Model):
     """
     Rang ecclésiastique d'un ouvrier dans la hiérarchie de l'EEC.
 
-    L'EEC a une structure hiérarchique précise. Exemples de grades :
-      Niveau 1 (plus haut) : Évêque (Ev.)
-      Niveau 2             : Ancien Évêque (A.Ev.)
-      Niveau 3             : Pasteur Principal (P.P.)
-      Niveau 4             : Pasteur (P.)
-      Niveau 5             : Diacre (D.)
-      Niveau 6             : Catéchiste (Cat.)
-      ...
+    Hiérarchie réelle de l'EEC, telle qu'importée par import_grades.py :
+      Niveau 2 (plus haut) : Pasteur (P.)
+      Niveau 3             : Pasteur Proposant (P.P.)
+      Niveau 4             : Pasteur Proposant avec Délégation Pastorale (P.P.D.P.)
+      Niveau 5             : Évangéliste (Ev.)
+      Niveau 6             : Évangéliste avec Délégation Pastorale (Ev.D.P.)
+      Niveau 7             : Délégué Pastoral (D.P.)
+      Niveau 8             : Aide-Évangéliste (A.Ev.)
+
+    Le niveau 1 est VOLONTAIREMENT VIDE : il portait le grade « Évêque », qui
+    n'existe pas dans l'Église Évangélique du Cameroun et a été retiré (voir
+    la migration 0004_supprime_grade_eveque). La numérotation n'a pas été
+    décalée, pour ne pas invalider d'éventuels tris ou exports enregistrés.
 
     Le champ 'niveau' permet de trier les grades du plus haut au plus bas.
     Le champ 'abreviation' est utilisé sur les cartes et dans les listes compactes.
     """
 
-    # Nom complet du grade (ex: "Évêque", "Pasteur Principal", "Diacre")
+    # Nom complet du grade (ex: "Pasteur", "Évangéliste", "Délégué Pastoral")
     # unique=True : pas deux grades avec le même nom
     nom = models.CharField(max_length=100, unique=True)
 
@@ -53,7 +58,7 @@ class Grade(models.Model):
     # Permet de trier par ordre hiérarchique (ORDER BY niveau)
     niveau = models.IntegerField()
 
-    # Abréviation utilisée sur les cartes et listes (ex: "Ev.", "P.", "D.", "Cat.")
+    # Abréviation utilisée sur les cartes et listes (ex: "P.", "Ev.", "D.P.")
     abreviation = models.CharField(max_length=10, blank=True)
 
     class Meta:
@@ -63,7 +68,7 @@ class Grade(models.Model):
         ordering = ["niveau"]
 
     def __str__(self):
-        # Ex: "Ev. — Évêque"
+        # Ex: "P. — Pasteur"
         return f"{self.abreviation} — {self.nom}"
 
 

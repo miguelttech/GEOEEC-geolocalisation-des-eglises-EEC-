@@ -6,6 +6,7 @@ import { I } from './icons';
 import { Avatar } from './atoms';
 import AdminBrand from './AdminBrand';
 import { logout } from '@/lib/api';
+import { useAdminSidebar } from './AdminSidebarContext';
 
 const BACKEND = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api')
   .replace(/\/api\/?$/, '');
@@ -74,6 +75,7 @@ export default function SidebarDistrict() {
   const pathname = usePathname();
   const active = activeKey(pathname);
   const [me, setMe] = React.useState<MeUser | null>(null);
+  const { mobileOpen, close } = useAdminSidebar();
 
   const loadMe = React.useCallback(() => {
     fetch(`${BACKEND}/api/auth/me/`, { credentials: 'include' })
@@ -90,12 +92,10 @@ export default function SidebarDistrict() {
   }, [loadMe]);
 
   return (
-    <aside style={{
-      width: 240, flexShrink: 0, background: 'var(--chrome)',
-      borderRight: `1px solid rgba(155,114,207,0.10)`,
-      height: '100vh', position: 'sticky', top: 0,
-      display: 'flex', flexDirection: 'column', overflowY: 'auto',
-    }}>
+    <aside
+      className={'admin-sidebar' + (mobileOpen ? ' mobile-open' : '')}
+      style={{ borderRight: `1px solid rgba(155,114,207,0.10)` }}
+    >
       <AdminBrand spaceLabel="Bureau de District" />
 
       {/* District admin user */}
@@ -123,7 +123,7 @@ export default function SidebarDistrict() {
               const Ic = I[it.icon as keyof typeof I];
               const isActive = active === it.key;
               return (
-                <Link key={it.key} href={`/admin/district/${it.key}`} style={{ textDecoration: 'none' }}>
+                <Link key={it.key} href={`/admin/district/${it.key}`} style={{ textDecoration: 'none' }} onClick={close}>
                   <div className={'nav-item' + (isActive ? ' active' : '')} style={isActive ? { borderLeftColor: C } : {}}>
                     <span className="ni-icon" style={isActive ? { color: C } : {}}>{Ic && <Ic size={17} />}</span>
                     <span>{it.label}</span>
@@ -137,7 +137,7 @@ export default function SidebarDistrict() {
         {/* Système */}
         <div style={{ marginTop: 10, borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 4 }}>
           <div className="nav-group-label">Système</div>
-          <Link href="/admin/district/parametres" style={{ textDecoration: 'none' }}>
+          <Link href="/admin/district/parametres" style={{ textDecoration: 'none' }} onClick={close}>
             <div className={'nav-item' + (active === 'parametres' ? ' active' : '')} style={active === 'parametres' ? { borderLeftColor: C } : {}}>
               <span className="ni-icon" style={active === 'parametres' ? { color: C } : {}}><I.gear size={17} /></span>
               <span>Paramètres</span>

@@ -105,6 +105,17 @@ class StatistiqueAnnuelle(models.Model):
     communiants = models.IntegerField(default=0)
     non_communiants = models.IntegerField(default=0)
 
+    # Effectif total quand la source ne fournit PAS la ventilation.
+    #
+    # L'évaluation du Conseil Synodal (« Catégorisation paroisses EEC 050826 »)
+    # ne donne qu'un effectif global par paroisse, là où l'enquête de terrain
+    # 2025 distingue communiants et non-communiants. Répartir arbitrairement ce
+    # total entre les deux colonnes fabriquerait une ventilation qui n'existe
+    # pas ; le laisser dans `communiants` seul la fausserait tout autant.
+    # D'où ce champ distinct : renseigné, il fait autorité sur la somme des
+    # deux composantes (voir StatistiqueAnnuelleSerializer.get_total_fideles).
+    total_declare = models.IntegerField(null=True, blank=True)
+
     baptemes = models.IntegerField(default=0)
     confirmations = models.IntegerField(default=0)
     mariages = models.IntegerField(default=0)

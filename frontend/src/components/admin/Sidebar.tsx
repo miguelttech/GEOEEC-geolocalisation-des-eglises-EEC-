@@ -6,6 +6,7 @@ import { I } from './icons';
 import { Avatar } from './atoms';
 import AdminBrand from './AdminBrand';
 import { logout } from '@/lib/api';
+import { useAdminSidebar } from './AdminSidebarContext';
 
 const BACKEND = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api')
   .replace(/\/api\/?$/, '');
@@ -25,6 +26,9 @@ const NAV = [
   { group: 'Rapports & données', items: [
     { key: 'stats', label: 'Statistiques',   icon: 'chart' },
     { key: 'io',    label: 'Import / Export', icon: 'swap' },
+  ]},
+  { group: 'Communication', items: [
+    { key: 'actualites', label: 'Actualités', icon: 'bell' },
   ]},
   { group: 'Administration', items: [
     { key: 'comptes', label: 'Comptes utilisateurs', icon: 'users' },
@@ -71,6 +75,7 @@ export default function Sidebar() {
   const pathname = usePathname();
   const active   = activeKey(pathname);
   const [me, setMe] = React.useState<MeUser | null>(null);
+  const { mobileOpen, close } = useAdminSidebar();
 
   const loadMe = React.useCallback(() => {
     fetch(`${BACKEND}/api/auth/me/`, { credentials: 'include' })
@@ -89,12 +94,10 @@ export default function Sidebar() {
   }, [loadMe]);
 
   return (
-    <aside suppressHydrationWarning style={{
-      width: 240, flexShrink: 0, background: 'var(--chrome)',
-      borderRight: '1px solid rgba(245,197,24,0.08)',
-      height: '100vh', position: 'sticky', top: 0,
-      display: 'flex', flexDirection: 'column', overflowY: 'auto',
-    }}>
+    <aside suppressHydrationWarning
+      className={'admin-sidebar' + (mobileOpen ? ' mobile-open' : '')}
+      style={{ borderRight: '1px solid rgba(245,197,24,0.08)' }}
+    >
       <AdminBrand spaceLabel="Bureau National" />
 
       {/* Compte connecté */}
@@ -123,7 +126,7 @@ export default function Sidebar() {
               const Ic = I[it.icon];
               const isActive = active === it.key;
               return (
-                <Link key={it.key} href={`/admin/${it.key}`} style={{ textDecoration: 'none' }}>
+                <Link key={it.key} href={`/admin/${it.key}`} style={{ textDecoration: 'none' }} onClick={close}>
                   <div className={'nav-item' + (isActive ? ' active' : '')}>
                     <span className="ni-icon">{Ic && <Ic size={17} />}</span>
                     <span>{it.label}</span>
@@ -137,7 +140,7 @@ export default function Sidebar() {
         {/* Système */}
         <div style={{ marginTop: 10, borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 4 }}>
           <div className="nav-group-label">Système</div>
-          <Link href="/admin/parametres" style={{ textDecoration: 'none' }}>
+          <Link href="/admin/parametres" style={{ textDecoration: 'none' }} onClick={close}>
             <div className={'nav-item' + (active === 'parametres' ? ' active' : '')}>
               <span className="ni-icon"><I.gear size={17} /></span>
               <span>Paramètres</span>

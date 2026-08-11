@@ -147,6 +147,7 @@ export default function JournalPage() {
             <I.refresh size={16} style={{ opacity: 0.5 }}/>Chargement…
           </div>
         ) : (
+          <div style={{ overflowX: 'auto' }}>
           <table className="data">
             <thead>
               <tr>
@@ -238,6 +239,7 @@ export default function JournalPage() {
               })}
             </tbody>
           </table>
+          </div>
         )}
       </div>
 

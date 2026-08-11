@@ -36,12 +36,29 @@ LOCAL_APPS = [
     "apps.audit",
     "apps.exports",
     "apps.visitors",
+    "apps.news",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    # Compression gzip des réponses. La carte télécharge ~1 Mo de JSON à
+    # chaque ouverture (GeoJSON des régions, paroisses, œuvres, ouvriers,
+    # statistiques) : du JSON se compresse à 85-90 %, c'est le gain le plus
+    # important pour le temps de chargement de la carte.
+    #
+    # Position : juste après SecurityMiddleware, conformément à l'ordre
+    # recommandé par Django. La phase « réponse » des middlewares s'exécute
+    # de bas en haut, donc être en tête garantit de compresser le corps
+    # FINAL, après passage de tous les autres middlewares.
+    #
+    # BREACH : la compression de réponses mêlant secret et entrée contrôlée
+    # par un attaquant est une classe d'attaque connue. Django masque le
+    # jeton CSRF avec un sel aléatoire à chaque réponse précisément pour
+    # neutraliser ce vecteur. Les réponses déjà encodées (fichiers
+    # pré-compressés servis par WhiteNoise) sont ignorées par ce middleware.
+    "django.middleware.gzip.GZipMiddleware",
     # Sert les fichiers statiques (admin Django, Swagger) directement depuis
     # gunicorn — suffisant tant qu'aucun reverse proxy n'est en place devant
     # le backend (voir docker-compose.prod.yml).

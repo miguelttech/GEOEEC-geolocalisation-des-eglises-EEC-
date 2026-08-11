@@ -10,6 +10,7 @@ import ScriptureBand from './ScriptureBand';
 import About        from './About';
 import Oeuvres      from './Oeuvres';
 import Direction    from './Direction';
+import News         from './News';
 import CTABand      from './CTABand';
 import Footer       from './Footer';
 
@@ -37,6 +38,7 @@ export default function LandingPage() {
       <div className="reveal"><About /></div>
       <div className="reveal"><Oeuvres /></div>
       <div className="reveal"><Direction /></div>
+      <div className="reveal"><News /></div>
       <div className="reveal"><CTABand /></div>
       <Footer />
     </div>

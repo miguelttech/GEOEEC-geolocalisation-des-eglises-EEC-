@@ -142,6 +142,7 @@ export default function IOPage() {
               <div className="sg-md" style={{ fontSize: 14 }}>Aucun export enregistré</div>
             </div>
           ) : (
+            <div style={{ overflowX: 'auto' }}>
             <table className="data">
               <thead>
                 <tr>
@@ -176,6 +177,7 @@ export default function IOPage() {
                 })}
               </tbody>
             </table>
+            </div>
           )}
         </div>
       )}

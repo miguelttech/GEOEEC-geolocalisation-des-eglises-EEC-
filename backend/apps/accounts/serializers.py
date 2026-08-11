@@ -13,6 +13,11 @@ class StatistiqueAnnuelleSerializer(serializers.ModelSerializer):
     total_fideles = serializers.SerializerMethodField()
 
     def get_total_fideles(self, obj):
+        # `total_declare` prime : il vient d'une source qui donne l'effectif
+        # global sans le ventiler. Quand il est absent, on retombe sur la
+        # somme des deux composantes de l'enquête de terrain.
+        if obj.total_declare is not None:
+            return obj.total_declare
         return (obj.communiants or 0) + (obj.non_communiants or 0)
 
     class Meta:
@@ -47,6 +52,16 @@ class UserSerializer(serializers.ModelSerializer):
         if not obj.avatar:
             return None
         url = obj.avatar.url
+        # EXIGENCE : le fichier est toujours réécrit sous le même nom
+        # (user_<id>.jpg) — sans paramètre de cache-busting, l'URL renvoyée
+        # après un remplacement de photo est identique à la précédente, donc
+        # React ne remet jamais à jour l'attribut src et le navigateur
+        # continue d'afficher l'ancienne image en cache.
+        try:
+            mtime = int(obj.avatar.storage.get_modified_time(obj.avatar.name).timestamp())
+            url = f"{url}?v={mtime}"
+        except (OSError, NotImplementedError):
+            pass
         return request.build_absolute_uri(url) if request else url
 
     class Meta:

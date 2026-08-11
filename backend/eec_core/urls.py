@@ -12,6 +12,7 @@ from apps.oeuvres.views  import TypeOeuvreViewSet, OeuvreViewSet
 from apps.accounts.views import StatistiqueAnnuelleViewSet
 from apps.ouvriers.views import GradeViewSet, OuvrierViewSet
 from apps.audit.views    import LogActiviteViewSet
+from apps.news.views     import NewsViewSet
 
 # Vues auth
 from apps.accounts.auth_views import (
@@ -22,6 +23,7 @@ from apps.accounts.auth_views import (
     upload_avatar,
     change_password,
     list_users,
+    users_summary,
     create_user,
     user_detail,
     toggle_user_active,
@@ -65,6 +67,7 @@ router.register(r"statistiques",      StatistiqueAnnuelleViewSet, basename="stat
 router.register(r"ouvriers/grades",   GradeViewSet,               basename="grade")
 router.register(r"ouvriers/ouvriers", OuvrierViewSet,             basename="ouvrier")
 router.register(r"audit/journal",     LogActiviteViewSet,         basename="logactivite")
+router.register(r"news",              NewsViewSet,                basename="news")
 
 # ---------------------------------------------------------------------------
 # Patterns auth
@@ -80,6 +83,7 @@ auth_patterns = [
     path("password-reset/confirm/",          password_reset_confirm),
     path("dashboard-stats/",                 dashboard_stats),
     path("users/",                           list_users),
+    path("users/summary/",                   users_summary),
     path("users/create/",                    create_user),
     path("users/<int:pk>/",                  user_detail),
     path("users/<int:pk>/toggle-active/",    toggle_user_active),

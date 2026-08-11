@@ -164,6 +164,7 @@ class ParoisseListSerializer(serializers.ModelSerializer):
             "region_id", "region_nom",
             "latitude", "longitude",
             "nombre_fideles", "communiants", "non_communiants", "nb_ouvriers",
+            "cible_offrande",
             "telephone", "email", "updated_at",
         ]
 
@@ -224,7 +225,7 @@ class ParoisseDetailSerializer(serializers.ModelSerializer):
             "district_id", "district_nom",
             "region_id", "region_nom",
             "latitude", "longitude",
-            "nombre_fideles", "telephone", "email", "updated_at",
+            "nombre_fideles", "cible_offrande", "telephone", "email", "updated_at",
         ]
 
 

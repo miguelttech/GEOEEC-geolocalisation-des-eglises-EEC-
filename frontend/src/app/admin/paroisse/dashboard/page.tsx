@@ -116,6 +116,7 @@ export default function DashboardParoissePage() {
           <div className="sg-md" style={{ fontSize: 14 }}>Ouvriers de la paroisse</div>
           <a href="/admin/paroisse/ouvriers" style={{ fontSize: 12, color: C, textDecoration: 'none' }}>Voir tous →</a>
         </div>
+        <div style={{ overflowX: 'auto' }}>
         <table className="data">
           <thead>
             <tr><th>Ouvrier</th><th>Grade</th><th>Téléphone</th><th>Statut</th></tr>
@@ -142,6 +143,7 @@ export default function DashboardParoissePage() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
     </div>

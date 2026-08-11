@@ -57,6 +57,22 @@ class ReadPublicWriteAdmin(BasePermission):
         return is_admin_role(request.user)
 
 
+class ReadPublicWriteSuperOnly(BasePermission):
+    """
+    Lecture publique (sans authentification) — pour les Actualités.
+    Écriture strictement réservée au Super Administrateur National (un admin
+    régional/district/paroisse n'a pas vocation à publier au grand public).
+    """
+    def has_permission(self, request, view):
+        if request.method in SAFE_METHODS:
+            return True
+        return (
+            request.user
+            and request.user.is_authenticated
+            and request.user.role == "SUPER"
+        )
+
+
 # ---------------------------------------------------------------------------
 # Helpers de filtrage de queryset selon le scope de l'utilisateur
 # ---------------------------------------------------------------------------

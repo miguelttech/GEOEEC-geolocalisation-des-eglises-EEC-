@@ -8,7 +8,7 @@ export default function Direction() {
         <div className="section-head">
           <div>
             <div className="section-num">— 05 / Direction</div>
-            <h2 className="lp-serif"><em>Direction Générale</em> de l&apos;EEC.</h2>
+            <h2 className="lp-serif"><em>Bureau National</em> de l&apos;EEC.</h2>
           </div>
           <div className="meta">
             Élus pour servir l&apos;Église dans la fidélité, le discernement
@@ -35,14 +35,12 @@ export default function Direction() {
                 letterSpacing: '0.15em',
                 color: 'var(--lp-gold-deep)',
                 fontWeight: 700,
-                textTransform: 'uppercase',
                 marginBottom: 6,
               }}>
                 {d.grade}
               </div>
               <h4>{d.name}</h4>
               <div className="dir-titre">{d.titre}</div>
-              <div className="dir-region">{d.region ? `${d.region} · ` : ''}MANDAT 2022–2027</div>
             </div>
           ))}
         </div>

@@ -34,7 +34,23 @@ STRUCTURE DE FEUIL2 (une ligne = une paroisse) :
   [11]   Coord_x         "7.332"   ← c'est la LATITUDE (inversé !)
   [12]   Coord_y         "13.582"  ← c'est la LONGITUDE (inversé !)
 
-PIÈGE : L'INVERSION COORD_X / COORD_Y
+PIÈGE N°1 — FEUIL2 EST FAITE DE DEUX BLOCS NON ALIGNÉS
+  Les colonnes 0-8 décrivent une paroisse ; les colonnes 9-13 (« Nom de la
+  paroisse », « Quartier », « Coord_x », « Coord_y », « Altitude ») sont un
+  SECOND bloc, recopié depuis Feuil1 dans son ordre d'origine. Les deux
+  blocs ne se correspondent PAS ligne à ligne.
+
+  Cette commande ne lit donc AUCUNE coordonnée : elle importerait la
+  position d'une autre paroisse. Vérification faite sur les 22 polygones de
+  régions synodales, 6 % seulement des points issus de Feuil2 tombaient dans
+  la bonne région, contre 84 % depuis Feuil1.
+
+  Le GPS est renseigné séparément :  python manage.py import_gps
+
+  Les constantes COL_COORD_X / COL_COORD_Y et le filtrage ci-dessous sont
+  conservés pour mémoire, mais ne sont plus utilisés.
+
+PIÈGE N°2 : L'INVERSION COORD_X / COORD_Y (dans Feuil1, où le GPS est lu)
   Dans ce fichier Excel, les agents de saisie ont INVERSÉ les colonnes :
   - Coord_x devrait être la longitude → mais c'est la LATITUDE
   - Coord_y devrait être la longitude → mais c'est la LONGITUDE
@@ -391,8 +407,25 @@ class Command(BaseCommand):
                 nb_ignores += 1
                 continue
 
-            # ─── Gérer les coordonnées GPS ────────────────────────────────────
-            position = None  # Par défaut, pas de position (position=null en base)
+            # ─── Coordonnées GPS : NE PAS LES LIRE DEPUIS FEUIL2 ─────────────
+            # Feuil2 est composée de DEUX blocs juxtaposés qui ne sont PAS
+            # alignés ligne à ligne : les colonnes 0-8 décrivent une paroisse,
+            # les colonnes 9-13 (dont Coord_x/Coord_y) sont un second bloc
+            # recopié depuis Feuil1 dans son ordre d'origine. Associer le nom
+            # de la colonne 4 aux coordonnées des colonnes 11-12 attribue donc
+            # à chaque paroisse la position d'une AUTRE paroisse.
+            #
+            # Mesuré en testant si le point tombe dans sa propre région
+            # synodale (22 polygones) : 6 % de justesse avec Feuil2, contre
+            # 84 % avec Feuil1. Exemple : « Le Jourdain de beka hossere »
+            # (Ngaoundéré) recevait les coordonnées de « AHALA-ECHANGEURS »
+            # à Yaoundé, soit 600 km d'écart.
+            #
+            # Le GPS est désormais renseigné par une commande dédiée qui lit
+            # Feuil1, où nom et coordonnées sont sur la même ligne :
+            #     python manage.py import_gps
+            position = None
+            coord_x = coord_y = None  # neutralise la lecture ci-dessus
 
             if coord_x is not None and coord_y is not None:
                 try:

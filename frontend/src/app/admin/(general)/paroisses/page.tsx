@@ -385,7 +385,7 @@ type FormState = {
   regionId: number; districtId: number;
   lat: string; lng: string; altitude: string;
   communiants: string; non_communiants: string;
-  nombre_fideles: string; telephone: string; email: string;
+  telephone: string; email: string;
 };
 
 function emptyForm(): FormState {
@@ -394,7 +394,7 @@ function emptyForm(): FormState {
     regionId: 0, districtId: 0,
     lat: '', lng: '', altitude: '',
     communiants: '', non_communiants: '',
-    nombre_fideles: '', telephone: '', email: '',
+    telephone: '', email: '',
   };
 }
 
@@ -406,7 +406,6 @@ function formFromParoisse(p: Paroisse): FormState {
     lng: p.longitude !== null ? String(p.longitude) : '',
     altitude: '',
     communiants: '', non_communiants: '',
-    nombre_fideles: p.nombre_fideles !== null ? String(p.nombre_fideles) : '',
     telephone: p.telephone, email: p.email,
   };
 }
@@ -492,7 +491,6 @@ function ParoisseFormPanel({ mode, paroisse, onClose, onSaved }: {
           nom: form.nom.trim(), adresse: form.adresse.trim(),
           categorie: form.categorie || null, en_prospection: form.en_prospection,
           district: form.districtId,
-          nombre_fideles: form.nombre_fideles ? parseInt(form.nombre_fideles) : null,
           telephone: form.telephone.trim(), email: form.email.trim(),
         };
         const latF = parseFloat(form.lat), lngF = parseFloat(form.lng);
@@ -552,7 +550,7 @@ function ParoisseFormPanel({ mode, paroisse, onClose, onSaved }: {
   const tabDone = [
     !!(form.nom && form.districtId),
     !!(form.lat && form.lng),
-    !!(form.communiants || form.non_communiants || form.nombre_fideles),
+    !!(form.communiants || form.non_communiants),
     !!(form.telephone || form.email),
     selOuvriers.length > 0,
     selOeuvres.length > 0,
@@ -742,7 +740,7 @@ function ParoisseFormPanel({ mode, paroisse, onClose, onSaved }: {
           {/* ─ Tab 3: Fidèles ──────────────────────────────────────────── */}
           {tab === 2 && (
             <>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                 <div>
                   <label style={L.label}>Communiants</label>
                   <input className="input mono" type="number" min={0} placeholder="0" value={form.communiants}
@@ -755,13 +753,12 @@ function ParoisseFormPanel({ mode, paroisse, onClose, onSaved }: {
                     onChange={e => set('non_communiants', e.target.value)} style={{ color: '#111827' }} />
                   <div style={{ fontSize: 11, color: '#6B7280', marginTop: 4 }}>Membres non baptisés</div>
                 </div>
-                <div>
-                  <label style={L.label}>Total fidèles (résumé)</label>
-                  <input className="input mono" type="number" min={0} placeholder="0" value={form.nombre_fideles}
-                    onChange={e => set('nombre_fideles', e.target.value)} style={{ color: '#111827' }} />
-                  <div style={{ fontSize: 11, color: '#6B7280', marginTop: 4 }}>Vue générale</div>
-                </div>
               </div>
+              {/* Le total des fidèles n'est plus saisi directement : il est
+                  toujours recalculé côté serveur comme communiants + non-
+                  communiants (voir _sync_nombre_fideles) dès l'enregistrement
+                  des statistiques ci-dessous — un champ séparé était trompeur
+                  car il n'avait plus aucun effet en modification. */}
 
               {(form.communiants || form.non_communiants) && (
                 <div className="card" style={{ padding: '16px 20px', background: 'rgba(46,151,68,0.06)' }}>

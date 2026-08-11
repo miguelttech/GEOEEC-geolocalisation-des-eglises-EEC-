@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import { api } from '@/lib/api';
+import { AdminSidebarProvider, AdminSidebarOverlay } from './AdminSidebarContext';
 
 const BACKEND = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api').replace(/\/api\/?$/, '');
 
@@ -41,7 +42,10 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
   return (
     <div suppressHydrationWarning className={`admin-shell${theme === 'light' ? ' light' : ''}`}>
-      {children}
+      <AdminSidebarProvider>
+        {children}
+        <AdminSidebarOverlay />
+      </AdminSidebarProvider>
     </div>
   );
 }

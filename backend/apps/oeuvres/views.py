@@ -1,4 +1,4 @@
-from django.db.models import Count
+from django.db.models import Count, Q
 
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
@@ -21,7 +21,31 @@ class TypeOeuvreViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = TypeOeuvreSerializer
 
     def get_queryset(self):
-        return TypeOeuvre.objects.annotate(nb_oeuvres=Count("oeuvres")).order_by("nom")
+        # EXIGENCE : nb_oeuvres doit refléter le scope de l'admin connecté
+        # (comme OeuvreViewSet.get_queryset via filter_oeuvres_by_scope) —
+        # sinon un admin régional/district/paroissial voit des totaux
+        # nationaux alors que sa liste d'œuvres, elle, est bien filtrée.
+        user = self.request.user
+        oeuvre_filter = Q()
+        if getattr(user, "is_authenticated", False) and getattr(user, "is_admin", False):
+            if user.role == "REGION" and user.region_id:
+                oeuvre_filter = (
+                    Q(oeuvres__region_id=user.region_id)
+                    | Q(oeuvres__district__region_id=user.region_id)
+                    | Q(oeuvres__paroisse__district__region_id=user.region_id)
+                )
+            elif user.role == "DISTRICT" and user.district_id:
+                oeuvre_filter = (
+                    Q(oeuvres__district_id=user.district_id)
+                    | Q(oeuvres__paroisse__district_id=user.district_id)
+                )
+            elif user.role == "PAROISSE" and user.paroisse_id:
+                oeuvre_filter = Q(oeuvres__paroisse_id=user.paroisse_id)
+            # SUPER → aucun filtre, comptage national (comme filter_oeuvres_by_scope)
+
+        return TypeOeuvre.objects.annotate(
+            nb_oeuvres=Count("oeuvres", filter=oeuvre_filter, distinct=True)
+        ).order_by("nom")
 
 
 # ---------------------------------------------------------------------------

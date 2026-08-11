@@ -239,6 +239,68 @@
 .admin-shell .admin-main { flex:1; min-width:0; display:flex; flex-direction:column; overflow:hidden; }
 .admin-shell .admin-content { flex:1; overflow-y:auto; padding:28px 32px; background:var(--canvas); transition: padding 320ms cubic-bezier(.4,0,.2,1); }
 
+/* Sidebar (shared by all role variants — Sidebar/SidebarRegional/SidebarDistrict/SidebarParoisse) */
+.admin-shell .admin-sidebar {
+  width: 240px; flex-shrink: 0; background: var(--chrome);
+  height: 100vh; position: sticky; top: 0; z-index: 150;
+  display: flex; flex-direction: column; overflow-y: auto;
+  transition: transform 280ms cubic-bezier(.4,0,.2,1);
+}
+
+/* Topbar */
+.admin-shell .admin-topbar {
+  height: 60px; background: var(--chrome); border-bottom: 1px solid rgba(245,197,24,0.10);
+  padding: 0 32px; display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  position: sticky; top: 0; z-index: 60;
+}
+
+/* Mobile hamburger — hidden on desktop, revealed under the sidebar breakpoint */
+.admin-shell .admin-hamburger {
+  display: none; flex-direction: column; justify-content: center; gap: 4px;
+  width: 32px; height: 32px; padding: 0; border: none; background: transparent;
+  cursor: pointer; flex-shrink: 0;
+}
+.admin-shell .admin-hamburger span { display: block; width: 100%; height: 2px; background: var(--text); border-radius: 2px; }
+
+/* Overlay behind the sidebar drawer on mobile */
+.admin-shell .admin-sidebar-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 140;
+  animation: a-fade 200ms ease;
+}
+
+/* ==========================================================================
+   Responsive — sidebar becomes an off-canvas drawer, chrome gets compact
+   ========================================================================== */
+@media (max-width: 900px) {
+  .admin-shell .admin-hamburger { display: flex; }
+
+  .admin-shell .admin-sidebar {
+    position: fixed; left: 0; top: 0;
+    transform: translateX(-100%);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .admin-shell .admin-sidebar.mobile-open { transform: translateX(0); }
+  .admin-shell .admin-sidebar-wrap { max-width: 0; }
+  /* Sur mobile, la carte plein écran ne doit pas empêcher l'ouverture du tiroir
+     (le collapse desktop de AdminMapFrame passe la wrapper à opacity:0, ce qui
+     rendrait le tiroir invisible même en position ouverte). */
+  .admin-shell .admin-sidebar-wrap.collapsed { opacity: 1; }
+
+  .admin-shell .admin-topbar { padding: 0 16px; }
+  .admin-shell .admin-content { padding: 16px; }
+
+  .admin-shell table.data { font-size: 12px; }
+  .admin-shell table.data thead th,
+  .admin-shell table.data tbody td { padding: 9px 10px; }
+}
+
+@media (max-width: 640px) {
+  .admin-shell .topbar-date { display: none !important; }
+  .admin-shell .slide-panel { width: 100%; }
+  .admin-shell .modal-panel { width: calc(100vw - 32px); }
+  .admin-shell .toast-stack { width: calc(100vw - 32px); right: 16px; }
+}
+
 /* EXIGENCE : Carte interactive en plein écran — le Topbar se replie avec une
    animation fluide, le contenu perd ses marges et prend tout l'espace restant
    (seule la barre latérale d'icônes demeure visible à côté). */

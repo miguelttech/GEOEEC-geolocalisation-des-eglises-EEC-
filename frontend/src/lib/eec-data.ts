@@ -3,6 +3,8 @@
    22 régions · 137 districts · 576 paroisses · 311 œuvres · 685 ouvriers
    ============================================================================= */
 
+import { VIZ_CATEGORICAL } from './viz-palette';
+
 export const REGIONS = [
   { id: 'R01', name: 'ADAMAOUA',                  admin: 'Adamaoua',          city: 'Ngaoundéré',  lat: 7.323,  lng: 13.580, radius: 0.65, districts: 5  },
   { id: 'R02', name: 'BAMBOUTOS ET NORD OUEST',   admin: 'Ouest/Nord-Ouest',  city: 'Mbouda',      lat: 5.625,  lng: 10.252, radius: 0.50, districts: 12 },
@@ -38,14 +40,24 @@ export const GRADES = [
   { id: 'aide-evang',   label: 'Aide-Évangéliste', short: 'Aide-É.',  weight: 3 },
 ];
 
+// Les couleurs viennent de VIZ_CATEGORICAL (lib/viz-palette.ts), où elles sont
+// mesurées et justifiées. Trois FAMILLES seulement, et non une couleur par
+// type : la carte est une forme « toutes paires » — deux marqueurs quelconques
+// peuvent se toucher — et au-delà de trois teintes la distinction n'est plus
+// garantie, y compris en vision normale. Les 7 anciennes couleurs échouaient
+// durement (marron ↔ rouge sombre à ΔE 4.7 en protanopie ; marron ↔ gris-bleu
+// à ΔE 9.0 en vision normale, sous le plancher de 15).
+//
+// Le TYPE précis reste porté par le GLYPHE de chaque marqueur (TYPE_ICON dans
+// components/eec/icons.tsx) : la couleur dit la famille, l'icône dit le type.
 export const ENTITY_TYPES = [
-  { id: 'paroisse', label: 'Paroisses',                    singular: 'Paroisse',             color: '#2E9744', target: 576 },
-  { id: 'scolaire', label: 'Œuvres scolaires',             singular: 'École',                color: '#1565C0', target: 48  },
-  { id: 'medical',  label: 'Structures médicales',         singular: 'Structure médicale',   color: '#B71C1C', target: 31  },
-  { id: 'univ',     label: 'Universités / Inst. supér.',   singular: 'Université',           color: '#4A148C', target: 12  },
-  { id: 'agro',     label: 'Domaines agropastoraux',       singular: 'Domaine agropastoral', color: '#E65100', target: 28  },
-  { id: 'immeuble', label: 'Immeubles EEC',                singular: 'Immeuble',             color: '#455A64', target: 89  },
-  { id: 'terrain',  label: 'Terrains EEC',                 singular: 'Terrain',              color: '#5D4037', target: 103 },
+  { id: 'paroisse', label: 'Paroisses',                    singular: 'Paroisse',             color: VIZ_CATEGORICAL.paroisses,  target: 576 },
+  { id: 'scolaire', label: 'Œuvres scolaires',             singular: 'École',                color: VIZ_CATEGORICAL.services,   target: 48  },
+  { id: 'medical',  label: 'Structures médicales',         singular: 'Structure médicale',   color: VIZ_CATEGORICAL.services,   target: 31  },
+  { id: 'univ',     label: 'Universités / Inst. supér.',   singular: 'Université',           color: VIZ_CATEGORICAL.services,   target: 12  },
+  { id: 'agro',     label: 'Domaines agropastoraux',       singular: 'Domaine agropastoral', color: VIZ_CATEGORICAL.patrimoine, target: 28  },
+  { id: 'immeuble', label: 'Immeubles EEC',                singular: 'Immeuble',             color: VIZ_CATEGORICAL.patrimoine, target: 89  },
+  { id: 'terrain',  label: 'Terrains EEC',                 singular: 'Terrain',              color: VIZ_CATEGORICAL.patrimoine, target: 103 },
 ];
 
 const DISTRICT_SUFFIXES = ['Centre','Nord','Sud','Est','Ouest','Akwa','Bonabéri','Bonapriso','Mfoundi','Mvog-Mbi','Ngoa-Ekellé','Nlongkak','Bastos','Marché','Plateau','Tongo','Banengo','Tsinga','Briqueterie','Mokolo','Mendong','Deido','New Bell','Bépanda','Logbessou','Up Station','Down Town','Mile 17','Buea Town','Molyko','Banja','Bafou','Bandjoun','Baham','Bayangam'];

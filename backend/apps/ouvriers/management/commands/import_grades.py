@@ -49,8 +49,11 @@ from apps.ouvriers.models import Grade
 #   - abreviation: forme courte pour les cartes et listes compactes
 # =============================================================================
 GRADES = [
-    # Niveau 1 : le plus haut grade — responsable d'une région synodale entière
-    # EXIGENCE : le grade « Évêque » n existe pas dans l Église protestante — retiré.
+    # Niveau 1 : VOLONTAIREMENT VIDE. Il portait « Évêque », grade qui n'existe
+    # pas dans l'Église Évangélique du Cameroun. Retiré de cette liste, et
+    # supprimé en base par la migration 0004_supprime_grade_eveque — cette
+    # commande utilise update_or_create() et n'efface donc jamais d'elle-même
+    # un grade devenu obsolète.
 
     # Niveau 2 : agent pastoral principal, responsable d'une paroisse
     {"niveau": 2, "nom": "Pasteur",                                     "abreviation": "P."},

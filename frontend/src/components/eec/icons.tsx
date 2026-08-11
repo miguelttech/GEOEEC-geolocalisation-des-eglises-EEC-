@@ -106,11 +106,19 @@ export const TYPE_ICON: Record<string, string> = {
   univ: 'university', agro: 'leaf', immeuble: 'buildings', terrain: 'fields',
 };
 
-export function markerSvg(type: string, color: string, sel: boolean): string {
+/**
+ * Épingle SVG d'un marqueur de carte.
+ *
+ * `taille` permet l'encodage de magnitude par symbole proportionnel (largeur
+ * en pixels). Omise, on retombe sur les tailles fixes historiques. Le glyphe
+ * garde son viewBox de 24×28 : il grandit donc avec l'épingle, sans
+ * déformation.
+ */
+export function markerSvg(type: string, color: string, sel: boolean, taille?: number): string {
   const ringStroke = sel ? '#FFD600' : '#ffffff';
   const ringFill = color;
   const glyphColor = '#ffffff';
-  const size = sel ? 36 : 30;
+  const size = taille ?? (sel ? 36 : 30);
   let glyph = '';
   switch (type) {
     case 'paroisse':

@@ -162,34 +162,118 @@ class Command(BaseCommand):
             return unicodedata.normalize("NFD", nom).encode("ascii", "ignore").decode().lower()
 
         candidats = sorted(
-            f for f in os.listdir(data_dir)
-            if f.lower().endswith(".docx")
-            and "categoris" in sans_accent(f)
-            and "region" in sans_accent(f)
+            os.path.join(data_dir, f) for f in os.listdir(data_dir)
+            if f.lower().endswith(".docx") and "categoris" in sans_accent(f)
         )
         if not candidats:
             self.stderr.write(self.style.ERROR(
-                f"Document de categorisation par region introuvable dans {data_dir}"
+                f"Aucun document de categorisation (.docx) dans {data_dir}"
             ))
             return None
-        return os.path.join(data_dir, candidats[0])
+
+        # Plusieurs documents de catégorisation coexistent dans data/ (versions
+        # successives, formats différents). Plutôt que de deviner le plus récent
+        # d'après son nom de fichier — les conventions de nommage varient — on
+        # les lit tous et on retient celui qui livre le plus de couples
+        # (paroisse, catégorie). Règle déterministe et vérifiable.
+        meilleur, meilleur_score, resultats = None, -1, []
+        for chemin in candidats:
+            try:
+                lignes = self._lire_document(chemin)
+            except Exception as exc:                     # document illisible
+                resultats.append((os.path.basename(chemin), f"illisible ({exc})"))
+                continue
+            resultats.append((os.path.basename(chemin), f"{len(lignes)} lignes"))
+            if len(lignes) > meilleur_score:
+                meilleur, meilleur_score = chemin, len(lignes)
+
+        self.stdout.write("Documents de categorisation examines :")
+        for nom, detail in resultats:
+            marque = " <-- retenu" if meilleur and nom == os.path.basename(meilleur) else ""
+            self.stdout.write(f"   {nom} : {detail}{marque}")
+
+        if meilleur_score <= 0:
+            self.stderr.write(self.style.ERROR("Aucun document exploitable."))
+            return None
+        return meilleur
 
     # ------------------------------------------------------------------
     # ÉTAPE 2 : extraire (catégorie, région, paroisse) du .docx
     # ------------------------------------------------------------------
     def _lire_document(self, chemin):
-        """Parcourt les tableaux : colonne 0 = catégorie, en-têtes = régions."""
-        try:
-            from docx import Document
-        except ImportError:
-            self.stderr.write(self.style.ERROR(
-                "python-docx absent. Installez les dependances : pip install -r requirements.txt"
-            ))
-            return []
+        """Extrait les couples (catégorie, région, district, paroisse).
+
+        Deux formats coexistent dans les documents de l'EEC ; on reconnaît
+        celui du fichier plutôt que d'en imposer un :
+
+        MATRICE (« Catégorisation paroisses EEC 050826 ») — un tableau par
+          région, une ligne par paroisse, la catégorie en dernière colonne.
+          Format le plus riche : il porte aussi le district, ce qui permet de
+          départager des homonymes qu'une région seule laisserait ambigus.
+
+        TABLEAU CROISÉ (documents antérieurs) — la catégorie en première
+          colonne, une colonne par région, les paroisses listées en cellule.
+        """
+        from docx import Document
 
         document = Document(chemin)
-        lignes = []
+        if self._est_matrice(document):
+            return self._lire_matrice(document)
+        return self._lire_tableau_croise(document)
 
+    @staticmethod
+    def _est_matrice(document) -> bool:
+        """La matrice se reconnaît à l'en-tête de son premier tableau."""
+        if not document.tables:
+            return False
+        entetes = " ".join(c.text.upper() for c in document.tables[0].rows[0].cells)
+        return "PAROISSES" in entetes and "CATEGORIE" in entetes
+
+    def _lire_matrice(self, document):
+        """Format matrice : un tableau par région, une ligne par paroisse."""
+        from docx.document import Document as _Doc
+        from docx.oxml.ns import qn
+        from docx.table import Table
+        from docx.text.paragraph import Paragraph
+
+        def blocs(doc: _Doc):
+            for enfant in doc.element.body.iterchildren():
+                if enfant.tag == qn("w:p"):
+                    yield Paragraph(enfant, doc)
+                elif enfant.tag == qn("w:tbl"):
+                    yield Table(enfant, doc)
+
+        lignes = []
+        region = None
+        for bloc in blocs(document):
+            if isinstance(bloc, Paragraph):
+                # Les tableaux sont précédés d'un titre « IV.n RÉGION SYNODALE … »
+                titre = re.match(r"^IV\.\d+\s+(.*)$", bloc.text.strip())
+                if titre and "REGION" in titre.group(1).upper():
+                    region = titre.group(1).strip()
+                continue
+
+            district = None
+            for rang in bloc.rows[1:]:                      # ligne 0 = en-têtes
+                cellules = [c.text.strip() for c in rang.cells]
+                if len(cellules) < 9:
+                    continue
+                nom = cellules[0]
+                if not nom or nom.upper().startswith("TOTAL"):
+                    continue
+                # Une ligne dont seule la première cellule est remplie annonce
+                # le district auquel appartiennent les lignes suivantes.
+                if not any(cellules[1:]):
+                    district = nom
+                    continue
+                categorie = cellules[8].strip().upper().replace(" ", "")
+                if categorie in CATEGORIES_VALIDES:
+                    lignes.append((categorie, region, district, nom))
+        return lignes
+
+    def _lire_tableau_croise(self, document):
+        """Format historique : catégorie en colonne 0, une colonne par région."""
+        lignes = []
         for tableau in document.tables:
             entetes = [cellule.text.strip() for cellule in tableau.rows[0].cells]
 
@@ -199,7 +283,6 @@ class Command(BaseCommand):
                 if categorie not in CATEGORIES_VALIDES:
                     continue  # ligne de titre ou cellule de mise en forme
 
-                # Colonne 0 = catégorie ; colonnes suivantes = une par région
                 for indice in range(1, min(len(entetes), len(cellules))):
                     region = entetes[indice]
                     for paragraphe in cellules[indice].paragraphs:
@@ -210,7 +293,7 @@ class Command(BaseCommand):
                         for morceau in re.split(r"[;\n]| {2,}", texte):
                             nom = morceau.strip(" \xa0;-")
                             if nom and nom != "-":
-                                lignes.append((categorie, region, nom))
+                                lignes.append((categorie, region, None, nom))
         return lignes
 
     # ------------------------------------------------------------------
@@ -229,16 +312,24 @@ class Command(BaseCommand):
         nb_ambigues = 0        # homonymes que la région ne départage pas
         conflits = []          # même paroisse, deux catégories dans le document
 
-        for categorie, region_doc, nom_doc in lignes:
+        for categorie, region_doc, district_doc, nom_doc in lignes:
             candidates = index.get(norm(nom_doc))
             if not candidates:
                 nb_absentes += 1
                 continue
 
-            # Homonymes : seule la région peut trancher
+            # Homonymes : la région tranche d'abord, le district ensuite.
+            # Deux paroisses homonymes d'une MÊME région ne sont départageables
+            # que par leur district — d'où l'intérêt du format matrice, seul à
+            # le porter.
             if len(candidates) > 1:
                 memes = [p for p in candidates
                          if norm_region(p.district.region.nom) == norm_region(region_doc)]
+                if len(memes) > 1 and district_doc:
+                    par_district = [p for p in memes
+                                    if norm(p.district.nom) == norm(district_doc)]
+                    if len(par_district) == 1:
+                        memes = par_district
                 if len(memes) != 1:
                     nb_ambigues += 1
                     continue

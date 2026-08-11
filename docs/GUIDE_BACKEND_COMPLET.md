@@ -383,11 +383,15 @@ PASSE 2 : Insérer en base les meilleures valeurs
 ### Fichier 6 — import_grades.py
 
 **Chemin** : `backend/apps/ouvriers/management/commands/import_grades.py`
-**But** : Créer les 8 grades ecclésiastiques de l'EEC
+**But** : Créer les 7 grades ecclésiastiques de l'EEC
+
+Le niveau 1 est volontairement vide : il portait « Évêque », grade qui n'existe
+pas dans l'Église Évangélique du Cameroun. Retiré de `import_grades.py` et
+supprimé en base par la migration `ouvriers/0004_supprime_grade_eveque`. La
+numérotation n'a pas été décalée.
 
 | Niveau | Grade | Abréviation |
 |--------|-------|-------------|
-| 1 | Évêque | Év. |
 | 2 | Pasteur | P. |
 | 3 | Pasteur Proposant | P.P. |
 | 4 | P.P. avec Délégation Pastorale | P.P.D.P. |

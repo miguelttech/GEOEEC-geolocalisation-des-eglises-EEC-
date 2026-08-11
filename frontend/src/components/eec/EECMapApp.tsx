@@ -19,6 +19,7 @@ import { Icon, TYPE_ICON, markerSvg } from './icons';
 // Vue de navigation 3D (MapLibre) — chargée paresseusement, uniquement pendant la navigation
 const NavMap3D = dynamic(() => import('./NavMap3D'), { ssr: false });
 import { ENTITY_TYPES } from '@/lib/eec-data';
+import { VIZ_CATEGORICAL, TAILLE_MARQUEUR, tailleParEffectif } from '@/lib/viz-palette';
 import {
   loadMapData,
   type MapDataResult,
@@ -125,12 +126,68 @@ function relTime(ms: number): string {
   return `il y a ${Math.floor(d / 30)} mois`;
 }
 
-function makeIcon(type: string, color: string, sel = false) {
-  const sz: [number, number] = sel ? [36, 44] : [30, 38];
+/**
+ * Icône Leaflet d'un marqueur.
+ *
+ * `taille` porte l'encodage de magnitude (symbole proportionnel). La sélection
+ * ajoute 6 px à la taille courante au lieu d'imposer une taille fixe : sans
+ * cela, sélectionner une petite paroisse la ferait bondir à la taille d'une
+ * grande et l'échelle mentirait le temps de la sélection.
+ */
+function makeIcon(type: string, color: string, sel = false, taille?: number) {
+  const base = taille ?? 30;
+  const w = sel ? base + 6 : base;
+  const sz: [number, number] = [w, w + 8];
   return L.divIcon({
-    html: markerSvg(type, color, sel), className: 'eec-marker',
+    html: markerSvg(type, color, sel, w), className: 'eec-marker',
     iconSize: sz, iconAnchor: [sz[0] / 2, sz[1] - 4], popupAnchor: [0, -sz[1] + 6],
   });
+}
+
+// Couleur par type d'entité, indexée une fois pour toutes. Évite un
+// ENTITY_TYPES.find() par marqueur — soit ~550 balayages de tableau à chaque
+// reconstruction de la couche.
+const COLOR_BY_TYPE: Record<string, string> = Object.fromEntries(
+  ENTITY_TYPES.map(t => [t.id, t.color]),
+);
+
+/**
+ * Taille du marqueur d'un élément.
+ *
+ * SEULES LES PAROISSES sont dimensionnées par leur effectif de fidèles : c'est
+ * la seule entité qui porte cette grandeur. Les œuvres gardent une taille
+ * fixe — leur faire porter une taille variable laisserait croire qu'elle
+ * mesure quelque chose.
+ */
+function tailleMarqueur(item: AnyItem, maxFideles: number): number {
+  if ((item as any).type !== 'paroisse') return TAILLE_MARQUEUR.oeuvre;
+  return tailleParEffectif((item as any).stats?.fideles ?? null, maxFideles);
+}
+
+// Zoom à partir duquel les noms de paroisses et d'œuvres s'affichent.
+// Partagé par la classe CSS .labels-hidden et par la liaison à la demande
+// des étiquettes — une seule source pour les deux.
+const LABEL_MIN_ZOOM = 13;
+
+/**
+ * Ajoute un lot de marqueurs à une couche.
+ * markerClusterGroup expose addLayers(), qui recalcule la grille de
+ * regroupement UNE fois pour tout le lot au lieu d'une fois par marqueur.
+ * L.layerGroup n'a pas cette méthode : on retombe sur des ajouts unitaires.
+ */
+function addLayersBulk(cible: L.LayerGroup, couches: L.Layer[]) {
+  if (!couches.length) return;
+  const bulk = (cible as unknown as { addLayers?: (l: L.Layer[]) => void }).addLayers;
+  if (bulk) bulk.call(cible, couches);
+  else couches.forEach(c => cible.addLayer(c));
+}
+
+/** Pendant de addLayersBulk pour le retrait. */
+function removeLayersBulk(cible: L.LayerGroup, couches: L.Layer[]) {
+  if (!couches.length) return;
+  const bulk = (cible as unknown as { removeLayers?: (l: L.Layer[]) => void }).removeLayers;
+  if (bulk) bulk.call(cible, couches);
+  else couches.forEach(c => cible.removeLayer(c));
 }
 
 /* ============================================================
@@ -466,7 +523,10 @@ function useLeafletMap(
     // Apparition PROGRESSIVE des noms selon le zoom (comme Google Maps) :
     // dézoomé = icônes seules (carte claire) ; en zoomant, les noms apparaissent.
     // Évite la carte confuse quand le regroupement est désactivé.
-    const LABEL_MIN_ZOOM = 13;
+    // Le seuil est défini au niveau module (LABEL_MIN_ZOOM) : l'effet qui lie
+    // les étiquettes à la demande s'appuie sur la même valeur.
+    // Cette classe CSS reste utile pour les étiquettes de POI, qui suivent
+    // leur propre logique de liaison.
     const applyLabelVisibility = () => {
       const c = map.getContainer();
       if (map.getZoom() < LABEL_MIN_ZOOM) c.classList.add('labels-hidden');
@@ -504,10 +564,6 @@ function useLeafletMap(
 
     regions.forEach((r, idx) => {
       const color = REG_COLORS[idx % REG_COLORS.length];
-      const pc = allParishes.filter(p => p.regionId === r.id).length;
-      const dc = allDistricts.filter(d => d.regionId === r.id).length;
-      // Popup compact
-      const popup = `<div class="region-popup-compact"><div class="rpc-dot" style="background:${color}"></div><div class="rpc-name">${escapeHtml(r.city)}</div><div class="rpc-stats">${dc} districts · ${pc} paroisses</div></div>`;
 
       // Pendant l'outil de mesure, les polygones ne captent pas les clics
       // (pour ne pas gêner le placement des points de mesure).
@@ -518,7 +574,9 @@ function useLeafletMap(
           interactive: clickable, renderer: svgRendererRef.current ?? undefined,
         } as any);
         if (clickable) {
-          poly.bindPopup(popup, { closeButton: false, maxWidth: 180 });
+          // Le clic sur une région se contente de cadrer dessus : ni popup, ni
+          // panneau latéral. Le détail d'une région se lit dans les panneaux
+          // dédiés du rail (Régions, Districts, Statistiques).
           poly.on('mouseover', () => poly.setStyle({ fillOpacity: 0.18, weight: 2.4 }));
           poly.on('mouseout',  () => poly.setStyle({ fillOpacity: 0.07, weight: 1.8 }));
           poly.on('click', () => {
@@ -533,10 +591,11 @@ function useLeafletMap(
           renderer: svgRendererRef.current ?? undefined,
         } as any);
         if (clickable) {
-          circle.bindPopup(popup, { closeButton: false, maxWidth: 180 });
           circle.on('mouseover', () => circle.setStyle({ fillOpacity: 0.16, weight: 2 }));
           circle.on('mouseout',  () => circle.setStyle({ fillOpacity: 0.06, weight: 1.6 }));
-          circle.on('click', () => map.flyToBounds(circle.getBounds().pad(0.2), { duration: 0.6 } as L.FitBoundsOptions));
+          circle.on('click', () => {
+            map.flyToBounds(circle.getBounds().pad(0.2), { duration: 0.6 } as L.FitBoundsOptions);
+          });
         }
         rl.addLayer(circle);
       }
@@ -576,40 +635,134 @@ function useLeafletMap(
   onMarkerClickRef.current = onMarkerClick;
   const selectedIdRef = useRef(selectedId);
   selectedIdRef.current = selectedId;
-  const markersByIdRef = useRef(new Map<string, { m: L.Marker; type: string; color: string }>());
+  const markersByIdRef = useRef(new Map<string, { m: L.Marker; type: string; color: string; name: string; taille: number }>());
   const prevSelectedRef = useRef<string | undefined>(undefined);
+  // Couche où les marqueurs sont actuellement posés — permet de DÉPLACER
+  // l'existant lors d'une bascule regroupé/plat au lieu de tout recréer.
+  const markerHostRef = useRef<'cluster' | 'plain' | null>(null);
 
+  // Effectif maximal, calculé sur TOUTES les paroisses et non sur les seules
+  // paroisses filtrées : l'échelle des tailles doit rester stable quand
+  // l'utilisateur filtre. Sinon la même paroisse changerait de taille selon
+  // le filtre actif, et la taille cesserait d'être une mesure.
+  const maxFideles = useMemo(
+    () => allParishes.reduce((m, p) => Math.max(m, (p as any).stats?.fideles ?? 0), 0),
+    [allParishes],
+  );
+
+  // ── Marqueurs : mise à jour INCRÉMENTALE ───────────────────────────────────
+  // Anciennement : clearLayers() puis recréation de tous les marqueurs à chaque
+  // changement de filtre ou de recherche. Sur ~550 entités cela reconstruisait
+  // 550 divIcon (donc 550 nœuds DOM) à chaque frappe dans la barre de
+  // recherche. Ici on ne touche qu'aux entrées qui changent réellement : un
+  // filtre qui retire 3 paroisses ne coûte que 3 suppressions.
   useEffect(() => {
     const cluster = clusterRef.current;
     const plain   = plainLayerRef.current;
     if (!cluster || !plain) return;
-    cluster.clearLayers();
-    plain.clearLayers();
-    markersByIdRef.current.clear();
-    prevSelectedRef.current = undefined;
-    const target = mapSettings.cluster ? cluster : plain;
-    filteredItems.forEach(it => {
-      const item = it as any;
-      const type = item.type ?? 'paroisse';
-      const t = ENTITY_TYPES.find(x => x.id === type);
-      const color = t?.color ?? '#2E9744';
-      const m = L.marker([it.lat, it.lng], { icon: makeIcon(type, color, false), title: it.name });
-      // Noms des paroisses/œuvres : toujours liés (information principale) ;
-      // le CSS labels-hidden les masque sous le zoom 13 pour rester lisible.
-      m.bindTooltip(escapeHtml(it.name), {
-        direction: 'top', offset: [0, -34], className: 'eec-map-label',
-        opacity: 1, permanent: true,
-      });
-      m.on('click', () => onMarkerClickRef.current(it));
-      markersByIdRef.current.set(String(it.id), { m, type, color });
-      target.addLayer(m);
-    });
-    // Réappliquer la surbrillance de l'élément sélectionné après reconstruction
-    const sel = selectedIdRef.current;
-    if (sel) {
-      const e = markersByIdRef.current.get(String(sel));
-      if (e) { e.m.setIcon(makeIcon(e.type, e.color, true)); prevSelectedRef.current = String(sel); }
+
+    const store  = markersByIdRef.current;
+    const veut   = mapSettings.cluster ? 'cluster' : 'plain';
+    const target = veut === 'cluster' ? cluster : plain;
+
+    // Bascule regroupé ↔ plat : on déplace les marqueurs déjà construits.
+    if (markerHostRef.current && markerHostRef.current !== veut) {
+      const source = markerHostRef.current === 'cluster' ? cluster : plain;
+      const tous = [...store.values()].map(e => e.m);
+      source.clearLayers();
+      addLayersBulk(target, tous);
     }
+    markerHostRef.current = veut;
+
+    // 1. Retirer ce qui ne passe plus le filtre
+    const voulus = new Set(filteredItems.map(it => String(it.id)));
+    const aRetirer: L.Marker[] = [];
+    store.forEach((entry, id) => {
+      if (!voulus.has(id)) { aRetirer.push(entry.m); store.delete(id); }
+    });
+    removeLayersBulk(target, aRetirer);
+
+    // 2. Ajouter ce qui apparaît
+    const aAjouter: L.Marker[] = [];
+    filteredItems.forEach(it => {
+      const id = String(it.id);
+      const existant = store.get(id);
+      if (existant) {
+        // Déjà présent : rien à recréer. On ne réajuste que si l'échelle des
+        // tailles a bougé (arrivée ou rafraîchissement des données), sinon le
+        // marqueur garderait une taille calculée sur un maximum périmé.
+        const taille = tailleMarqueur(it, maxFideles);
+        if (taille !== existant.taille) {
+          existant.taille = taille;
+          existant.m.setIcon(makeIcon(existant.type, existant.color, String(selectedIdRef.current) === id, taille));
+        }
+        return;
+      }
+      const type   = (it as any).type ?? 'paroisse';
+      const color  = COLOR_BY_TYPE[type] ?? VIZ_CATEGORICAL.paroisses;
+      const taille = tailleMarqueur(it, maxFideles);
+      const m = L.marker([it.lat, it.lng], { icon: makeIcon(type, color, false, taille), title: it.name });
+      m.on('click', () => onMarkerClickRef.current(it));
+      // Pas de tooltip ici : les étiquettes sont liées à la demande par
+      // l'effet ci-dessous, uniquement pour les marqueurs réellement visibles.
+      store.set(id, { m, type, color, name: it.name, taille });
+      aAjouter.push(m);
+    });
+    addLayersBulk(target, aAjouter);
+
+    // 3. Réappliquer la surbrillance de la sélection si son marqueur a survécu
+    const sel = selectedIdRef.current;
+    if (sel && store.has(String(sel))) {
+      const e = store.get(String(sel))!;
+      e.m.setIcon(makeIcon(e.type, e.color, true, e.taille));
+      prevSelectedRef.current = String(sel);
+    } else if (prevSelectedRef.current && !store.has(prevSelectedRef.current)) {
+      prevSelectedRef.current = undefined;
+    }
+  }, [filteredItems, mapSettings.cluster, maxFideles]);
+
+  // ── Étiquettes à la demande ────────────────────────────────────────────────
+  // Un tooltip permanent = un nœud DOM créé par Leaflet, même si le CSS
+  // (.labels-hidden) le masque ensuite. En liant les ~550 marqueurs on payait
+  // donc 550 nœuds en permanence, dont l'immense majorité hors écran.
+  //
+  // Le comportement visible est inchangé — noms affichés au-dessus du zoom 13,
+  // masqués en dessous — mais on ne lie que les marqueurs présents dans la vue
+  // courante, soit quelques dizaines au lieu de plusieurs centaines.
+  const labelsLiesRef = useRef(new Set<string>());
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const sync = () => {
+      const store = markersByIdRef.current;
+      const lies  = labelsLiesRef.current;
+      // .pad(0.15) : petite marge autour de la vue, pour que l'étiquette soit
+      // déjà en place quand le marqueur entre à l'écran par un déplacement.
+      const vue = map.getZoom() >= LABEL_MIN_ZOOM ? map.getBounds().pad(0.15) : null;
+
+      store.forEach((entry, id) => {
+        const doitEtreLie = vue !== null && vue.contains(entry.m.getLatLng());
+        const estLie = lies.has(id);
+        if (doitEtreLie && !estLie) {
+          entry.m.bindTooltip(escapeHtml(entry.name), {
+            direction: 'top', offset: [0, -34], className: 'eec-map-label',
+            opacity: 1, permanent: true,
+          });
+          lies.add(id);
+        } else if (!doitEtreLie && estLie) {
+          entry.m.unbindTooltip();
+          lies.delete(id);
+        }
+      });
+      // Purge des identifiants dont le marqueur a disparu du filtre
+      lies.forEach(id => { if (!store.has(id)) lies.delete(id); });
+    };
+
+    sync();
+    map.on('zoomend', sync);
+    map.on('moveend', sync);
+    return () => { map.off('zoomend', sync); map.off('moveend', sync); };
   }, [filteredItems, mapSettings.cluster]);
 
   // Sélection : mise à jour CIBLÉE des icônes (ancien + nouveau marqueur)
@@ -617,11 +770,11 @@ function useLeafletMap(
     const prev = prevSelectedRef.current;
     if (prev && prev !== selectedId) {
       const e = markersByIdRef.current.get(prev);
-      if (e) e.m.setIcon(makeIcon(e.type, e.color, false));
+      if (e) e.m.setIcon(makeIcon(e.type, e.color, false, e.taille));
     }
     if (selectedId) {
       const e = markersByIdRef.current.get(String(selectedId));
-      if (e) e.m.setIcon(makeIcon(e.type, e.color, true));
+      if (e) e.m.setIcon(makeIcon(e.type, e.color, true, e.taille));
     }
     prevSelectedRef.current = selectedId ? String(selectedId) : undefined;
   }, [selectedId]);
@@ -1675,12 +1828,29 @@ function buildShareLink(item: any): string {
 /* ============================================================
    Légende flottante — bouton circulaire + panneau animé
    ============================================================ */
-const LegendPanel = ({ regions, mapSettings, setMapSettings, onClose }: {
+// Familles de couleur affichées en légende. La couleur porte la famille, le
+// glyphe porte le type précis — cette section explicite cette lecture, sans
+// quoi trois œuvres bleues côte à côte paraissent identiques.
+const LEGEND_FAMILLES: { couleur: string; label: string; detail: string }[] = [
+  { couleur: VIZ_CATEGORICAL.paroisses,  label: 'Paroisses',  detail: 'réseau paroissial' },
+  { couleur: VIZ_CATEGORICAL.services,   label: 'Services',   detail: 'écoles, universités, structures médicales' },
+  { couleur: VIZ_CATEGORICAL.patrimoine, label: 'Patrimoine', detail: 'agropastoral, immeubles, terrains' },
+];
+
+const LegendPanel = ({ regions, mapSettings, setMapSettings, onClose, maxFideles }: {
   regions: RegionItem[];
   mapSettings: { regions: boolean; cluster: boolean; labels: boolean; poi: boolean };
   setMapSettings: (fn: (s: any) => any) => void;
   onClose: () => void;
+  maxFideles: number;
 }) => {
+  // Paliers de l'échelle de taille. Le rayon suit la RACINE CARRÉE de la
+  // valeur : des paliers en progression géométrique (÷4) se traduisent donc
+  // par des écarts de taille réguliers à l'œil.
+  const paliers = maxFideles > 0
+    ? [maxFideles, Math.round(maxFideles / 4), Math.round(maxFideles / 16)]
+    : [];
+
   return (
     <div className="legend-panel" onClick={e => e.stopPropagation()}>
       <div className="legend-header">
@@ -1694,6 +1864,42 @@ const LegendPanel = ({ regions, mapSettings, setMapSettings, onClose }: {
           <button className={'toggle-switch sm' + (mapSettings.regions ? ' on' : '')}
             onClick={() => setMapSettings((s: any) => ({ ...s, regions: !s.regions }))} />
         </div>
+
+        {/* Familles de couleur */}
+        <div className="legend-section-title">Familles</div>
+        {LEGEND_FAMILLES.map(f => (
+          <div key={f.label} className="legend-item">
+            <span className="legend-color" style={{ background: f.couleur }} />
+            <span>{f.label} <span className="legend-note">· {f.detail}</span></span>
+          </div>
+        ))}
+
+        {/* Échelle des tailles — sans elle, le symbole proportionnel n'est
+            pas lisible : le lecteur ne peut pas convertir une taille en valeur. */}
+        {paliers.length > 0 && (
+          <>
+            <div className="legend-section-title">
+              Effectif de fidèles <span className="legend-note">(taille du marqueur)</span>
+            </div>
+            <div className="legend-sizes">
+              {paliers.map(v => (
+                <div key={v} className="legend-size-item">
+                  <span
+                    className="legend-size-pin"
+                    dangerouslySetInnerHTML={{
+                      __html: markerSvg('paroisse', VIZ_CATEGORICAL.paroisses, false, tailleParEffectif(v, maxFideles)),
+                    }}
+                  />
+                  <span className="legend-size-value">{fmt(v)}</span>
+                </div>
+              ))}
+            </div>
+            <div className="legend-note legend-size-note">
+              L&apos;aire du marqueur est proportionnelle à l&apos;effectif. Les œuvres,
+              qui ne portent pas d&apos;effectif, gardent une taille fixe.
+            </div>
+          </>
+        )}
 
         {/* Clusters */}
         <div className="legend-section-title">Regroupements</div>
@@ -2198,6 +2404,14 @@ export default function EECMapApp({ mode, user, embedded = false }: { mode: MapM
     return () => document.removeEventListener('keydown', onKey);
   }, [showLoginPrompt, fullscreen, selected, floatQ, activeTab]);
 
+  // Même définition que dans useLeafletMap : le maximum est pris sur TOUTES
+  // les paroisses, pas sur les filtrées, pour que la légende décrive la même
+  // échelle que celle appliquée aux marqueurs quel que soit le filtre actif.
+  const maxFidelesGlobal = useMemo(
+    () => mapData.parishes.reduce((m, p) => Math.max(m, p.stats?.fideles ?? 0), 0),
+    [mapData.parishes],
+  );
+
   const filteredItems = useMemo(() => {
     return mapData.allItems.filter(it => {
       const item = it as any;
@@ -2676,7 +2890,7 @@ export default function EECMapApp({ mode, user, embedded = false }: { mode: MapM
                     <span>Légende</span>
                   </button>
                   {showLegend && (
-                    <LegendPanel regions={mapData.regions} mapSettings={mapSettings} setMapSettings={setMapSettings} onClose={() => setShowLegend(false)} />
+                    <LegendPanel regions={mapData.regions} mapSettings={mapSettings} setMapSettings={setMapSettings} onClose={() => setShowLegend(false)} maxFideles={maxFidelesGlobal} />
                   )}
                 </div>
 
