@@ -334,7 +334,7 @@ function OuvrierFormPanel({ mode, ouvrier, grades, onClose, onSaved }: {
 
           {/* Tab 1 — Identité */}
           {tab === 0 && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <div className="g g-2" style={{ gap: 16 }}>
               {mode === 'edit' && (
                 <div style={{ gridColumn: '1/-1', background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: 6, padding: '10px 14px', fontSize: 12, color: '#1D4ED8' }}>
                   <I.alert size={13} style={{ marginRight: 6 }} />
@@ -388,7 +388,7 @@ function OuvrierFormPanel({ mode, ouvrier, grades, onClose, onSaved }: {
 
           {/* Tab 2 — Affectation */}
           {tab === 1 && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <div className="g g-2" style={{ gap: 16 }}>
               <div style={{ gridColumn: '1/-1' }}>
                 <label style={L.label}>Grade ecclésiastique</label>
                 <select className="input" style={{ color: '#111827' }} value={form.grade} onChange={e => set('grade', e.target.value)}>
@@ -538,7 +538,7 @@ export default function OuvriersPage() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
       {/* Grade stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(grades.length, 8)}, 1fr)`, gap: 10 }}>
+      <div className="g g-fit" style={{ gap: 10 }}>
         {grades.map(g => {
           const color = gradeColor(g.niveau);
           return (

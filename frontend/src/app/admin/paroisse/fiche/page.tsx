@@ -176,7 +176,7 @@ export default function FicheParoissePage() {
         </div>
       )}
 
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16 }}>
+      <div className="g g-2" style={{ gap:16 }}>
 
         {/* Colonne gauche */}
         <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
@@ -203,7 +203,7 @@ export default function FicheParoissePage() {
           </Section>
 
           <Section title="Statistiques 2025">
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+            <div className="g g-2" style={{ gap:12 }}>
               <div>
                 <div style={{ fontSize:10, color:'var(--text-3)', fontWeight:600, letterSpacing:'0.06em', marginBottom:4 }}>COMMUNIANTS</div>
                 <div className="sg-md" style={{ fontSize:22, color:'#5AC472', paddingTop:4 }}>{(paroisse.communiants ?? '—').toLocaleString?.('fr') ?? paroisse.communiants ?? '—'}</div>
@@ -231,7 +231,7 @@ export default function FicheParoissePage() {
                 {hasGps ? '✓ Coordonnées GPS renseignées' : '✗ Aucune coordonnée GPS'}
               </span>
             </div>
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
+            <div className="g g-2" style={{ gap:12 }}>
               <LockedField label="LATITUDE" value={hasGps ? String(paroisse.latitude) : '—'}/>
               <LockedField label="LONGITUDE" value={hasGps ? String(paroisse.longitude) : '—'}/>
             </div>

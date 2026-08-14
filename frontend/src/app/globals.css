@@ -183,6 +183,7 @@ body:has(.eec-lp) {
   grid-template-columns: var(--rail-w) 0 1fr;
   grid-template-rows: 1fr;   /* hauteur de ligne explicite : la carte remplit même sans rail (plein écran) */
   min-height: 0;
+  min-width: 0;   /* même raison que .navbar : ne jamais élargir la grille .app */
   position: relative;
   transition: grid-template-columns 260ms cubic-bezier(.4,0,.2,1);
 }
@@ -201,6 +202,11 @@ body:has(.eec-lp) {
   z-index: 1100;
   position: relative;
   color: var(--t-1);
+  /* Item de grille de .app : sans min-width:0, sa largeur min-content (~1343px,
+     brand + nav-actions étant en flex-shrink:0) élargit la colonne au-delà de
+     100vw et provoque un défilement horizontal de toute la page entre ~901px
+     et ~1342px de large. */
+  min-width: 0;
 }
 [data-theme="dark"] .navbar {
   backdrop-filter: blur(12px);
@@ -261,6 +267,9 @@ body:has(.eec-lp) {
   flex-wrap: nowrap;
   overflow-x: auto;
   scrollbar-width: none;
+  /* Seul élément compressible de la navbar : il doit pouvoir passer sous sa
+     largeur min-content (les pastilles défilent alors horizontalement). */
+  min-width: 0;
 }
 .nav-stats::-webkit-scrollbar { display: none; }
 .nav-stat {
@@ -298,6 +307,7 @@ body:has(.eec-lp) {
 .nav-stat .ns-label { font-weight: 500; }
 
 .nav-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.nav-auth { display: flex; align-items: center; gap: 6px; }
 
 .icon-btn {
   width: 36px; height: 36px;
@@ -332,6 +342,45 @@ body:has(.eec-lp) {
 [data-theme="dark"] .nav-stat:hover { background: rgba(255,255,255,.07); border-color: rgba(245,197,24,.25); }
 [data-theme="dark"] .admin-pill { background: rgba(245,197,24,.09); border-color: rgba(245,197,24,.22); }
 [data-theme="dark"] .admin-pill:hover { background: rgba(245,197,24,.14); box-shadow: 0 0 0 3px rgba(245,197,24,.07); }
+
+/* ── Bascule Carte / Liste ─────────────────────────────────────────────── */
+.view-toggle {
+  display: inline-flex;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 3px;
+  flex-shrink: 0;
+}
+.view-toggle .vt-btn {
+  border: 0;
+  background: transparent;
+  color: var(--t-2);
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: var(--radius-pill);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+.view-toggle .vt-btn.on { background: var(--eec-green); color: #fff; }
+
+/* ── Liens d'authentification de la navbar ─────────────────────────────── */
+.nav-register, .nav-signin {
+  padding: 6px 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  border-radius: var(--radius-pill);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.nav-register { background: var(--eec-green); color: #fff; }
+.nav-signin { border: 1px solid var(--border); color: var(--t-1); }
 
 .theme-toggle {
   display: inline-flex;
@@ -1386,6 +1435,37 @@ img.leaflet-tile {
   scrollbar-width: none;
 }
 .chip-row::-webkit-scrollbar { display: none; }
+
+/* ── Bandeau CTA d'inscription posé sur la carte ──────────────────────────
+   Sa largeur naturelle (659px, texte insécable) dépassait le viewport sous
+   600px et se faisait rogner par le overflow:hidden de .map-wrap. On la borne
+   au viewport et on autorise le retour à la ligne du libellé. */
+.map-cta {
+  position: absolute;
+  bottom: 40px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 1200;
+  max-width: calc(100% - 28px);
+  background: var(--eec-green);
+  border-radius: 12px;
+  padding: 12px 20px;
+  display: flex; align-items: center; gap: 14px;
+  box-shadow: 0 8px 32px rgba(46,151,68,0.35);
+}
+.map-cta-text { font-size: 13px; color: #fff; font-weight: 500; }
+.map-cta-btn {
+  padding: 6px 16px; border-radius: 999px;
+  background: #fff; color: var(--eec-green);
+  font-weight: 700; font-size: 12.5px; text-decoration: none;
+  flex-shrink: 0; white-space: nowrap;
+}
+.map-cta-close {
+  background: none; border: none; color: rgba(255,255,255,0.6);
+  cursor: pointer; padding: 4px; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.map-cta-close:hover { color: #fff; }
+
 .chip {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 6px 14px;
@@ -2130,6 +2210,21 @@ img.leaflet-tile {
   .big-stat .bs-value { font-size: 22px; }
 }
 
+/* ── Tablette étroite (< 780px) : compactage de la navbar ──
+   Une fois .nav-stats masqué, la navbar réclame encore 764px (brand 282 +
+   nav-actions 433 + gaps + padding), tous deux en flex-shrink:0. Entre 601 et
+   763px elle débordait donc et rendait la page scrollable horizontalement.
+   On compacte ici, avant le palier mobile qui va plus loin. */
+@media (max-width: 780px) {
+  .brand-text { display: none; }
+  .nav-register { display: none; }        /* rattrapé par le bandeau .map-cta */
+  .view-toggle span:not(.icon) { display: none; }
+  .view-toggle .vt-btn { padding: 5px 9px; }
+  .nav-signin span { display: none; }
+  .nav-signin { padding: 6px 10px; }
+  .nav-actions { min-width: 0; }
+}
+
 /* ── Mobile (< 600px) : style Google Maps ── */
 @media (max-width: 600px) {
   /* Le rail devient un tiroir hamburger en overlay : il ne réserve plus de
@@ -2137,17 +2232,45 @@ img.leaflet-tile {
      défaut, comme sur Google Maps. */
   :root { --panel-w: 100vw; --detail-w: 100vw; --rail-w: 0px; }
 
-  /* Navbar compacte */
+  /* Navbar compacte.
+     .nav-actions mesure 433px en pleine largeur : sans compactage il déborde
+     d'une navbar de 375px et rend TOUTE la page scrollable horizontalement. */
   .navbar { padding: 0 10px; min-height: 48px; gap: 8px; }
   .brand-text { display: none; }
   .nav-stats { display: none; }
-  .nav-actions { gap: 6px; }
+  .nav-actions { gap: 6px; min-width: 0; }
   .nav-actions .admin-pill .ap-label { display: none; }
+  /* Les libellés « Carte »/« Liste » et « Connexion » sont dans des <span> ;
+     les icônes sont des <svg> et restent donc visibles. */
   .view-toggle span:not(.icon) { display: none; }
+  .view-toggle .vt-btn { padding: 5px 8px; }
+  .nav-signin span { display: none; }
+  .nav-signin { padding: 6px 9px; }
+  /* « S'inscrire » reste accessible via le bandeau .map-cta posé sur la carte. */
+  .nav-register { display: none; }
 
-  /* Panel ouvert sur mobile : la carte garde toute la largeur en dessous,
-     le panneau se pose par-dessus en feuille du bas (voir .panel plus bas). */
-  .main.panel-open { grid-template-columns: 0 0 1fr; }
+  /* Sous 600px, .rail et .panel passent en position:fixed (tiroir + feuille du
+     bas) et quittent donc le flux de la grille. Avec trois pistes, le placement
+     automatique reléguait .map-wrap dans la 1re colonne (0px) : la carte se
+     retrouvait large de 0px, donc invisible sur téléphone. Une seule piste
+     pleine largeur supprime le problème à la racine, panneau ouvert ou non. */
+  .main,
+  .main.panel-open { grid-template-columns: 1fr; }
+
+  /* Bandeau CTA : occupe la largeur disponible, le libellé passe à la ligne
+     et le bouton d'action se place sous le texte. */
+  .map-cta {
+    left: 12px; right: 12px;
+    transform: none;
+    max-width: none;
+    bottom: 24px;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px 14px;
+  }
+  .map-cta-text { font-size: 12.5px; flex: 1 1 100%; order: 2; }
+  .map-cta-btn  { order: 3; }
+  .map-cta-close { order: 1; margin-left: auto; }
 
   /* Rail latéral → tiroir hamburger plein-hauteur, caché par défaut,
      révélé par le bouton hamburger (glissement depuis la gauche). */
@@ -2552,6 +2675,14 @@ img.leaflet-tile {
 .ls-field {
   display: flex; flex-direction: column; gap: 6px;
   margin-bottom: 16px;
+}
+
+/* Rangée à deux champs (Prénom / Nom) du formulaire d'inscription.
+   .ls-field porte déjà sa marge basse : sur une colonne, la gouttière
+   verticale de la grille ferait double emploi. */
+.ls-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 480px) {
+  .ls-row-2 { grid-template-columns: 1fr; gap: 0; }
 }
 .ls-field label {
   font-family: var(--mono);

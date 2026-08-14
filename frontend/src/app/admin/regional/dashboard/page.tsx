@@ -71,7 +71,7 @@ export default function DashboardRegionalPage() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
       {/* Row 1 — KPI stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 12 }}>
+      <div className="g g-5" style={{ gap: 12 }}>
         {loading ? Array.from({ length: 5 }).map((_, i) => <div key={i} className="card" style={{ padding: 16 }}><Skeleton h={70} /></div>) : (<>
           <StatCard icon="network"  label="Districts"    value={s?.nb_districts ?? 0}  sub="dans la région"              color="#5B9BD5" />
           <StatCard icon="church"   label="Paroisses"    value={s?.nb_paroisses ?? 0}  sub={`${s?.nb_paroisses_sans_gps ?? 0} sans GPS`} color="#5AC472" />
@@ -82,7 +82,7 @@ export default function DashboardRegionalPage() {
       </div>
 
       {/* Row 2 — Sub-stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+      <div className="g g-3" style={{ gap: 12 }}>
         {loading ? Array.from({ length: 3 }).map((_, i) => <div key={i} className="card" style={{ padding: 16 }}><Skeleton h={56} /></div>) : (<>
           <div className="card" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
             <div style={{ fontSize: 11, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>Communiants</div>
@@ -103,7 +103,7 @@ export default function DashboardRegionalPage() {
       </div>
 
       {/* Row 3 — Charts */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 12 }}>
+      <div className="g g-2-1" style={{ gap: 12 }}>
         <div className="card" style={{ padding: '14px 16px' }}>
           <div style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>Fidèles par district</div>
           {loading ? <Skeleton h={180} /> : districtBars.length ? <HorizontalBars data={districtBars} /> :
@@ -129,7 +129,7 @@ export default function DashboardRegionalPage() {
       </div>
 
       {/* Row 4 — Evolution + Top paroisses */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+      <div className="g g-2" style={{ gap: 12 }}>
         <div className="card" style={{ padding: '14px 16px' }}>
           <div style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>
             Évolution des fidèles {(s?.fideles_par_annee?.[0]?.year ?? 2020)} → {annee}

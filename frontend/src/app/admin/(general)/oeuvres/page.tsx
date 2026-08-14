@@ -408,7 +408,7 @@ function OeuvreFormPanel({ mode, oeuvre, types, isSuper, onClose, onSaved }: {
 
           {/* Tab 1 — Identité */}
           {tab === 0 && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <div className="g g-2" style={{ gap: 16 }}>
               <div style={{ gridColumn: '1/-1' }}>
                 <label style={Lbl}>Nom de l'œuvre *</label>
                 <input className="input" placeholder="Ex. École Primaire de Bonanjo" value={form.nom} onChange={e => set('nom', e.target.value)} style={{ color: '#111827', fontSize: 15, fontWeight: 600 }} autoFocus />
@@ -455,7 +455,7 @@ function OeuvreFormPanel({ mode, oeuvre, types, isSuper, onClose, onSaved }: {
                 )}
               </div>
               {form.geo_level !== 'national' && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                <div className="g g-2" style={{ gap: 16 }}>
                   <div>
                     <label style={Lbl}>Région synodiale{form.geo_level === 'region' ? ' *' : ''}</label>
                     <select className="input" style={{ color: '#111827' }} value={form.region} onChange={e => setForm(f => ({ ...f, region: e.target.value, district: '', paroisse: '' }))}>
@@ -483,7 +483,7 @@ function OeuvreFormPanel({ mode, oeuvre, types, isSuper, onClose, onSaved }: {
                   )}
                 </div>
               )}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <div className="g g-2" style={{ gap: 16 }}>
                 <div style={{ gridColumn: '1/-1' }}>
                   <label style={Lbl}>Adresse</label>
                   <input className="input" placeholder="Quartier, ville…" value={form.adresse} onChange={e => set('adresse', e.target.value)} style={{ color: '#111827' }} />
@@ -518,7 +518,7 @@ function OeuvreFormPanel({ mode, oeuvre, types, isSuper, onClose, onSaved }: {
                 <I.pin size={14} /> Saisissez les coordonnées Latitude/Longitude ci-dessous — le marqueur apparaît uniquement pour visualiser la position saisie.
               </div>
               <GpsMapPicker lat={gpsValid ? latNum : null} lng={gpsValid ? lngNum : null} />
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14 }}>
+              <div className="g g-3" style={{ gap: 14 }}>
                 <div>
                   <label style={Lbl}>Coord. Y — Latitude</label>
                   <input className="input mono" placeholder="Ex. 4.0511" value={form.latitude} onChange={e => set('latitude', e.target.value)} style={{ color: '#111827' }} />
@@ -654,7 +654,7 @@ export default function OeuvresPage() {
 
       {/* Type stats */}
       {types.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(types.length, 7)}, 1fr)`, gap: 10 }}>
+        <div className="g g-fit" style={{ gap: 10 }}>
           {types.map(t => (
             <div key={t.id} className="card" style={{ padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 4, cursor: 'pointer', outline: filterType === String(t.id) ? `2px solid ${t.couleur}` : 'none' }}
               onClick={() => setFilterType(filterType === String(t.id) ? '' : String(t.id))}>

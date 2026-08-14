@@ -117,7 +117,7 @@ function StepIdentity({ form, update }: { form: Form; update: (k: keyof Form, v:
       <p style={{ fontSize: 12.5, color: 'var(--text-2)', margin: 0, lineHeight: 1.5 }}>
         Ces informations apparaîtront sur le compte et dans le journal d'activité. L'adresse e-mail servira d'identifiant de connexion.
       </p>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+      <div className="g g-2" style={{ gap: 12 }}>
         <div>
           <div className="label">Nom de famille<span className="req">*</span></div>
           <input className="input" value={form.nom} onChange={e => update('nom', e.target.value)} placeholder="BIYA" />

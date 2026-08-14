@@ -172,7 +172,7 @@ function NewsFormPanel({ news, onClose, onSaved, onAddToast }: {
               <div style={{ fontSize: 12, color: 'var(--text-3)' }}>Aucune image — l&apos;actualité s&apos;affichera en texte seul.</div>
             )}
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+            <div className="g g-4" style={{ gap: 8 }}>
               {images.map(img => (
                 <div key={img.id} style={{ position: 'relative', aspectRatio: '1', borderRadius: 6, overflow: 'hidden', border: '1px solid var(--border)' }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}

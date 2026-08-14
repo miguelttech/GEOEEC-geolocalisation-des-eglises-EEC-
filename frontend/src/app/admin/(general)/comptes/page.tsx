@@ -222,7 +222,7 @@ function AccountCreatePanel({ onClose, onSaved }: {
             </div>
           )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+          <div className="g g-2" style={{ gap: 14 }}>
             <div>
               <div className="label">Prénom *</div>
               <input className="input" placeholder="Prénom(s)" value={form.first_name} onChange={e => set('first_name', e.target.value)}/>
@@ -431,7 +431,7 @@ export default function ComptesPage() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
       {/* Summary */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+      <div className="g g-4" style={{ gap: 12 }}>
         {myRole === 'DISTRICT' ? (
           [
             { label: 'Administrateur Général', value: districtSummary?.nb_super, color: ROLE_META.SUPER.initColor },

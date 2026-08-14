@@ -337,7 +337,7 @@ function ParoisseViewPanel({ paroisse: p, onClose, onEdit, canEdit = true }: { p
             <CategoriePill categorie={p.categorie} /><GpsCell ok={hasGps} />
             {p.en_prospection && <span className="pill pill-orange">En prospection</span>}
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          <div className="g g-2" style={{ gap: 10 }}>
             {[
               { label: 'Fidèles', value: p.nombre_fideles !== null ? p.nombre_fideles.toLocaleString('fr') : '—', color: '#2E9744' },
               { label: 'Communiants', value: p.communiants !== null ? p.communiants.toLocaleString('fr') : '—', color: '#1565C0' },
@@ -630,7 +630,7 @@ function ParoisseFormPanel({ mode, paroisse, onClose, onSaved }: {
           {/* ─ Tab 1: Général ─────────────────────────────────────────── */}
           {tab === 0 && (
             <>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <div className="g g-2" style={{ gap: 16 }}>
                 <div style={{ gridColumn: '1/-1' }}>
                   <label style={L.label}>Nom de la paroisse *</label>
                   <input className="input" placeholder="Ex. Yaoundé-Centre" value={form.nom}
@@ -704,7 +704,7 @@ function ParoisseFormPanel({ mode, paroisse, onClose, onSaved }: {
                 lng={gpsValid ? lngNum : null}
               />
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14 }}>
+              <div className="g g-3" style={{ gap: 14 }}>
                 <div>
                   <label style={L.label}>Coord. Y — Latitude</label>
                   <input className="input mono" placeholder="Ex. 3.8480" value={form.lat}
@@ -740,7 +740,7 @@ function ParoisseFormPanel({ mode, paroisse, onClose, onSaved }: {
           {/* ─ Tab 3: Fidèles ──────────────────────────────────────────── */}
           {tab === 2 && (
             <>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <div className="g g-2" style={{ gap: 16 }}>
                 <div>
                   <label style={L.label}>Communiants</label>
                   <input className="input mono" type="number" min={0} placeholder="0" value={form.communiants}
@@ -787,7 +787,7 @@ function ParoisseFormPanel({ mode, paroisse, onClose, onSaved }: {
 
           {/* ─ Tab 4: Contact ──────────────────────────────────────────── */}
           {tab === 3 && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <div className="g g-2" style={{ gap: 16 }}>
               <div>
                 <label style={L.label}>Téléphone</label>
                 <input className="input" placeholder="+237 6XX XXX XXX" value={form.telephone}

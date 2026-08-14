@@ -65,7 +65,7 @@ export default function DashboardParoissePage() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
       {/* Row 1 — 4 KPI */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+      <div className="g g-4" style={{ gap: 12 }}>
         {loading ? Array.from({ length: 4 }).map((_, i) => <div key={i} className="card" style={{ padding: 16 }}><Skeleton h={70} /></div>) : (<>
           <StatCard label="Fidèles"     value={(s?.total_fideles ?? 0).toLocaleString('fr')} sub="total communiants + non-comm." color={C} />
           <StatCard label="Communiants" value={(s?.total_communiants ?? 0).toLocaleString('fr')} sub={`Non-comm. : ${(s?.total_non_communiants ?? 0).toLocaleString('fr')}`} color="#5AC472" />

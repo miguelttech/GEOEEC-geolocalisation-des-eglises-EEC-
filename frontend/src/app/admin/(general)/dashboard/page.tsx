@@ -176,7 +176,7 @@ export default function DashboardPage() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
       {/* Row 1 — 5 stat cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 16 }}>
+      <div className="g g-5" style={{ gap: 16 }}>
         {loading ? Array.from({ length: 5 }).map((_, i) => <div key={i} className="stat-card"><Skeleton h={80} /></div>) : (<>
           <StatCard label="Régions"   icon={I.compass}   value={s?.nb_regions ?? 0}   sub="Régions synodales"     delta={{ type: 'flat', text: 'Données stables' }} />
           <StatCard label="Districts" icon={I.network}   value={s?.nb_districts ?? 0} sub="Districts"              delta={{ type: 'flat', text: 'Données stables' }} />
@@ -187,7 +187,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Row 2 — 4 widgets */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 16 }}>
+      <div className="g g-4" style={{ gap: 16 }}>
         <Widget title={`Total fidèles ${annee}`} action={
           !loading && !editingFideles ? (
             <button className="btn-ghost btn" style={{ padding: '4px 6px', fontSize: 11 }} onClick={startEditFideles}>
@@ -272,7 +272,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Row 3 — graphiques */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      <div className="g g-2" style={{ gap: 16 }}>
 
         <Widget title="Top régions par fidèles" action={
           <select className="input" style={{ padding: '2px 8px', fontSize: 12, height: 28 }}
@@ -347,7 +347,7 @@ export default function DashboardPage() {
 
       {/* Row 4bis — Œuvres par région (EXIGENCE : par région ET par type,
           couleurs pertinentes + légende) + Activité */}
-      <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: 16 }}>
+      <div className="g g-3-2" style={{ gap: 16 }}>
         <Widget title="Répartition des œuvres par région">
           {loading ? <Skeleton h={280} /> : s?.oeuvres_par_region?.length ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>

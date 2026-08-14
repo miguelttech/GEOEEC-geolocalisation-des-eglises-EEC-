@@ -111,7 +111,7 @@ function GlobalesTab({ data, loading }: { data: StatsGlobales | null; loading: b
         {data.nb_admins !== null && <StatCard label="Comptes administrateurs" value={data.nb_admins} color="#C2410C"/>}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: isSuper ? '1fr 1fr' : '1fr', gap: 14 }}>
+      <div className={`g ${isSuper ? 'g-2' : 'g-1'}`} style={{ gap: 14 }}>
         {isSuper && (
           <BarList title="Paroisses par région synodale" items={data.paroisses_par_region} emptyLabel="Aucune donnée disponible."/>
         )}
@@ -140,7 +140,7 @@ function VisiteursTab({ data, loading }: { data: StatsVisiteurs | null; loading:
         {data.recherches_total !== null && <StatCard label="Recherches effectuées" value={data.recherches_total} color="#EF4444"/>}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+      <div className="g g-2" style={{ gap: 14 }}>
         <BarList title="Régions les plus consultées" items={data.top_regions} emptyLabel="Aucune consultation enregistrée."/>
         <BarList title="Districts les plus consultés" items={data.top_districts} emptyLabel="Aucune consultation enregistrée."/>
         <BarList title="Paroisses les plus consultées" items={data.top_paroisses} emptyLabel="Aucune consultation enregistrée."/>

@@ -50,7 +50,7 @@ function DistrictViewPanel({ district: d, onClose }: { district: District; onClo
 
         <div style={{ padding: '20px 22px', overflowY: 'auto', height: 'calc(100% - 72px)', display: 'flex', flexDirection: 'column', gap: 16 }}>
           {/* Même modèle que les régions : toutes les statistiques disponibles */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          <div className="g g-2" style={{ gap: 10 }}>
             {[
               { label: 'Paroisses', value: String(d.nb_paroisses), color: '#5AC472', big: true },
               { label: 'Fidèles',   value: (d.nb_fideles ?? 0).toLocaleString('fr'), color: '#FFD600', big: true },
@@ -165,7 +165,7 @@ export default function DistrictsPage() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
       {/* Summary */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
+      <div className="g g-3" style={{ gap: 14 }}>
         <TopCount label="Total districts" value={loading ? '…' : count.toLocaleString('fr')} />
         <TopCount label="Régions synodales" value={String(regions.length || '—')} />
         <TopCount label="Filtré" value={hasFilter ? districts.length.toLocaleString('fr') : '—'} color={hasFilter ? '#5AC472' : 'var(--text)'} />

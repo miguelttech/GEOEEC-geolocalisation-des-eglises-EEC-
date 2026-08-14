@@ -82,7 +82,7 @@ function Card({ item, cls }: { item: Item; cls: string }) {
 
 function CatGrid({ items }: { items: Item[] }) {
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+    <div className="cat-grid">
       {items.slice(0, 6).map((item, i) => (
         <div key={i} className="oeuvre-card" style={{ height: 260, position: 'relative', borderRadius: 6 }}>
           <Image

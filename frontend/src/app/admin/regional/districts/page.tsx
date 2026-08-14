@@ -34,7 +34,7 @@ function DistrictViewPanel({ district, onClose }: { district: District; onClose:
           <button className="icon-btn" onClick={onClose}><I.x size={16}/></button>
         </div>
         <div style={{ padding: '20px 22px', overflowY: 'auto', height: 'calc(100% - 72px)', display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          <div className="g g-2" style={{ gap: 10 }}>
             {[
               { label: 'Paroisses', value: district.nb_paroisses, color: '#5B9BD5' },
               { label: 'Fidèles',   value: (district.nb_fideles ?? 0).toLocaleString('fr'), color: '#5AC472' },
@@ -76,7 +76,7 @@ export default function DistrictsRegionPage() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {/* Summary */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+      <div className="g g-3" style={{ gap: 12 }}>
         {[
           { label: 'Districts',     value: loading ? '—' : districts.length,               color: '#5B9BD5', icon: 'network' as const },
           { label: 'Paroisses',     value: loading ? '—' : totalParoisses,                  color: '#2E9744', icon: 'church' as const },

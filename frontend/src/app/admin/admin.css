@@ -322,6 +322,63 @@
 .admin-shell .lr-actions { display:flex; align-items:center; gap:4px; }
 .admin-shell .act-btn { display:inline-flex; align-items:center; gap:5px; padding:5px 10px; border-radius:5px; font-size:12px; font-weight:500; cursor:pointer; border:0; transition:background 200ms; }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   GRILLES DE CONTENU RESPONSIVES
+
+   Les pages admin déclaraient leurs grilles en `style={{ gridTemplateColumns }}`
+   inline, donc hors de portée de toute media query : sur un téléphone de 375px,
+   la rangée `repeat(5, 1fr)` du tableau de bord produisait des cartes de 101px
+   de large (61px de contenu utile une fois le padding retiré).
+
+   Ces classes reproduisent EXACTEMENT la mise en page desktop d'origine, puis
+   dégradent par paliers. Volontairement pas de `auto-fit` : dans une zone de
+   contenu de 976px, `minmax(200px, 1fr)` transformerait un formulaire à 2
+   colonnes en 4 colonnes et casserait le desktop.
+   ══════════════════════════════════════════════════════════════════════════ */
+.admin-shell .g     { display: grid; }
+.admin-shell .g-1   { grid-template-columns: 1fr; }
+.admin-shell .g-2   { grid-template-columns: repeat(2, 1fr); }
+.admin-shell .g-3   { grid-template-columns: repeat(3, 1fr); }
+.admin-shell .g-4   { grid-template-columns: repeat(4, 1fr); }
+.admin-shell .g-5   { grid-template-columns: repeat(5, 1fr); }
+.admin-shell .g-2-1 { grid-template-columns: 2fr 1fr; }
+.admin-shell .g-3-2 { grid-template-columns: 3fr 2fr; }
+/* Séries de longueur variable (une pastille par grade, par type d'œuvre…) :
+   ici `auto-fit` est le bon outil, le nombre de colonnes n'étant pas conçu. */
+.admin-shell .g-fit { grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); }
+
+/* Barres horizontales (HorizontalBars) : libellé · barre · valeur.
+   Avec 180px + 80px figés, il ne restait que ~59px pour la barre sur mobile. */
+.admin-shell .hbar-row {
+  display: grid;
+  grid-template-columns: 180px 1fr 80px;
+  gap: 12px; align-items: center; font-size: 12px;
+}
+
+@media (max-width: 1180px) {
+  .admin-shell .g-5 { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 900px) {
+  .admin-shell .hbar-row { grid-template-columns: 110px 1fr 64px; gap: 8px; }
+}
+@media (max-width: 560px) {
+  .admin-shell .hbar-row { grid-template-columns: 92px 1fr 56px; gap: 6px; }
+}
+@media (max-width: 900px) {
+  .admin-shell .g-3,
+  .admin-shell .g-4,
+  .admin-shell .g-5 { grid-template-columns: repeat(2, 1fr); }
+  /* Les paires asymétriques (graphique + panneau latéral) s'empilent. */
+  .admin-shell .g-2-1,
+  .admin-shell .g-3-2 { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  .admin-shell .g-2,
+  .admin-shell .g-3,
+  .admin-shell .g-4,
+  .admin-shell .g-5 { grid-template-columns: 1fr; }
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    LIGHT THEME  —  appliqué via .admin-shell.light
    ═══════════════════════════════════════════════════════════════════════════ */

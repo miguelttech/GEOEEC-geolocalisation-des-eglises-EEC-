@@ -24,7 +24,7 @@ function RegionViewPanel({ region: r, onClose }: { region: RegionSynodale; onClo
         </div>
 
         <div style={{ padding: '20px 22px', overflowY: 'auto', height: 'calc(100% - 72px)', display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          <div className="g g-2" style={{ gap: 10 }}>
             {[
               { label: 'Districts', value: String(r.nb_districts), color: 'var(--text)' },
               { label: 'Paroisses', value: String(r.nb_paroisses), color: '#5AC472' },
@@ -86,7 +86,7 @@ export default function RegionsPage() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
       {/* Summary */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
+      <div className="g g-3" style={{ gap: 14 }}>
         <TopCount label="Régions synodales" value={loading ? '…' : String(regions.length)} />
         <TopCount label="Districts" value={loading ? '…' : String(totalDistricts)} />
         <TopCount label="Paroisses" value={loading ? '…' : totalParoisses.toLocaleString('fr')} color="#5AC472" />

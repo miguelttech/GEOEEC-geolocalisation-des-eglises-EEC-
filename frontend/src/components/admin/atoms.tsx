@@ -166,7 +166,7 @@ export const HorizontalBars = ({ data, max, formatVal }: { data: BarDatum[]; max
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       {data.map((d, i) => (
-        <div key={i} style={{ display: 'grid', gridTemplateColumns: '180px 1fr 80px', gap: 12, alignItems: 'center', fontSize: 12 }}>
+        <div key={i} className="hbar-row">
           <div style={{ color: 'var(--text-2)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.label}</div>
           <div style={{ position: 'relative', height: 22, background: 'rgba(255,255,255,0.04)', borderRadius: 3 }}>
             <div data-tip={`${d.label} · ${formatVal ? formatVal(d.value) : d.value.toLocaleString('fr')}`} style={{

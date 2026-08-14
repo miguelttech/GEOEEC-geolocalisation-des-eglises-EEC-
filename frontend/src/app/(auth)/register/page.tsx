@@ -128,7 +128,7 @@ export default function RegisterPage() {
           ) : (
             <form onSubmit={handleSubmit} noValidate>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div className="ls-row-2">
                 <div className="ls-field">
                   <label htmlFor="rs-fn">Prénom</label>
                   <div className="ls-iw">

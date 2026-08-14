@@ -957,12 +957,15 @@ const MapNavbar = ({ view, setView, stats, theme, setTheme, user, mode, onLogout
         ))}
       </div>
       <div className="nav-actions">
-        <div className="view-toggle" style={{ display:'inline-flex', background:'var(--surface-2)', border:'1px solid var(--border)', borderRadius:'999px', padding:'3px' }}>
-          <button onClick={() => setView('map')} style={{ border:0, background: view==='map' ? 'var(--eec-green)' : 'transparent', color: view==='map' ? '#fff' : 'var(--t-2)', padding:'5px 12px', fontSize:12, fontWeight:600, borderRadius:'999px', display:'inline-flex', alignItems:'center', gap:6, cursor:'pointer' } as React.CSSProperties}>
-            <Icon name="map" size={13} stroke={1.9} /> Carte
+        {/* Seuls les styles dépendant de l'état (fond/couleur de l'onglet actif)
+            restent inline : padding et display doivent vivre en CSS, sinon les
+            media queries qui compactent la navbar sont écrasées. */}
+        <div className="view-toggle">
+          <button className={`vt-btn${view === 'map' ? ' on' : ''}`} onClick={() => setView('map')}>
+            <Icon name="map" size={13} stroke={1.9} /> <span>Carte</span>
           </button>
-          <button onClick={() => setView('list')} style={{ border:0, background: view==='list' ? 'var(--eec-green)' : 'transparent', color: view==='list' ? '#fff' : 'var(--t-2)', padding:'5px 12px', fontSize:12, fontWeight:600, borderRadius:'999px', display:'inline-flex', alignItems:'center', gap:6, cursor:'pointer' } as React.CSSProperties}>
-            <Icon name="list" size={13} stroke={1.9} /> Liste
+          <button className={`vt-btn${view === 'list' ? ' on' : ''}`} onClick={() => setView('list')}>
+            <Icon name="list" size={13} stroke={1.9} /> <span>Liste</span>
           </button>
         </div>
         <div className="theme-toggle">
@@ -996,12 +999,12 @@ const MapNavbar = ({ view, setView, stats, theme, setTheme, user, mode, onLogout
             )}
           </div>
         ) : (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Link href="/register" style={{ padding: '6px 14px', fontSize: 12.5, fontWeight: 600, borderRadius: 999, background: 'var(--eec-green)', color: '#fff', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <div className="nav-auth">
+            <Link href="/register" className="nav-register">
               S&apos;inscrire
             </Link>
-            <Link href="/login" style={{ padding: '6px 14px', fontSize: 12.5, fontWeight: 600, borderRadius: 999, border: '1px solid var(--border)', color: 'var(--t-1)', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-              <Icon name="logout" size={13} stroke={2} /> Connexion
+            <Link href="/login" className="nav-signin">
+              <Icon name="logout" size={13} stroke={2} /> <span>Connexion</span>
             </Link>
           </div>
         )}
@@ -1077,21 +1080,20 @@ const LoginPrompt = ({ onClose }: { onClose: () => void }) => (
 /* ============================================================
    AUTH CTA BANNER
    ============================================================ */
+/* La mise en page (largeur, retour à la ligne, position) vit dans globals.css
+   (.map-cta) : en `nowrap` inline elle mesurait 659px infrangibles et se
+   faisait rogner des deux côtés sous 600px, rendant le bouton de fermeture
+   inatteignable. */
 const AuthCTABanner = ({ onDismiss }: { onDismiss: () => void }) => (
-  <div style={{
-    position: 'absolute', bottom: 40, left: '50%', transform: 'translateX(-50%)',
-    zIndex: 1200, background: 'var(--eec-green)', borderRadius: 12,
-    padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 14,
-    boxShadow: '0 8px 32px rgba(46,151,68,0.35)', whiteSpace: 'nowrap',
-  }}>
+  <div className="map-cta">
     <Icon name="star" size={16} color="#FFD600" fill="#FFD600" stroke={0} />
-    <span style={{ fontSize: 13, color: '#fff', fontWeight: 500 }}>
+    <span className="map-cta-text">
       Inscrivez-vous gratuitement pour accéder à toutes les fonctionnalités
     </span>
-    <Link href="/register" style={{ padding: '6px 16px', borderRadius: 999, background: '#fff', color: 'var(--eec-green)', fontWeight: 700, fontSize: 12.5, textDecoration: 'none', flexShrink: 0 }}>
+    <Link href="/register" className="map-cta-btn">
       S&apos;inscrire →
     </Link>
-    <button onClick={onDismiss} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', padding: 4 }}>
+    <button onClick={onDismiss} className="map-cta-close" aria-label="Fermer">
       <Icon name="close" size={13} stroke={2} />
     </button>
   </div>

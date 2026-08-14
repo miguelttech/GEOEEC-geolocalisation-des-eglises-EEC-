@@ -159,7 +159,7 @@ function PrefProfil({ me, onAddToast, onSaved }: {
           <div style={{ fontSize: 11, color: 'var(--text-3)' }}>JPG ou PNG, 5 Mo max.</div>
         </div>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+      <div className="g g-2" style={{ gap: 14 }}>
         <div>
           <div className="label">Nom complet</div>
           <input className="input" value={fullName} disabled style={{ opacity: 0.7, cursor: 'not-allowed' }} />
@@ -199,7 +199,7 @@ function PrefPrefs({ me, onAddToast }: { me: UserAccount | null; onAddToast: (t:
     <div className="anim-in card" style={{ padding: 24, maxWidth: 720, display: 'flex', flexDirection: 'column', gap: 22 }}>
       <div>
         <h3 className="sg" style={{ fontSize: 16, margin: '0 0 12px' }}>Thème</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, maxWidth: 400 }}>
+        <div className="g g-2" style={{ gap: 12, maxWidth: 400 }}>
           {[
             { k: 'clair' as const, l: 'Clair', ic: 'sun' as const, bg: '#F0F4F1', accent: '#0D1B12' },
             { k: 'sombre' as const, l: 'Sombre', ic: 'moon' as const, bg: '#0D1B12', accent: '#FFD600' },
