@@ -1181,8 +1181,12 @@ body:has(.eec-lp) {
 }
 .map { position: absolute; inset: 0; }
 
-.leaflet-container { font-family: var(--font); background: #d4dcd3; }
-[data-theme="dark"] .leaflet-container { background: #d0d8cf; }
+/* Fond du conteneur = ce qu'on voit pendant le chargement des tuiles et dans
+   les trous de couverture. #d4dcd3 était un vert-gris : il préparait l'œil à
+   la teinte verte avant même l'arrivée des tuiles et se confondait avec les
+   masses terrestres de Voyager. Un gris neutre ne colore plus la perception. */
+.leaflet-container { font-family: var(--font); background: #f0f0ef; }
+[data-theme="dark"] .leaflet-container { background: #f0f0ef; }
 
 /* ── Supprimer les joints blancs entre tuiles ── */
 img.leaflet-tile {
@@ -1198,8 +1202,12 @@ img.leaflet-tile {
   border: 0;
   box-shadow: none;
   color: #1a1a1a;
-  font-size: 10px;
-  font-weight: 600;
+  /* 12px : 10px passait sous le plancher de lisibilité cartographique (~11px),
+     surtout sur fond satellite où le halo travaille davantage. Graisse 700
+     pour épaissir le trait sous le halo — c'est elle qui porte la hiérarchie
+     face aux étiquettes de POI (11px/600), pas une transparence. */
+  font-size: 12px;
+  font-weight: 700;
   padding: 0;
   white-space: nowrap;
   letter-spacing: 0;
@@ -3176,8 +3184,17 @@ img.leaflet-tile {
 }
 .poi-2d:hover { opacity: 1; transform: scale(1.15); }
 .poi-2d svg { display: block; }
-/* étiquette POI plus discrète que celle des paroisses/œuvres */
-.leaflet-tooltip.eec-map-label.poi-label { font-size: 9px; font-weight: 500; opacity: 0.85; }
+/* Étiquette POI : plus discrète que celle des paroisses/œuvres, mais lisible.
+   L'ancien réglage cumulait deux handicaps — 9px ET opacity .85 — ce qui
+   délavait le texte par-dessus le halo censé le détacher. La hiérarchie est
+   maintenue par la taille (11 vs 12px) et la graisse (600 vs 700), pas par
+   la transparence ; le gris #3c4043 reste en retrait du #1a1a1a des
+   paroisses sans perdre le contraste. */
+.leaflet-tooltip.eec-map-label.poi-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #3c4043;
+}
 /* Légende : petit icône plat */
 .poi-glyph-sm { width: 16px; height: 16px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
 .poi-glyph-sm svg { display: block; }

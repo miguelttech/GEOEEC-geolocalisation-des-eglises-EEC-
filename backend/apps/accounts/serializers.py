@@ -25,10 +25,19 @@ class StatistiqueAnnuelleSerializer(serializers.ModelSerializer):
         fields = [
             "id", "annee",
             "paroisse", "paroisse_nom", "district_nom", "region_nom",
-            "communiants", "non_communiants", "total_fideles",
+            "communiants", "non_communiants", "total_fideles", "total_declare",
             "baptemes", "confirmations", "mariages", "deces",
             "offrandes", "dimes", "validee",
         ]
+
+    def validate(self, attrs):
+        # Saisir une ventilation rend caduc un total global antérieur : sans
+        # cela `total_declare` continuerait de primer et la ventilation
+        # nouvellement saisie n'aurait aucun effet visible sur l'effectif.
+        envoyees = set(getattr(self, "initial_data", {}) or {})
+        if {"communiants", "non_communiants"} & envoyees and "total_declare" not in envoyees:
+            attrs["total_declare"] = None
+        return attrs
 
 
 # ---------------------------------------------------------------------------

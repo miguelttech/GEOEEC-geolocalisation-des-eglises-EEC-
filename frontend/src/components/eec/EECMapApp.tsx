@@ -167,7 +167,23 @@ function tailleMarqueur(item: AnyItem, maxFideles: number): number {
 // Zoom à partir duquel les noms de paroisses et d'œuvres s'affichent.
 // Partagé par la classe CSS .labels-hidden et par la liaison à la demande
 // des étiquettes — une seule source pour les deux.
+//
+// Seuil DIFFÉRENCIÉ : à l'ouverture (vue nationale), un seuil unique à 13
+// laissait la carte entièrement muette — aucun repère nommé, ce qui accentue
+// l'impression de fond plat. Les grandes paroisses servent donc de points
+// d'ancrage dès la vue régionale, les autres n'apparaissent qu'au zoom
+// rapproché pour ne pas encombrer.
 const LABEL_MIN_ZOOM = 13;
+const LABEL_MIN_ZOOM_MAJEUR = 9;
+// Un marqueur est « majeur » à partir de ce diamètre (échelle 22→46 px de
+// TAILLE_MARQUEUR) : ~tiers supérieur de l'échelle des effectifs. Les œuvres
+// (taille fixe 26) restent volontairement sous ce seuil.
+const TAILLE_MARQUEUR_MAJEUR = 38;
+
+/** Zoom à partir duquel l'étiquette d'un marqueur donné peut s'afficher. */
+function seuilEtiquette(taille: number): number {
+  return taille >= TAILLE_MARQUEUR_MAJEUR ? LABEL_MIN_ZOOM_MAJEUR : LABEL_MIN_ZOOM;
+}
 
 /**
  * Ajoute un lot de marqueurs à une couche.
@@ -487,7 +503,12 @@ function useLeafletMap(
   useEffect(() => {
     if (mapRef.current) return;
     const map = L.map(mapId, {
-      center: CAMEROON_CENTER, zoom: 6, minZoom: 5, maxZoom: 19,
+      // zoom 7 = valeur de REPLI seulement : dès que les paroisses sont
+      // chargées, l'effet de cadrage automatique ci-dessous recalcule la vue
+      // sur leur étendue réelle. À 6, la vue couvrait tout le Cameroun y
+      // compris les zones sans aucune paroisse EEC, à un niveau où CARTO
+      // Voyager ne dessine encore ni voirie ni bâti — d'où l'aspect plat.
+      center: CAMEROON_CENTER, zoom: 7, minZoom: 5, maxZoom: 19,
       zoomControl: false, attributionControl: true, preferCanvas: true,
       // Rotation (leaflet-rotate) : gestes tactiles + boutons dédiés
       rotate: true, rotateControl: false, touchRotate: true, bearing: 0,
@@ -527,9 +548,13 @@ function useLeafletMap(
     // les étiquettes à la demande s'appuie sur la même valeur.
     // Cette classe CSS reste utile pour les étiquettes de POI, qui suivent
     // leur propre logique de liaison.
+    // Le gabarit CSS doit s'ouvrir au seuil le PLUS BAS (celui des grandes
+    // paroisses) : .labels-hidden masque indistinctement toutes les
+    // étiquettes, il annulerait sinon le seuil différencié. Le tri fin par
+    // marqueur est fait à la liaison, pas ici.
     const applyLabelVisibility = () => {
       const c = map.getContainer();
-      if (map.getZoom() < LABEL_MIN_ZOOM) c.classList.add('labels-hidden');
+      if (map.getZoom() < LABEL_MIN_ZOOM_MAJEUR) c.classList.add('labels-hidden');
       else c.classList.remove('labels-hidden');
     };
     map.on('zoomend', applyLabelVisibility);
@@ -540,7 +565,15 @@ function useLeafletMap(
     regionLayerRef.current = rl;
 
     const cluster = (L as any).markerClusterGroup({
-      maxClusterRadius: 50, showCoverageOnHover: false, spiderfyOnMaxZoom: true,
+      // 90 px (au lieu de 50) : à l'échelle nationale, 50 px produisait une
+      // nuée de petits groupes de 2-3 paroisses, illisible et impossible à
+      // distinguer d'un marqueur isolé. 90 px agrège par bassin réel.
+      maxClusterRadius: 90, showCoverageOnHover: false, spiderfyOnMaxZoom: true,
+      // Les ~550 marqueurs sont insérés par addLayers() (cf. addLayersBulk) :
+      // sans découpage, ce lot bloque le thread principal le temps du calcul
+      // de la grille. chunkedLoading l'étale sur plusieurs frames — la carte
+      // reste réactive pendant l'insertion initiale et après chaque filtre.
+      chunkedLoading: true,
       iconCreateFunction: (c: any) => {
         const n = c.getChildCount();
         return L.divIcon({ html: `<div>${n}</div>`, className: 'marker-cluster' + (n >= 30 ? ' marker-cluster-large' : ''), iconSize: [40, 40] });
@@ -552,6 +585,54 @@ function useLeafletMap(
     // Couche plate (utilisée quand le regroupement/cluster est désactivé)
     plainLayerRef.current = L.layerGroup().addTo(map);
   }, [mapId]);
+
+  // ── Cadrage initial sur l'étendue RÉELLE des paroisses ────────────────────
+  // Le zoom fixe de l'initialisation cadrait le Cameroun entier, alors que
+  // l'implantation EEC ne couvre pas tout le territoire : une part de la vue
+  // était vide, et le niveau de zoom correspondant est trop large pour que
+  // CARTO Voyager dessine voirie et bâti. On recadre donc sur les données
+  // dès leur arrivée — la vue suit automatiquement le jeu de données, sans
+  // constante à réajuster si de nouvelles paroisses sont créées.
+  const cadrageFaitRef = useRef(false);
+  useEffect(() => {
+    const map = mapRef.current;
+    // UNE SEULE FOIS : après ce cadrage, la vue appartient à l'utilisateur.
+    // Un recadrage à chaque mise à jour des données annulerait son
+    // déplacement en cours.
+    if (!map || cadrageFaitRef.current || !allParishes.length) return;
+    // Si l'utilisateur a déjà demandé un cadrage (recherche, géolocalisation,
+    // sélection dans une liste) avant l'arrivée des données, sa cible prime :
+    // on abandonne définitivement le cadrage automatique plutôt que de lui
+    // reprendre la vue une frame plus tard.
+    if (focusTarget) { cadrageFaitRef.current = true; return; }
+
+    const pts = allParishes
+      .filter(p => Number.isFinite(p.lat) && Number.isFinite(p.lng))
+      .map(p => [p.lat, p.lng] as [number, number]);
+    if (!pts.length) return;
+
+    cadrageFaitRef.current = true;
+    // Différé d'une frame : au premier rendu le conteneur peut ne pas avoir
+    // sa taille définitive, et fitBounds calculerait alors un zoom faux (même
+    // cause que le NaN de bearing traité dans le ResizeObserver ci-dessus).
+    const id = requestAnimationFrame(() => {
+      if (!mapRef.current) return;
+      try {
+        map.invalidateSize({ animate: false } as L.ZoomPanOptions);
+        map.fitBounds(L.latLngBounds(pts).pad(0.08), {
+          // Plafond à 10 : si un filtre ou un jeu de données réduit
+          // l'étendue à une seule ville, on ne veut pas ouvrir la carte
+          // collée au sol. Plancher implicite = minZoom (5).
+          maxZoom: 10,
+          animate: false,
+        } as L.FitBoundsOptions);
+      } catch {
+        /* étendue dégénérée (une seule paroisse, coordonnées identiques) :
+           on garde le zoom de repli défini à l'initialisation. */
+      }
+    });
+    return () => cancelAnimationFrame(id);
+  }, [allParishes, focusTarget]);
 
   // Region circles — re-runs when real data arrives ou quand on (dé)active l'option
   useEffect(() => {
@@ -570,7 +651,13 @@ function useLeafletMap(
       const clickable = !measuring;
       if (r.geometry) {
         const poly = L.geoJSON({ type: 'Feature', geometry: r.geometry, properties: {} } as any, {
-          style: { color, weight: 1.8, opacity: 0.85, fillColor: color, fillOpacity: 0.07, dashArray: '4 3' },
+          // fillOpacity 0.03 (au lieu de 0.07) : les 22 régions pavent la
+          // TOTALITÉ des terres visibles. À 0.07, ces voiles se cumulaient
+          // aux frontières partagées et teintaient toute la carte — c'est la
+          // principale cause de l'aspect « vert-beige uniforme ». À 0.03 le
+          // rattachement régional reste lisible sans écraser le fond ; le
+          // survol (0.18) reste le mode de lecture franc.
+          style: { color, weight: 1.8, opacity: 0.85, fillColor: color, fillOpacity: 0.03, dashArray: '4 3' },
           interactive: clickable, renderer: svgRendererRef.current ?? undefined,
         } as any);
         if (clickable) {
@@ -578,7 +665,7 @@ function useLeafletMap(
           // panneau latéral. Le détail d'une région se lit dans les panneaux
           // dédiés du rail (Régions, Districts, Statistiques).
           poly.on('mouseover', () => poly.setStyle({ fillOpacity: 0.18, weight: 2.4 }));
-          poly.on('mouseout',  () => poly.setStyle({ fillOpacity: 0.07, weight: 1.8 }));
+          poly.on('mouseout',  () => poly.setStyle({ fillOpacity: 0.03, weight: 1.8 }));
           poly.on('click', () => {
             try { map.flyToBounds(poly.getBounds().pad(0.08), { duration: 0.7, maxZoom: 10 } as L.FitBoundsOptions); } catch {}
           });
@@ -739,10 +826,15 @@ function useLeafletMap(
       const lies  = labelsLiesRef.current;
       // .pad(0.15) : petite marge autour de la vue, pour que l'étiquette soit
       // déjà en place quand le marqueur entre à l'écran par un déplacement.
-      const vue = map.getZoom() >= LABEL_MIN_ZOOM ? map.getBounds().pad(0.15) : null;
+      // On ouvre la fenêtre au seuil le plus bas, puis chaque marqueur est
+      // filtré sur SON propre seuil (grandes paroisses dès 9, reste à 13).
+      const z   = map.getZoom();
+      const vue = z >= LABEL_MIN_ZOOM_MAJEUR ? map.getBounds().pad(0.15) : null;
 
       store.forEach((entry, id) => {
-        const doitEtreLie = vue !== null && vue.contains(entry.m.getLatLng());
+        const doitEtreLie = vue !== null
+          && z >= seuilEtiquette(entry.taille)
+          && vue.contains(entry.m.getLatLng());
         const estLie = lies.has(id);
         if (doitEtreLie && !estLie) {
           entry.m.bindTooltip(escapeHtml(entry.name), {
@@ -2332,12 +2424,49 @@ export default function EECMapApp({ mode, user, embedded = false }: { mode: MapM
   // ── Menu contextuel clic droit ─────────────────────────────────────────
   const [ctxMenu, setCtxMenu] = useState<{ lat: number; lng: number; x: number; y: number } | null>(null);
 
-  // Load real data from backend on mount
+  // ── Chargement des données, et rafraîchissement au retour sur l'onglet ──
+  //
+  // Le chargement au montage suffit au parcours habituel : quitter la carte
+  // puis y revenir démonte et remonte le composant, donc redemande les données.
+  // Il ne couvre pas la carte laissée ouverte dans un autre onglet pendant
+  // qu'une paroisse est créée ou supprimée depuis l'administration : elle
+  // afficherait un marqueur fantôme, ou manquerait le nouveau.
+  //
+  // On recharge donc quand l'onglet redevient visible. Un délai minimal évite
+  // de retélécharger le jeu complet à chaque va-et-vient entre fenêtres —
+  // c'est ~190 Ko compressés, inutile de le refaire toutes les deux secondes.
+  const dernierChargement = useRef(0);
+  const DELAI_MIN_RECHARGEMENT = 30_000;
+
   useEffect(() => {
-    loadMapData()
-      .then(d => setMapData(d))
-      .catch(() => {/* keep empty data */})
-      .finally(() => setDataLoading(false));
+    let annule = false;
+
+    const charger = (silencieux: boolean) => {
+      dernierChargement.current = Date.now();
+      if (!silencieux) setDataLoading(true);
+      loadMapData()
+        .then(d => { if (!annule) setMapData(d); })
+        .catch(() => {/* on garde les données précédentes */})
+        .finally(() => { if (!annule && !silencieux) setDataLoading(false); });
+    };
+
+    charger(false);
+
+    // Rechargement discret : pas de voile de chargement, la carte reste
+    // utilisable pendant la requête et se met à jour quand elle arrive.
+    const auRetour = () => {
+      if (document.visibilityState !== 'visible') return;
+      if (Date.now() - dernierChargement.current < DELAI_MIN_RECHARGEMENT) return;
+      charger(true);
+    };
+
+    document.addEventListener('visibilitychange', auRetour);
+    window.addEventListener('focus', auRetour);
+    return () => {
+      annule = true;
+      document.removeEventListener('visibilitychange', auRetour);
+      window.removeEventListener('focus', auRetour);
+    };
   }, []);
 
   // Lien profond de partage : /carte?id=&lat=&lng=&name= → vole + ouvre le détail

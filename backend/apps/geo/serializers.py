@@ -256,14 +256,36 @@ class ParoisseWriteSerializer(serializers.ModelSerializer):
         ]
 
     def validate(self, attrs):
+        # On raisonne sur les clés REÇUES, pas sur leurs valeurs.
+        #
+        # Une mise à jour partielle qui ne parle pas de GPS ne doit pas y
+        # toucher. La version précédente testait `lat is None`, ce qui ne
+        # distinguait pas « coordonnée absente de la requête » de
+        # « coordonnée envoyée à null » : renommer une paroisse effaçait donc
+        # sa position, silencieusement. Ici, absence des clés = on ne touche à
+        # rien ; présence avec null = effacement explicitement demandé.
+        envoyees = set(getattr(self, "initial_data", {}) or {})
+        a_latitude = "latitude" in envoyees
+        a_longitude = "longitude" in envoyees
+
         lat = attrs.pop("latitude", None)
         lng = attrs.pop("longitude", None)
-        if lat is not None and lng is not None:
-            attrs["position"] = Point(lng, lat, srid=4326)
-        elif lat is None and lng is None:
-            attrs.setdefault("position", None)
-        else:
+
+        if not a_latitude and not a_longitude:
+            return attrs                          # sujet non abordé
+
+        if a_latitude != a_longitude:
             raise serializers.ValidationError(
-                "Il faut fournir latitude ET longitude (ou aucun des deux)."
+                "Il faut fournir latitude ET longitude (ou aucune des deux)."
             )
+
+        if lat is None and lng is None:
+            attrs["position"] = None              # effacement demandé
+        elif lat is None or lng is None:
+            raise serializers.ValidationError(
+                "Latitude et longitude doivent être toutes deux renseignées, "
+                "ou toutes deux vides pour effacer la position."
+            )
+        else:
+            attrs["position"] = Point(lng, lat, srid=4326)
         return attrs

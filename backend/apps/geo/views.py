@@ -262,6 +262,16 @@ class ParoisseViewSet(viewsets.ModelViewSet):
     # statistiques : verrouillés en modification.
     CHAMPS_MODIFIABLES = {"nom", "en_prospection"}
 
+    # L'administrateur général dispose d'un périmètre étendu : catégorie,
+    # coordonnées GPS et coordonnées de contact s'ajoutent au nom.
+    # Restent verrouillés pour TOUS, lui compris : le district et la région
+    # (déplacer une paroisse d'un district à l'autre romprait la hiérarchie
+    # sans trace), et les effectifs — qui ne se saisissent pas ici mais via
+    # les statistiques annuelles, seule source qui les date.
+    CHAMPS_MODIFIABLES_SUPER = CHAMPS_MODIFIABLES | {
+        "categorie", "latitude", "longitude", "adresse", "telephone", "email",
+    }
+
     def update(self, request, *args, **kwargs):
         paroisse = self.get_object()
         user = request.user
@@ -274,23 +284,75 @@ class ParoisseViewSet(viewsets.ModelViewSet):
             )
         if not _can_write_paroisse(user, paroisse):
             return Response(status=status.HTTP_403_FORBIDDEN)
-        interdits = set(request.data.keys()) - self.CHAMPS_MODIFIABLES
+
+        autorises = (self.CHAMPS_MODIFIABLES_SUPER if user.role == "SUPER"
+                     else self.CHAMPS_MODIFIABLES)
+        interdits = set(request.data.keys()) - autorises
         if interdits:
             return Response(
-                {"detail": "Seul le nom (et l'état de prospection) d'une paroisse "
-                           f"peut être modifié. Champs refusés : {sorted(interdits)}"},
+                {"detail": "Champs non modifiables pour votre rôle : "
+                           f"{sorted(interdits)}. Autorisés : {sorted(autorises)}."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+        # Les deux coordonnées vont ensemble : n'en recevoir qu'une laisserait
+        # le sérialiseur ignorer silencieusement la position (il n'écrit un
+        # Point que si latitude ET longitude sont présentes).
+        recues = {"latitude", "longitude"} & set(request.data.keys())
+        if len(recues) == 1:
+            return Response(
+                {"detail": "Latitude et longitude doivent être envoyées ensemble."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         kwargs["partial"] = True
         return super().update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
-        # EXIGENCE : il est IMPOSSIBLE de supprimer une paroisse — pour TOUS
-        # les niveaux d'administration, y compris l'administrateur général.
-        return Response(
-            {"detail": "La suppression d'une paroisse est définitivement désactivée."},
-            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+        # Réservée à l'administrateur général. Les autres rôles conservent
+        # l'interdiction totale.
+        if request.user.role != "SUPER":
+            return Response(
+                {"detail": "Seul l'administrateur général peut supprimer une paroisse."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        paroisse = self.get_object()
+
+        # Ouvriers et œuvres référencent la paroisse en PROTECT : la base
+        # refuserait la suppression avec une erreur d'intégrité brute. On
+        # vérifie d'abord pour rendre la réponse actionnable — l'utilisateur
+        # doit savoir QUOI déplacer avant de pouvoir supprimer.
+        blocages = []
+        nb_ouvriers = paroisse.ouvriers.count()
+        if nb_ouvriers:
+            blocages.append(f"{nb_ouvriers} ouvrier(s) affecté(s)")
+        nb_oeuvres = paroisse.oeuvres.count()
+        if nb_oeuvres:
+            blocages.append(f"{nb_oeuvres} œuvre(s) rattachée(s)")
+        if blocages:
+            return Response(
+                {"detail": "Suppression impossible : cette paroisse a encore "
+                           + " et ".join(blocages)
+                           + ". Réaffectez-les avant de la supprimer."},
+                status=status.HTTP_409_CONFLICT,
+            )
+
+        # Les statistiques annuelles, elles, sont en CASCADE : elles n'ont
+        # aucun sens sans leur paroisse et disparaissent avec elle. On le
+        # journalise pour que la perte reste traçable.
+        nb_stats = paroisse.statistiques.count()
+
+        from apps.audit.utils import log_action
+        log_action(
+            request, "DELETE", "paroisse",
+            objet_id=paroisse.id,
+            objet_nom=paroisse.nom,
+            description=(f"Suppression de la paroisse « {paroisse.nom} » "
+                         f"(district {paroisse.district.nom}) — "
+                         f"{nb_stats} statistique(s) annuelle(s) supprimée(s) avec elle"),
         )
+        return super().destroy(request, *args, **kwargs)
 
     @action(detail=False, url_path="sans-gps", permission_classes=[permissions.IsAuthenticated])
     def sans_gps(self, request):

@@ -204,6 +204,12 @@ EMAIL_BACKEND = os.environ.get(
 EMAIL_HOST     = os.environ.get("EMAIL_HOST", "smtp.gmail.com")
 EMAIL_PORT     = int(os.environ.get("EMAIL_PORT", "587"))
 EMAIL_USE_TLS  = os.environ.get("EMAIL_USE_TLS", "True") == "True"
+# EXIGENCE : sans timeout explicite, smtplib bloque sans limite (pas de
+# valeur par défaut côté socket) — un SMTP lent ou une connexion qui ne
+# répond pas peut alors geler une requête (ex. création de compte admin,
+# mot de passe oublié) pendant plusieurs minutes au lieu d'échouer vite et
+# de laisser le repli "email non envoyé" prendre le relais.
+EMAIL_TIMEOUT = int(os.environ.get("EMAIL_TIMEOUT", "10"))
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "GÉOEEC EEC Cameroun <noreply@eec-cameroun.org>")
 
 # URL publique du frontend (pour les liens de reset dans les emails)
