@@ -10,7 +10,7 @@ const BACKEND = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api')
 
 interface Region   { id: number; nom: string; code: string | null; }
 interface District { id: number; nom: string; region_id: number; region_nom: string; nb_paroisses: number; }
-interface StatAnn  { id: number; paroisse: number; annee: number; communiants: number; non_communiants: number; }
+interface StatAnn  { id: number; paroisse: number; annee: number; communiants: number; non_communiants: number; total_declare: number | null; }
 
 function computeComplete(p: Paroisse): number {
   let s = 0;
@@ -385,6 +385,9 @@ type FormState = {
   regionId: number; districtId: number;
   lat: string; lng: string; altitude: string;
   communiants: string; non_communiants: string;
+  // Effectif global quand la ventilation est inconnue — cas des paroisses
+  // issues de l'évaluation synodale, qui ne fournit qu'un total.
+  total_declare: string;
   telephone: string; email: string;
 };
 
@@ -393,7 +396,7 @@ function emptyForm(): FormState {
     nom: '', adresse: '', categorie: '', en_prospection: false,
     regionId: 0, districtId: 0,
     lat: '', lng: '', altitude: '',
-    communiants: '', non_communiants: '',
+    communiants: '', non_communiants: '', total_declare: '',
     telephone: '', email: '',
   };
 }
@@ -405,7 +408,7 @@ function formFromParoisse(p: Paroisse): FormState {
     lat: p.latitude !== null ? String(p.latitude) : '',
     lng: p.longitude !== null ? String(p.longitude) : '',
     altitude: '',
-    communiants: '', non_communiants: '',
+    communiants: '', non_communiants: '', total_declare: '',
     telephone: p.telephone, email: p.email,
   };
 }
@@ -419,8 +422,13 @@ const FORM_TABS = [
   { label: 'Œuvres',      icon: 'hexagon'   as const },
 ];
 
-function ParoisseFormPanel({ mode, paroisse, onClose, onSaved }: {
+function ParoisseFormPanel({ mode, paroisse, estSuper, onClose, onSaved }: {
   mode: 'create' | 'edit'; paroisse?: Paroisse;
+  // Cette page est RÉEXPORTÉE par les espaces régional et district
+  // (app/admin/{regional,district}/paroisses) : elle n'est pas réservée au
+  // SUPER. Or lui seul peut modifier catégorie, GPS et contact — envoyer ces
+  // champs pour un autre rôle ferait échouer TOUT l'enregistrement en 400.
+  estSuper: boolean;
   onClose: () => void; onSaved: (p: Paroisse) => void;
 }) {
   const [tab, setTab]   = useState(0);
@@ -439,6 +447,7 @@ function ParoisseFormPanel({ mode, paroisse, onClose, onSaved }: {
   // Annual stat
   const [statId, setStatId] = useState<number | null>(null);
   const annee = new Date().getFullYear();
+
 
   useEffect(() => {
     api.get<any>('/api/geo/regions/liste/').then(setRegions).catch(() => {});
@@ -461,7 +470,12 @@ function ParoisseFormPanel({ mode, paroisse, onClose, onSaved }: {
         if (r.results.length > 0) {
           const s = r.results[0];
           setStatId(s.id);
-          setForm(f => ({ ...f, communiants: String(s.communiants || ''), non_communiants: String(s.non_communiants || '') }));
+          setForm(f => ({
+            ...f,
+            communiants: String(s.communiants || ''),
+            non_communiants: String(s.non_communiants || ''),
+            total_declare: s.total_declare != null ? String(s.total_declare) : '',
+          }));
         }
       }).catch(() => {});
 
@@ -499,23 +513,69 @@ function ParoisseFormPanel({ mode, paroisse, onClose, onSaved }: {
         }
         saved = await api.post<Paroisse>('/api/geo/paroisses/', payload);
       } else {
-        // EXIGENCE : en modification, SEUL le nom (et l'état de prospection)
-        // peut changer — le backend refuse tout autre champ.
-        saved = await api.patch<Paroisse>(`/api/geo/paroisses/${paroisse!.id}/`, {
+        // Tous les rôles autorisés à modifier peuvent changer le nom et l'état
+        // de prospection. Le SUPER y ajoute catégorie, GPS et contact.
+        const payload: Record<string, unknown> = {
           nom: form.nom.trim(), en_prospection: form.en_prospection,
-        });
+        };
+
+        if (estSuper) {
+          payload.categorie = form.categorie || null;
+          payload.adresse   = form.adresse.trim();
+          payload.telephone = form.telephone.trim();
+          payload.email     = form.email.trim();
+
+          // Latitude et longitude vont toujours par paire — le backend refuse
+          // l'une sans l'autre. Deux champs vides = effacement demandé ;
+          // un seul rempli = saisie incomplète, qu'on signale ici plutôt que
+          // de laisser partir une requête vouée au 400.
+          const latF = parseFloat(form.lat), lngF = parseFloat(form.lng);
+          const latOk = form.lat.trim() !== '' && !isNaN(latF);
+          const lngOk = form.lng.trim() !== '' && !isNaN(lngF);
+          if (latOk && lngOk) {
+            payload.latitude = latF; payload.longitude = lngF;
+          } else if (!form.lat.trim() && !form.lng.trim()) {
+            payload.latitude = null; payload.longitude = null;
+          } else {
+            setError('Renseignez la latitude ET la longitude, ou laissez les deux vides.');
+            setSaving(false);
+            return;
+          }
+        }
+
+        saved = await api.patch<Paroisse>(`/api/geo/paroisses/${paroisse!.id}/`, payload);
       }
 
       const pid = saved.id;
 
       // ── 2. Save statistics (communiants / non-communiants) ────────────
-      const comm  = form.communiants    ? parseInt(form.communiants)    : 0;
-      const ncomm = form.non_communiants ? parseInt(form.non_communiants) : 0;
-      if (form.communiants || form.non_communiants) {
+      // Deux façons de renseigner l'effectif, exclusives :
+      //   · la VENTILATION (communiants + non-communiants) quand on la connaît ;
+      //     le serveur en déduit le total et efface tout total global antérieur.
+      //   · le TOTAL SEUL sinon — cas des paroisses dont l'effectif vient de
+      //     l'évaluation synodale, qui ne ventile pas.
+      // La ventilation prime : plus précise, c'est elle qu'on envoie si elle
+      // est saisie, même si le champ total porte encore une ancienne valeur.
+      const aVentilation = !!(form.communiants || form.non_communiants);
+      const aTotalSeul   = !aVentilation && !!form.total_declare;
+
+      let corpsStat: Record<string, unknown> | null = null;
+      if (aVentilation) {
+        corpsStat = {
+          communiants:     form.communiants     ? parseInt(form.communiants)     : 0,
+          non_communiants: form.non_communiants ? parseInt(form.non_communiants) : 0,
+        };
+      } else if (aTotalSeul) {
+        corpsStat = { total_declare: parseInt(form.total_declare) };
+      }
+
+      if (corpsStat) {
+        // Les erreurs ne sont plus avalées : un effectif refusé sans que rien
+        // ne l'indique à l'écran est pire qu'un message d'erreur.
         if (statId) {
-          await api.patch(`/api/statistiques/${statId}/`, { communiants: comm, non_communiants: ncomm }).catch(() => {});
+          await api.patch(`/api/statistiques/${statId}/`, corpsStat);
         } else {
-          await api.post(`/api/statistiques/`, { paroisse: pid, annee, communiants: comm, non_communiants: ncomm }).catch(() => {});
+          await api.post(`/api/statistiques/`, { paroisse: pid, annee, ...corpsStat });
         }
       }
 
@@ -754,23 +814,52 @@ function ParoisseFormPanel({ mode, paroisse, onClose, onSaved }: {
                   <div style={{ fontSize: 11, color: '#6B7280', marginTop: 4 }}>Membres non baptisés</div>
                 </div>
               </div>
-              {/* Le total des fidèles n'est plus saisi directement : il est
-                  toujours recalculé côté serveur comme communiants + non-
-                  communiants (voir _sync_nombre_fideles) dès l'enregistrement
-                  des statistiques ci-dessous — un champ séparé était trompeur
-                  car il n'avait plus aucun effet en modification. */}
+              {/* Total seul — pour les paroisses dont la source ne ventile pas
+                  (évaluation du Conseil Synodal). Désactivé dès qu'une
+                  ventilation est saisie : celle-ci est plus précise et prime
+                  côté serveur, laisser le champ actif ferait croire à un
+                  arbitrage possible. */}
+              <div style={{ marginTop: 16 }}>
+                <label style={L.label}>Effectif total (si la ventilation est inconnue)</label>
+                <input
+                  className="input mono" type="number" min={0} placeholder="0"
+                  value={form.total_declare}
+                  disabled={!!(form.communiants || form.non_communiants)}
+                  onChange={e => set('total_declare', e.target.value)}
+                  style={{
+                    color: '#111827',
+                    opacity: (form.communiants || form.non_communiants) ? 0.45 : 1,
+                    maxWidth: 240,
+                  }}
+                />
+                <div style={{ fontSize: 11, color: '#6B7280', marginTop: 4 }}>
+                  {(form.communiants || form.non_communiants)
+                    ? 'Ignoré : le total est calculé à partir de la ventilation ci-dessus.'
+                    : 'À utiliser quand seul l’effectif global est connu.'}
+                </div>
+              </div>
 
-              {(form.communiants || form.non_communiants) && (
+              {(form.communiants || form.non_communiants || form.total_declare) && (
                 <div className="card" style={{ padding: '16px 20px', background: 'rgba(46,151,68,0.06)' }}>
                   <div style={{ fontSize: 11, color: '#374151', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>
                     Statistiques {annee} — Récapitulatif
                   </div>
                   <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap' }}>
-                    {[
-                      { label: 'Communiants', val: parseInt(form.communiants) || 0, color: '#2E9744' },
-                      { label: 'Non-communiants', val: parseInt(form.non_communiants) || 0, color: '#1565C0' },
-                      { label: 'Total', val: (parseInt(form.communiants) || 0) + (parseInt(form.non_communiants) || 0), color: '#111827' },
-                    ].map(s => (
+                    {((): { label: string; val: number; color: string }[] => {
+                      const c = parseInt(form.communiants) || 0;
+                      const n = parseInt(form.non_communiants) || 0;
+                      // Sans ventilation, n'afficher que le total : montrer
+                      // « Communiants 0 · Non-communiants 0 » ferait passer une
+                      // donnée absente pour une donnée nulle.
+                      if (!form.communiants && !form.non_communiants) {
+                        return [{ label: 'Effectif total', val: parseInt(form.total_declare) || 0, color: '#111827' }];
+                      }
+                      return [
+                        { label: 'Communiants', val: c, color: '#2E9744' },
+                        { label: 'Non-communiants', val: n, color: '#1565C0' },
+                        { label: 'Total', val: c + n, color: '#111827' },
+                      ];
+                    })().map(s => (
                       <div key={s.label}>
                         <div style={{ fontSize: 10, color: '#6B7280', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{s.label}</div>
                         <div style={{ fontSize: 28, fontWeight: 700, color: s.color, lineHeight: 1.2 }}>{s.val.toLocaleString('fr')}</div>
@@ -897,6 +986,7 @@ export default function ParoissesPage() {
   const [selection, setSelection]     = useState<Set<number>>(new Set());
   const [confirmDelete, setConfirmDelete] = useState<Paroisse | null>(null);
   const [deleting, setDeleting]       = useState(false);
+  const [deleteError, setDeleteError] = useState('');
   const [viewPanel, setViewPanel]     = useState<Paroisse | null>(null);
   const [formPanel, setFormPanel]     = useState<{ mode: 'create' | 'edit'; paroisse?: Paroisse } | null>(null);
 
@@ -1125,7 +1215,10 @@ export default function ParoissesPage() {
                         <td>
                           <div style={{ display: 'flex', gap: 2 }}>
                             <button className="icon-btn" title="Voir les détails" onClick={() => setViewPanel(p)}><I.eye size={15} /></button>
-                            {canEdit && <button className="icon-btn green" title="Modifier (nom uniquement)" onClick={() => setFormPanel({ mode: 'edit', paroisse: p })}><I.pencil size={15} /></button>}
+                            {canEdit && <button className="icon-btn green" title={canCreate ? "Modifier" : "Modifier (nom uniquement)"} onClick={() => setFormPanel({ mode: 'edit', paroisse: p })}><I.pencil size={15} /></button>}
+                            {/* Suppression réservée à l'administrateur général
+                                (canCreate vaut role === 'SUPER'). */}
+                            {canCreate && <button className="icon-btn" title="Supprimer la paroisse" onClick={() => setConfirmDelete(p)} style={{ color: '#DC2626' }}><I.trash size={15} /></button>}
                           </div>
                         </td>
                       </tr>
@@ -1160,9 +1253,59 @@ export default function ParoissesPage() {
         </div>
       )}
 
+      {/* Confirmation de suppression — action irréversible qui emporte aussi
+          les statistiques annuelles de la paroisse. Le serveur refuse (409)
+          tant que des ouvriers ou des œuvres y sont rattachés ; on relaie son
+          message tel quel, car lui seul sait ce qui bloque. */}
+      {confirmDelete && (
+        <div className="overlay" onClick={() => !deleting && setConfirmDelete(null)}>
+          <div className="card" onClick={e => e.stopPropagation()}
+            style={{ maxWidth: 460, margin: '12vh auto', padding: 24, background: '#fff' }}>
+            <h3 style={{ margin: '0 0 8px', fontSize: 17, color: '#111827' }}>
+              Supprimer « {confirmDelete.nom} » ?
+            </h3>
+            <p style={{ margin: '0 0 6px', fontSize: 13, color: '#374151', lineHeight: 1.55 }}>
+              Cette paroisse et ses statistiques annuelles seront définitivement
+              effacées. Cette action est irréversible.
+            </p>
+            <p style={{ margin: '0 0 18px', fontSize: 12, color: '#6B7280' }}>
+              {confirmDelete.district_nom} · {confirmDelete.region_nom}
+            </p>
+            {deleteError && (
+              <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: '#991B1B',
+                            padding: '10px 12px', borderRadius: 6, fontSize: 12.5, marginBottom: 16 }}>
+                {deleteError}
+              </div>
+            )}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+              <button className="btn btn-ghost" disabled={deleting}
+                onClick={() => { setConfirmDelete(null); setDeleteError(''); }}
+                style={{ color: '#374151' }}>Annuler</button>
+              <button className="btn" disabled={deleting}
+                style={{ background: '#DC2626', color: '#fff' }}
+                onClick={async () => {
+                  setDeleting(true); setDeleteError('');
+                  try {
+                    await api.delete(`/api/geo/paroisses/${confirmDelete.id}/`);
+                    addToast({ type: 'success', title: 'Paroisse supprimée', body: confirmDelete.nom });
+                    setConfirmDelete(null);
+                    setRefresh(r => r + 1);
+                  } catch (e) {
+                    setDeleteError(e instanceof Error ? e.message : 'Suppression impossible.');
+                  } finally {
+                    setDeleting(false);
+                  }
+                }}>
+                {deleting ? <span className="ls-spinner" /> : <><I.trash size={14} />Supprimer</>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Panels & Modals */}
       {viewPanel && <ParoisseViewPanel paroisse={viewPanel} canEdit={canEdit} onClose={() => setViewPanel(null)} onEdit={() => { setFormPanel({ mode: 'edit', paroisse: viewPanel }); setViewPanel(null); }} />}
-      {formPanel && <ParoisseFormPanel mode={formPanel.mode} paroisse={formPanel.paroisse} onClose={() => setFormPanel(null)} onSaved={handleSaved} />}
+      {formPanel && <ParoisseFormPanel mode={formPanel.mode} paroisse={formPanel.paroisse} estSuper={canCreate} onClose={() => setFormPanel(null)} onSaved={handleSaved} />}
 
       <ToastStack toasts={toasts} remove={remove} />
     </div>

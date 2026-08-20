@@ -1,6 +1,5 @@
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail
 from django.middleware.csrf import get_token
 from django.db.models import Sum
 from django.utils.encoding import force_str
@@ -323,23 +322,28 @@ def create_user(request):
             description=f"Création compte — rôle : {new_user.get_role_display()}",
         )
         # ── Envoi AUTOMATIQUE du mot de passe généré par e-mail ──────────
+        from .emails import send_credentials_email
+
         email_ok = False
         try:
-            send_mail(
+            send_credentials_email(
+                user=new_user,
+                password=new_user._generated_password,
                 subject="EEC Géolocalisation — votre compte administrateur",
-                message=(
-                    f"Bonjour {new_user.get_full_name() or new_user.username},\n\n"
-                    f"Votre compte administrateur ({new_user.get_role_display()}) vient d'être créé "
-                    f"sur la plateforme de géolocalisation de l'Église Évangélique du Cameroun.\n\n"
-                    f"Identifiant : {new_user.username}\n"
-                    f"Mot de passe : {new_user._generated_password}\n\n"
-                    f"Ce mot de passe est généré automatiquement. Il vous sera demandé "
-                    f"de le changer à votre première connexion.\n\n"
-                    f"— Plateforme EEC Géolocalisation"
+                intro_html=(
+                    "Votre compte administrateur vient d'être créé sur la plateforme "
+                    "de géolocalisation de l'Église Évangélique du Cameroun."
                 ),
-                from_email=getattr(settings, "DEFAULT_FROM_EMAIL", None),
-                recipient_list=[new_user.email],
-                fail_silently=False,
+                intro_text=(
+                    "Votre compte administrateur vient d'être créé sur la plateforme "
+                    "de géolocalisation de l'Église Évangélique du Cameroun."
+                ),
+                security_note=(
+                    "Pour la sécurité de la plateforme, connectez-vous rapidement pour "
+                    "définir votre propre mot de passe. Si vous ne vous attendiez pas à "
+                    "recevoir cet e-mail, contactez immédiatement l'administrateur."
+                ),
+                show_role=True,
             )
             email_ok = True
         except Exception:
@@ -733,23 +737,25 @@ def password_reset_request(request):
                description="Mot de passe réinitialisé via 'mot de passe oublié'")
 
     try:
-        send_mail(
+        from .emails import send_credentials_email
+
+        send_credentials_email(
+            user=user,
+            password=new_password,
             subject="Votre nouveau mot de passe — EEC Géolocalisation",
-            message=(
-                f"Bonjour {user.get_full_name() or user.username},\n\n"
-                f"Vous avez demandé la réinitialisation de votre mot de passe sur la "
-                f"plateforme de géolocalisation de l'Église Évangélique du Cameroun.\n\n"
-                f"Identifiant : {user.username}\n"
-                f"Nouveau mot de passe : {new_password}\n\n"
-                f"Ce mot de passe est temporaire. Il vous sera demandé de le changer "
-                f"à votre prochaine connexion.\n\n"
-                f"Si vous n'êtes pas à l'origine de cette demande, contactez immédiatement "
-                f"votre administrateur.\n\n"
-                f"— Plateforme EEC Géolocalisation"
+            intro_html=(
+                "Vous avez demandé la réinitialisation de votre mot de passe sur la "
+                "plateforme de géolocalisation de l'Église Évangélique du Cameroun."
             ),
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            fail_silently=False,
+            intro_text=(
+                "Vous avez demandé la réinitialisation de votre mot de passe sur la "
+                "plateforme de géolocalisation de l'Église Évangélique du Cameroun."
+            ),
+            security_note=(
+                "Si vous n'êtes pas à l'origine de cette demande, contactez immédiatement "
+                "l'administrateur de la plateforme — ce mot de passe donne accès à des "
+                "données sensibles."
+            ),
         )
     except Exception:
         # En cas d'erreur SMTP, le mot de passe a déjà été changé en base —
