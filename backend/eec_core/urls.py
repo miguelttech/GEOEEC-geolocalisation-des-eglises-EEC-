@@ -117,7 +117,7 @@ import_patterns = [
 # URL principale
 # ---------------------------------------------------------------------------
 urlpatterns = [
-    path("admin/",               admin.site.urls),
+    path("django-admin/",         admin.site.urls),
 
     # API REST — ViewSets via le router
     path("api/",                 include(router.urls)),

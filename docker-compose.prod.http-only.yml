@@ -1,0 +1,15 @@
+services:
+  nginx:
+    ports:
+      - "80:80"
+    volumes:
+      - media_data_prod:/app/media:ro
+  certbot:
+    profiles: ["disabled"]
+  backend:
+    volumes:
+      - ./data:/data:ro
+      - media_data_prod:/app/media
+
+volumes:
+  media_data_prod:
