@@ -62,6 +62,38 @@ class OuvrierWriteSerializer(serializers.ModelSerializer):
         }
 
 
+class OuvrierSuperSerializer(serializers.ModelSerializer):
+    """Modification par l'administrateur général : identité comprise.
+
+    Les autres rôles passent par OuvrierAffectationSerializer, qui interdit de
+    toucher au nom, au prénom et au sexe. Corriger une identité mal saisie à
+    l'import restait sinon impossible depuis l'application — or les données
+    viennent de fichiers Excel remplis à la main, où les fautes sont
+    fréquentes (ligne « en theologie Tayo Nji Jacques… » dans la base).
+
+    La RÈGLE MÉTIER de réaffectation reste imposée à tous, administrateur
+    général compris : un ouvrier occupé doit d'abord être retiré de sa
+    paroisse. Ce n'est pas une restriction technique mais une procédure de
+    l'EEC, et la contourner créerait des affectations sans trace.
+    """
+
+    class Meta:
+        model = Ouvrier
+        fields = [
+            "nom", "prenom", "sexe", "grade",
+            "paroisse", "statut", "telephone", "email",
+            "date_naissance", "date_ordination",
+        ]
+        extra_kwargs = {
+            "grade": {"required": False, "allow_null": True},
+            "email": {"required": False, "allow_blank": True},
+            "date_naissance":  {"required": False, "allow_null": True},
+            "date_ordination": {"required": False, "allow_null": True},
+        }
+
+    validate = None      # remplacé juste après par la logique partagée
+
+
 class OuvrierAffectationSerializer(serializers.ModelSerializer):
     """
     EXIGENCE : l'identité d'un ouvrier (nom, prénom, sexe) n'est JAMAIS
@@ -92,3 +124,9 @@ class OuvrierAffectationSerializer(serializers.ModelSerializer):
             # Réaffectation d'un ouvrier inoccupé → il redevient occupé
             attrs.setdefault("statut", "OCCUPE")
         return attrs
+
+
+# La validation de réaffectation est commune aux deux sérialiseurs de
+# modification : une seule définition, pour qu'un ajustement de la règle
+# métier ne puisse pas s'appliquer à l'un et pas à l'autre.
+OuvrierSuperSerializer.validate = OuvrierAffectationSerializer.validate

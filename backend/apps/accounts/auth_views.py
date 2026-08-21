@@ -1,7 +1,9 @@
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.tokens import default_token_generator
 from django.middleware.csrf import get_token
-from django.db.models import Sum
+from django.db.models import Sum, F, Value
+from django.db.models.functions import Coalesce
+from datetime import date
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from django.conf import settings
@@ -519,10 +521,28 @@ def dashboard_stats(request):
         ouvriers_qs  = Ouvrier.objects.filter(paroisse_id=pid) if pid else Ouvrier.objects.none()
         stats_qs     = StatistiqueAnnuelle.objects.filter(paroisse_id=pid) if pid else StatistiqueAnnuelle.objects.none()
 
-    annee  = int(request.query_params.get("annee", 2025))
+    # Années réellement présentes en base, plus récente d'abord. Elles étaient
+    # codées en dur (défaut 2025, liste [2024, 2025]) : les statistiques saisies
+    # depuis l'interface, qui portent l'année COURANTE, restaient donc
+    # invisibles sur le tableau de bord — modifier un effectif ne changeait
+    # rien à l'écran. La liste est désormais déduite des données.
+    annees_disponibles = list(
+        stats_qs.values_list("annee", flat=True).distinct().order_by("-annee")
+    )
+    annee_par_defaut = annees_disponibles[0] if annees_disponibles else date.today().year
+    annee = int(request.query_params.get("annee", annee_par_defaut))
+
+    # `total_declare` porte l'effectif global des sources qui ne ventilent pas
+    # (évaluation du Conseil Synodal). Sommer communiants + non-communiants
+    # afficherait 0 fidèle pour ces paroisses alors que leur effectif est connu.
+    total_effectif = Coalesce(
+        "total_declare",
+        Coalesce(F("communiants"), Value(0)) + Coalesce(F("non_communiants"), Value(0)),
+    )
     totaux = stats_qs.filter(annee=annee).aggregate(
         total_communiants=Sum("communiants"),
         total_non_communiants=Sum("non_communiants"),
+        total_effectif=Sum(total_effectif),
     )
 
     nb_regions = (
@@ -541,27 +561,42 @@ def dashboard_stats(request):
     # ── Évolution fidèles par année ──────────────────────────────────────────
     # EXIGENCE : ne conserver que les années réellement renseignées (2024, 2025) —
     # pas d'années obsolètes/vides affichées comme si elles étaient réelles.
-    annees_range = [2024, 2025]
     fideles_par_annee = []
-    for yr in annees_range:
-        t = stats_qs.filter(annee=yr).aggregate(c=Sum("communiants"), nc=Sum("non_communiants"))
-        fideles_par_annee.append({"year": yr, "comm": t["c"] or 0, "noncomm": t["nc"] or 0})
+    for yr in sorted(annees_disponibles):
+        t = stats_qs.filter(annee=yr).aggregate(
+            c=Sum("communiants"), nc=Sum("non_communiants"), tot=Sum(total_effectif),
+        )
+        fideles_par_annee.append({
+            "year": yr, "comm": t["c"] or 0, "noncomm": t["nc"] or 0,
+            "total": t["tot"] or 0,
+        })
 
     # ── Top régions par fidèles (annee courante) ─────────────────────────────
     if user.role == "SUPER":
+        # Comme pour le total général, l'effectif d'une paroisse est
+        # `total_declare` quand il est renseigné (sources qui ne ventilent pas),
+        # sinon la somme communiants + non-communiants. Sans ce Coalesce, les
+        # régions dont les paroisses ne ventilent pas remontaient à 0 fidèle et
+        # le classement était vide.
+        effectif_ligne = Coalesce(
+            "districts__paroisses__statistiques__total_declare",
+            Coalesce(F("districts__paroisses__statistiques__communiants"), Value(0))
+            + Coalesce(F("districts__paroisses__statistiques__non_communiants"), Value(0)),
+        )
         top_regions_qs = (
             RegionSynodale.objects
             .annotate(
                 nb_p=Count("districts__paroisses", distinct=True),
-                comm=Sum("districts__paroisses__statistiques__communiants",
-                         filter=Q(districts__paroisses__statistiques__annee=annee)),
-                noncomm=Sum("districts__paroisses__statistiques__non_communiants",
+                fideles=Sum(effectif_ligne,
                             filter=Q(districts__paroisses__statistiques__annee=annee)),
             )
-            .order_by("-comm")[:10]
+            # nulls_last : une région sans statistique pour l'année a
+            # `fideles` à NULL, et PostgreSQL classe les NULL EN TÊTE d'un tri
+            # décroissant — le classement s'ouvrait donc sur des régions à 0.
+            .order_by(F("fideles").desc(nulls_last=True))[:10]
         )
         top_regions = [
-            {"name": r.nom, "fideles": (r.comm or 0) + (r.noncomm or 0), "paroisses": r.nb_p}
+            {"name": r.nom, "fideles": r.fideles or 0, "paroisses": r.nb_p}
             for r in top_regions_qs
         ]
     else:
@@ -677,8 +712,9 @@ def dashboard_stats(request):
         "nb_districts":          nb_districts,
         "total_communiants":     totaux["total_communiants"]     or 0,
         "total_non_communiants": totaux["total_non_communiants"] or 0,
-        "total_fideles":         (totaux["total_communiants"] or 0) + (totaux["total_non_communiants"] or 0),
+        "total_fideles":         totaux["total_effectif"] or 0,
         "annee":                 annee,
+        "annees_disponibles":    annees_disponibles,
         "scope":                 user.get_scope_label(),
         "role":                  user.role,
         "validations_attente":   validations_attente,

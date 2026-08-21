@@ -446,7 +446,21 @@ function ParoisseFormPanel({ mode, paroisse, estSuper, onClose, onSaved }: {
 
   // Annual stat
   const [statId, setStatId] = useState<number | null>(null);
-  const annee = new Date().getFullYear();
+  // Année du recensement en cours — PAS l'année civile.
+  //
+  // Le formulaire écrivait sur `new Date().getFullYear()`. Or le dernier
+  // recensement de l'EEC est celui de 2025 : chaque modification d'effectif
+  // créait donc une statistique pour une année jamais recensée, invisible du
+  // tableau de bord et concurrente de la vraie donnée. On lit l'année de
+  // référence auprès du serveur, qui renvoie la plus récente réellement
+  // présente en base.
+  const [annee, setAnnee] = useState<number | null>(null);
+
+  useEffect(() => {
+    api.get<{ annees_disponibles?: number[]; annee?: number }>('/api/auth/dashboard-stats/')
+      .then(d => setAnnee(d.annees_disponibles?.[0] ?? d.annee ?? null))
+      .catch(() => setAnnee(null));
+  }, []);
 
 
   useEffect(() => {
@@ -465,6 +479,7 @@ function ParoisseFormPanel({ mode, paroisse, estSuper, onClose, onSaved }: {
     const pid = paroisse.id;
 
     // Load annual stats
+    if (annee === null) return;   // année de référence pas encore connue
     api.get<PagedResult<StatAnn>>(`/api/statistiques/?paroisse=${pid}&annee=${annee}`)
       .then(r => {
         if (r.results.length > 0) {
@@ -569,6 +584,11 @@ function ParoisseFormPanel({ mode, paroisse, estSuper, onClose, onSaved }: {
         corpsStat = { total_declare: parseInt(form.total_declare) };
       }
 
+      if (corpsStat && annee === null) {
+        setError("Année de référence indisponible : impossible d'enregistrer les effectifs.");
+        setSaving(false);
+        return;
+      }
       if (corpsStat) {
         // Les erreurs ne sont plus avalées : un effectif refusé sans que rien
         // ne l'indique à l'écran est pire qu'un message d'erreur.
@@ -842,7 +862,7 @@ function ParoisseFormPanel({ mode, paroisse, estSuper, onClose, onSaved }: {
               {(form.communiants || form.non_communiants || form.total_declare) && (
                 <div className="card" style={{ padding: '16px 20px', background: 'rgba(46,151,68,0.06)' }}>
                   <div style={{ fontSize: 11, color: '#374151', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>
-                    Statistiques {annee} — Récapitulatif
+                    Statistiques {annee ?? '—'} — Récapitulatif
                   </div>
                   <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap' }}>
                     {((): { label: string; val: number; color: string }[] => {
@@ -867,7 +887,7 @@ function ParoisseFormPanel({ mode, paroisse, estSuper, onClose, onSaved }: {
                     ))}
                   </div>
                   <div style={{ fontSize: 11, color: '#6B7280', marginTop: 10 }}>
-                    Ces données seront enregistrées comme statistiques annuelles {annee}.
+                    Ces données seront enregistrées comme statistiques annuelles {annee ?? '—'}.
                   </div>
                 </div>
               )}

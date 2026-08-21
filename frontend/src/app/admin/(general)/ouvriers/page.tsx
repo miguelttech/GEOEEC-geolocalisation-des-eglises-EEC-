@@ -149,7 +149,11 @@ const FORM_TABS_OUV = [
 ];
 
 // ─── Form Panel ───────────────────────────────────────────────────────────────
-function OuvrierFormPanel({ mode, ouvrier, grades, onClose, onSaved }: {
+function OuvrierFormPanel({ mode, ouvrier, grades, isSuper, onClose, onSaved }: {
+  // Le rôle n'était lu qu'en création (pour verrouiller la zone). En
+  // modification il est nécessaire aussi : seul l'administrateur général peut
+  // corriger l'identité et le grade d'un ouvrier.
+  isSuper: boolean;
   mode: 'create' | 'edit'; ouvrier?: Ouvrier; grades: Grade[];
   onClose: () => void; onSaved: (nom: string) => void;
 }) {
@@ -253,11 +257,18 @@ function OuvrierFormPanel({ mode, ouvrier, grades, onClose, onSaved }: {
         };
         await api.post('/api/ouvriers/ouvriers/', payload);
       } else {
-        // EXIGENCE : l'identité d'un ouvrier n'est JAMAIS modifiable —
-        // seule son AFFECTATION (paroisse unique) peut changer.
-        await api.patch(`/api/ouvriers/ouvriers/${ouvrier!.id}/`, {
-          paroisse: Number(form.paroisse),
-        });
+        // Tous les rôles peuvent réaffecter. L'administrateur général peut en
+        // outre corriger l'identité, le grade et le téléphone — les données
+        // proviennent de saisies Excel manuelles, souvent fautives.
+        const payload: Record<string, unknown> = { paroisse: Number(form.paroisse) };
+        if (isSuper) {
+          payload.nom       = form.nom.trim();
+          payload.prenom    = form.prenom.trim();
+          payload.sexe      = form.sexe;
+          payload.grade     = form.grade ? Number(form.grade) : null;
+          payload.telephone = form.telephone;
+        }
+        await api.patch(`/api/ouvriers/ouvriers/${ouvrier!.id}/`, payload);
       }
       onSaved(form.nom);
     } catch (e: unknown) {
@@ -338,22 +349,24 @@ function OuvrierFormPanel({ mode, ouvrier, grades, onClose, onSaved }: {
               {mode === 'edit' && (
                 <div style={{ gridColumn: '1/-1', background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: 6, padding: '10px 14px', fontSize: 12, color: '#1D4ED8' }}>
                   <I.alert size={13} style={{ marginRight: 6 }} />
-                  Nom, prénom et sexe constituent l'identité de l'ouvrier et ne sont plus modifiables après création.
+                  {isSuper
+                    ? "Réaffectation : un ouvrier occupé doit d'abord être retiré de sa paroisse (statut « Inoccupé »)."
+                    : "Nom, prénom et sexe constituent l'identité de l'ouvrier et ne sont plus modifiables après création."}
                 </div>
               )}
               <div>
                 <label style={L.label}>Prénom(s) *</label>
                 <input className="input" placeholder="Ex. Jean-Pierre" value={form.prenom} onChange={e => set('prenom', e.target.value)}
-                  disabled={mode === 'edit'} style={{ color: '#111827', opacity: mode === 'edit' ? 0.6 : 1, cursor: mode === 'edit' ? 'not-allowed' : 'text' }} autoFocus={mode === 'create'} />
+                  disabled={mode === 'edit' && !isSuper} style={{ color: '#111827', opacity: (mode === 'edit' && !isSuper) ? 0.6 : 1, cursor: (mode === 'edit' && !isSuper) ? 'not-allowed' : 'text' }} autoFocus={mode === 'create'} />
               </div>
               <div>
                 <label style={L.label}>Nom de famille *</label>
                 <input className="input" placeholder="Ex. ATEBA" value={form.nom} onChange={e => set('nom', e.target.value)}
-                  disabled={mode === 'edit'} style={{ color: '#111827', fontWeight: 600, opacity: mode === 'edit' ? 0.6 : 1, cursor: mode === 'edit' ? 'not-allowed' : 'text' }} />
+                  disabled={mode === 'edit' && !isSuper} style={{ color: '#111827', fontWeight: 600, opacity: (mode === 'edit' && !isSuper) ? 0.6 : 1, cursor: (mode === 'edit' && !isSuper) ? 'not-allowed' : 'text' }} />
               </div>
               <div>
                 <label style={L.label}>Sexe</label>
-                <select className="input" style={{ color: '#111827', opacity: mode === 'edit' ? 0.6 : 1, cursor: mode === 'edit' ? 'not-allowed' : 'pointer' }} value={form.sexe} onChange={e => set('sexe', e.target.value)} disabled={mode === 'edit'}>
+                <select className="input" style={{ color: '#111827', opacity: (mode === 'edit' && !isSuper) ? 0.6 : 1, cursor: (mode === 'edit' && !isSuper) ? 'not-allowed' : 'pointer' }} value={form.sexe} onChange={e => set('sexe', e.target.value)} disabled={mode === 'edit' && !isSuper}>
                   <option value="M">Masculin</option>
                   <option value="F">Féminin</option>
                 </select>
@@ -476,6 +489,16 @@ export default function OuvriersPage() {
   const [filterRegion, setFilterRegion] = useState('');
   const [filterStatut, setFilterStatut] = useState('');
   const [refresh, setRefresh] = useState(0);
+  // Rôle : la suppression et la correction d'identité sont réservées au SUPER.
+  const [isSuper, setIsSuper] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState<Ouvrier | null>(null);
+  const [deleting, setDeleting]           = useState(false);
+  const [deleteError, setDeleteError]     = useState('');
+
+  useEffect(() => {
+    api.get<{ role: string }>('/api/auth/me/')
+      .then(m => setIsSuper(m.role === 'SUPER')).catch(() => {});
+  }, []);
   const [viewPanel, setViewPanel] = useState<Ouvrier | null>(null);
   const [formPanel, setFormPanel] = useState<{ mode: 'create'|'edit'; ouvrier?: Ouvrier } | null>(null);
   const [regions, setRegions] = useState<RegionSynodale[]>([]);
@@ -678,7 +701,8 @@ export default function OuvriersPage() {
                         <td>
                           <div style={{ display: 'flex', gap: 2 }}>
                             <button className="icon-btn" onClick={() => setViewPanel(o)} title="Voir la fiche"><I.eye size={15}/></button>
-                            <button className="icon-btn green" onClick={() => setFormPanel({ mode: 'edit', ouvrier: o })} title="Réaffecter"><I.pencil size={15}/></button>
+                            <button className="icon-btn green" onClick={() => setFormPanel({ mode: 'edit', ouvrier: o })} title={isSuper ? "Modifier" : "Réaffecter"}><I.pencil size={15}/></button>
+                            {isSuper && <button className="icon-btn" title="Supprimer l'ouvrier" onClick={() => setConfirmDelete(o)} style={{ color: '#DC2626' }}><I.trash size={15}/></button>}
                           </div>
                         </td>
                       </tr>
@@ -709,8 +733,46 @@ export default function OuvriersPage() {
         <OuvrierViewPanel ouvrier={viewPanel} grades={grades} onClose={() => setViewPanel(null)}
           onEdit={() => { setFormPanel({ mode: 'edit', ouvrier: viewPanel! }); setViewPanel(null); }}/>
       )}
+      {confirmDelete && (
+        <div className="overlay" onClick={() => !deleting && setConfirmDelete(null)}>
+          <div className="card" onClick={e => e.stopPropagation()} style={{ maxWidth: 470, margin: '12vh auto', padding: 24, background: '#fff' }}>
+            <h3 style={{ margin: '0 0 8px', fontSize: 17, color: '#111827' }}>
+              Supprimer « {confirmDelete.nom} {confirmDelete.prenom} » ?
+            </h3>
+            <p style={{ margin: '0 0 6px', fontSize: 13, color: '#374151', lineHeight: 1.55 }}>
+              Cet ouvrier sera définitivement effacé. Cette action est irréversible.
+            </p>
+            <p style={{ margin: '0 0 18px', fontSize: 12, color: '#6B7280' }}>
+              {confirmDelete.grade_nom || 'Grade non renseigné'} · {confirmDelete.paroisse_nom} · {confirmDelete.region_nom}
+            </p>
+            {deleteError && (
+              <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: '#991B1B', padding: '10px 12px', borderRadius: 6, fontSize: 12.5, marginBottom: 16 }}>
+                {deleteError}
+              </div>
+            )}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+              <button className="btn btn-outline" disabled={deleting} onClick={() => { setConfirmDelete(null); setDeleteError(''); }}>Annuler</button>
+              <button className="btn" disabled={deleting} style={{ background: '#DC2626', color: '#fff' }}
+                onClick={async () => {
+                  setDeleting(true); setDeleteError('');
+                  try {
+                    await api.delete(`/api/ouvriers/ouvriers/${confirmDelete.id}/`);
+                    addToast({ type: 'success', title: 'Ouvrier supprimé', body: `${confirmDelete.nom} ${confirmDelete.prenom}` });
+                    setConfirmDelete(null);
+                    doRefresh();
+                  } catch (e: unknown) {
+                    setDeleteError(e instanceof Error ? e.message : 'Suppression impossible.');
+                  } finally { setDeleting(false); }
+                }}>
+                {deleting ? <span className="ls-spinner" /> : <><I.trash size={14}/>Supprimer</>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {formPanel && (
-        <OuvrierFormPanel mode={formPanel.mode} ouvrier={formPanel.ouvrier} grades={grades}
+        <OuvrierFormPanel mode={formPanel.mode} ouvrier={formPanel.ouvrier} grades={grades} isSuper={isSuper}
           onClose={() => setFormPanel(null)} onSaved={handleSaved}/>
       )}
       <ToastStack toasts={toasts}/>

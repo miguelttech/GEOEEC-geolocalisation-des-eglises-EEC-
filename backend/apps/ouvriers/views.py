@@ -6,6 +6,7 @@ from rest_framework.response import Response
 
 from .models import Grade, Ouvrier
 from .serializers import (
+    OuvrierSuperSerializer,
     GradeSerializer,
     OuvrierListSerializer,
     OuvrierWriteSerializer,
@@ -59,8 +60,13 @@ class OuvrierViewSet(viewsets.ModelViewSet):
         if self.action == "create":
             return OuvrierWriteSerializer
         if self.action in ("update", "partial_update"):
-            # EXIGENCE : l'identité d'un ouvrier n'est jamais modifiable ;
-            # seule son affectation (paroisse unique) peut changer.
+            # Pour les rôles régional, district et paroissial : l'identité d'un
+            # ouvrier reste inaltérable, seule son affectation peut changer.
+            # L'administrateur général peut en outre corriger l'identité et le
+            # grade — les données viennent de saisies Excel manuelles où les
+            # fautes sont fréquentes, et rien ne permettait de les rectifier.
+            if self.request.user.is_authenticated and self.request.user.role == "SUPER":
+                return OuvrierSuperSerializer
             return OuvrierAffectationSerializer
         return OuvrierListSerializer
 
@@ -164,11 +170,31 @@ class OuvrierViewSet(viewsets.ModelViewSet):
         return super().update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
-        # EXIGENCE : la suppression d'un ouvrier n'existe plus — pour AUCUN rôle.
-        return Response(
-            {"detail": "La suppression d'un ouvrier est définitivement désactivée."},
-            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+        # Réservée à l'administrateur général ; les autres rôles conservent
+        # l'interdiction totale.
+        if request.user.role != "SUPER":
+            return Response(
+                {"detail": "Seul l'administrateur général peut supprimer un ouvrier."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        ouvrier = self.get_object()
+        # Aucun modèle ne référence Ouvrier : rien ne s'oppose à la
+        # suppression, et il n'en restera aucune trace ailleurs. D'où une
+        # journalisation détaillée — grade et affectation compris.
+        from apps.audit.utils import log_action
+        log_action(
+            request, "DELETE", "ouvrier",
+            objet_id=ouvrier.id,
+            objet_nom=f"{ouvrier.nom} {ouvrier.prenom}".strip(),
+            description=(
+                f"Suppression de l'ouvrier « {ouvrier.nom} {ouvrier.prenom} » — "
+                f"grade {ouvrier.grade.nom if ouvrier.grade_id else 'non renseigné'}, "
+                f"paroisse {ouvrier.paroisse.nom} "
+                f"({ouvrier.paroisse.district.region.nom})"
+            ),
         )
+        return super().destroy(request, *args, **kwargs)
 
     @action(detail=False, url_path="stats", permission_classes=[permissions.IsAuthenticated])
     def stats(self, request):

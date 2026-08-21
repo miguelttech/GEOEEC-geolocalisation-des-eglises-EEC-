@@ -248,15 +248,48 @@ function OeuvreFormPanel({ mode, oeuvre, types, isSuper, onClose, onSaved }: {
   }
 
   async function handleSave() {
-    // EXIGENCE : en modification, SEULS nom/téléphone/adresse sont envoyés
-    // (le backend refuse tout autre champ — voir CHAMPS_MODIFIABLES).
+    // En modification, tous les rôles peuvent changer nom, téléphone et
+    // adresse. L'administrateur général y ajoute la nature de l'œuvre, sa
+    // position et ses informations descriptives. Le RATTACHEMENT (région /
+    // district / paroisse) n'est envoyé par personne : le backend le refuse,
+    // car il détermine qui a le droit de voir et modifier l'œuvre.
     if (mode === 'edit') {
       if (!form.nom.trim()) { setError('Le nom est obligatoire.'); return; }
+
+      const payload: Record<string, unknown> = {
+        nom: form.nom.trim(), telephone: form.telephone, adresse: form.adresse,
+      };
+
+      if (isSuper) {
+        if (!form.type_oeuvre) { setError('Le type est obligatoire.'); return; }
+        payload.type_oeuvre    = Number(form.type_oeuvre);
+        payload.description    = form.description;
+        payload.email          = form.email;
+        payload.est_active     = form.est_active;
+        payload.en_prospection = form.en_prospection;
+        payload.capacite       = form.capacite       ? Number(form.capacite)       : null;
+        payload.nb_personnels  = form.nb_personnels  ? Number(form.nb_personnels)  : null;
+        payload.annee_creation = form.annee_creation ? Number(form.annee_creation) : null;
+
+        // Les deux coordonnées vont ensemble : deux champs vides valent
+        // effacement, un seul rempli est une saisie incomplète qu'on signale
+        // ici plutôt que d'envoyer une requête vouée au refus.
+        const latOk = form.latitude.trim()  !== '' && !isNaN(parseFloat(form.latitude));
+        const lngOk = form.longitude.trim() !== '' && !isNaN(parseFloat(form.longitude));
+        if (latOk && lngOk) {
+          payload.latitude  = parseFloat(form.latitude);
+          payload.longitude = parseFloat(form.longitude);
+        } else if (!form.latitude.trim() && !form.longitude.trim()) {
+          payload.latitude = null; payload.longitude = null;
+        } else {
+          setError('Renseignez la latitude ET la longitude, ou laissez les deux vides.');
+          return;
+        }
+      }
+
       setSaving(true); setError('');
       try {
-        await api.patch(`/api/oeuvres/oeuvres/${oeuvre!.id}/`, {
-          nom: form.nom.trim(), telephone: form.telephone, adresse: form.adresse,
-        });
+        await api.patch(`/api/oeuvres/oeuvres/${oeuvre!.id}/`, payload);
         onSaved(form.nom);
       } catch (e: unknown) {
         setError(e instanceof Error ? e.message : 'Erreur lors de l\'enregistrement.');
@@ -328,12 +361,25 @@ function OeuvreFormPanel({ mode, oeuvre, types, isSuper, onClose, onSaved }: {
           )}
           <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: 8, padding: '10px 14px', fontSize: 12, color: '#1D4ED8' }}>
-              Seuls le nom, le téléphone et l&apos;adresse peuvent être modifiés. Le rattachement et la position GPS sont verrouillés.
+              {isSuper
+                ? "Le rattachement (région, district, paroisse) reste verrouillé : il détermine qui a le droit de voir et modifier cette œuvre."
+                : "Seuls le nom, le téléphone et l'adresse peuvent être modifiés."}
             </div>
             <div>
               <label style={Lbl}>Nom de l&apos;œuvre *</label>
               <input className="input" value={form.nom} onChange={e => set('nom', e.target.value)} style={{ color: '#111827', fontWeight: 600 }} autoFocus />
             </div>
+
+            {isSuper && (
+              <div>
+                <label style={Lbl}>Type d&apos;œuvre *</label>
+                <select className="input" value={form.type_oeuvre} onChange={e => set('type_oeuvre', e.target.value)} style={{ color: '#111827' }}>
+                  <option value="">— Sélectionner —</option>
+                  {types.map(t => <option key={t.id} value={String(t.id)}>{t.nom}</option>)}
+                </select>
+              </div>
+            )}
+
             <div>
               <label style={Lbl}>Téléphone</label>
               <input className="input mono" placeholder="+237 6XX…" value={form.telephone} onChange={e => set('telephone', e.target.value)} style={{ color: '#111827' }} />
@@ -342,6 +388,58 @@ function OeuvreFormPanel({ mode, oeuvre, types, isSuper, onClose, onSaved }: {
               <label style={Lbl}>Adresse</label>
               <input className="input" placeholder="Quartier, ville…" value={form.adresse} onChange={e => set('adresse', e.target.value)} style={{ color: '#111827' }} />
             </div>
+
+            {isSuper && (<>
+              <div>
+                <label style={Lbl}>Adresse e-mail</label>
+                <input className="input" type="email" placeholder="oeuvre@eec.cm" value={form.email} onChange={e => set('email', e.target.value)} style={{ color: '#111827' }} />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div>
+                  <label style={Lbl}>Latitude</label>
+                  <input className="input mono" placeholder="4.0500" value={form.latitude} onChange={e => set('latitude', e.target.value)} style={{ color: '#111827' }} />
+                </div>
+                <div>
+                  <label style={Lbl}>Longitude</label>
+                  <input className="input mono" placeholder="9.7000" value={form.longitude} onChange={e => set('longitude', e.target.value)} style={{ color: '#111827' }} />
+                </div>
+              </div>
+              <div style={{ fontSize: 11, color: '#6B7280', marginTop: -8 }}>
+                Les deux ensemble, ou les deux vides pour retirer l&apos;œuvre de la carte.
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+                <div>
+                  <label style={Lbl}>Capacité</label>
+                  <input className="input mono" type="number" min={0} value={form.capacite} onChange={e => set('capacite', e.target.value)} style={{ color: '#111827' }} />
+                </div>
+                <div>
+                  <label style={Lbl}>Personnels</label>
+                  <input className="input mono" type="number" min={0} value={form.nb_personnels} onChange={e => set('nb_personnels', e.target.value)} style={{ color: '#111827' }} />
+                </div>
+                <div>
+                  <label style={Lbl}>Année création</label>
+                  <input className="input mono" type="number" value={form.annee_creation} onChange={e => set('annee_creation', e.target.value)} style={{ color: '#111827' }} />
+                </div>
+              </div>
+
+              <div>
+                <label style={Lbl}>Description</label>
+                <textarea className="input" rows={3} value={form.description} onChange={e => set('description', e.target.value)} style={{ color: '#111827', resize: 'vertical' }} />
+              </div>
+
+              <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#374151', cursor: 'pointer' }}>
+                  <input type="checkbox" checked={form.est_active} onChange={e => set('est_active', e.target.checked)} />
+                  Œuvre active
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#374151', cursor: 'pointer' }}>
+                  <input type="checkbox" checked={form.en_prospection} onChange={e => set('en_prospection', e.target.checked)} />
+                  En prospection
+                </label>
+              </div>
+            </>)}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, paddingTop: 8, borderTop: '1px solid #E5E7EB' }}>
               <button className="btn btn-outline" onClick={onClose} disabled={saving}>Annuler</button>
               <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
@@ -577,6 +675,10 @@ export default function OeuvresPage() {
   const [filterActive, setFilterActive] = useState('');
   const [filterGps, setFilterGps]       = useState('');
   const [refresh, setRefresh]   = useState(0);
+  // Suppression : réservée au SUPER, confirmée, et irréversible.
+  const [confirmDelete, setConfirmDelete] = useState<Oeuvre | null>(null);
+  const [deleting, setDeleting]           = useState(false);
+  const [deleteError, setDeleteError]     = useState('');
   const [viewPanel, setViewPanel]   = useState<Oeuvre | null>(null);
   const [formPanel, setFormPanel]   = useState<{ mode: 'create'|'edit'; oeuvre?: Oeuvre } | null>(null);
   const [regions, setRegions] = useState<RegionSynodale[]>([]);
@@ -790,6 +892,7 @@ export default function OeuvresPage() {
                         <div style={{ display: 'flex', gap: 2 }}>
                           <button className="icon-btn" onClick={() => setViewPanel(o)}><I.eye size={15}/></button>
                           <button className="icon-btn green" onClick={() => setFormPanel({ mode: 'edit', oeuvre: o })}><I.pencil size={15}/></button>
+                          {isSuper && <button className="icon-btn" title="Supprimer l'œuvre" onClick={() => setConfirmDelete(o)} style={{ color: '#DC2626' }}><I.trash size={15}/></button>}
                         </div>
                       </td>
                     </tr>
@@ -819,6 +922,42 @@ export default function OeuvresPage() {
         <OeuvreViewPanel oeuvre={viewPanel} onClose={() => setViewPanel(null)}
           onEdit={() => { setFormPanel({ mode: 'edit', oeuvre: viewPanel! }); setViewPanel(null); }}/>
       )}
+        {confirmDelete && (
+        <div className="overlay" onClick={() => !deleting && setConfirmDelete(null)}>
+          <div className="card" onClick={e => e.stopPropagation()} style={{ maxWidth: 460, margin: '12vh auto', padding: 24, background: '#fff' }}>
+            <h3 style={{ margin: '0 0 8px', fontSize: 17, color: '#111827' }}>Supprimer « {confirmDelete.nom} » ?</h3>
+            <p style={{ margin: '0 0 6px', fontSize: 13, color: '#374151', lineHeight: 1.55 }}>
+              Cette œuvre sera définitivement effacée. Cette action est irréversible.
+            </p>
+            <p style={{ margin: '0 0 18px', fontSize: 12, color: '#6B7280' }}>
+              {confirmDelete.type_oeuvre_nom} · {confirmDelete.region_nom || 'National'}
+            </p>
+            {deleteError && (
+              <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: '#991B1B', padding: '10px 12px', borderRadius: 6, fontSize: 12.5, marginBottom: 16 }}>
+                {deleteError}
+              </div>
+            )}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+              <button className="btn btn-outline" disabled={deleting} onClick={() => { setConfirmDelete(null); setDeleteError(''); }}>Annuler</button>
+              <button className="btn" disabled={deleting} style={{ background: '#DC2626', color: '#fff' }}
+                onClick={async () => {
+                  setDeleting(true); setDeleteError('');
+                  try {
+                    await api.delete(`/api/oeuvres/oeuvres/${confirmDelete.id}/`);
+                    addToast({ type: 'success', title: 'Œuvre supprimée', body: confirmDelete.nom });
+                    setConfirmDelete(null);
+                    doRefresh();
+                  } catch (e: unknown) {
+                    setDeleteError(e instanceof Error ? e.message : 'Suppression impossible.');
+                  } finally { setDeleting(false); }
+                }}>
+                {deleting ? <span className="ls-spinner" /> : <><I.trash size={14}/>Supprimer</>}
+              </button>
+            </div>
+          </div>
+        </div>
+        )}
+
       {formPanel && (
         <OeuvreFormPanel mode={formPanel.mode} oeuvre={formPanel.oeuvre} types={types} isSuper={isSuper}
           onClose={() => setFormPanel(null)} onSaved={handleSaved}/>

@@ -8,7 +8,9 @@ import { api, type DashboardStats, type Paroisse } from '@/lib/api';
 /* ── Types ────────────────────────────────────────────────────────────────── */
 interface FullStats extends DashboardStats {
   validations_attente: number;
-  fideles_par_annee: { year: number; comm: number; noncomm: number }[];
+  fideles_par_annee: { year: number; comm: number; noncomm: number; total: number }[];
+  // Années réellement présentes en base, plus récente d'abord.
+  annees_disponibles: number[];
   top_regions: { name: string; fideles: number; paroisses: number }[];
   oeuvres_par_type: { type: string; count: number; color: string }[];
   top_paroisses_fideles: { name: string; fideles: number }[];
@@ -121,47 +123,19 @@ export default function DashboardPage() {
   const [stats, setStats]     = React.useState<FullStats | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError]     = React.useState('');
-  const [annee, setAnnee]     = React.useState(2025);
+  // `null` au premier chargement : on laisse le serveur choisir l'année la
+  // plus récente réellement présente en base. Une valeur en dur (2025) faisait
+  // manquer les statistiques saisies depuis l'interface, qui portent l'année
+  // courante — modifier un effectif ne changeait alors rien à l'écran.
+  const [annee, setAnnee]     = React.useState<number | null>(null);
 
   React.useEffect(() => {
     setLoading(true);
-    api.get<FullStats>(`/api/auth/dashboard-stats/?annee=${annee}`)
-      .then(setStats)
+    api.get<FullStats>('/api/auth/dashboard-stats/' + (annee !== null ? `?annee=${annee}` : ''))
+      .then(d => { setStats(d); if (annee === null) setAnnee(d.annee); })
       .catch(e => setError(e.message || 'Erreur de chargement'))
       .finally(() => setLoading(false));
   }, [annee]);
-
-  // ── Affichage du nombre de fidèles : purement visuel, ne touche jamais
-  // la base de données. La vraie valeur (s.total_fideles) reste intacte ;
-  // seul ce qui est AFFICHÉ peut être modifié par l'administrateur général,
-  // et cette préférence est propre à son navigateur (localStorage).
-  const FIDELES_OVERRIDE_KEY = 'eec_dashboard_fideles_override';
-  const [fidelesOverride, setFidelesOverride] = React.useState<number | null>(null);
-  const [editingFideles, setEditingFideles]   = React.useState(false);
-  const [fidelesInput, setFidelesInput]       = React.useState('');
-
-  React.useEffect(() => {
-    const saved = window.localStorage.getItem(FIDELES_OVERRIDE_KEY);
-    if (saved !== null && !Number.isNaN(Number(saved))) setFidelesOverride(Number(saved));
-  }, []);
-
-  const startEditFideles = () => {
-    setFidelesInput(String(fidelesOverride ?? s?.total_fideles ?? 0));
-    setEditingFideles(true);
-  };
-  const saveFidelesOverride = () => {
-    const n = parseInt(fidelesInput, 10);
-    if (!Number.isNaN(n) && n >= 0) {
-      setFidelesOverride(n);
-      window.localStorage.setItem(FIDELES_OVERRIDE_KEY, String(n));
-    }
-    setEditingFideles(false);
-  };
-  const resetFidelesOverride = () => {
-    setFidelesOverride(null);
-    window.localStorage.removeItem(FIDELES_OVERRIDE_KEY);
-    setEditingFideles(false);
-  };
 
   if (error) return (
     <div style={{ padding: 32, color: '#FF6B6B' }}>
@@ -171,6 +145,8 @@ export default function DashboardPage() {
   );
 
   const s = stats;
+  // Année à AFFICHER : celle du serveur tant que l'utilisateur n'a rien choisi.
+  const anneeAffichee = annee ?? s?.annee ?? '';
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -188,40 +164,16 @@ export default function DashboardPage() {
 
       {/* Row 2 — 4 widgets */}
       <div className="g g-4" style={{ gap: 16 }}>
-        <Widget title={`Total fidèles ${annee}`} action={
-          !loading && !editingFideles ? (
-            <button className="btn-ghost btn" style={{ padding: '4px 6px', fontSize: 11 }} onClick={startEditFideles}>
-              <I.pencil size={12} /> Modifier
-            </button>
-          ) : undefined
-        }>
-          {loading ? <Skeleton h={80} /> : editingFideles ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <input
-                className="input" type="number" min={0} autoFocus
-                value={fidelesInput} onChange={e => setFidelesInput(e.target.value)}
-                style={{ fontSize: 20, fontWeight: 700 }}
-              />
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                <button className="btn btn-primary" style={{ fontSize: 12, padding: '6px 10px' }} onClick={saveFidelesOverride}>Enregistrer</button>
-                <button className="btn-ghost btn" style={{ fontSize: 12, padding: '6px 10px' }} onClick={() => setEditingFideles(false)}>Annuler</button>
-                {fidelesOverride !== null && (
-                  <button className="btn-ghost btn" style={{ fontSize: 12, padding: '6px 10px', color: 'var(--text-3)' }} onClick={resetFidelesOverride}>
-                    Réinitialiser
-                  </button>
-                )}
-              </div>
-            </div>
-          ) : (
+        {/* Aucune action d'édition ici : le total vient exclusivement des
+            statistiques annuelles en base. Un « Modifier » local existait, qui
+            affichait un nombre stocké dans le navigateur sans rapport avec la
+            donnée réelle — deux visiteurs voyaient deux totaux différents. */}
+        <Widget title={`Total fidèles ${anneeAffichee}`}>
+          {loading ? <Skeleton h={80} /> : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <div className="sg" style={{ fontSize: 28, lineHeight: 1 }}>
-                {(fidelesOverride ?? s?.total_fideles ?? 0).toLocaleString('fr')}
+                {(s?.total_fideles ?? 0).toLocaleString('fr')}
               </div>
-              {fidelesOverride !== null && (
-                <div style={{ fontSize: 10, color: 'var(--text-3)', fontStyle: 'italic' }}>
-                  Affichage personnalisé — la donnée réelle de la base n&apos;est pas modifiée
-                </div>
-              )}
               <div style={{ fontSize: 12, color: 'var(--text-2)', display: 'flex', flexDirection: 'column', gap: 3, marginTop: 4 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span style={{ width: 8, height: 8, background: '#2E9744', borderRadius: 2 }} />
@@ -265,7 +217,7 @@ export default function DashboardPage() {
             <>
               <div className="sg" style={{ fontSize: 18, lineHeight: 1.3, color: '#5AC472' }}>{s?.scope ?? '—'}</div>
               <div style={{ fontSize: 12, color: 'var(--text-2)', marginTop: 4 }}>Rôle : {s?.role ?? '—'}</div>
-              <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 4 }}>Données {annee}</div>
+              <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 4 }}>Données {anneeAffichee}</div>
             </>
           )}
         </Widget>
@@ -276,13 +228,15 @@ export default function DashboardPage() {
 
         <Widget title="Top régions par fidèles" action={
           <select className="input" style={{ padding: '2px 8px', fontSize: 12, height: 28 }}
-            value={annee} onChange={e => setAnnee(Number(e.target.value))}>
-            {[2025, 2024, 2023, 2022, 2021, 2020].map(y => <option key={y} value={y}>{y}</option>)}
+            value={annee ?? ''} onChange={e => setAnnee(Number(e.target.value))}>
+            {/* Années issues de la base, pas d'une liste figée : proposer
+                des années sans aucune donnée n'aidait personne. */}
+            {(stats?.annees_disponibles ?? []).map(y => <option key={y} value={y}>{y}</option>)}
           </select>
         }>
           {loading ? <Skeleton h={180} /> :
             s?.top_regions?.length ? <HorizontalBars data={s.top_regions.map(r => ({ label: r.name, value: r.fideles }))} /> :
-            <div style={{ color: 'var(--text-3)', fontSize: 13 }}>Aucune statistique pour {annee}</div>}
+            <div style={{ color: 'var(--text-3)', fontSize: 13 }}>Aucune statistique pour {anneeAffichee}</div>}
         </Widget>
 
         <Widget title="Répartition des œuvres">
@@ -322,7 +276,7 @@ export default function DashboardPage() {
           ) : <div style={{ color: 'var(--text-3)', fontSize: 13 }}>Importez des données pour voir les catégories</div>}
         </Widget>
 
-        <Widget title={`Évolution des fidèles ${(s?.fideles_par_annee?.[0]?.year ?? 2020)} → ${annee}`}>
+        <Widget title={`Évolution des fidèles ${(s?.fideles_par_annee?.[0]?.year ?? '')} → ${anneeAffichee}`}>
           {loading ? <Skeleton h={180} /> : s?.fideles_par_annee?.length ? (
             <>
               <LineChart data={s.fideles_par_annee.map(d => ({ year: d.year, comm: d.comm, noncomm: d.noncomm }))} height={210} />

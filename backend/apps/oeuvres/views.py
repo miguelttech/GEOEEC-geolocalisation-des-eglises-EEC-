@@ -180,30 +180,80 @@ class OeuvreViewSet(viewsets.ModelViewSet):
             # SUPER sans rattachement = œuvre NATIONALE (les 3 FK restent nuls)
         serializer.save(**extra)
 
-    # EXIGENCE : en MODIFICATION, seuls le nom, le téléphone et l'adresse
-    # sont modifiables. Le GPS et le rattachement administratif : JAMAIS.
+    # Champs modifiables par les rôles régional, district et paroissial.
     CHAMPS_MODIFIABLES = {"nom", "telephone", "adresse"}
+
+    # L'administrateur général dispose d'un périmètre étendu : nature de
+    # l'œuvre, position, capacités et informations descriptives.
+    #
+    # Reste verrouillé pour TOUS, lui compris : le RATTACHEMENT
+    # (paroisse / district / region). Il ne décrit pas l'œuvre, il détermine
+    # QUI a le droit de la voir et de la modifier — le déplacer reviendrait à
+    # la faire changer de main sans trace. Une œuvre mal rattachée se corrige
+    # en la recréant au bon endroit.
+    CHAMPS_MODIFIABLES_SUPER = CHAMPS_MODIFIABLES | {
+        "type_oeuvre", "latitude", "longitude", "email", "description",
+        "capacite", "nb_personnels", "annee_creation", "en_prospection",
+        "est_active",
+    }
 
     def update(self, request, *args, **kwargs):
         oeuvre = self.get_object()
-        if not _can_write_oeuvre(request.user, oeuvre):
+        user = request.user
+        if not _can_write_oeuvre(user, oeuvre):
             return Response(status=status.HTTP_403_FORBIDDEN)
-        interdits = set(request.data.keys()) - self.CHAMPS_MODIFIABLES
+
+        autorises = (self.CHAMPS_MODIFIABLES_SUPER if user.role == "SUPER"
+                     else self.CHAMPS_MODIFIABLES)
+        interdits = set(request.data.keys()) - autorises
         if interdits:
             return Response(
-                {"detail": "Seuls le nom, le téléphone et l'adresse d'une œuvre "
-                           f"sont modifiables. Champs refusés : {sorted(interdits)}"},
+                {"detail": "Champs non modifiables pour votre rôle : "
+                           f"{sorted(interdits)}. Autorisés : {sorted(autorises)}."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+        # Le sérialiseur rejette déjà une coordonnée isolée, mais l'erreur y est
+        # moins explicite : on tranche ici, comme pour les paroisses.
+        recues = {"latitude", "longitude"} & set(request.data.keys())
+        if len(recues) == 1:
+            return Response(
+                {"detail": "Latitude et longitude doivent être envoyées ensemble."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         kwargs["partial"] = True
         return super().update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
-        # EXIGENCE : la suppression d'une œuvre n'existe plus — pour AUCUN rôle.
-        return Response(
-            {"detail": "La suppression d'une œuvre est définitivement désactivée."},
-            status=status.HTTP_405_METHOD_NOT_ALLOWED,
+        # Réservée à l'administrateur général ; les autres rôles conservent
+        # l'interdiction totale.
+        if request.user.role != "SUPER":
+            return Response(
+                {"detail": "Seul l'administrateur général peut supprimer une œuvre."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        oeuvre = self.get_object()
+        # Aucun modèle ne référence Oeuvre : la suppression n'a pas de blocage
+        # d'intégrité, contrairement à celle d'une paroisse. On journalise donc
+        # d'autant plus soigneusement — c'est la seule trace qui restera.
+        rattachement = (
+            f"paroisse {oeuvre.paroisse.nom}" if oeuvre.paroisse_id
+            else f"district {oeuvre.district.nom}" if oeuvre.district_id
+            else f"région {oeuvre.region.nom}" if oeuvre.region_id
+            else "national"
         )
+        from apps.audit.utils import log_action
+        log_action(
+            request, "DELETE", "oeuvre",
+            objet_id=oeuvre.id,
+            objet_nom=oeuvre.nom,
+            description=(f"Suppression de l'œuvre « {oeuvre.nom} » "
+                         f"({oeuvre.type_oeuvre.nom if oeuvre.type_oeuvre_id else 'type inconnu'}, "
+                         f"{rattachement})"),
+        )
+        return super().destroy(request, *args, **kwargs)
 
     @action(detail=False, url_path="sans-gps", permission_classes=[permissions.IsAuthenticated])
     def sans_gps(self, request):
