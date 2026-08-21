@@ -17,11 +17,11 @@ if SECRET_KEY == "changez-en-prod":
 
 DEBUG = False
 
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = os.environ.get("SESSION_COOKIE_SECURE", "True") == "True"
+CSRF_COOKIE_SECURE = os.environ.get("CSRF_COOKIE_SECURE", "True") == "True"
 SECURE_HSTS_SECONDS = 31536000
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_SSL_REDIRECT = True
+SECURE_SSL_REDIRECT = os.environ.get("SECURE_SSL_REDIRECT", "True") == "True"
 
 # Le TLS est terminé par nginx (INFRA-2) — la connexion gunicorn↔nginx est en
 # clair sur le réseau Docker interne. Sans cette ligne, Django ne sait pas

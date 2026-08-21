@@ -4,6 +4,8 @@ from django.db.models import Count, Func, Value, F, Q
 from django.contrib.gis.db.models import GeometryField
 from django.contrib.gis.db.models.functions import AsGeoJSON
 
+from django.core.cache import cache
+from django.utils.http import urlencode
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -24,6 +26,17 @@ from apps.accounts.permissions import (
 )
 
 
+def get_or_compute_cached(cache_key, compute_fn, ttl=600, lock_timeout=5):
+    """Cache simple, sans attente bloquante : en cas de miss, calcule et
+    stocke. Pas de sleep() ici — un worker WSGI sync bloqué en sleep ne
+    peut traiter aucune autre requête, ce qui aggrave la charge au lieu
+    de la réduire quand beaucoup de requêtes arrivent en même temps."""
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
+    result = compute_fn()
+    cache.set(cache_key, result, ttl)
+    return result
 class STSimplify(Func):
     """ST_Simplify(geom, tolerance) de PostGIS — réduit le nombre de sommets
     des polygones → payload beaucoup plus léger."""
@@ -56,23 +69,28 @@ class RegionSynodaleViewSet(viewsets.ReadOnlyModelViewSet):
         """GET /api/geo/regions/ — FeatureCollection GeoJSON des 22 régions synodales.
         La géométrie est SIMPLIFIÉE et convertie en GeoJSON directement par PostGIS
         (ST_Simplify + ST_AsGeoJSON) → réponse légère et quasi instantanée
-        (vs ~6,5 Mo / 16 s avec les polygones bruts)."""
-        qs = self.get_queryset().annotate(
-            geojson=AsGeoJSON(STSimplify(F("geometrie"), Value(0.002)), precision=5)
-        )
-        features = [
-            {
-                "type": "Feature",
-                "id": r.id,
-                "geometry": json.loads(r.geojson) if r.geojson else None,
-                "properties": {
-                    "id": r.id, "nom": r.nom, "code": r.code,
-                    "nb_districts": r.nb_districts, "nb_paroisses": r.nb_paroisses,
-                },
-            }
-            for r in qs
-        ]
-        return Response({"type": "FeatureCollection", "features": features})
+        (vs ~6,5 Mo / 16 s avec les polygones bruts).
+        Mise en cache Redis (10 min) : données quasi statiques, coûteuses à
+        recalculer (jointures + simplification PostGIS à chaque appel)."""
+        def _compute():
+            qs = self.get_queryset().annotate(
+                geojson=AsGeoJSON(STSimplify(F("geometrie"), Value(0.002)), precision=5)
+            )
+            features = [
+                {
+                    "type": "Feature",
+                    "id": r.id,
+                    "geometry": json.loads(r.geojson) if r.geojson else None,
+                    "properties": {
+                        "id": r.id, "nom": r.nom, "code": r.code,
+                        "nb_districts": r.nb_districts, "nb_paroisses": r.nb_paroisses,
+                    },
+                }
+                for r in qs
+            ]
+            return {"type": "FeatureCollection", "features": features}
+        result = get_or_compute_cached("geo:regions:list:v1", _compute)
+        return Response(result)
 
     @action(detail=False, url_path="liste")
     def liste(self, request):
@@ -144,6 +162,17 @@ class DistrictViewSet(viewsets.ReadOnlyModelViewSet):
             qs = filter_districts_by_scope(qs, self.request.user)
 
         return qs
+    def list(self, request, *args, **kwargs):
+        """Cache Redis (10 min) pour les visiteurs anonymes sans filtre."""
+        FILTRES_REELS = {"region"}
+        a_un_filtre = any(p in request.query_params for p in FILTRES_REELS)
+        if not request.user.is_authenticated and not a_un_filtre:
+            data = get_or_compute_cached(
+                "geo:districts:list:v1",
+                lambda: super(DistrictViewSet, self).list(request, *args, **kwargs).data,
+            )
+            return Response(data)
+        return super().list(request, *args, **kwargs)
 
 
 
@@ -201,6 +230,16 @@ class ParoisseViewSet(viewsets.ModelViewSet):
             qs = filter_paroisses_by_scope(qs, self.request.user)
 
         return qs
+    def list(self, request, *args, **kwargs):
+        FILTRES_REELS = {"district", "region", "search", "avec_gps", "sans_gps", "categorie"}
+        a_un_filtre = any(p in request.query_params for p in FILTRES_REELS)
+        if not request.user.is_authenticated and not a_un_filtre:
+            data = get_or_compute_cached(
+                "geo:paroisses:list:v1",
+                lambda: super(ParoisseViewSet, self).list(request, *args, **kwargs).data,
+            )
+            return Response(data)
+        return super().list(request, *args, **kwargs)
 
     def get_serializer_class(self):
         if self.action in ("create", "update", "partial_update"):
