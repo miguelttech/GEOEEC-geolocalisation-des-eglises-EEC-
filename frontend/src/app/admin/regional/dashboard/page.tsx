@@ -1,12 +1,11 @@
 'use client';
 import React from 'react';
 import { I } from '@/components/admin/icons';
-import { HorizontalBars, Donut, LineChart } from '@/components/admin/atoms';
+import { HorizontalBars, Donut } from '@/components/admin/atoms';
 import { api, type DashboardStats, type District } from '@/lib/api';
 
 /* ── Types ────────────────────────────────────────────────────────────────── */
 interface RegionStats extends DashboardStats {
-  fideles_par_annee: { year: number; comm: number; noncomm: number }[];
   oeuvres_par_type: { type: string; count: number; color: string }[];
   top_paroisses_fideles: { name: string; fideles: number }[];
   validations_attente: number;
@@ -128,22 +127,12 @@ export default function DashboardRegionalPage() {
         </div>
       </div>
 
-      {/* Row 4 — Evolution + Top paroisses */}
-      <div className="g g-2" style={{ gap: 12 }}>
-        <div className="card" style={{ padding: '14px 16px' }}>
-          <div style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>
-            Évolution des fidèles {(s?.fideles_par_annee?.[0]?.year ?? 2020)} → {annee}
-          </div>
-          {loading ? <Skeleton h={180} /> : s?.fideles_par_annee?.length ? (
-            <LineChart data={s.fideles_par_annee.map(d => ({ year: d.year, comm: d.comm, noncomm: d.noncomm }))} />
-          ) : <div style={{ color: 'var(--text-3)', fontSize: 13 }}>Aucune statistique historique</div>}
-        </div>
-        <div className="card" style={{ padding: '14px 16px' }}>
-          <div style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>Top paroisses par fidèles</div>
-          {loading ? <Skeleton h={180} /> : s?.top_paroisses_fideles?.length ? (
-            <HorizontalBars data={s.top_paroisses_fideles.map(p => ({ label: p.name, value: p.fideles }))} />
-          ) : <div style={{ color: 'var(--text-3)', fontSize: 13 }}>Aucune donnée de fidèles</div>}
-        </div>
+      {/* Row 4 — Top paroisses */}
+      <div className="card" style={{ padding: '14px 16px' }}>
+        <div style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>Top paroisses par fidèles</div>
+        {loading ? <Skeleton h={180} /> : s?.top_paroisses_fideles?.length ? (
+          <HorizontalBars data={s.top_paroisses_fideles.map(p => ({ label: p.name, value: p.fideles }))} />
+        ) : <div style={{ color: 'var(--text-3)', fontSize: 13 }}>Aucune donnée de fidèles</div>}
       </div>
 
       {/* Row 5 — Districts table */}

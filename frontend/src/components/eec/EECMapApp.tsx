@@ -68,12 +68,17 @@ type FilterState = {
 export type TravelMode = 'auto' | 'moto' | 'pedestrian';
 export type RoutePoint = { lat: number; lng: number; label: string; kind: string };
 export type RouteStep = { instruction: string; distance_km: number; duration_min: number; type: number };
+/** Distance + durée d'un mode, sans tracé — sert à comparer les 3 modes. */
+export type RouteSummary = { distance_km: number; duration_min: number };
 export type RouteData = {
   mode: string;
   distance_km: number;
   duration_min: number;
   geometry: [number, number][];   // [lat, lng]
   steps: RouteStep[];
+  /** Durée de CHAQUE mode ('auto' | 'moto' | 'pedestrian') pour le même trajet,
+   *  renvoyée en un seul appel par le backend. `null` = mode indisponible. */
+  alternatives?: Record<string, RouteSummary | null>;
 } | null;
 
 const DEFAULT_FILTERS: FilterState = {
@@ -447,21 +452,17 @@ const ALL_RAIL_TABS = [
   { id: 'search',    label: 'Recherche',    icon: 'search' },
   { id: 'filters',   label: 'Filtres',      icon: 'filterFunnel' },
   { id: 'parcours',  label: 'Parcours',     icon: 'trail' },
-  { id: 'stats',     label: 'Statistiques', icon: 'stat' },
   { id: 'regions',   label: 'Régions',      icon: 'region' },
   { id: 'districts', label: 'Districts',    icon: 'network' },
   { id: 'paroisses', label: 'Paroisses',    icon: 'church' },
   { id: 'oeuvres',   label: 'Œuvres',       icon: 'buildings' },
-  { id: 'ouvriers',  label: 'Ouvriers',     icon: 'users' },
   { id: 'favoris',   label: 'Favoris',      icon: 'starFilled' },
   { id: 'history',   label: 'Historique',   icon: 'history' },
   { id: 'settings',  label: 'Paramètres',   icon: 'settings' },
 ];
 // Onglets réservés au visiteur connecté. En mode 'public' ils restent cliquables
 // mais ouvrent l'invite de connexion (même système que le favori).
-// EXIGENCE : les statistiques sont réservées aux utilisateurs ayant un compte —
-// un visiteur non connecté ne doit plus y avoir accès.
-const LOCKED_FOR_PUBLIC = new Set(['stats', 'favoris', 'parcours', 'history', 'settings']);
+const LOCKED_FOR_PUBLIC = new Set(['favoris', 'parcours', 'history', 'settings']);
 
 /* ============================================================
    useLeafletMap hook
@@ -484,6 +485,8 @@ function useLeafletMap(
   measuring: boolean,
   measurePoints: [number, number][],
   onMeasureClick: (lat: number, lng: number) => void,
+  pickTarget: 'start' | 'end' | null,
+  onPickMapPoint: (lat: number, lng: number) => void,
 ) {
   const mapRef         = useRef<L.Map | null>(null);
   const tileRef        = useRef<L.TileLayer | null>(null);
@@ -961,6 +964,27 @@ function useLeafletMap(
     }
   }, [route, routeStart, routeEnd]);
 
+  // ── Itinéraire : capter un clic n'importe où sur la carte ──
+  // Le point de départ d'un trajet est presque toujours un endroit quelconque
+  // (un domicile, un carrefour), pas une paroisse : se limiter aux marqueurs
+  // rendait le mode « choisir sur la carte » inutilisable pour un départ.
+  useEffect(() => {
+    const map = mapRef.current; if (!map) return;
+    if (!pickTarget || measuring) return;
+    const handler = (e: L.LeafletMouseEvent & { propagatedFrom?: unknown }) => {
+      // Un clic sur un marqueur (ou un polygone de région) est déjà traité par
+      // handleMarkerClick, PUIS remonte jusqu'à la carte : sans ce filtre, le
+      // point nommé qui vient d'être choisi serait aussitôt écrasé par ses
+      // coordonnées brutes. Leaflet ne renseigne `propagatedFrom` que sur les
+      // événements venus d'une couche, jamais sur un clic direct sur le fond.
+      if (e.propagatedFrom) return;
+      onPickMapPoint(e.latlng.lat, e.latlng.lng);
+    };
+    map.on('click', handler);
+    map.getContainer().style.cursor = 'crosshair';
+    return () => { map.off('click', handler); map.getContainer().style.cursor = ''; };
+  }, [pickTarget, measuring, onPickMapPoint]);
+
   // ── Outil de mesure : capter les clics quand l'outil est actif ──
   useEffect(() => {
     const map = mapRef.current; if (!map) return;
@@ -1423,60 +1447,6 @@ const FiltersPanel = ({ filters, setFilters, layerCounts, onClose, onReset, onAp
 /* ============================================================
    STATS PANEL
    ============================================================ */
-const StatsPanel = ({ filters, layerCounts, onClose, onFocusRegion }: {
-  filters: FilterState; layerCounts: Record<string, number>; onClose: () => void;
-  onFocusRegion: (r: RegionItem) => void;
-}) => {
-  const { regions, parishes } = useMapData();
-
-  const totalFideles = useMemo(() => parishes.reduce((s, p) => s + p.stats.fideles, 0), [parishes]);
-  const totalCommun  = useMemo(() => parishes.reduce((s, p) => s + p.stats.communiants, 0), [parishes]);
-
-  const regionStats = useMemo(() => {
-    const max = Math.max(1, ...regions.map(r => parishes.filter(p => p.regionId === r.id).length));
-    return regions
-      .map(r => { const count = parishes.filter(p => p.regionId === r.id).length; return { ...r, count, pct: (count / max) * 100 }; })
-      .sort((a, b) => b.count - a.count);
-  }, [regions, parishes]);
-
-  return (
-    <>
-      <div className="panel-head"><h2>Statistiques</h2><button className="ib" onClick={onClose}><Icon name="close" size={16} stroke={2} /></button></div>
-      <div className="panel-body">
-        <div className="panel-section">
-          <h3 className="section-label">Fidèles · Année {filters.year}</h3>
-          <div className="stats-row">
-            <div className="stat-card featured"><div className="sc-label">Total fidèles</div><div className="sc-value">{fmt(totalFideles)}</div></div>
-            <div className="stat-card yellow"><div className="sc-label">Communiants</div><div className="sc-value">{fmt(totalCommun)}</div><div className="sc-delta">{totalFideles ? Math.round(totalCommun / totalFideles * 100) : 0} % du total</div></div>
-          </div>
-        </div>
-        <div className="panel-section">
-          <h3 className="section-label">Top régions par paroisses</h3>
-          <div className="region-bar-list">
-            {regionStats.slice(0, 12).map(r => (
-              <div key={r.id} className="region-bar" onClick={() => onFocusRegion(r as RegionItem)}>
-                <span className="rb-name">{r.city}</span><span className="rb-val">{r.count}</span>
-                <span className="rb-track"><span className="rb-fill" style={{ width: r.pct + '%' }} /></span>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="panel-section">
-          <h3 className="section-label">Œuvres par type</h3>
-          <div className="stats-row">
-            {ENTITY_TYPES.filter(t => t.id !== 'paroisse').map(t => (
-              <div key={t.id} className="stat-card" style={{ borderLeft: `3px solid ${t.color}` }}>
-                <div className="sc-label" style={{ color: t.color }}>{t.singular}</div>
-                <div className="sc-value">{layerCounts[t.id]}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </>
-  );
-};
-
 /* ============================================================
    ENTITY LIST PANEL
    ============================================================ */
@@ -1504,18 +1474,6 @@ const EntityListPanel = ({ title, items, kind, onPick, onClose, totalLabel }: {
         </div>
         {filtered.slice(0, 80).map((it: any) => {
           const r = regions.find(x => x.id === it.regionId);
-          if (kind === 'worker') {
-            const initials = it.name.split(' ').map((s: string) => s[0]).join('').slice(0, 2).toUpperCase();
-            return (
-              <button key={it.id} className="list-row">
-                <span className="lr-ico" style={{ background: 'var(--eec-green-soft)', color: 'var(--green-deep-text)', fontWeight: 700, fontSize: 13 }}>{initials}</span>
-                <span className="lr-body"><span className="lr-title">{it.name}</span><span className="lr-sub">{it.gradeLabel} · {r?.city}</span></span>
-                <span className="dp-worker w-status" style={{ padding: '3px 10px', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', borderRadius: 999, background: it.status === 'occupe' ? 'var(--eec-green)' : 'var(--surface-3)', color: it.status === 'occupe' ? '#fff' : 'var(--t-2)' }}>
-                  {it.status === 'occupe' ? 'Occupé' : 'Inoccupé'}
-                </span>
-              </button>
-            );
-          }
           const t = ENTITY_TYPES.find(x => x.id === it.type);
           return (
             <button key={it.id} className="list-row" onClick={() => onPick && onPick(kind === 'region' ? 'region' : kind === 'district' ? 'district' : 'item', it)}>
@@ -1593,7 +1551,7 @@ const PointField = ({ kind, point, accent, letter, placeholder, picking, onPickM
     <div className={'rt-field' + (picking ? ' picking' : '')}>
       <span className="rt-dot" style={{ background: accent }}>{letter}</span>
       <div className="rt-field-body" style={{ position: 'relative' }}>
-        <input className="rt-input" value={q} placeholder={picking ? 'Cliquez un marqueur sur la carte…' : placeholder}
+        <input className="rt-input" value={q} placeholder={picking ? 'Cliquez un point sur la carte…' : placeholder}
           onChange={e => setQ(e.target.value)} disabled={picking} />
         {results.length > 0 && (
           <div className="rt-results">
@@ -1635,7 +1593,7 @@ const ParcoursPanel = ({
   onUseMyPosition: (t: 'start' | 'end') => void;
   onCompute: () => void; onClear: () => void; onSwap: () => void; onStartNav: () => void;
 }) => {
-  const canCompute = !!routeStart && !!routeEnd && !routeLoading;
+  const manquant: 'start' | 'end' | null = !routeStart ? 'start' : (!routeEnd ? 'end' : null);
   return (
     <>
       <div className="panel-head">
@@ -1643,15 +1601,26 @@ const ParcoursPanel = ({
         <button className="ib" onClick={onClose}><Icon name="close" size={16} stroke={2} /></button>
       </div>
       <div className="panel-body">
-        {/* Sélecteur de mode */}
+        {/* Sélecteur de mode — chaque bouton porte la durée de SON mode.
+            L'utilisateur doit pouvoir comparer voiture / moto / à pied d'un
+            coup d'œil : le backend renvoie les trois durées dans une seule
+            réponse, il n'y a donc rien à recalculer pour les afficher. */}
         <div className="panel-section" style={{ paddingBottom: 8 }}>
           <div className="rt-modes">
-            {TRAVEL_MODES.map(m => (
-              <button key={m.id} className={'rt-mode' + (routeMode === m.id ? ' on' : '')} onClick={() => setRouteMode(m.id)}>
-                <Icon name={m.icon} size={18} stroke={1.8} />
-                <span>{m.label}</span>
-              </button>
-            ))}
+            {TRAVEL_MODES.map(m => {
+              const alt = route?.alternatives?.[m.id];
+              return (
+                <button key={m.id} className={'rt-mode' + (routeMode === m.id ? ' on' : '')} onClick={() => setRouteMode(m.id)}>
+                  <Icon name={m.icon} size={18} stroke={1.8} />
+                  <span>{m.label}</span>
+                  {route && (
+                    <span className="rt-mode-time">
+                      {alt ? fmtDuration(alt.duration_min) : '—'}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -1675,12 +1644,20 @@ const ParcoursPanel = ({
           </div>
 
           {pickTarget && (
-            <div className="rt-hint"><Icon name="pin" size={12} stroke={2} /> Cliquez un marqueur sur la carte pour définir {pickTarget === 'start' ? 'le départ' : 'la destination'}.</div>
+            <div className="rt-hint"><Icon name="pin" size={12} stroke={2} /> Cliquez n’importe où sur la carte — ou sur un marqueur — pour définir {pickTarget === 'start' ? 'le départ' : 'la destination'}.</div>
+          )}
+          {!pickTarget && manquant && !routeError && (
+            <div className="rt-hint" style={{ color: 'var(--t-2)' }}>
+              <Icon name="help" size={12} stroke={2} />
+              {manquant === 'start'
+                ? 'Il manque le point de départ (A) — touchez la cible pour votre position GPS.'
+                : 'Il manque la destination (B) — cherchez une paroisse ou une œuvre.'}
+            </div>
           )}
           {routeError && <div className="rt-error"><Icon name="help" size={13} stroke={2} /> {routeError}</div>}
 
           <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-            <button className="btn-apply" style={{ flex: 1 }} disabled={!canCompute} onClick={onCompute}>
+            <button className="btn-apply" style={{ flex: 1 }} disabled={routeLoading} onClick={onCompute}>
               {routeLoading ? <span className="rt-spin" /> : <><Icon name="route" size={14} stroke={2} /> Calculer l&apos;itinéraire</>}
             </button>
             {(route || routeStart || routeEnd) && (
@@ -1736,6 +1713,8 @@ const ParcoursPanel = ({
             <div className="rt-tips">
               <div className="rt-tip"><span className="rt-tip-ico" style={{ background: 'var(--eec-green-soft)', color: 'var(--eec-green)' }}><Icon name="crosshair" size={14} stroke={1.9} /></span>
                 <div><b>Depuis ma position</b><span>Touchez la cible sur le départ, puis choisissez une destination.</span></div></div>
+              <div className="rt-tip"><span className="rt-tip-ico" style={{ background: 'rgba(26,115,232,0.1)', color: '#1A73E8' }}><Icon name="map" size={14} stroke={1.9} /></span>
+                <div><b>Depuis un point quelconque</b><span>Touchez le repère, puis cliquez l’endroit voulu sur la carte.</span></div></div>
               <div className="rt-tip"><span className="rt-tip-ico" style={{ background: 'rgba(211,47,47,0.1)', color: '#D32F2F' }}><Icon name="pin" size={14} stroke={1.9} /></span>
                 <div><b>Entre deux éléments</b><span>Choisissez une église/œuvre en A et une autre en B pour la distance.</span></div></div>
             </div>
@@ -2596,6 +2575,21 @@ export default function EECMapApp({ mode, user, embedded = false }: { mode: MapM
     kind: 'type' in item ? (item as any).type : 'region',
   });
 
+  // Clic sur le fond de carte pendant la sélection d'un point d'itinéraire.
+  // Le libellé du point reprend ses coordonnées, comme le fait déjà le menu
+  // contextuel « Itinéraire depuis ici ».
+  const onPickMapPoint = useCallback((lat: number, lng: number) => {
+    if (!pickTarget) return;
+    const pt: RoutePoint = {
+      lat, lng,
+      label: `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
+      kind: 'map',
+    };
+    if (pickTarget === 'start') setRouteStart(pt); else setRouteEnd(pt);
+    setPickTarget(null);
+    setRouteError('');
+  }, [pickTarget]);
+
   const handleMarkerClick = useCallback((item: AnyItem) => {
     // Si on est en mode "choisir un point pour l'itinéraire", on capture le clic
     if (pickTarget) {
@@ -2660,8 +2654,23 @@ export default function EECMapApp({ mode, user, embedded = false }: { mode: MapM
 
   // Calcul de l'itinéraire réel via le backend (Valhalla)
   const computeRoute = useCallback(async () => {
-    if (!routeStart || !routeEnd) { setRouteError('Définissez un départ et une destination.'); return; }
-    setRouteLoading(true); setRouteError(''); setRoute(null);
+    // Dire CE QUI manque et ouvrir directement la sélection correspondante :
+    // un bouton grisé sans explication laissait l'utilisateur cliquer dans le
+    // vide sans comprendre pourquoi rien ne se passait.
+    if (!routeStart) {
+      setRouteError("Choisissez d'abord un point de départ (A) : la cible utilise votre position GPS, le repère vous laisse cliquer un point sur la carte.");
+      setPickTarget('start');
+      return;
+    }
+    if (!routeEnd) {
+      setRouteError('Choisissez une destination (B) : tapez le nom d’une paroisse ou d’une œuvre dans le champ B.');
+      setPickTarget('end');
+      return;
+    }
+    // On NE vide PAS `route` ici : lors d'un changement de mode, l'ancien
+    // tracé et les durées restent affichés pendant le recalcul au lieu de
+    // clignoter et de disparaître le temps de l'aller-retour réseau.
+    setRouteLoading(true); setRouteError('');
     try {
       const csrf = await fetch(`${BACKEND}/api/auth/csrf/`, { credentials: 'include' })
         .then(r => r.json()).then(d => d.csrfToken ?? '').catch(() => '');
@@ -2674,10 +2683,18 @@ export default function EECMapApp({ mode, user, embedded = false }: { mode: MapM
         }),
       });
       const data = await res.json();
-      if (!res.ok) { setRouteError(data.detail || "Calcul d'itinéraire impossible."); return; }
-      setRoute(data as RouteData);
+      if (!res.ok) { setRouteError(data.detail || "Calcul d'itinéraire impossible."); setRoute(null); return; }
+      const r = data as NonNullable<RouteData>;
+      setRoute(r);
+      // Le repli « ligne droite » du backend n'est pas un itinéraire : il faut
+      // le dire, sinon l'utilisateur prend une distance à vol d'oiseau pour un
+      // vrai temps de trajet.
+      if ((data as { provider?: string }).provider === 'direct') {
+        setRouteError('Service de calcul momentanément indisponible — tracé à vol d’oiseau, la durée est indicative.');
+      }
     } catch {
       setRouteError('Erreur réseau pendant le calcul.');
+      setRoute(null);
     } finally {
       setRouteLoading(false);
     }
@@ -2689,8 +2706,32 @@ export default function EECMapApp({ mode, user, embedded = false }: { mode: MapM
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [routeMode]);
 
+  // Calcul automatique dès que le départ ET la destination sont connus.
+  //
+  // Le parcours visé est : chercher une paroisse → « Itinéraire » → se
+  // localiser → voir le tracé. Exiger en plus un clic sur « Calculer
+  // l'itinéraire » alors que les deux points sont déjà renseignés donne
+  // l'impression que le bouton « Itinéraire » n'a rien fait.
+  //
+  // `autoCalcule` retient le couple de points déjà tenté : sans lui, un échec
+  // (réseau coupé, point inaccessible) laisserait `route` à null et l'effet
+  // relancerait le calcul en boucle.
+  const autoCalcule = useRef('');
+  useEffect(() => {
+    if (!routeStart || !routeEnd || route || routeLoading) return;
+    const cle = `${routeStart.lat},${routeStart.lng}|${routeEnd.lat},${routeEnd.lng}|${routeMode}`;
+    if (autoCalcule.current === cle) return;
+    autoCalcule.current = cle;
+    computeRoute();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [routeStart, routeEnd, route, routeLoading, routeMode]);
+
   const clearRoute = useCallback(() => {
     setRoute(null); setRouteStart(null); setRouteEnd(null); setRouteError(''); setPickTarget(null);
+    // Sans cette remise à zéro, refaire exactement le même trajet après un
+    // « Effacer » ne relancerait aucun calcul : le garde anti-boucle croirait
+    // ce couple de points déjà tenté.
+    autoCalcule.current = '';
   }, []);
 
   const swapRoute = useCallback(() => {
@@ -2801,6 +2842,8 @@ export default function EECMapApp({ mode, user, embedded = false }: { mode: MapM
     measuring,
     measurePoints,
     onMeasureClick,
+    pickTarget,
+    onPickMapPoint,
   );
   const recenter = () => {
     const map = mapRef.current;
@@ -2913,12 +2956,10 @@ export default function EECMapApp({ mode, user, embedded = false }: { mode: MapM
                 setRouteMode={setRouteMode} setRouteStart={setRouteStart} setRouteEnd={setRouteEnd}
                 setPickTarget={setPickTarget} onUseMyPosition={useMyPosition}
                 onCompute={computeRoute} onClear={clearRoute} onSwap={swapRoute} onStartNav={startNav} />}
-              {activeTab === 'stats'     && <StatsPanel filters={filters} layerCounts={layerCounts} onClose={() => setActiveTab(null)} onFocusRegion={r => { setFilters(f => ({ ...f, region: r.id })); setFocusTarget({ lat: r.lat, lng: r.lng, zoom: 8 }); }} />}
               {activeTab === 'regions'   && <EntityListPanel title="Régions"   items={mapData.regions}   kind="region"   onPick={handleSearchPick} onClose={() => setActiveTab(null)} totalLabel={`${mapData.regions.length} régions synodales`} />}
               {activeTab === 'districts' && <EntityListPanel title="Districts"  items={mapData.districts} kind="district" onPick={handleSearchPick} onClose={() => setActiveTab(null)} totalLabel={`${mapData.districts.length} districts`} />}
               {activeTab === 'paroisses' && <EntityListPanel title="Paroisses"  items={mapData.parishes}  kind="parish"   onPick={handleSearchPick} onClose={() => setActiveTab(null)} totalLabel={`${mapData.globalStats.parishes} paroisses`} />}
               {activeTab === 'oeuvres'   && <EntityListPanel title="Œuvres"     items={mapData.oeuvres}   kind="oeuvre"   onPick={handleSearchPick} onClose={() => setActiveTab(null)} totalLabel={`${mapData.oeuvres.length} œuvres`} />}
-              {activeTab === 'ouvriers'  && <EntityListPanel title="Ouvriers"   items={mapData.workers}   kind="worker"   onClose={() => setActiveTab(null)} totalLabel={`${mapData.globalStats.workers} ouvriers ecclésiastiques`} />}
               {activeTab === 'favoris'   && <FavorisPanel saved={saved} onOpen={openSaved} onRemove={toggleSave} onClose={() => setActiveTab(null)} />}
               {activeTab === 'history'   && <HistoryPanel recents={recents} onPick={handleMarkerClick} onClose={() => setActiveTab(null)} onClear={clearHistory} />}
               {activeTab === 'settings'  && <SettingsPanel theme={theme} setTheme={setTheme} onClose={() => setActiveTab(null)} user={user} onLogout={handleLogout} mapSettings={mapSettings} setMapSettings={setMapSettings} />}

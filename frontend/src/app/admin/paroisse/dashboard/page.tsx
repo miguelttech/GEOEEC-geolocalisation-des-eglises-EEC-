@@ -1,13 +1,11 @@
 'use client';
 import React from 'react';
 import { I } from '@/components/admin/icons';
-import { LineChart, GpsCell } from '@/components/admin/atoms';
+import { GpsCell } from '@/components/admin/atoms';
 import { api, type DashboardStats, type Paroisse, type Ouvrier, type Oeuvre } from '@/lib/api';
 
 /* ── Types ────────────────────────────────────────────────────────────────── */
-interface ParoisseStats extends DashboardStats {
-  fideles_par_annee: { year: number; comm: number; noncomm: number }[];
-}
+type ParoisseStats = DashboardStats;
 
 const C = '#E67A2E';
 
@@ -98,16 +96,6 @@ export default function DashboardParoissePage() {
             )}
           </div>
         </>) : <div style={{ color: 'var(--text-3)', fontSize: 13 }}>Aucune paroisse rattachée à ce compte</div>}
-      </div>
-
-      {/* Row 3 — Évolution des fidèles */}
-      <div className="card" style={{ padding: '14px 16px' }}>
-        <div style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>
-          Évolution des fidèles {(s?.fideles_par_annee?.[0]?.year ?? 2020)} → {annee}
-        </div>
-        {loading ? <Skeleton h={180} /> : s?.fideles_par_annee?.length ? (
-          <LineChart data={s.fideles_par_annee.map(d => ({ year: d.year, comm: d.comm, noncomm: d.noncomm }))} />
-        ) : <div style={{ color: 'var(--text-3)', fontSize: 13 }}>Aucune statistique historique</div>}
       </div>
 
       {/* Row 4 — Ouvriers */}

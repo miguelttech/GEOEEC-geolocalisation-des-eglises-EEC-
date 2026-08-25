@@ -3,6 +3,7 @@ import math
 from django.contrib.auth import login
 from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance
+from django.core.cache import cache
 from django.core.mail import send_mail
 from django.conf import settings
 from django.db import IntegrityError
@@ -525,8 +526,12 @@ def route_reelle(request):
     Le tracé `geometry` est dessiné directement sur la carte Leaflet côté frontend.
     Contrairement à /calculer/ (vol d'oiseau Haversine), ici la distance et la
     durée sont réalistes (suivent les routes praticables selon le mode).
+
+    La réponse porte aussi `alternatives` : la distance et la durée des DEUX
+    autres modes, pour que l'interface affiche côte à côte le temps en voiture,
+    en moto et à pied sans redemander un calcul à chaque changement d'onglet.
     """
-    from .routing import calculer_route, RoutingError
+    from .routing import calculer_routes_multi, MODES_UI, RoutingError
 
     data = request.data
     try:
@@ -540,15 +545,45 @@ def route_reelle(request):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
+    # Bornes terrestres : un couple de coordonnées inversé (lng en lat) envoie
+    # le moteur chercher une route au milieu de l'océan et fait patienter
+    # l'utilisateur 15 s avant un échec incompréhensible. Autant refuser tout
+    # de suite avec un message clair.
+    for nom, lat, lng in (("départ", start_lat, start_lng), ("destination", end_lat, end_lng)):
+        if not (-90.0 <= lat <= 90.0) or not (-180.0 <= lng <= 180.0):
+            return Response(
+                {"detail": f"Coordonnées de {nom} invalides (latitude/longitude hors bornes)."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
     mode = (data.get("mode") or "auto")
 
+    # Cache Redis : un itinéraire entre deux mêmes points ne change pas d'une
+    # minute à l'autre, et les instances publiques Valhalla/OSRM sont limitées
+    # en débit. On arrondit à ~11 m (5 décimales) pour que deux clics quasi
+    # identiques partagent la même entrée.
+    cle = "route:v2:{}:{:.5f},{:.5f}:{:.5f},{:.5f}".format(
+        str(mode).lower(), start_lat, start_lng, end_lat, end_lng,
+    )
+    cached = cache.get(cle)
+    if cached is not None:
+        return Response(cached, status=status.HTTP_200_OK)
+
     try:
-        result = calculer_route(start_lat, start_lng, end_lat, end_lng, mode=mode)
+        result = calculer_routes_multi(
+            start_lat, start_lng, end_lat, end_lng, mode=mode, modes=MODES_UI,
+        )
     except RoutingError as e:
         return Response({"detail": str(e)}, status=status.HTTP_502_BAD_GATEWAY)
     except Exception:  # noqa: BLE001 — filet de sécurité : ne jamais renvoyer 500
         from .routing import _route_direct
         result = _route_direct(start_lat, start_lng, end_lat, end_lng, mode)
+
+    # On ne met en cache que les itinéraires réellement calculés sur le réseau
+    # routier : figer une ligne droite de secours pendant 1 h priverait
+    # l'utilisateur du vrai tracé dès le retour du service.
+    if result.get("provider") != "direct":
+        cache.set(cle, result, 3600)
 
     return Response(result, status=status.HTTP_200_OK)
 

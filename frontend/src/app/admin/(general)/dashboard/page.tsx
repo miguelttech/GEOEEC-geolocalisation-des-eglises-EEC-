@@ -2,13 +2,12 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { I } from '@/components/admin/icons';
-import { Avatar, Widget, HorizontalBars, Donut, StackedBars, LineChart, CategoriePill, GpsCell } from '@/components/admin/atoms';
+import { Avatar, Widget, HorizontalBars, Donut, StackedBars, CategoriePill, GpsCell } from '@/components/admin/atoms';
 import { api, type DashboardStats, type Paroisse } from '@/lib/api';
 
 /* ── Types ────────────────────────────────────────────────────────────────── */
 interface FullStats extends DashboardStats {
   validations_attente: number;
-  fideles_par_annee: { year: number; comm: number; noncomm: number; total: number }[];
   // Années réellement présentes en base, plus récente d'abord.
   annees_disponibles: number[];
   top_regions: { name: string; fideles: number; paroisses: number }[];
@@ -276,17 +275,6 @@ export default function DashboardPage() {
           ) : <div style={{ color: 'var(--text-3)', fontSize: 13 }}>Importez des données pour voir les catégories</div>}
         </Widget>
 
-        <Widget title={`Évolution des fidèles ${(s?.fideles_par_annee?.[0]?.year ?? '')} → ${anneeAffichee}`}>
-          {loading ? <Skeleton h={180} /> : s?.fideles_par_annee?.length ? (
-            <>
-              <LineChart data={s.fideles_par_annee.map(d => ({ year: d.year, comm: d.comm, noncomm: d.noncomm }))} height={210} />
-              <div style={{ display: 'flex', gap: 14, fontSize: 11, color: 'var(--text-2)', marginTop: -4, justifyContent: 'center' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 14, height: 2, background: '#2E9744' }} />Communiants</span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 14, height: 2, background: 'rgba(240,244,241,0.45)' }} />Non-communiants</span>
-              </div>
-            </>
-          ) : <div style={{ color: 'var(--text-3)', fontSize: 13 }}>Aucune statistique historique</div>}
-        </Widget>
       </div>
 
       {/* Row 4 — Top 10 paroisses (EXIGENCE : le widget « Aperçu géographique »
