@@ -101,6 +101,19 @@ DATABASES = {
         "PASSWORD": os.environ.get("DB_PASSWORD", ""),
         "HOST": os.environ.get("DB_HOST", "db"),
         "PORT": os.environ.get("DB_PORT", "5432"),
+        # Connexions PostgreSQL persistantes (60 s). Sans ce réglage, Django
+        # ouvre ET ferme une connexion à CHAQUE requête HTTP : poignée de main
+        # TCP, authentification, puis fork d'un backend PostgreSQL — de l'ordre
+        # de 10 à 15 ms perdues par requête, et autant de churn côté serveur.
+        # Avec 16 emplacements gunicorn simultanés, on passe d'environ
+        # 16 connexions/s recréées en permanence à 16 connexions réutilisées,
+        # très en dessous du max_connections de PostgreSQL (100 par défaut).
+        "CONN_MAX_AGE": int(os.environ.get("DB_CONN_MAX_AGE", "60")),
+        # Indispensable dès que CONN_MAX_AGE > 0 : Django vérifie qu'une
+        # connexion recyclée est toujours vivante avant de la réutiliser,
+        # au lieu de faire échouer la requête sur un socket fermé entre-temps
+        # (redémarrage de PostgreSQL, coupure réseau, timeout côté serveur).
+        "CONN_HEALTH_CHECKS": True,
     }
 }
 

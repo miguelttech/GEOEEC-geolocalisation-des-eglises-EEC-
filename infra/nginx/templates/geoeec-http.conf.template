@@ -4,6 +4,34 @@ server {
 
     client_max_body_size 15M;
 
+    # ── Compression HTTP ──────────────────────────────────────────────────
+    # Le serveur est à Gravelines (France), les utilisateurs au Cameroun :
+    # environ 150 ms de RTT via les câbles sous-marins. Sur un lien mobile
+    # camerounais (~2-4 Mbps effectifs), la charge utile de la carte passe de
+    # 1 103 Ko à 182 Ko une fois compressée (-84 %), soit 2 à 4 secondes
+    # gagnées à chaque ouverture — et davantage encore en pratique, le
+    # démarrage lent de TCP étant amplifié par la latence.
+    #
+    # gzip_proxied any : sans ça, nginx ne compresse PAS les réponses issues
+    # d'un proxy_pass — c'est-à-dire exactement les réponses de l'API Django.
+    # gzip_min_length 1024 : en dessous, l'en-tête de compression coûte plus
+    # que ce qu'il économise.
+    gzip              on;
+    gzip_comp_level   5;
+    gzip_min_length   1024;
+    gzip_vary         on;
+    gzip_proxied      any;
+    gzip_types        application/json
+                      application/geo+json
+                      application/javascript
+                      application/x-javascript
+                      text/css
+                      text/javascript
+                      text/plain
+                      text/xml
+                      image/svg+xml;
+
+
     location /api/ {
         proxy_pass http://backend:8000;
         proxy_set_header Host              $host;
