@@ -22,11 +22,13 @@ import { ENTITY_TYPES } from '@/lib/eec-data';
 import { VIZ_CATEGORICAL, TAILLE_MARQUEUR, tailleParEffectif } from '@/lib/viz-palette';
 import {
   loadMapData,
+  loadOuvriersParoisse,
   type MapDataResult,
   type RegionItem,
   type DistrictItem,
   type ParishItem,
   type OeuvreItem,
+  type WorkerItem,
 } from '@/lib/eec-api';
 
 /* ============================================================
@@ -91,9 +93,9 @@ const DEFAULT_FILTERS: FilterState = {
    Map data context
    ============================================================ */
 const EMPTY_DATA: MapDataResult = {
-  regions: [], districts: [], parishes: [], oeuvres: [], workers: [],
+  regions: [], districts: [], parishes: [], oeuvres: [],
   allItems: [],
-  globalStats: { regions: 0, districts: 0, parishes: 0, oeuvres: 0, workers: 0 },
+  globalStats: { regions: 0, districts: 0, parishes: 0, oeuvres: 0 },
 };
 
 const MapDataCtx = React.createContext<MapDataResult>(EMPTY_DATA);
@@ -2095,9 +2097,33 @@ const DetailPanel = ({ item, onClose, saved, onToggleSave, onPick, mode, onLogin
   mode: MapMode; onLoginRequired: () => void; onRoute: (item: AnyItem) => void;
   onShare: (item: AnyItem) => void;
 }) => {
-  const { regions, districts, parishes, workers } = useMapData();
+  const { regions, districts, parishes } = useMapData();
   const [tab, setTab] = useState('apercu');
   useEffect(() => { setTab('apercu'); }, [item?.id]);
+
+  // Ouvriers de la paroisse affichée — chargés à la demande (la liste
+  // nationale n'est plus téléchargée au démarrage de la carte).
+  //
+  // Ce hook DOIT rester au-dessus du `if (!item)` : React exige que le
+  // nombre et l'ordre des hooks soient identiques à chaque rendu, or ce
+  // retour anticipé s'exécute dès qu'aucune entité n'est sélectionnée.
+  const [parishWorkers, setParishWorkers] = useState<WorkerItem[]>([]);
+  // Clé type+id plutôt que l'id seul : les identifiants sont propres à
+  // chaque table, donc une région et une paroisse peuvent partager "12".
+  const cleEntite = item ? `${'type' in item ? (item as any).type : 'geo'}:${item.id}` : null;
+  useEffect(() => {
+    const estParoisse = !!item && 'type' in item && (item as any).type === 'paroisse';
+    if (!estParoisse) { setParishWorkers([]); return; }
+    let annule = false;
+    setParishWorkers([]);
+    loadOuvriersParoisse(item!.id).then(l => { if (!annule) setParishWorkers(l); });
+    // Une paroisse peut être remplacée par une autre avant la fin de la
+    // requête : sans ce drapeau, la réponse la plus lente écraserait la plus
+    // récente et le panneau afficherait les ouvriers de la paroisse d'avant.
+    return () => { annule = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cleEntite]);
+
   if (!item) return <div className="detail-panel" />;
 
   const isRegion   = 'admin' in item && 'city' in item && !('type' in item);
@@ -2107,7 +2133,6 @@ const DetailPanel = ({ item, onClose, saved, onToggleSave, onPick, mode, onLogin
   const typeMeta   = isEntity ? ENTITY_TYPES.find(t => t.id === (item as any).type) : { singular: isRegion ? 'Région Synodale' : 'District', color: '#2E9744' };
   const region     = isRegion ? (item as RegionItem) : regions.find(r => r.id === (item as any).regionId);
   const district   = isDistrict ? (item as DistrictItem) : ((item as any).districtId ? districts.find(d => d.id === (item as any).districtId) : null);
-  const parishWorkers = isParish ? workers.filter(w => w.parishId === item.id).slice(0, 6) : [];
   const regionDistricts  = isRegion ? districts.filter(d => d.regionId === item.id) : [];
   const regionParishes   = isRegion ? parishes.filter(p => p.regionId === item.id) : [];
   const districtParishes = isDistrict ? parishes.filter(p => p.districtId === item.id) : [];
