@@ -1311,6 +1311,33 @@ img.leaflet-tile {
 }
 .rt-swap:hover { color: var(--eec-green); border-color: var(--eec-green); }
 
+/* ── Escales (étapes intermédiaires, façon Google Maps) ──────────────────
+   Le bouton « inverser » est normalement en position absolue, centré à 50 %
+   de la hauteur du planificateur : avec seulement A et B, il tombe pile dans
+   l'espace qui les sépare. Dès qu'une escale s'intercale, ce 50 % atterrit
+   SUR une ligne d'escale et recouvre son bouton de suppression. On le
+   remet donc dans le flux — sans décalage en pixels codé en dur, qui
+   casserait au moindre changement de hauteur des champs. */
+.rt-planner.has-stops .rt-swap {
+  position: static; transform: none; align-self: flex-end; margin: -2px 0;
+}
+.rt-stop-row { display: flex; align-items: center; gap: 6px; }
+.rt-stop-row > :first-child { flex: 1; min-width: 0; }
+.rt-stop-del {
+  width: 26px; height: 26px; border-radius: 7px; flex-shrink: 0; cursor: pointer;
+  border: 0; background: transparent; color: var(--t-3);
+  display: inline-flex; align-items: center; justify-content: center; transition: all 0.15s;
+}
+.rt-stop-del:hover { background: rgba(211,47,47,0.10); color: #D32F2F; }
+.rt-add-stop {
+  display: inline-flex; align-items: center; gap: 6px; margin-top: 8px;
+  padding: 6px 10px; border-radius: 9px; cursor: pointer;
+  border: 1px dashed var(--border); background: transparent;
+  color: var(--t-2); font-size: 12px; font-weight: 600; font-family: inherit;
+  transition: all 0.15s;
+}
+.rt-add-stop:hover { border-color: var(--eec-green); color: var(--eec-green); border-style: solid; }
+
 /* Dropdown résultats de recherche d'élément */
 .rt-results {
   position: absolute; top: 100%; left: 0; right: 0; z-index: 20; margin-top: 6px;

@@ -4,8 +4,6 @@ from django.db.models import Count, Func, Value, F, Q
 from django.contrib.gis.db.models import GeometryField
 from django.contrib.gis.db.models.functions import AsGeoJSON
 
-from django.core.cache import cache
-from django.utils.http import urlencode
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -24,19 +22,9 @@ from apps.accounts.permissions import (
     filter_paroisses_by_scope,
     filter_districts_by_scope,
 )
+from eec_core.cache import PublicListCacheMixin, get_or_compute_cached
 
 
-def get_or_compute_cached(cache_key, compute_fn, ttl=600, lock_timeout=5):
-    """Cache simple, sans attente bloquante : en cas de miss, calcule et
-    stocke. Pas de sleep() ici — un worker WSGI sync bloqué en sleep ne
-    peut traiter aucune autre requête, ce qui aggrave la charge au lieu
-    de la réduire quand beaucoup de requêtes arrivent en même temps."""
-    cached = cache.get(cache_key)
-    if cached is not None:
-        return cached
-    result = compute_fn()
-    cache.set(cache_key, result, ttl)
-    return result
 class STSimplify(Func):
     """ST_Simplify(geom, tolerance) de PostGIS — réduit le nombre de sommets
     des polygones → payload beaucoup plus léger."""
@@ -89,7 +77,12 @@ class RegionSynodaleViewSet(viewsets.ReadOnlyModelViewSet):
                 for r in qs
             ]
             return {"type": "FeatureCollection", "features": features}
-        result = get_or_compute_cached("geo:regions:list:v1", _compute)
+        # Clé fixe volontairement : cette vue a pagination_class = None et
+        # get_queryset() n'exploite aucun paramètre — la réponse est la même
+        # pour toute query string. (v2 : aligné sur la numérotation de
+        # eec_core.cache, dont le changement de version purge les entrées
+        # tronquées écrites par l'ancienne implémentation.)
+        result = get_or_compute_cached("geo:regions:list:v2", _compute)
         return Response(result)
 
     @action(detail=False, url_path="liste")
@@ -123,11 +116,14 @@ class RegionSynodaleViewSet(viewsets.ReadOnlyModelViewSet):
 # Districts — lecture publique, CRUD réservé admin
 # ---------------------------------------------------------------------------
 
-class DistrictViewSet(viewsets.ReadOnlyModelViewSet):
+class DistrictViewSet(PublicListCacheMixin, viewsets.ReadOnlyModelViewSet):
     """EXIGENCE : il est IMPOSSIBLE de modifier ou supprimer un district
     (comme une région). Lecture seule pour tout le monde."""
     permission_classes = [ReadPublicWriteAdmin]
     serializer_class = DistrictSerializer
+
+    cache_prefix = "geo:districts:list"
+    cache_key_params = frozenset({"region"})
 
     def get_queryset(self):
         from django.db.models import OuterRef, Subquery, Sum, IntegerField
@@ -162,26 +158,18 @@ class DistrictViewSet(viewsets.ReadOnlyModelViewSet):
             qs = filter_districts_by_scope(qs, self.request.user)
 
         return qs
-    def list(self, request, *args, **kwargs):
-        """Cache Redis (10 min) pour les visiteurs anonymes sans filtre."""
-        FILTRES_REELS = {"region"}
-        a_un_filtre = any(p in request.query_params for p in FILTRES_REELS)
-        if not request.user.is_authenticated and not a_un_filtre:
-            data = get_or_compute_cached(
-                "geo:districts:list:v1",
-                lambda: super(DistrictViewSet, self).list(request, *args, **kwargs).data,
-            )
-            return Response(data)
-        return super().list(request, *args, **kwargs)
-
 
 
 # ---------------------------------------------------------------------------
 # Paroisses — lecture publique, CRUD complet avec RBAC
 # ---------------------------------------------------------------------------
 
-class ParoisseViewSet(viewsets.ModelViewSet):
+class ParoisseViewSet(PublicListCacheMixin, viewsets.ModelViewSet):
     permission_classes = [ReadPublicWriteAdmin]
+
+    cache_prefix = "geo:paroisses:list"
+    cache_key_params = frozenset({"district", "region", "avec_gps", "sans_gps", "categorie"})
+    cache_bypass_params = frozenset({"search"})
 
     def get_queryset(self):
         from django.db.models import OuterRef, Subquery
@@ -230,17 +218,6 @@ class ParoisseViewSet(viewsets.ModelViewSet):
             qs = filter_paroisses_by_scope(qs, self.request.user)
 
         return qs
-    def list(self, request, *args, **kwargs):
-        FILTRES_REELS = {"district", "region", "search", "avec_gps", "sans_gps", "categorie"}
-        a_un_filtre = any(p in request.query_params for p in FILTRES_REELS)
-        if not request.user.is_authenticated and not a_un_filtre:
-            data = get_or_compute_cached(
-                "geo:paroisses:list:v1",
-                lambda: super(ParoisseViewSet, self).list(request, *args, **kwargs).data,
-            )
-            return Response(data)
-        return super().list(request, *args, **kwargs)
-
     def get_serializer_class(self):
         if self.action in ("create", "update", "partial_update"):
             return ParoisseWriteSerializer

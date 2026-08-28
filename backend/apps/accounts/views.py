@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from .models import StatistiqueAnnuelle
 from .serializers import StatistiqueAnnuelleSerializer
 from apps.accounts.permissions import ReadPublicWriteAdmin
+from eec_core.cache import PublicListCacheMixin
 
 
 def _sync_nombre_fideles(paroisse):
@@ -34,7 +35,7 @@ def _sync_nombre_fideles(paroisse):
         paroisse.save(update_fields=["nombre_fideles"])
 
 
-class StatistiqueAnnuelleViewSet(viewsets.ModelViewSet):
+class StatistiqueAnnuelleViewSet(PublicListCacheMixin, viewsets.ModelViewSet):
     """
     Statistiques annuelles par paroisse.
 
@@ -47,6 +48,10 @@ class StatistiqueAnnuelleViewSet(viewsets.ModelViewSet):
     """
     permission_classes = [ReadPublicWriteAdmin]
     serializer_class   = StatistiqueAnnuelleSerializer
+
+    # Liste chargée intégralement par la carte publique à chaque ouverture.
+    cache_prefix = "statistiques:list"
+    cache_key_params = frozenset({"paroisse", "district", "region", "annee", "non_validee"})
 
     def get_queryset(self):
         qs = (

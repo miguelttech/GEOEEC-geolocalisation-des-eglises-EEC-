@@ -10,6 +10,7 @@ from apps.accounts.permissions import (
     ReadPublicWriteAdmin,
     filter_oeuvres_by_scope,
 )
+from eec_core.cache import PublicListCacheMixin
 
 
 # ---------------------------------------------------------------------------
@@ -52,8 +53,15 @@ class TypeOeuvreViewSet(viewsets.ReadOnlyModelViewSet):
 # Oeuvres — lecture publique, CRUD avec RBAC
 # ---------------------------------------------------------------------------
 
-class OeuvreViewSet(viewsets.ModelViewSet):
+class OeuvreViewSet(PublicListCacheMixin, viewsets.ModelViewSet):
     permission_classes = [ReadPublicWriteAdmin]
+
+    # Liste chargée intégralement par la carte publique à chaque ouverture.
+    cache_prefix = "oeuvres:list"
+    cache_key_params = frozenset({
+        "type", "region", "district", "paroisse", "avec_gps", "sans_gps", "active",
+    })
+    cache_bypass_params = frozenset({"search"})
 
     def get_queryset(self):
         qs = (

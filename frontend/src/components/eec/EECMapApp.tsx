@@ -6,6 +6,12 @@ import L from 'leaflet';
 import 'leaflet.markercluster';
 // leaflet-rotate (sans types) : patche L pour activer la rotation de la carte
 import 'leaflet-rotate';
+// Fond de carte vectoriel OpenFreeMap rendu par MapLibre GL dans Leaflet.
+// Remplace CARTO Voyager, dont le service gratuit a fermé : ses tuiles
+// revenaient en HTTP 200 avec un filigrane « API KEY REQUIRED », donc sans
+// la moindre erreur côté code — la carte se dégradait en silence.
+// Fonds de carte : voir src/lib/basemap.ts (source unique pour les 5 cartes
+// du projet, après la fermeture du service gratuit de CARTO).
 // Décodage des tuiles vectorielles OpenFreeMap (source des points d'intérêt,
 // identique à celle de la carte 3D — voir usePOILayer)
 import { VectorTile } from '@mapbox/vector-tile';
@@ -18,15 +24,18 @@ import { Icon, TYPE_ICON, markerSvg } from './icons';
 
 // Vue de navigation 3D (MapLibre) — chargée paresseusement, uniquement pendant la navigation
 const NavMap3D = dynamic(() => import('./NavMap3D'), { ssr: false });
+import { addBasemap, SATELLITE_URL, SATELLITE_ATTRIBUTION, SATELLITE_LABELS_URL } from '@/lib/basemap';
 import { ENTITY_TYPES } from '@/lib/eec-data';
 import { VIZ_CATEGORICAL, TAILLE_MARQUEUR, tailleParEffectif } from '@/lib/viz-palette';
 import {
   loadMapData,
+  loadOuvriersParoisse,
   type MapDataResult,
   type RegionItem,
   type DistrictItem,
   type ParishItem,
   type OeuvreItem,
+  type WorkerItem,
 } from '@/lib/eec-api';
 
 /* ============================================================
@@ -67,6 +76,13 @@ type FilterState = {
 /* Routing types (itinéraire type Google Maps) */
 export type TravelMode = 'auto' | 'moto' | 'pedestrian';
 export type RoutePoint = { lat: number; lng: number; label: string; kind: string };
+/**
+ * Champ que le prochain clic sur la carte doit renseigner.
+ * Un NOMBRE désigne l'index d'une escale dans `routeStops` — 0 est donc une
+ * valeur légitime, d'où les comparaisons explicites à `null` partout plutôt
+ * qu'un test de véracité qui avalerait la première escale.
+ */
+export type PickTarget = 'start' | 'end' | number;
 export type RouteStep = { instruction: string; distance_km: number; duration_min: number; type: number };
 /** Distance + durée d'un mode, sans tracé — sert à comparer les 3 modes. */
 export type RouteSummary = { distance_km: number; duration_min: number };
@@ -81,6 +97,10 @@ export type RouteData = {
   alternatives?: Record<string, RouteSummary | null>;
 } | null;
 
+/** Doit rester aligné sur MAX_ETAPES de backend/apps/visitors/routing.py :
+ *  au-delà, l'API refuse la requête avec un 400. */
+const MAX_ETAPES = 8;
+
 const DEFAULT_FILTERS: FilterState = {
   region: null, district: null, parish: null,
   layers: { paroisse: true, scolaire: true, medical: true, univ: true, agro: true, immeuble: true, terrain: true },
@@ -91,9 +111,9 @@ const DEFAULT_FILTERS: FilterState = {
    Map data context
    ============================================================ */
 const EMPTY_DATA: MapDataResult = {
-  regions: [], districts: [], parishes: [], oeuvres: [], workers: [],
+  regions: [], districts: [], parishes: [], oeuvres: [],
   allItems: [],
-  globalStats: { regions: 0, districts: 0, parishes: 0, oeuvres: 0, workers: 0 },
+  globalStats: { regions: 0, districts: 0, parishes: 0, oeuvres: 0 },
 };
 
 const MapDataCtx = React.createContext<MapDataResult>(EMPTY_DATA);
@@ -214,13 +234,8 @@ function removeLayersBulk(cible: L.LayerGroup, couches: L.Layer[]) {
 /* ============================================================
    Map constants
    ============================================================ */
-// CartoDB Voyager = routes + noms de rues/quartiers + POI (proche de Google Maps)
-const BASEMAPS = {
-  light: { url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', attr: '© OpenStreetMap, © CARTO' },
-  sat:   { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attr: '© Esri, Maxar' },
-};
-// Labels overlay pour mode satellite (routes + noms par-dessus l'image satellite)
-const SAT_LABELS_URL = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png';
+// Fond « Plan » (vectoriel OpenFreeMap) et satellite (Esri) : définis dans
+// src/lib/basemap.ts, partagé avec les quatre cartes de l'espace admin.
 const CAMEROON_BOUNDS = L.latLngBounds([1.6, 8.4], [13.1, 16.2]);
 const CAMEROON_CENTER: [number, number] = [6.5, 12.5];
 // Tuile transparente (1px GIF) pour remplacer les tuiles manquantes ou "Map data not yet available"
@@ -480,16 +495,19 @@ function useLeafletMap(
   route: RouteData,
   routeStart: RoutePoint | null,
   routeEnd: RoutePoint | null,
+  routeStops: (RoutePoint | null)[],
   userPos: { lat: number; lng: number } | null,
   mapSettings: { regions: boolean; cluster: boolean; labels: boolean; poi: boolean },
   measuring: boolean,
   measurePoints: [number, number][],
   onMeasureClick: (lat: number, lng: number) => void,
-  pickTarget: 'start' | 'end' | null,
+  pickTarget: PickTarget | null,
   onPickMapPoint: (lat: number, lng: number) => void,
 ) {
   const mapRef         = useRef<L.Map | null>(null);
-  const tileRef        = useRef<L.TileLayer | null>(null);
+  // Le fond « Plan » est une couche MapLibre GL (maplibregl.Layer), le satellite
+  // une TileLayer raster classique : d'où le type large sur tileRef.
+  const tileRef        = useRef<L.Layer | null>(null);
   const labelsRef      = useRef<L.TileLayer | null>(null);
   const clusterRef     = useRef<L.MarkerClusterGroup | null>(null);
   const plainLayerRef  = useRef<L.LayerGroup | null>(null);
@@ -699,20 +717,20 @@ function useLeafletMap(
     const map = mapRef.current; if (!map) return;
     if (tileRef.current)   { map.removeLayer(tileRef.current);   tileRef.current = null; }
     if (labelsRef.current) { map.removeLayer(labelsRef.current); labelsRef.current = null; }
-    const bm = BASEMAPS[basemap];
-    // Éviter "Map data not yet available" : le satellite Esri n'a pas d'imagerie
-    // haute résolution en zone rurale camerounaise (> z17). On plafonne le zoom
-    // NATIF et Leaflet agrandit la dernière tuile valide au lieu d'en demander
-    // une inexistante. CARTO Voyager a une couverture mondiale jusqu'à z18.
-    const nativeMax = basemap === 'sat' ? 17 : 18;
-    tileRef.current = L.tileLayer(bm.url, {
-      attribution: bm.attr, maxZoom: 19, maxNativeZoom: nativeMax, errorTileUrl: BLANK_TILE,
-    }).addTo(map);
-    tileRef.current.bringToBack();
     if (basemap === 'sat') {
-      labelsRef.current = L.tileLayer(SAT_LABELS_URL, {
-        attribution: '', maxZoom: 19, maxNativeZoom: 17, opacity: 0.85, errorTileUrl: BLANK_TILE,
+      // Éviter "Map data not yet available" : le satellite Esri n'a pas
+      // d'imagerie haute résolution en zone rurale camerounaise (> z17). On
+      // plafonne le zoom NATIF et Leaflet agrandit la dernière tuile valide au
+      // lieu d'en demander une inexistante.
+      tileRef.current = L.tileLayer(SATELLITE_URL, {
+        attribution: SATELLITE_ATTRIBUTION, maxZoom: 19, maxNativeZoom: 17, errorTileUrl: BLANK_TILE,
       }).addTo(map);
+      (tileRef.current as L.TileLayer).bringToBack();
+      labelsRef.current = L.tileLayer(SATELLITE_LABELS_URL, {
+        attribution: '', maxZoom: 19, maxNativeZoom: 17, opacity: 0.9, errorTileUrl: BLANK_TILE,
+      }).addTo(map);
+    } else {
+      tileRef.current = addBasemap(map, 'liberty');
     }
   }, [basemap]);
 
@@ -942,11 +960,17 @@ function useLeafletMap(
       html: `<div class="rp-dot" style="background:${bg}">${txt}</div>`,
       iconSize: [30, 30], iconAnchor: [15, 30], popupAnchor: [0, -28],
     });
+    const poser = (p: RoutePoint, txt: string, bg: string) =>
+      L.marker([p.lat, p.lng], { icon: pin(txt, bg), zIndexOffset: 1000 })
+        .bindTooltip(escapeHtml(p.label), { direction: 'top', offset: [0, -30], className: 'eec-map-label', permanent: false })
+        .addTo(layer);
+
     // Si départ = Ma position, le marqueur bleu animé suffit (pas de doublon pin A)
-    if (routeStart && routeStart.kind !== 'me') L.marker([routeStart.lat, routeStart.lng], { icon: pin('A', '#2E9744'), zIndexOffset: 1000 })
-      .bindTooltip(escapeHtml(routeStart.label), { direction: 'top', offset: [0, -30], className: 'eec-map-label', permanent: false }).addTo(layer);
-    if (routeEnd) L.marker([routeEnd.lat, routeEnd.lng], { icon: pin('B', '#D32F2F'), zIndexOffset: 1000 })
-      .bindTooltip(escapeHtml(routeEnd.label), { direction: 'top', offset: [0, -30], className: 'eec-map-label', permanent: false }).addTo(layer);
+    if (routeStart && routeStart.kind !== 'me') poser(routeStart, 'A', '#2E9744');
+    // Escales : numérotées 1, 2, 3… en orange, pour se distinguer d'un coup
+    // d'œil du départ (vert) et de l'arrivée (rouge).
+    routeStops.forEach((p, i) => { if (p) poser(p, String(i + 1), '#F29900'); });
+    if (routeEnd) poser(routeEnd, 'B', '#D32F2F');
 
     layer.addTo(map);
     routeLayerRef.current = layer;
@@ -962,7 +986,7 @@ function useLeafletMap(
         try { map.fitBounds(bounds.pad(0.18), { maxZoom: 15 } as L.FitBoundsOptions); } catch { /* ignore */ }
       }
     }
-  }, [route, routeStart, routeEnd]);
+  }, [route, routeStart, routeEnd, routeStops]);
 
   // ── Itinéraire : capter un clic n'importe où sur la carte ──
   // Le point de départ d'un trajet est presque toujours un endroit quelconque
@@ -970,7 +994,9 @@ function useLeafletMap(
   // rendait le mode « choisir sur la carte » inutilisable pour un départ.
   useEffect(() => {
     const map = mapRef.current; if (!map) return;
-    if (!pickTarget || measuring) return;
+    // `pickTarget === null` et non `!pickTarget` : l'index d'escale 0 est une
+    // cible parfaitement valide, et un test de véracité l'écarterait.
+    if (pickTarget === null || measuring) return;
     const handler = (e: L.LeafletMouseEvent & { propagatedFrom?: unknown }) => {
       // Un clic sur un marqueur (ou un polygone de région) est déjà traité par
       // handleMarkerClick, PUIS remonte jusqu'à la carte : sans ce filtre, le
@@ -1581,17 +1607,21 @@ const PointField = ({ kind, point, accent, letter, placeholder, picking, onPickM
 };
 
 const ParcoursPanel = ({
-  onClose, routeStart, routeEnd, routeMode, route, routeLoading, routeError, pickTarget,
-  setRouteMode, setRouteStart, setRouteEnd, setPickTarget, onUseMyPosition, onCompute, onClear, onSwap, onStartNav,
+  onClose, routeStart, routeEnd, routeStops, routeMode, route, routeLoading, routeError, pickTarget,
+  setRouteMode, setRouteStart, setRouteEnd, setRouteStops, setPickTarget, onUseMyPosition,
+  onCompute, onClear, onSwap, onStartNav, onAddStop, onRemoveStop,
 }: {
   onClose: () => void;
   routeStart: RoutePoint | null; routeEnd: RoutePoint | null; routeMode: TravelMode;
-  route: RouteData; routeLoading: boolean; routeError: string; pickTarget: 'start' | 'end' | null;
+  routeStops: (RoutePoint | null)[];
+  route: RouteData; routeLoading: boolean; routeError: string; pickTarget: PickTarget | null;
   setRouteMode: (m: TravelMode) => void;
   setRouteStart: (p: RoutePoint | null) => void; setRouteEnd: (p: RoutePoint | null) => void;
-  setPickTarget: (t: 'start' | 'end' | null) => void;
+  setRouteStops: React.Dispatch<React.SetStateAction<(RoutePoint | null)[]>>;
+  setPickTarget: (t: PickTarget | null) => void;
   onUseMyPosition: (t: 'start' | 'end') => void;
   onCompute: () => void; onClear: () => void; onSwap: () => void; onStartNav: () => void;
+  onAddStop: () => void; onRemoveStop: (i: number) => void;
 }) => {
   const manquant: 'start' | 'end' | null = !routeStart ? 'start' : (!routeEnd ? 'end' : null);
   return (
@@ -1626,13 +1656,29 @@ const ParcoursPanel = ({
 
         {/* Planificateur départ → destination */}
         <div className="panel-section" style={{ paddingTop: 4 }}>
-          <div className="rt-planner">
+          <div className={'rt-planner' + (routeStops.length ? ' has-stops' : '')}>
             <PointField kind="start" point={routeStart} accent="#2E9744" letter="A"
               placeholder="Point de départ (ou ma position)" picking={pickTarget === 'start'}
               onPickMap={() => setPickTarget(pickTarget === 'start' ? null : 'start')}
               onMyPos={() => onUseMyPosition('start')}
               onSelect={p => { setRouteStart(p); setPickTarget(null); }}
               onClear={() => setRouteStart(null)} />
+
+            {/* Escales : autant de champs que d'arrêts, numérotés 1, 2, 3…
+                Ils s'intercalent entre A et B, comme « Ajouter une étape »
+                de Google Maps, et l'ordre du tableau est l'ordre de passage. */}
+            {routeStops.map((stop, i) => (
+              <div key={i} className="rt-stop-row">
+                <PointField kind="end" point={stop} accent="#F29900" letter={String(i + 1)}
+                  placeholder={`Escale ${i + 1}`} picking={pickTarget === i}
+                  onPickMap={() => setPickTarget(pickTarget === i ? null : i)}
+                  onSelect={p => { setRouteStops(l => l.map((q, k) => (k === i ? p : q))); setPickTarget(null); }}
+                  onClear={() => setRouteStops(l => l.map((q, k) => (k === i ? null : q)))} />
+                <button className="rt-stop-del" onClick={() => onRemoveStop(i)} title={`Supprimer l’escale ${i + 1}`}>
+                  <Icon name="close" size={13} stroke={2.2} />
+                </button>
+              </div>
+            ))}
 
             <button className="rt-swap" onClick={onSwap} title="Inverser"><Icon name="swap" size={15} stroke={2} /></button>
 
@@ -1643,10 +1689,20 @@ const ParcoursPanel = ({
               onClear={() => setRouteEnd(null)} />
           </div>
 
-          {pickTarget && (
-            <div className="rt-hint"><Icon name="pin" size={12} stroke={2} /> Cliquez n’importe où sur la carte — ou sur un marqueur — pour définir {pickTarget === 'start' ? 'le départ' : 'la destination'}.</div>
+          {routeStops.length < MAX_ETAPES && (
+            <button className="rt-add-stop" onClick={onAddStop}>
+              <Icon name="plus" size={13} stroke={2.2} /> Ajouter une étape
+            </button>
           )}
-          {!pickTarget && manquant && !routeError && (
+
+          {pickTarget !== null && (
+            <div className="rt-hint"><Icon name="pin" size={12} stroke={2} /> Cliquez n’importe où sur la carte — ou sur un marqueur — pour définir {
+              pickTarget === 'start' ? 'le départ'
+              : pickTarget === 'end' ? 'la destination'
+              : `l’escale ${pickTarget + 1}`
+            }.</div>
+          )}
+          {pickTarget === null && manquant && !routeError && (
             <div className="rt-hint" style={{ color: 'var(--t-2)' }}>
               <Icon name="help" size={12} stroke={2} />
               {manquant === 'start'
@@ -2095,9 +2151,33 @@ const DetailPanel = ({ item, onClose, saved, onToggleSave, onPick, mode, onLogin
   mode: MapMode; onLoginRequired: () => void; onRoute: (item: AnyItem) => void;
   onShare: (item: AnyItem) => void;
 }) => {
-  const { regions, districts, parishes, workers } = useMapData();
+  const { regions, districts, parishes } = useMapData();
   const [tab, setTab] = useState('apercu');
   useEffect(() => { setTab('apercu'); }, [item?.id]);
+
+  // Ouvriers de la paroisse affichée — chargés à la demande (la liste
+  // nationale n'est plus téléchargée au démarrage de la carte).
+  //
+  // Ce hook DOIT rester au-dessus du `if (!item)` : React exige que le
+  // nombre et l'ordre des hooks soient identiques à chaque rendu, or ce
+  // retour anticipé s'exécute dès qu'aucune entité n'est sélectionnée.
+  const [parishWorkers, setParishWorkers] = useState<WorkerItem[]>([]);
+  // Clé type+id plutôt que l'id seul : les identifiants sont propres à
+  // chaque table, donc une région et une paroisse peuvent partager "12".
+  const cleEntite = item ? `${'type' in item ? (item as any).type : 'geo'}:${item.id}` : null;
+  useEffect(() => {
+    const estParoisse = !!item && 'type' in item && (item as any).type === 'paroisse';
+    if (!estParoisse) { setParishWorkers([]); return; }
+    let annule = false;
+    setParishWorkers([]);
+    loadOuvriersParoisse(item!.id).then(l => { if (!annule) setParishWorkers(l); });
+    // Une paroisse peut être remplacée par une autre avant la fin de la
+    // requête : sans ce drapeau, la réponse la plus lente écraserait la plus
+    // récente et le panneau afficherait les ouvriers de la paroisse d'avant.
+    return () => { annule = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cleEntite]);
+
   if (!item) return <div className="detail-panel" />;
 
   const isRegion   = 'admin' in item && 'city' in item && !('type' in item);
@@ -2107,7 +2187,6 @@ const DetailPanel = ({ item, onClose, saved, onToggleSave, onPick, mode, onLogin
   const typeMeta   = isEntity ? ENTITY_TYPES.find(t => t.id === (item as any).type) : { singular: isRegion ? 'Région Synodale' : 'District', color: '#2E9744' };
   const region     = isRegion ? (item as RegionItem) : regions.find(r => r.id === (item as any).regionId);
   const district   = isDistrict ? (item as DistrictItem) : ((item as any).districtId ? districts.find(d => d.id === (item as any).districtId) : null);
-  const parishWorkers = isParish ? workers.filter(w => w.parishId === item.id).slice(0, 6) : [];
   const regionDistricts  = isRegion ? districts.filter(d => d.regionId === item.id) : [];
   const regionParishes   = isRegion ? parishes.filter(p => p.regionId === item.id) : [];
   const districtParishes = isDistrict ? parishes.filter(p => p.districtId === item.id) : [];
@@ -2385,13 +2464,17 @@ export default function EECMapApp({ mode, user, embedded = false }: { mode: MapM
   // ── Routing (itinéraire type Google Maps) ──────────────────────────────
   const [routeStart, setRouteStart]     = useState<RoutePoint | null>(null);
   const [routeEnd, setRouteEnd]         = useState<RoutePoint | null>(null);
+  // Escales : points de passage obligés entre A et B, dans l'ordre du tableau.
+  // `null` = champ ajouté mais pas encore renseigné — il doit exister dans le
+  // tableau pour s'afficher dans le panneau, tout en étant exclu du calcul.
+  const [routeStops, setRouteStops]     = useState<(RoutePoint | null)[]>([]);
   const [routeMode, setRouteMode]       = useState<TravelMode>('auto');
   const [route, setRoute]               = useState<RouteData>(null);
   const [routeLoading, setRouteLoading] = useState(false);
   const [routeError, setRouteError]     = useState<string>('');
   const [userPos, setUserPos]           = useState<{ lat: number; lng: number } | null>(null);
   // Quand on attend que l'utilisateur clique un marqueur pour fixer départ/arrivée
-  const [pickTarget, setPickTarget]     = useState<'start' | 'end' | null>(null);
+  const [pickTarget, setPickTarget]     = useState<PickTarget | null>(null);
 
   // ── Outil de mesure de distance ────────────────────────────────────────
   const [measuring, setMeasuring]       = useState(false);
@@ -2578,23 +2661,28 @@ export default function EECMapApp({ mode, user, embedded = false }: { mode: MapM
   // Clic sur le fond de carte pendant la sélection d'un point d'itinéraire.
   // Le libellé du point reprend ses coordonnées, comme le fait déjà le menu
   // contextuel « Itinéraire depuis ici ».
+  /** Range un point dans le champ visé (départ, arrivée ou escale n°i). */
+  const affecterPoint = useCallback((cible: PickTarget, pt: RoutePoint) => {
+    if (cible === 'start')    setRouteStart(pt);
+    else if (cible === 'end') setRouteEnd(pt);
+    else setRouteStops(l => l.map((p, i) => (i === cible ? pt : p)));
+  }, []);
+
   const onPickMapPoint = useCallback((lat: number, lng: number) => {
-    if (!pickTarget) return;
-    const pt: RoutePoint = {
+    if (pickTarget === null) return;   // 0 = escale n°1, surtout pas `!pickTarget`
+    affecterPoint(pickTarget, {
       lat, lng,
       label: `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
       kind: 'map',
-    };
-    if (pickTarget === 'start') setRouteStart(pt); else setRouteEnd(pt);
+    });
     setPickTarget(null);
     setRouteError('');
-  }, [pickTarget]);
+  }, [pickTarget, affecterPoint]);
 
   const handleMarkerClick = useCallback((item: AnyItem) => {
     // Si on est en mode "choisir un point pour l'itinéraire", on capture le clic
-    if (pickTarget) {
-      const pt = itemToPoint(item);
-      if (pickTarget === 'start') setRouteStart(pt); else setRouteEnd(pt);
+    if (pickTarget !== null) {
+      affecterPoint(pickTarget, itemToPoint(item));
       setPickTarget(null);
       return;
     }
@@ -2603,7 +2691,7 @@ export default function EECMapApp({ mode, user, embedded = false }: { mode: MapM
     // Zoomer SUR l'élément (jamais de dézoom) : on centre et on rapproche
     // à 16 si on était plus loin, sinon on garde le zoom courant.
     setFocusTarget({ lat: item.lat, lng: item.lng, zoom: 16, atLeast: true });
-  }, [addToRecents, pickTarget]);
+  }, [addToRecents, pickTarget, affecterPoint]);
 
   // Géolocalisation : "Ma position" comme point de départ
   const useMyPosition = useCallback((target: 'start' | 'end' = 'start') => {
@@ -2680,6 +2768,11 @@ export default function EECMapApp({ mode, user, embedded = false }: { mode: MapM
         body: JSON.stringify({
           start_lat: routeStart.lat, start_lng: routeStart.lng,
           end_lat: routeEnd.lat, end_lng: routeEnd.lng, mode: routeMode,
+          // Escales dans l'ordre du panneau. Les champs encore vides sont
+          // écartés : une escale non renseignée ne doit pas faire échouer le
+          // calcul de tout l'itinéraire.
+          etapes: routeStops.filter((p): p is RoutePoint => p !== null)
+                            .map(p => ({ lat: p.lat, lng: p.lng })),
         }),
       });
       const data = await res.json();
@@ -2698,7 +2791,7 @@ export default function EECMapApp({ mode, user, embedded = false }: { mode: MapM
     } finally {
       setRouteLoading(false);
     }
-  }, [routeStart, routeEnd, routeMode]);
+  }, [routeStart, routeEnd, routeMode, routeStops]);
 
   // Recalcul automatique quand on change de mode si un itinéraire existe déjà
   useEffect(() => {
@@ -2727,7 +2820,8 @@ export default function EECMapApp({ mode, user, embedded = false }: { mode: MapM
   }, [routeStart, routeEnd, route, routeLoading, routeMode]);
 
   const clearRoute = useCallback(() => {
-    setRoute(null); setRouteStart(null); setRouteEnd(null); setRouteError(''); setPickTarget(null);
+    setRoute(null); setRouteStart(null); setRouteEnd(null); setRouteStops([]);
+    setRouteError(''); setPickTarget(null);
     // Sans cette remise à zéro, refaire exactement le même trajet après un
     // « Effacer » ne relancerait aucun calcul : le garde anti-boucle croirait
     // ce couple de points déjà tenté.
@@ -2736,7 +2830,21 @@ export default function EECMapApp({ mode, user, embedded = false }: { mode: MapM
 
   const swapRoute = useCallback(() => {
     setRouteStart(routeEnd); setRouteEnd(routeStart);
+    // Les escales doivent suivre : à l'aller A→1→2→B correspond au retour
+    // B→2→1→A. Les laisser en place produirait un détour absurde.
+    setRouteStops(l => [...l].reverse());
   }, [routeStart, routeEnd]);
+
+  // ── Escales ──
+  const addStop = useCallback(() => {
+    setRouteStops(l => (l.length >= MAX_ETAPES ? l : [...l, null]));
+  }, []);
+  const removeStop = useCallback((i: number) => {
+    setRouteStops(l => l.filter((_, k) => k !== i));
+    // La cible de pointage désigne un INDEX : après suppression, elle
+    // pointerait sur une autre escale (ou dans le vide). On l'annule.
+    setPickTarget(null);
+  }, []);
 
   // ── Mesure ──
   const onMeasureClick = useCallback((lat: number, lng: number) => {
@@ -2837,6 +2945,7 @@ export default function EECMapApp({ mode, user, embedded = false }: { mode: MapM
     route,
     routeStart,
     routeEnd,
+    routeStops,
     userPos,
     mapSettings,
     measuring,
@@ -2949,11 +3058,19 @@ export default function EECMapApp({ mode, user, embedded = false }: { mode: MapM
             <aside className="panel">
               {activeTab === 'search'    && <SearchPanel onPick={handleSearchPick} recents={recents} onClose={() => setActiveTab(null)} />}
               {activeTab === 'filters'   && <FiltersPanel filters={filters} setFilters={setFilters as any} layerCounts={layerCounts} onClose={() => setActiveTab(null)} onReset={handleReset} onApply={() => setActiveTab(null)} />}
+              {/* La croix du panneau QUITTE l'itinéraire : elle efface le tracé
+                  et les points A/B, rendant la carte à son état initial. Sans ce
+                  clearRoute(), la polyligne restait dessinée sans qu'aucune
+                  commande visible ne permette de l'enlever — il fallait rouvrir
+                  le panneau pour retrouver « Effacer ».
+                  Pour seulement replier le panneau EN GARDANT le tracé affiché,
+                  on reclique l'onglet « Parcours » du rail, qui bascule. */}
               {activeTab === 'parcours'  && <ParcoursPanel
-                onClose={() => setActiveTab(null)}
-                routeStart={routeStart} routeEnd={routeEnd} routeMode={routeMode}
+                onClose={() => { clearRoute(); setActiveTab(null); }}
+                routeStart={routeStart} routeEnd={routeEnd} routeStops={routeStops} routeMode={routeMode}
                 route={route} routeLoading={routeLoading} routeError={routeError} pickTarget={pickTarget}
                 setRouteMode={setRouteMode} setRouteStart={setRouteStart} setRouteEnd={setRouteEnd}
+                setRouteStops={setRouteStops} onAddStop={addStop} onRemoveStop={removeStop}
                 setPickTarget={setPickTarget} onUseMyPosition={useMyPosition}
                 onCompute={computeRoute} onClear={clearRoute} onSwap={swapRoute} onStartNav={startNav} />}
               {activeTab === 'regions'   && <EntityListPanel title="Régions"   items={mapData.regions}   kind="region"   onPick={handleSearchPick} onClose={() => setActiveTab(null)} totalLabel={`${mapData.regions.length} régions synodales`} />}

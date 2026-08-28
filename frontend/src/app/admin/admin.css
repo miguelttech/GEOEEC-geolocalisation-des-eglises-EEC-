@@ -53,8 +53,18 @@
 .admin-shell .leaflet-control-attribution { background: rgba(8,17,11,0.7) !important; color: rgba(240,244,241,0.45) !important; font-size: 9px !important; }
 .admin-shell .leaflet-control-attribution a { color: rgba(240,244,241,0.65) !important; }
 .admin-shell .leaflet-control-zoom a { background: #0D1B12 !important; color: var(--text) !important; border-color: var(--border-soft) !important; }
-.admin-shell .leaflet-tooltip { background: #1B2E1F !important; border: 1px solid rgba(245,197,24,0.20) !important; color: var(--text) !important; font-family: var(--font-inter, 'Inter', sans-serif) !important; box-shadow: 0 8px 24px rgba(0,0,0,0.5) !important; }
-.admin-shell .leaflet-tooltip-top:before { border-top-color: #1B2E1F !important; }
+/* Infobulles sombres de l'espace admin (ex. mini-carte du tableau de bord).
+   Les :not() sont NÉCESSAIRES : cette règle attrapait TOUTES les infobulles
+   Leaflet, y compris les étiquettes de noms de la carte principale, qui sont
+   censées être du texte nu cerné d'un halo blanc (style Google Maps). Chaque
+   nom de lieu se retrouvait donc dans une pastille vert très sombre, illisible
+   par-dessus le fond de carte — et le !important empêchait le style d'origine
+   de reprendre la main.
+     · .eec-map-label     → noms de paroisses, d'œuvres et de POI
+     · .eec-measure-label → étiquette orange de l'outil de mesure, elle aussi
+                            repeinte en vert sombre par cette règle */
+.admin-shell .leaflet-tooltip:not(.eec-map-label):not(.eec-measure-label) { background: #1B2E1F !important; border: 1px solid rgba(245,197,24,0.20) !important; color: var(--text) !important; font-family: var(--font-inter, 'Inter', sans-serif) !important; box-shadow: 0 8px 24px rgba(0,0,0,0.5) !important; }
+.admin-shell .leaflet-tooltip-top:not(.eec-map-label):not(.eec-measure-label):before { border-top-color: #1B2E1F !important; }
 
 /* Pills */
 .admin-shell .pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 99px; font-size: 10px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; border: 1px solid transparent; white-space: nowrap; }

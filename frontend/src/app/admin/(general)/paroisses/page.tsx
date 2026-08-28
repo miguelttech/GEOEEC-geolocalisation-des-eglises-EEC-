@@ -5,6 +5,7 @@ import { api, Paroisse, Ouvrier, Oeuvre, PagedResult, getCsrf } from '@/lib/api'
 import { I } from '@/components/admin/icons';
 import { CompleteBar, CategoriePill, GpsCell, StatusPill, Dropdown, useOutside } from '@/components/admin/atoms';
 
+import { addBasemap } from '@/lib/basemap';
 const BACKEND = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api')
   .replace(/\/api\/?$/, '');
 
@@ -65,9 +66,7 @@ function GpsMapPicker({ lat, lng }: {
       const initLat = lat ?? 4.5;
       const initLng = lng ?? 12.5;
       const map = L.map(mapDiv.current, { center: [initLat, initLng], zoom: lat ? 11 : 6, zoomControl: true });
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        attribution: '© OpenStreetMap · © CartoDB', maxZoom: 19, subdomains: 'abcd',
-      }).addTo(map);
+      addBasemap(map);
 
       if (lat !== null && lng !== null) {
         marker.current = L.marker([lat, lng], {

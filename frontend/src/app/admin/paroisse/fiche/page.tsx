@@ -4,6 +4,7 @@ import { I } from '@/components/admin/icons';
 import { CompleteBar } from '@/components/admin/atoms';
 import { api, type Paroisse, type PagedResult } from '@/lib/api';
 
+import { addBasemap } from '@/lib/basemap';
 const C = '#E67A2E';
 
 interface Toast { id:number; type:'success'|'info'|'warn'; title:string; body?:string; }
@@ -56,10 +57,7 @@ function ParoisseMiniMap({ lat, lng, height = 220 }: { lat: number; lng: number;
         doubleClickZoom: false, touchZoom: false, boxZoom: false,
       }).setView([lat, lng], 13);
 
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '© OpenStreetMap · © CartoDB',
-        maxZoom: 19, subdomains: 'abcd',
-      }).addTo(map);
+      addBasemap(map, 'dark');
 
       L.circleMarker([lat, lng], {
         radius: 9, color: C, fillColor: C, fillOpacity: 0.85, weight: 2,

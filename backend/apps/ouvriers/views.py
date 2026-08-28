@@ -16,6 +16,7 @@ from apps.accounts.permissions import (
     ReadPublicWriteAdmin,
     filter_ouvriers_by_scope,
 )
+from eec_core.cache import PublicListCacheMixin
 
 
 # ---------------------------------------------------------------------------
@@ -53,8 +54,13 @@ class GradeViewSet(viewsets.ReadOnlyModelViewSet):
 # Ouvriers — lecture publique, CRUD avec RBAC
 # ---------------------------------------------------------------------------
 
-class OuvrierViewSet(viewsets.ModelViewSet):
+class OuvrierViewSet(PublicListCacheMixin, viewsets.ModelViewSet):
     permission_classes = [ReadPublicWriteAdmin]
+
+    # Liste chargée intégralement par la carte publique à chaque ouverture.
+    cache_prefix = "ouvriers:list"
+    cache_key_params = frozenset({"grade", "paroisse", "district", "region", "statut", "sexe"})
+    cache_bypass_params = frozenset({"search"})
 
     def get_serializer_class(self):
         if self.action == "create":

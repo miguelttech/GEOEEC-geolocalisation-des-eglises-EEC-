@@ -3,6 +3,7 @@ import React from 'react';
 export const PATHS: Record<string, React.ReactNode> = {
   search:       <><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></>,
   close:        <><path d="M18 6L6 18"/><path d="M6 6l12 12"/></>,
+  plus:         <><path d="M12 5v14"/><path d="M5 12h14"/></>,
   menu:         <><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></>,
   chevron:      <path d="M9 18l6-6-6-6"/>,
   chevronD:     <path d="M6 9l6 6 6-6"/>,

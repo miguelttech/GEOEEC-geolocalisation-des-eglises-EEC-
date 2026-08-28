@@ -65,9 +65,8 @@ export interface MapDataResult {
   districts: DistrictItem[];
   parishes: ParishItem[];
   oeuvres: OeuvreItem[];
-  workers: WorkerItem[];
   allItems: (ParishItem | OeuvreItem)[];
-  globalStats: { regions: number; districts: number; parishes: number; oeuvres: number; workers: number };
+  globalStats: { regions: number; districts: number; parishes: number; oeuvres: number };
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -150,7 +149,13 @@ function oeuvreTypeId(nom: string): string {
 // ──────────────────────────────────────────────────────────────────────────────
 
 export async function loadMapData(): Promise<MapDataResult> {
-  const [regGeoRes, distRaw, parRaw, oeuRaw, ouvRaw, statsRaw] = await Promise.all([
+  // Les ouvriers ne sont PAS chargés ici : 254 Ko (38 Ko compressés) pour une
+  // liste nationale dont la carte n'affiche jamais plus de six lignes, et
+  // seulement dans l'onglet « Ouvriers » du panneau de détail d'une paroisse.
+  // Ils sont désormais récupérés à la demande, paroisse par paroisse, via
+  // loadOuvriersParoisse(). Sur un lien mobile camerounais (~150 ms de RTT
+  // depuis Gravelines), c'était l'endpoint le plus lourd du chemin critique.
+  const [regGeoRes, distRaw, parRaw, oeuRaw, statsRaw] = await Promise.all([
     // Sans credentials — voir la note dans fetchAllPages() : la carte
     // publique doit rester non-scopée même pour un navigateur où un admin
     // est connecté.
@@ -160,7 +165,6 @@ export async function loadMapData(): Promise<MapDataResult> {
     fetchAllPages<District>('geo/districts/'),
     fetchAllPages<Paroisse>('geo/paroisses/'),
     fetchAllPages<Oeuvre>('oeuvres/oeuvres/'),
-    fetchAllPages<Ouvrier>('ouvriers/ouvriers/'),
     fetchAllPages<StatistiqueAnnuelle>('statistiques/'),
   ]);
 
@@ -284,8 +288,25 @@ export async function loadMapData(): Promise<MapDataResult> {
       active:     o.est_active     ?? true,
     }));
 
-  // 6. Workers
-  const workers: WorkerItem[] = ouvRaw.map(w => ({
+  return {
+    regions,
+    districts,
+    parishes,
+    oeuvres,
+    allItems: [...parishes, ...oeuvres],
+    globalStats: {
+      regions:   regions.length,
+      districts: distReels.length,
+      parishes:  parRaw.length,
+      oeuvres:   oeuRaw.length,
+    },
+  };
+}
+
+
+/** Convertit un ouvrier brut de l'API en WorkerItem d'affichage. */
+function versWorkerItem(w: Ouvrier): WorkerItem {
+  return {
     id:           String(w.id),
     regionId:     String(w.region_id ?? ''),
     regionName:   w.region_nom ?? '',
@@ -296,21 +317,33 @@ export async function loadMapData(): Promise<MapDataResult> {
     gradeLabel:   w.grade_nom ?? '',
     name:         [w.nom, w.prenom].filter(Boolean).join(' '),
     status: w.statut === 'OCCUPE' ? 'occupe' : 'inoccupe',
-  }));
-
-  return {
-    regions,
-    districts,
-    parishes,
-    oeuvres,
-    workers,
-    allItems: [...parishes, ...oeuvres],
-    globalStats: {
-      regions:   regions.length,
-      districts: distReels.length,
-      parishes:  parRaw.length,
-      oeuvres:   oeuRaw.length,
-      workers:   ouvRaw.length,
-    },
   };
+}
+
+/**
+ * Ouvriers d'UNE paroisse, chargés à l'ouverture de son panneau de détail.
+ *
+ * Remplace le téléchargement de la liste nationale au démarrage de la carte.
+ * Le backend filtre par `paroisse` et met la réponse en cache Redis (le
+ * paramètre fait partie de la clé — voir eec_core/cache.py), donc une
+ * paroisse consultée deux fois ne recalcule rien.
+ *
+ * `limite` reproduit le .slice(0, 6) de l'ancien affichage : le panneau
+ * n'a jamais listé plus de six ouvriers.
+ *
+ * Pas de `credentials` — même raison que fetchAllPages() : la carte publique
+ * ne doit jamais hériter du filtrage RBAC d'une session admin ouverte dans
+ * le même navigateur.
+ */
+export async function loadOuvriersParoisse(parishId: string, limite = 6): Promise<WorkerItem[]> {
+  try {
+    const r = await fetch(`${API}/api/ouvriers/ouvriers/?paroisse=${encodeURIComponent(parishId)}&page_size=${limite}`);
+    if (!r.ok) return [];
+    const d: { results?: Ouvrier[] } | Ouvrier[] = await r.json();
+    const bruts = Array.isArray(d) ? d : (d.results ?? []);
+    return bruts.map(versWorkerItem);
+  } catch {
+    // Backend injoignable : le panneau affiche simplement « aucun ouvrier ».
+    return [];
+  }
 }

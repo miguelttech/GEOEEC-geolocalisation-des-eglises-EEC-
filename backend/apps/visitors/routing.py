@@ -48,7 +48,8 @@ import urllib.error
 # voiture (voies rapides comprises) avec une durée simplement redivisée par une
 # vitesse moyenne. Tant que Valhalla répond, les trois modes suivent désormais
 # chacun leur propre réseau. Mesuré sur Yaoundé : Valhalla ~1 s, OSRM ~4 s.
-OSRM_URL = "https://router.project-osrm.org/route/v1/driving/{lng1},{lat1};{lng2},{lat2}"
+# {coords} = "lng,lat;lng,lat[;lng,lat...]" — autant de points que d'escales.
+OSRM_BASE_URL = "https://router.project-osrm.org/route/v1/driving/{coords}"
 VALHALLA_URL = "https://valhalla1.openstreetmap.de/route"
 
 # Correspondance mode frontend → "costing" Valhalla
@@ -107,6 +108,62 @@ MOTO_FACTEUR_DUREE = 0.85
 # Vitesses moyennes par mode (km/h) — sert à estimer la durée quand on suit
 # le tracé routier OSRM (profil voiture) pour le vélo / la marche.
 MODE_SPEED_KMH = {"auto": None, "motor_scooter": 28.0, "bicycle": 15.0, "pedestrian": 5.0}
+
+# Distance maximale acceptée par l'instance publique Valhalla, PAR PROFIL.
+#
+# Au-delà, elle répond systématiquement :
+#     {"error_code": 154,
+#      "error": "Path distance exceeds the max distance limit: 200000 meters"}
+#
+# Mesuré sur valhalla1.openstreetmap.de (Yaoundé → Ngaoundéré, ~430 km à vol
+# d'oiseau) : le profil piéton met 2,7 s à renvoyer cette erreur, puis le repli
+# OSRM repart pour 3,5 s — soit 6,3 s au total pour un mode dont on SAIT
+# d'avance qu'il sera refusé. Comme les trois modes partent en parallèle, ces
+# 2,7 s gaspillées dictaient à elles seules la durée ressentie du calcul.
+#
+# Le test porte sur la distance à VOL D'OISEAU, toujours inférieure ou égale à
+# la distance routière : si elle dépasse déjà la limite, la distance réelle la
+# dépasse forcément aussi. On ne peut donc jamais écarter à tort un trajet que
+# Valhalla aurait su calculer — dans le cas inverse (vol d'oiseau sous la
+# limite mais route au-dessus), on l'interroge comme avant et le repli joue.
+#
+# Les profils motorisés n'ont pas cette limite sur /route : « auto » répond
+# normalement sur 830 km. Seuls les modes non motorisés sont concernés.
+VALHALLA_MAX_KM = {"pedestrian": 200.0, "bicycle": 200.0}
+
+# Nombre maximal d'escales acceptées sur un itinéraire. Chaque escale ajoute
+# un segment à calculer, donc du temps de réponse et de la charge sur une
+# instance publique partagée ; au-delà de 8, le panneau devient de toute façon
+# illisible.
+MAX_ETAPES = 8
+
+
+def _points_trajet(start_lat, start_lng, end_lat, end_lng, etapes=None):
+    """Chaîne complète des points du trajet : départ, escales, arrivée.
+
+    Les escales (« waypoints » de Google Maps) sont des points intermédiaires
+    par lesquels l'itinéraire DOIT passer, dans l'ordre donné. Valhalla comme
+    OSRM les acceptent nativement ; il suffit de les insérer entre le départ
+    et l'arrivée.
+    """
+    points = [(float(start_lat), float(start_lng))]
+    for lat, lng in (etapes or []):
+        points.append((float(lat), float(lng)))
+    points.append((float(end_lat), float(end_lng)))
+    return points
+
+
+def _longueur_vol_oiseau(points):
+    """Somme des distances à vol d'oiseau segment par segment.
+
+    Avec des escales, la borne inférieure de la distance routière n'est plus
+    la ligne droite départ→arrivée mais la ligne brisée qui passe par chaque
+    escale — c'est elle qu'il faut comparer aux limites de Valhalla.
+    """
+    return sum(
+        _haversine_km(a[0], a[1], b[0], b[1])
+        for a, b in zip(points, points[1:])
+    )
 
 
 def _haversine_km(lat1, lng1, lat2, lng2):
@@ -180,10 +237,16 @@ def _osrm_instruction(maneuver, name):
     return (f"Continuez {mod}{voie}").strip()
 
 
-def _route_osrm(start_lat, start_lng, end_lat, end_lng, mode):
-    """Itinéraire via OSRM (profil voiture). Lève RoutingError en cas d'échec."""
-    url = OSRM_URL.format(lng1=float(start_lng), lat1=float(start_lat),
-                          lng2=float(end_lng), lat2=float(end_lat))
+def _route_osrm(start_lat, start_lng, end_lat, end_lng, mode, etapes=None):
+    """Itinéraire via OSRM (profil voiture). Lève RoutingError en cas d'échec.
+
+    Les escales sont passées comme points supplémentaires dans le chemin de
+    l'URL, séparés par « ; » — OSRM les traite comme des passages obligés et
+    renvoie un « leg » par segment (déjà parcourus plus bas pour les étapes).
+    """
+    points = _points_trajet(start_lat, start_lng, end_lat, end_lng, etapes)
+    coords = ";".join(f"{lng},{lat}" for lat, lng in points)
+    url = OSRM_BASE_URL.format(coords=coords)
     url += "?overview=full&geometries=polyline6&steps=true&annotations=false"
     req = urllib.request.Request(url, headers={"User-Agent": "GEOEEC/1.0 (EEC Cameroun)"})
     try:
@@ -228,14 +291,17 @@ def _route_osrm(start_lat, start_lng, end_lat, end_lng, mode):
     }
 
 
-def _route_valhalla(start_lat, start_lng, end_lat, end_lng, mode):
-    """Itinéraire via Valhalla FOSSGIS (multimodal). Lève RoutingError en cas d'échec."""
+def _route_valhalla(start_lat, start_lng, end_lat, end_lng, mode, etapes=None):
+    """Itinéraire via Valhalla FOSSGIS (multimodal). Lève RoutingError en cas d'échec.
+
+    Avec des escales, Valhalla renvoie UN LEG PAR SEGMENT (n points → n-1 legs).
+    Il faut donc recoller les tracés et les manœuvres de tous les legs, alors
+    qu'un trajet sans escale n'en comportait qu'un seul.
+    """
     costing = COSTING.get((mode or "auto").lower(), "auto")
+    points = _points_trajet(start_lat, start_lng, end_lat, end_lng, etapes)
     payload = json.dumps({
-        "locations": [
-            {"lat": float(start_lat), "lon": float(start_lng)},
-            {"lat": float(end_lat),   "lon": float(end_lng)},
-        ],
+        "locations": [{"lat": lat, "lon": lng} for lat, lng in points],
         "costing": costing,
         # `language` est indispensable : sans lui Valhalla renvoie ses
         # instructions virage-par-virage en anglais ("Drive north on…"), ce qui
@@ -259,41 +325,54 @@ def _route_valhalla(start_lat, start_lng, end_lat, end_lng, mode):
     if not legs:
         raise RoutingError("Valhalla : aucun itinéraire.")
 
-    leg = legs[0]
-    steps = [{
-        "instruction":  m.get("instruction", ""),
-        "distance_km":  round(m.get("length", 0.0), 3),
-        "duration_min": round(m.get("time", 0.0) / 60.0, 1),
-        "type":         m.get("type", 0),
-    } for m in leg.get("maneuvers", [])]
+    geometry = []
+    steps = []
+    for leg in legs:
+        trace = decode_polyline(leg.get("shape", ""), precision=6)
+        # Le premier point d'un leg est le dernier du précédent (l'escale
+        # elle-même) : le garder dessinerait deux fois le même sommet.
+        geometry.extend(trace[1:] if geometry else trace)
+        steps.extend({
+            "instruction":  m.get("instruction", ""),
+            "distance_km":  round(m.get("length", 0.0), 3),
+            "duration_min": round(m.get("time", 0.0) / 60.0, 1),
+            "type":         m.get("type", 0),
+        } for m in leg.get("maneuvers", []))
 
     return {
         "mode":         costing,
+        # `summary` couvre DÉJÀ l'ensemble du trajet, escales comprises.
         "distance_km":  round(summary.get("length", 0.0), 2),
         "duration_min": round(summary.get("time", 0.0) / 60.0, 1),
-        "geometry":     decode_polyline(leg.get("shape", ""), precision=6),
+        "geometry":     geometry,
         "steps":        steps,
         "provider":     "valhalla",
     }
 
 
-def _route_direct(start_lat, start_lng, end_lat, end_lng, mode):
-    """Dernier recours : ligne droite (à vol d'oiseau). Ne lève jamais d'erreur."""
-    dist_km = _haversine_km(float(start_lat), float(start_lng), float(end_lat), float(end_lng))
+def _route_direct(start_lat, start_lng, end_lat, end_lng, mode, etapes=None):
+    """Dernier recours : ligne brisée à vol d'oiseau. Ne lève jamais d'erreur.
+
+    Avec des escales, on relie les points dans l'ordre plutôt que de tirer un
+    trait du départ à l'arrivée : le tracé reste faux (aucune route suivie),
+    mais il passe au moins par les escales demandées.
+    """
+    points = _points_trajet(start_lat, start_lng, end_lat, end_lng, etapes)
+    dist_km = _longueur_vol_oiseau(points)
     speed = MODE_SPEED_KMH.get(mode) or 40.0  # 40 km/h par défaut pour la voiture
     dur_min = dist_km / speed * 60.0
     return {
         "mode":         mode,
         "distance_km":  round(dist_km, 2),
         "duration_min": round(dur_min, 1),
-        "geometry":     [[float(start_lat), float(start_lng)], [float(end_lat), float(end_lng)]],
+        "geometry":     [[lat, lng] for lat, lng in points],
         "steps":        [{"instruction": "Trajet direct (routage indisponible)",
                           "distance_km": round(dist_km, 3), "duration_min": round(dur_min, 1), "type": 0}],
         "provider":     "direct",
     }
 
 
-def calculer_route(start_lat, start_lng, end_lat, end_lng, mode="auto"):
+def calculer_route(start_lat, start_lng, end_lat, end_lng, mode="auto", etapes=None):
     """
     Calcule un itinéraire réel sur les routes entre deux points GPS.
     Essaie Valhalla, puis OSRM, puis (dernier recours) une ligne droite.
@@ -311,10 +390,22 @@ def calculer_route(start_lat, start_lng, end_lat, end_lng, mode="auto"):
     mode_ui = (mode or "auto").lower()
     mode_norm = COSTING.get(mode_ui, "auto")
 
+    # Valhalla refuse d'emblée les modes non motorisés au-delà de 200 km : on
+    # évite l'aller-retour perdu et on attaque directement OSRM (voir
+    # VALHALLA_MAX_KM).
+    limite = VALHALLA_MAX_KM.get(mode_norm)
+    fournisseurs = (_route_valhalla, _route_osrm)
+    if limite is not None:
+        # Avec escales, la borne inférieure est la ligne BRISÉE qui les relie,
+        # pas la ligne droite départ→arrivée.
+        points = _points_trajet(start_lat, start_lng, end_lat, end_lng, etapes)
+        if _longueur_vol_oiseau(points) > limite:
+            fournisseurs = (_route_osrm,)
+
     result = None
-    for provider in (_route_valhalla, _route_osrm):
+    for provider in fournisseurs:
         try:
-            result = provider(start_lat, start_lng, end_lat, end_lng, mode_norm)
+            result = provider(start_lat, start_lng, end_lat, end_lng, mode_norm, etapes)
             break
         except RoutingError:
             continue
@@ -322,7 +413,7 @@ def calculer_route(start_lat, start_lng, end_lat, end_lng, mode="auto"):
             continue
     if result is None:
         # Aucun service dispo → ligne droite (l'appli reste fonctionnelle)
-        result = _route_direct(start_lat, start_lng, end_lat, end_lng, mode_norm)
+        result = _route_direct(start_lat, start_lng, end_lat, end_lng, mode_norm, etapes)
 
     # Correction moto : le profil `motorcycle` calque la voiture, on applique
     # le facteur métier à la durée totale ET aux étapes (sinon la somme des
@@ -338,7 +429,7 @@ def calculer_route(start_lat, start_lng, end_lat, end_lng, mode="auto"):
     return result
 
 
-def calculer_resume(start_lat, start_lng, end_lat, end_lng, mode):
+def calculer_resume(start_lat, start_lng, end_lat, end_lng, mode, etapes=None):
     """
     Distance + durée d'un mode, SANS la géométrie ni les étapes.
 
@@ -347,7 +438,7 @@ def calculer_resume(start_lat, start_lng, end_lat, end_lng, mode):
     peut pas se contenter du mode actuellement sélectionné. Le tracé, lui, ne
     concerne que le mode affiché — inutile de rapatrier trois polylignes.
     """
-    r = calculer_route(start_lat, start_lng, end_lat, end_lng, mode)
+    r = calculer_route(start_lat, start_lng, end_lat, end_lng, mode, etapes)
     return {
         "mode":         r["mode"],
         "distance_km":  r["distance_km"],
@@ -356,7 +447,7 @@ def calculer_resume(start_lat, start_lng, end_lat, end_lng, mode):
     }
 
 
-def calculer_routes_multi(start_lat, start_lng, end_lat, end_lng, mode="auto", modes=None):
+def calculer_routes_multi(start_lat, start_lng, end_lat, end_lng, mode="auto", modes=None, etapes=None):
     """
     Calcule l'itinéraire COMPLET du mode sélectionné, plus le résumé
     (distance + durée) de chacun des autres modes proposés dans l'interface.
@@ -379,9 +470,9 @@ def calculer_routes_multi(start_lat, start_lng, end_lat, end_lng, mode="auto", m
     autres = [m for m in modes if m != mode_ui]
 
     with ThreadPoolExecutor(max_workers=len(modes)) as pool:
-        principal = pool.submit(calculer_route, start_lat, start_lng, end_lat, end_lng, mode_ui)
+        principal = pool.submit(calculer_route, start_lat, start_lng, end_lat, end_lng, mode_ui, etapes)
         resumes = {
-            m: pool.submit(calculer_resume, start_lat, start_lng, end_lat, end_lng, m)
+            m: pool.submit(calculer_resume, start_lat, start_lng, end_lat, end_lng, m, etapes)
             for m in autres
         }
         result = principal.result()
