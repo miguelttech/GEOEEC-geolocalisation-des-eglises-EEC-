@@ -6,6 +6,7 @@ import { api, TypeOeuvre, Oeuvre, PagedResult, RegionSynodale, District, Paroiss
 import { I } from '@/components/admin/icons';
 import { GpsCell } from '@/components/admin/atoms';
 
+import { addBasemap } from '@/lib/basemap';
 // ─── Toast ────────────────────────────────────────────────────────────────────
 interface Toast { id: number; type: 'success'|'warn'|'error'; title: string; body?: string; }
 function useToast() {
@@ -183,7 +184,7 @@ function GpsMapPicker({ lat, lng }: { lat: number|null; lng: number|null }) {
       if (cancelled || !mapDiv.current || mapInst.current) return;
       const initLat = lat ?? 4.5, initLng = lng ?? 12.5;
       const map = L.map(mapDiv.current, { center: [initLat, initLng], zoom: lat ? 11 : 6 });
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: '© OSM · CartoDB', maxZoom: 19, subdomains: 'abcd' }).addTo(map);
+      addBasemap(map);
       const mkIcon = () => L.divIcon({ html: `<div style="width:16px;height:16px;background:#5B9BD5;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.4)"></div>`, iconSize:[16,16], iconAnchor:[8,8], className:'' });
       if (lat !== null && lng !== null) { marker.current = L.marker([lat,lng],{icon:mkIcon()}).addTo(map); }
       // EXIGENCE : le marqueur n'est plus déplaçable directement sur la carte —

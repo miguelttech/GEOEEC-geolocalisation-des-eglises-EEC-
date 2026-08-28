@@ -2,6 +2,7 @@
 import React from 'react';
 import 'leaflet/dist/leaflet.css';
 
+import { addBasemap } from '@/lib/basemap';
 const CLUSTERS = [
   { lat: 3.866,  lng: 11.516, count: 95, name: 'CENTRE SUD 1' },
   { lat: 4.061,  lng: 9.787,  count: 72, name: 'WOURI CENTRE' },
@@ -32,10 +33,7 @@ export default function MiniLeafletMap({ height = 320 }: { height?: number }) {
         doubleClickZoom: false, touchZoom: false, boxZoom: false,
       }).setView([6.4, 12.3], 5.4);
 
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '© OpenStreetMap · © CartoDB',
-        maxZoom: 19, subdomains: 'abcd',
-      }).addTo(map);
+      addBasemap(map, 'dark');
 
       CLUSTERS.forEach(c => {
         const size = 18 + Math.sqrt(c.count) * 2.6;

@@ -6,6 +6,12 @@ import L from 'leaflet';
 import 'leaflet.markercluster';
 // leaflet-rotate (sans types) : patche L pour activer la rotation de la carte
 import 'leaflet-rotate';
+// Fond de carte vectoriel OpenFreeMap rendu par MapLibre GL dans Leaflet.
+// Remplace CARTO Voyager, dont le service gratuit a fermé : ses tuiles
+// revenaient en HTTP 200 avec un filigrane « API KEY REQUIRED », donc sans
+// la moindre erreur côté code — la carte se dégradait en silence.
+// Fonds de carte : voir src/lib/basemap.ts (source unique pour les 5 cartes
+// du projet, après la fermeture du service gratuit de CARTO).
 // Décodage des tuiles vectorielles OpenFreeMap (source des points d'intérêt,
 // identique à celle de la carte 3D — voir usePOILayer)
 import { VectorTile } from '@mapbox/vector-tile';
@@ -18,6 +24,7 @@ import { Icon, TYPE_ICON, markerSvg } from './icons';
 
 // Vue de navigation 3D (MapLibre) — chargée paresseusement, uniquement pendant la navigation
 const NavMap3D = dynamic(() => import('./NavMap3D'), { ssr: false });
+import { addBasemap, SATELLITE_URL, SATELLITE_ATTRIBUTION, SATELLITE_LABELS_URL } from '@/lib/basemap';
 import { ENTITY_TYPES } from '@/lib/eec-data';
 import { VIZ_CATEGORICAL, TAILLE_MARQUEUR, tailleParEffectif } from '@/lib/viz-palette';
 import {
@@ -216,13 +223,8 @@ function removeLayersBulk(cible: L.LayerGroup, couches: L.Layer[]) {
 /* ============================================================
    Map constants
    ============================================================ */
-// CartoDB Voyager = routes + noms de rues/quartiers + POI (proche de Google Maps)
-const BASEMAPS = {
-  light: { url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', attr: '© OpenStreetMap, © CARTO' },
-  sat:   { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attr: '© Esri, Maxar' },
-};
-// Labels overlay pour mode satellite (routes + noms par-dessus l'image satellite)
-const SAT_LABELS_URL = 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png';
+// Fond « Plan » (vectoriel OpenFreeMap) et satellite (Esri) : définis dans
+// src/lib/basemap.ts, partagé avec les quatre cartes de l'espace admin.
 const CAMEROON_BOUNDS = L.latLngBounds([1.6, 8.4], [13.1, 16.2]);
 const CAMEROON_CENTER: [number, number] = [6.5, 12.5];
 // Tuile transparente (1px GIF) pour remplacer les tuiles manquantes ou "Map data not yet available"
@@ -491,7 +493,9 @@ function useLeafletMap(
   onPickMapPoint: (lat: number, lng: number) => void,
 ) {
   const mapRef         = useRef<L.Map | null>(null);
-  const tileRef        = useRef<L.TileLayer | null>(null);
+  // Le fond « Plan » est une couche MapLibre GL (maplibregl.Layer), le satellite
+  // une TileLayer raster classique : d'où le type large sur tileRef.
+  const tileRef        = useRef<L.Layer | null>(null);
   const labelsRef      = useRef<L.TileLayer | null>(null);
   const clusterRef     = useRef<L.MarkerClusterGroup | null>(null);
   const plainLayerRef  = useRef<L.LayerGroup | null>(null);
@@ -701,20 +705,20 @@ function useLeafletMap(
     const map = mapRef.current; if (!map) return;
     if (tileRef.current)   { map.removeLayer(tileRef.current);   tileRef.current = null; }
     if (labelsRef.current) { map.removeLayer(labelsRef.current); labelsRef.current = null; }
-    const bm = BASEMAPS[basemap];
-    // Éviter "Map data not yet available" : le satellite Esri n'a pas d'imagerie
-    // haute résolution en zone rurale camerounaise (> z17). On plafonne le zoom
-    // NATIF et Leaflet agrandit la dernière tuile valide au lieu d'en demander
-    // une inexistante. CARTO Voyager a une couverture mondiale jusqu'à z18.
-    const nativeMax = basemap === 'sat' ? 17 : 18;
-    tileRef.current = L.tileLayer(bm.url, {
-      attribution: bm.attr, maxZoom: 19, maxNativeZoom: nativeMax, errorTileUrl: BLANK_TILE,
-    }).addTo(map);
-    tileRef.current.bringToBack();
     if (basemap === 'sat') {
-      labelsRef.current = L.tileLayer(SAT_LABELS_URL, {
-        attribution: '', maxZoom: 19, maxNativeZoom: 17, opacity: 0.85, errorTileUrl: BLANK_TILE,
+      // Éviter "Map data not yet available" : le satellite Esri n'a pas
+      // d'imagerie haute résolution en zone rurale camerounaise (> z17). On
+      // plafonne le zoom NATIF et Leaflet agrandit la dernière tuile valide au
+      // lieu d'en demander une inexistante.
+      tileRef.current = L.tileLayer(SATELLITE_URL, {
+        attribution: SATELLITE_ATTRIBUTION, maxZoom: 19, maxNativeZoom: 17, errorTileUrl: BLANK_TILE,
       }).addTo(map);
+      (tileRef.current as L.TileLayer).bringToBack();
+      labelsRef.current = L.tileLayer(SATELLITE_LABELS_URL, {
+        attribution: '', maxZoom: 19, maxNativeZoom: 17, opacity: 0.9, errorTileUrl: BLANK_TILE,
+      }).addTo(map);
+    } else {
+      tileRef.current = addBasemap(map, 'liberty');
     }
   }, [basemap]);
 
