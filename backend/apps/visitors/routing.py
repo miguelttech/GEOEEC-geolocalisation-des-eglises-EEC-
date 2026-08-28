@@ -108,6 +108,28 @@ MOTO_FACTEUR_DUREE = 0.85
 # le tracé routier OSRM (profil voiture) pour le vélo / la marche.
 MODE_SPEED_KMH = {"auto": None, "motor_scooter": 28.0, "bicycle": 15.0, "pedestrian": 5.0}
 
+# Distance maximale acceptée par l'instance publique Valhalla, PAR PROFIL.
+#
+# Au-delà, elle répond systématiquement :
+#     {"error_code": 154,
+#      "error": "Path distance exceeds the max distance limit: 200000 meters"}
+#
+# Mesuré sur valhalla1.openstreetmap.de (Yaoundé → Ngaoundéré, ~430 km à vol
+# d'oiseau) : le profil piéton met 2,7 s à renvoyer cette erreur, puis le repli
+# OSRM repart pour 3,5 s — soit 6,3 s au total pour un mode dont on SAIT
+# d'avance qu'il sera refusé. Comme les trois modes partent en parallèle, ces
+# 2,7 s gaspillées dictaient à elles seules la durée ressentie du calcul.
+#
+# Le test porte sur la distance à VOL D'OISEAU, toujours inférieure ou égale à
+# la distance routière : si elle dépasse déjà la limite, la distance réelle la
+# dépasse forcément aussi. On ne peut donc jamais écarter à tort un trajet que
+# Valhalla aurait su calculer — dans le cas inverse (vol d'oiseau sous la
+# limite mais route au-dessus), on l'interroge comme avant et le repli joue.
+#
+# Les profils motorisés n'ont pas cette limite sur /route : « auto » répond
+# normalement sur 830 km. Seuls les modes non motorisés sont concernés.
+VALHALLA_MAX_KM = {"pedestrian": 200.0, "bicycle": 200.0}
+
 
 def _haversine_km(lat1, lng1, lat2, lng2):
     """Distance à vol d'oiseau en km (formule de Haversine)."""
@@ -311,8 +333,16 @@ def calculer_route(start_lat, start_lng, end_lat, end_lng, mode="auto"):
     mode_ui = (mode or "auto").lower()
     mode_norm = COSTING.get(mode_ui, "auto")
 
+    # Valhalla refuse d'emblée les modes non motorisés au-delà de 200 km : on
+    # évite l'aller-retour perdu et on attaque directement OSRM (voir
+    # VALHALLA_MAX_KM).
+    limite = VALHALLA_MAX_KM.get(mode_norm)
+    fournisseurs = (_route_valhalla, _route_osrm)
+    if limite is not None and _haversine_km(start_lat, start_lng, end_lat, end_lng) > limite:
+        fournisseurs = (_route_osrm,)
+
     result = None
-    for provider in (_route_valhalla, _route_osrm):
+    for provider in fournisseurs:
         try:
             result = provider(start_lat, start_lng, end_lat, end_lng, mode_norm)
             break
