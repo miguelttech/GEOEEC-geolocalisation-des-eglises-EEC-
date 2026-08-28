@@ -123,17 +123,14 @@ server {
         add_header X-Content-Type-Options nosniff;
     }
 
-    location /geoserver/web/ {
-        deny all;
-        return 403;
-    }
-
+    # GeoServer est désactivé (profil Compose — voir docker-compose.prod.yml).
+    # Le proxy_pass a été RETIRÉ volontairement : nginx résout les noms de ses
+    # upstreams au démarrage, donc pointer vers un conteneur absent le fait
+    # échouer avec « host not found in upstream » et met TOUT le site à terre.
+    # On répond 404 pour qu'une URL encore en signet reçoive une réponse nette.
+    # Pour réactiver : relancer le service, puis restaurer un bloc proxy_pass.
     location /geoserver/ {
-        proxy_pass http://geoserver:8080/geoserver/;
-        proxy_set_header Host              $host;
-        proxy_set_header X-Real-IP         $remote_addr;
-        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto http;
+        return 404;
     }
 
     location / {

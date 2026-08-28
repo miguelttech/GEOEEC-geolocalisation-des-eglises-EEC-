@@ -24,6 +24,24 @@ services:
   geoserver:
     image: docker.osgeo.org/geoserver:2.26.2
     container_name: eec_geoserver_dev
+    # DÉSACTIVÉ PAR DÉFAUT (profil Compose) — audit du 28/08/2026.
+    #
+    # L'instance ne contenait QUE les données de démonstration livrées avec
+    # l'image (tiger, nurc, sf, topp, ne…) : aucun workspace « eec », aucune
+    # couche publiée, et les styles SLD de infra/geoserver/styles/ n'ont jamais
+    # été chargés. Côté application, NEXT_PUBLIC_GEOSERVER_URL n'est lue par
+    # aucune ligne de code : la carte consomme le GeoJSON de l'API DRF.
+    # Coût constaté : ~1 Go de RAM et 979 Mo d'image pour zéro requête servie.
+    #
+    # Le service reste DÉCLARÉ (montée en charge future, publication OGC), mais
+    # n'est plus démarré automatiquement. Pour le relancer ponctuellement :
+    #     docker compose --profile geoserver up -d geoserver
+    #
+    # ATTENTION si tu le réactives : les blocs location /geoserver/ ont été
+    # retirés des templates nginx, car un proxy_pass vers un conteneur absent
+    # empêche nginx de démarrer (« host not found in upstream ») — ce qui
+    # ferait tomber TOUT le site, pas seulement GeoServer.
+    profiles: ["geoserver"]
     restart: unless-stopped
     environment:
       GEOSERVER_ADMIN_USER: admin
