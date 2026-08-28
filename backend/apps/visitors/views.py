@@ -531,7 +531,7 @@ def route_reelle(request):
     autres modes, pour que l'interface affiche côte à côte le temps en voiture,
     en moto et à pied sans redemander un calcul à chaque changement d'onglet.
     """
-    from .routing import calculer_routes_multi, MODES_UI, RoutingError
+    from .routing import calculer_routes_multi, MODES_UI, MAX_ETAPES, RoutingError
 
     data = request.data
     try:
@@ -558,12 +558,47 @@ def route_reelle(request):
 
     mode = (data.get("mode") or "auto")
 
+    # ── Escales (waypoints) ──────────────────────────────────────────────
+    # Points de passage obligés, dans l'ordre, entre le départ et l'arrivée —
+    # l'équivalent du « + Ajouter une étape » de Google Maps. Acceptés au
+    # format [{"lat": .., "lng": ..}, ...] ou [[lat, lng], ...].
+    etapes = []
+    brutes = data.get("etapes") or data.get("waypoints") or []
+    if not isinstance(brutes, (list, tuple)):
+        return Response({"detail": "etapes doit être une liste de points."},
+                        status=status.HTTP_400_BAD_REQUEST)
+    # Plafond : chaque escale ajoute un segment à calculer chez Valhalla, donc
+    # du temps de réponse ET de la charge sur une instance publique partagée.
+    # Au-delà de 8, l'interface devient de toute façon inutilisable.
+    if len(brutes) > MAX_ETAPES:
+        return Response({"detail": f"{MAX_ETAPES} escales au maximum."},
+                        status=status.HTTP_400_BAD_REQUEST)
+    for i, pt in enumerate(brutes, start=1):
+        try:
+            if isinstance(pt, dict):
+                e_lat = float(pt.get("lat"))
+                e_lng = float(pt.get("lng", pt.get("lon")))
+            else:
+                e_lat, e_lng = float(pt[0]), float(pt[1])
+        except (TypeError, ValueError, IndexError, KeyError):
+            return Response({"detail": f"Escale {i} invalide (lat/lng attendus)."},
+                            status=status.HTTP_400_BAD_REQUEST)
+        if not (-90.0 <= e_lat <= 90.0) or not (-180.0 <= e_lng <= 180.0):
+            return Response({"detail": f"Escale {i} hors bornes (latitude/longitude)."},
+                            status=status.HTTP_400_BAD_REQUEST)
+        etapes.append((e_lat, e_lng))
+
     # Cache Redis : un itinéraire entre deux mêmes points ne change pas d'une
     # minute à l'autre, et les instances publiques Valhalla/OSRM sont limitées
     # en débit. On arrondit à ~11 m (5 décimales) pour que deux clics quasi
     # identiques partagent la même entrée.
-    cle = "route:v2:{}:{:.5f},{:.5f}:{:.5f},{:.5f}".format(
+    #
+    # v3 : les escales entrent dans la clé. Sans elles, deux trajets de mêmes
+    # extrémités mais passant par des escales différentes partageraient la même
+    # entrée — le second afficherait le tracé du premier.
+    cle = "route:v3:{}:{:.5f},{:.5f}:{:.5f},{:.5f}:{}".format(
         str(mode).lower(), start_lat, start_lng, end_lat, end_lng,
+        "|".join(f"{a:.5f},{b:.5f}" for a, b in etapes) or "-",
     )
     cached = cache.get(cle)
     if cached is not None:
@@ -572,12 +607,13 @@ def route_reelle(request):
     try:
         result = calculer_routes_multi(
             start_lat, start_lng, end_lat, end_lng, mode=mode, modes=MODES_UI,
+            etapes=etapes,
         )
     except RoutingError as e:
         return Response({"detail": str(e)}, status=status.HTTP_502_BAD_GATEWAY)
     except Exception:  # noqa: BLE001 — filet de sécurité : ne jamais renvoyer 500
         from .routing import _route_direct
-        result = _route_direct(start_lat, start_lng, end_lat, end_lng, mode)
+        result = _route_direct(start_lat, start_lng, end_lat, end_lng, mode, etapes)
 
     # On ne met en cache que les itinéraires réellement calculés sur le réseau
     # routier : figer une ligne droite de secours pendant 1 h priverait
