@@ -171,8 +171,15 @@ body:has(.eec-lp) {
 .app {
   display: grid;
   grid-template-rows: var(--nav-h) 1fr;
+  /* 100vh se mesure hors barres d'adresse mobiles : la carte débordait sous
+     la barre du navigateur et ses commandes du bas (rotation, bandeau) se
+     retrouvaient hors de l'écran. 100dvh suit la hauteur réellement visible. */
   height: 100vh;
+  height: 100dvh;
   width: 100vw;
+  /* Empêche le « tirer pour rafraîchir » et le rebond de page déclenchés par
+     un glissement sur la carte. */
+  overscroll-behavior: none;
 }
 /* Plein écran : la navbar n'est plus rendue → .main devient le 1er enfant.
    Une seule ligne pleine hauteur pour qu'il (et la carte) remplisse l'écran. */
@@ -2409,6 +2416,13 @@ img.leaflet-tile {
   /* Boutons flottants à droite de la carte */
   .locate-btn, .measure-btn, .fs-btn, .zoom-btns button { min-width: 38px; min-height: 38px; }
 
+  /* Commandes de zoom Leaflet : elles se placent en haut-gauche, exactement
+     sous le bouton hamburger (14px + 40px de haut), qui les recouvrait — les
+     boutons +/− étaient donc inatteignables au doigt. On les descend sous lui
+     et on les agrandit à la taille minimale confortable au tactile. */
+  .leaflet-top.leaflet-left { top: 46px; }
+  .leaflet-bar a, .leaflet-bar a:hover { width: 40px; height: 40px; line-height: 40px; font-size: 20px; }
+
   /* HUD navigation */
   .nav-hud { bottom: 80px; }
   .nav-banner { border-radius: 0; }
@@ -3405,3 +3419,45 @@ img.leaflet-tile {
   border: 2px solid #D32F2F; animation: mic-pulse 1s infinite;
 }
 @keyframes mic-pulse { 0%,100% { opacity:0.8; transform: scale(1); } 50% { opacity:0.3; transform: scale(1.4); } }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CIBLES TACTILES — TÉLÉPHONE (carte + pages d'authentification)
+   Valeurs mesurées au navigateur à 360px, toutes sous le minimum
+   WCAG 2.5.8 de 24×24 px :
+     · « Connexion » (.nav-signin)      14×20  ← le pire : libellé masqué,
+                                                 il ne restait que l'icône
+     · « Carte » / « Liste » (.vt-btn)  23×29
+     · « Mot de passe oublié ? »        17×130
+     · « S'inscrire », « Retour… »      15×…
+   On agrandit la zone cliquable, jamais le texte.
+   ══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 700px) and (pointer: coarse) {
+  .nav-signin,
+  .nav-register {
+    min-height: 34px;
+    min-width: 34px;
+    justify-content: center;
+  }
+  .view-toggle .vt-btn {
+    min-height: 32px;
+    min-width: 34px;
+    justify-content: center;
+  }
+  /* Zoom Leaflet : 30×30 → 36×36 */
+  .leaflet-control-zoom a {
+    width: 36px !important;
+    height: 36px !important;
+    line-height: 36px !important;
+  }
+  /* Liens des pages d'authentification */
+  /* Le lien « Mot de passe oublié ? » n'a aucune classe : c'est un <a> nu
+     dans .ls-opts. Mesuré à 17px de haut avant correction. */
+  .ls-opts a,
+  .ls-forgot,
+  .ls-footer a,
+  .ls-alt a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+  }
+}

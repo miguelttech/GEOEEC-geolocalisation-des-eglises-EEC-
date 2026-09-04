@@ -49,11 +49,13 @@ from apps.ouvriers.models import Grade
 #   - abreviation: forme courte pour les cartes et listes compactes
 # =============================================================================
 GRADES = [
-    # Niveau 1 : VOLONTAIREMENT VIDE. Il portait « Évêque », grade qui n'existe
-    # pas dans l'Église Évangélique du Cameroun. Retiré de cette liste, et
-    # supprimé en base par la migration 0004_supprime_grade_eveque — cette
-    # commande utilise update_or_create() et n'efface donc jamais d'elle-même
-    # un grade devenu obsolète.
+    # Niveau 1 : pasteur titulaire d'un doctorat, tête de la hiérarchie.
+    # Ce niveau a d'abord porté « Évêque », grade qui n'existe pas dans
+    # l'Église Évangélique du Cameroun : il a été retiré de cette liste et
+    # supprimé en base par la migration 0004_supprime_grade_eveque. La place
+    # ainsi libérée est reprise par « Révérant Docteur » (migration 0006),
+    # sans décaler la numérotation des grades suivants.
+    {"niveau": 1, "nom": "Révérant Docteur",                            "abreviation": "Rév Dr"},
 
     # Niveau 2 : agent pastoral principal, responsable d'une paroisse
     {"niveau": 2, "nom": "Pasteur",                                     "abreviation": "P."},

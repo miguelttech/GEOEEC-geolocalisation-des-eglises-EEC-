@@ -33,7 +33,8 @@ class Grade(models.Model):
     Rang ecclésiastique d'un ouvrier dans la hiérarchie de l'EEC.
 
     Hiérarchie réelle de l'EEC, telle qu'importée par import_grades.py :
-      Niveau 2 (plus haut) : Pasteur (P.)
+      Niveau 1 (plus haut) : Révérant Docteur (Rév Dr)
+      Niveau 2             : Pasteur (P.)
       Niveau 3             : Pasteur Proposant (P.P.)
       Niveau 4             : Pasteur Proposant avec Délégation Pastorale (P.P.D.P.)
       Niveau 5             : Évangéliste (Ev.)
@@ -41,10 +42,17 @@ class Grade(models.Model):
       Niveau 7             : Délégué Pastoral (D.P.)
       Niveau 8             : Aide-Évangéliste (A.Ev.)
 
-    Le niveau 1 est VOLONTAIREMENT VIDE : il portait le grade « Évêque », qui
-    n'existe pas dans l'Église Évangélique du Cameroun et a été retiré (voir
-    la migration 0004_supprime_grade_eveque). La numérotation n'a pas été
-    décalée, pour ne pas invalider d'éventuels tris ou exports enregistrés.
+    Le niveau 1 a d'abord porté « Évêque », grade qui n'existe pas dans
+    l'Église Évangélique du Cameroun et qui a été retiré (migration
+    0004_supprime_grade_eveque) sans décaler la numérotation, pour ne pas
+    invalider d'éventuels tris ou exports enregistrés. La place laissée libre
+    est occupée depuis par « Révérant Docteur » (migration 0006_grade_rev_dr),
+    rang attendu d'un pasteur titulaire d'un doctorat.
+
+    ATTENTION : « Rév Dr » est bien un grade à part entière, sur décision de la
+    maîtrise d'ouvrage. C'est le seul cas où une mention de doctorat en est un —
+    import_grades_docx.py continue de traiter « Pasteur Dr » comme un simple
+    Pasteur, le doctorat n'y étant qu'un diplôme mentionné à côté du grade.
 
     Le champ 'niveau' permet de trier les grades du plus haut au plus bas.
     Le champ 'abreviation' est utilisé sur les cartes et dans les listes compactes.

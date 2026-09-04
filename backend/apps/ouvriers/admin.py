@@ -31,7 +31,7 @@ class GradeAdmin(admin.ModelAdmin):
     # Colonnes visibles dans la liste des grades
     list_display = ["niveau", "nom", "abreviation", "nb_ouvriers_admin"]
 
-    # Tri par niveau hiérarchique (2=Pasteur, 8=Aide-Évangéliste)
+    # Tri par niveau hiérarchique (1=Révérant Docteur, 8=Aide-Évangéliste)
     ordering = ["niveau"]
 
     def nb_ouvriers_admin(self, obj):

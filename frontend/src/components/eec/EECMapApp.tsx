@@ -231,6 +231,35 @@ function removeLayersBulk(cible: L.LayerGroup, couches: L.Layer[]) {
   else couches.forEach(c => cible.removeLayer(c));
 }
 
+/**
+ * Centre de vue à viser pour qu'un point tombe au milieu de la portion de
+ * carte NON masquée par la fiche détail.
+ *
+ * La fiche est un panneau latéral droit sur ordinateur et une feuille du bas
+ * sur téléphone : centrer bêtement sur le point le plaçait derrière elle. On
+ * mesure l'occultation avec offsetLeft/offsetTop/offsetWidth/offsetHeight —
+ * la position de MISE EN PAGE, insensible à la transition translate() encore
+ * en cours au moment où l'on calcule — puis on déporte le centre de la moitié
+ * de la zone cachée.
+ */
+function centreHorsPanneau(map: L.Map, lat: number, lng: number, zoom: number): L.LatLng {
+  const point = L.latLng(lat, lng);
+  const panneau = map.getContainer().parentElement?.querySelector('.detail-panel') as HTMLElement | null;
+  if (!panneau) return point;
+  const sz = map.getSize();
+  if (!sz.x || !sz.y) return point;
+
+  const pleineHauteur = panneau.offsetHeight >= sz.y * 0.9;
+  const pleineLargeur = panneau.offsetWidth  >= sz.x * 0.9;
+  let dx = 0, dy = 0;
+  if (pleineHauteur && !pleineLargeur)      dx = Math.max(0, sz.x - panneau.offsetLeft) / 2; // panneau latéral
+  else if (pleineLargeur && !pleineHauteur) dy = Math.max(0, sz.y - panneau.offsetTop)  / 2; // feuille du bas
+  if (!dx && !dy) return point;
+
+  try { return map.unproject(map.project(point, zoom).add([dx, dy]), zoom); }
+  catch { return point; }
+}
+
 /* ============================================================
    Map constants
    ============================================================ */
@@ -491,7 +520,7 @@ function useLeafletMap(
   basemap: 'light' | 'sat',
   selectedId: string | undefined,
   onMarkerClick: (item: AnyItem) => void,
-  focusTarget: { lat: number; lng: number; zoom?: number; atLeast?: boolean } | null,
+  focusTarget: { lat: number; lng: number; zoom?: number; atLeast?: boolean; id?: string | number } | null,
   route: RouteData,
   routeStart: RoutePoint | null,
   routeEnd: RoutePoint | null,
@@ -531,11 +560,40 @@ function useLeafletMap(
       // Voyager ne dessine encore ni voirie ni bâti — d'où l'aspect plat.
       center: CAMEROON_CENTER, zoom: 7, minZoom: 5, maxZoom: 19,
       zoomControl: false, attributionControl: true, preferCanvas: true,
-      // Rotation (leaflet-rotate) : gestes tactiles + boutons dédiés
-      rotate: true, rotateControl: false, touchRotate: true, bearing: 0,
+      // Rotation (leaflet-rotate) : boutons dédiés UNIQUEMENT.
+      // touchRotate est volontairement désactivé. Avec lui, leaflet-rotate
+      // traite tout geste à deux doigts comme « pivoter + zoomer » à la fois :
+      //   1. le moindre écart d'angle entre les doigts fait tourner la carte
+      //      pendant qu'on pince, et chaque setBearing redessine tout ;
+      //   2. surtout, son _onTouchEnd sort en avance quand deux doigts se
+      //      posent puis se lèvent sans bouger (mauvaise prise, très fréquent
+      //      sur téléphone) en laissant _rotating à true — or _onTouchStart
+      //      refuse tout nouveau geste tant que ce drapeau est levé. Le zoom
+      //      à deux doigts mourait alors pour le reste de la session.
+      // La rotation reste accessible par les boutons ⟲ / ⟳ sous la carte.
+      rotate: true, rotateControl: false, touchRotate: false, bearing: 0,
+      touchZoom: true,
+      // Pas d'effet élastique au-delà des bornes de zoom : sur mobile il donne
+      // l'impression que le pincement « ne prend pas ».
+      bounceAtZoomLimits: false,
     } as L.MapOptions);
     L.control.zoom({ position: 'topleft' }).addTo(map);
     mapRef.current = map;
+
+    // Filet de sécurité pinch : si un drapeau interne de leaflet-rotate reste
+    // levé (cf. le bug _onTouchEnd décrit plus haut), plus aucun geste à deux
+    // doigts n'est accepté. On les purge dès qu'il reste moins de deux doigts
+    // sur l'écran. L'écoute est posée sur `window`, donc APRÈS le handler que
+    // leaflet-rotate installe sur `document` : sa fin de zoom animée reste
+    // intacte, on ne nettoie que ce qu'il a oublié.
+    const gestes = (map as unknown as {
+      touchGestures?: { _zooming: boolean; _rotating: boolean };
+    }).touchGestures;
+    if (gestes) {
+      window.addEventListener('touchend', (e: TouchEvent) => {
+        if (e.touches.length < 2) { gestes._zooming = false; gestes._rotating = false; }
+      }, { passive: true });
+    }
     svgRendererRef.current = L.svg({ padding: 0.5 }).addTo(map);
     map.setMaxBounds([[-1, 5], [15, 20]]);
 
@@ -910,7 +968,7 @@ function useLeafletMap(
   // Focus / ripple
   useEffect(() => {
     const map = mapRef.current; if (!map || !focusTarget) return;
-    const { lat, lng, zoom = 12, atLeast = false } = focusTarget;
+    const { lat, lng, zoom = 12, atLeast = false, id } = focusTarget;
     // « atLeast » : ne jamais DÉZOOMER en cliquant un élément — on garde le zoom
     // courant s'il est déjà plus rapproché (comportement Google Maps).
     const target = atLeast ? Math.max(map.getZoom(), zoom) : zoom;
@@ -918,11 +976,40 @@ function useLeafletMap(
     // flyTo divise par zéro et plante. On se contente d'un setView sans animation ;
     // le focus animé se fera au retour sur la vue carte.
     const sz = map.getSize();
+    // Le lieu visé doit atterrir au milieu de la portion RÉELLEMENT visible de
+    // la carte, pas au centre géométrique du conteneur : la fiche détail
+    // recouvre la moitié droite sur ordinateur et les 60 % du bas sur
+    // téléphone. Sans ce décalage, une recherche « centrait » la paroisse
+    // exactement derrière le panneau qui vient de s'ouvrir — le lieu demandé
+    // restait invisible.
+    const centre = centreHorsPanneau(map, lat, lng, target);
     try {
-      if (sz.x > 0 && sz.y > 0) map.flyTo([lat, lng], target, { duration: 0.6 } as L.ZoomPanOptions);
-      else map.setView([lat, lng], target, { animate: false } as L.ZoomPanOptions);
+      if (sz.x > 0 && sz.y > 0) map.flyTo(centre, target, { duration: 0.6 } as L.ZoomPanOptions);
+      else map.setView(centre, target, { animate: false } as L.ZoomPanOptions);
     } catch { /* carte non prête — ignore */ }
     if (sz.x === 0 || sz.y === 0) return; // pas de ripple sur carte cachée
+
+    // Éclater le groupe qui avale le marqueur recherché : tant qu'il est
+    // « clusterisé », la carte n'affiche qu'une pastille numérotée à sa place,
+    // donc le lieu demandé n'apparaît nulle part. zoomToShowLayer zoome (ou
+    // étale en éventail) jusqu'à ce que le marqueur lui-même soit à l'écran ;
+    // son étiquette suit automatiquement, l'affichage des noms étant lié au
+    // zoom atteint.
+    let revele: (() => void) | null = null;
+    if (id != null) {
+      revele = () => {
+        const entree = markersByIdRef.current.get(String(id));
+        const groupe = clusterRef.current;
+        if (!entree || !groupe) return;
+        // `_icon` absent = le marqueur n'est pas rendu, donc encore absorbé
+        // par un groupe : c'est le seul moyen de le savoir côté markercluster.
+        const rendu = (entree.m as unknown as { _icon?: HTMLElement })._icon;
+        if (groupe.hasLayer(entree.m) && !rendu) {
+          try { groupe.zoomToShowLayer(entree.m, () => {}); } catch { /* ignore */ }
+        }
+      };
+      map.once('moveend', revele);
+    }
     if (rippleRef.current) map.removeLayer(rippleRef.current);
     const ring = L.circleMarker([lat, lng], { radius: 4, color: '#FFD600', weight: 3, fillOpacity: 0, opacity: 0.9 }).addTo(map);
     rippleRef.current = ring;
@@ -932,7 +1019,10 @@ function useLeafletMap(
       if (op <= 0) { clearInterval(iv); map.removeLayer(ring); return; }
       ring.setRadius(r); ring.setStyle({ opacity: op });
     }, 30);
-    return () => clearInterval(iv);
+    return () => {
+      clearInterval(iv);
+      if (revele) map.off('moveend', revele);
+    };
   }, [focusTarget]);
 
   // Route tracé (style Google Maps : casing sombre + ligne colorée animée + marqueurs A/B)
@@ -2449,7 +2539,7 @@ export default function EECMapApp({ mode, user, embedded = false }: { mode: MapM
   const [filters, setFilters]           = useState<FilterState>(DEFAULT_FILTERS);
   const [floatQ, setFloatQ]             = useState('');
   const [selected, setSelected]         = useState<AnyItem | null>(null);
-  const [focusTarget, setFocusTarget]   = useState<{ lat: number; lng: number; zoom?: number; atLeast?: boolean } | null>(null);
+  const [focusTarget, setFocusTarget]   = useState<{ lat: number; lng: number; zoom?: number; atLeast?: boolean; id?: string | number } | null>(null);
   const [fullscreen, setFullscreen]     = useState(false);
   const [recents, setRecents]           = useState<any[]>([]);
   const [saved, setSaved]               = useState<AnyItem[]>([]);
@@ -2543,7 +2633,7 @@ export default function EECMapApp({ mode, user, embedded = false }: { mode: MapM
     const found = id ? mapData.allItems.find(it => String(it.id) === id) : null;
     if (found) {
       setSelected(found);
-      setFocusTarget({ lat: found.lat, lng: found.lng, zoom: 15 });
+      setFocusTarget({ lat: found.lat, lng: found.lng, zoom: 16, id: found.id });
     } else if (!Number.isNaN(lat) && !Number.isNaN(lng)) {
       setFocusTarget({ lat, lng, zoom: 15 });
     }
@@ -2690,7 +2780,7 @@ export default function EECMapApp({ mode, user, embedded = false }: { mode: MapM
     if ('type' in item) addToRecents(item as any);
     // Zoomer SUR l'élément (jamais de dézoom) : on centre et on rapproche
     // à 16 si on était plus loin, sinon on garde le zoom courant.
-    setFocusTarget({ lat: item.lat, lng: item.lng, zoom: 16, atLeast: true });
+    setFocusTarget({ lat: item.lat, lng: item.lng, zoom: 16, atLeast: true, id: item.id });
   }, [addToRecents, pickTarget, affecterPoint]);
 
   // Géolocalisation : "Ma position" comme point de départ
@@ -2736,7 +2826,7 @@ export default function EECMapApp({ mode, user, embedded = false }: { mode: MapM
   // Ouvrir un favori : voler dessus + ouvrir le détail
   const openSaved = useCallback((item: AnyItem) => {
     setSelected(item);
-    setFocusTarget({ lat: item.lat, lng: item.lng, zoom: 14 });
+    setFocusTarget({ lat: item.lat, lng: item.lng, zoom: 16, id: item.id });
     setActiveTab(null);
   }, []);
 
@@ -2870,7 +2960,40 @@ export default function EECMapApp({ mode, user, embedded = false }: { mode: MapM
   // handleMapRightClick est défini APRÈS useLeafletMap (qui expose mapRef)
 
   const handleSearchPick = useCallback((kind: string, item: any) => {
-    if (kind === 'item')     { setSelected(item); addToRecents(item); setFocusTarget({ lat: item.lat, lng: item.lng, zoom: 13 }); setActiveTab(null); }
+    if (kind === 'item') {
+      // La recherche porte sur TOUTES les entités, pas sur celles que les
+      // filtres laissent passer : un résultat exclu par un filtre actif (type
+      // décoché, région verrouillée, seuil de fidèles…) n'avait aucun marqueur
+      // sur la carte, et l'utilisateur atterrissait sur une zone vide. On lève
+      // donc uniquement les filtres qui masqueraient le lieu demandé.
+      setFilters(f => {
+        const masque =
+          !f.layers[item.type]
+          || (f.region   && item.regionId   !== f.region)
+          || (f.district && item.districtId !== f.district)
+          || (f.parish   && item.id         !== f.parish)
+          || (item.type === 'paroisse' && item.stats && (
+                (f.minFideles && item.stats.fideles     < f.minFideles)
+             || (f.minCommun  && item.stats.communiants < f.minCommun)));
+        if (!masque) return f;
+        return {
+          ...f,
+          region: null, district: null, parish: null,
+          layers: { ...f.layers, [item.type]: true },
+          minFideles: 0, minCommun: 0,
+        };
+      });
+      // Le texte de la barre flottante filtre lui aussi les marqueurs : s'il ne
+      // correspond pas au résultat choisi, il le ferait disparaître.
+      setFloatQ(q => (q && !item.name.toLowerCase().includes(q.toLowerCase()) ? '' : q));
+      setSelected(item);
+      addToRecents(item);
+      // Zoom 16 (et non 13) : à 13 la paroisse reste avalée par un groupe de
+      // marqueurs, qui n'affiche qu'un nombre. `id` permet en plus d'éclater
+      // le groupe si elle y est encore, pour montrer le lieu cherché lui-même.
+      setFocusTarget({ lat: item.lat, lng: item.lng, zoom: 16, id: item.id });
+      setActiveTab(null);
+    }
     else if (kind === 'region')   { setFilters(f => ({ ...f, region: item.id, district: null, parish: null })); setFocusTarget({ lat: item.lat, lng: item.lng, zoom: 8 }); setActiveTab(null); }
     else if (kind === 'district') { setFilters(f => ({ ...f, region: item.regionId, district: item.id, parish: null })); setFocusTarget({ lat: item.lat, lng: item.lng, zoom: 11 }); setActiveTab(null); }
   }, [addToRecents]);

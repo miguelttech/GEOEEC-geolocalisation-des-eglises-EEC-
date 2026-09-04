@@ -1393,3 +1393,22 @@
   }
   .eec-lp .hero .lp-btn:hover { transform: none; }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CIBLES TACTILES — TÉLÉPHONE
+   Mesuré au navigateur : les liens du pied de page tombaient à 17px de haut
+   et « www.eecmr.com » à 14px, sous le minimum WCAG 2.5.8 (24×24 px).
+   On agrandit la surface tactile sans toucher à la taille du texte ni au
+   rendu sur grand écran.
+   ══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 960px) and (pointer: coarse) {
+  .eec-lp footer ul li a,
+  .eec-lp .footer-meta a,
+  .eec-lp .footer-bottom a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;      /* 24px exigés, 32 pour le confort réel du pouce */
+  }
+  /* Les puces se resserrent sinon la colonne double de hauteur */
+  .eec-lp footer ul li { margin-bottom: 0; }
+}

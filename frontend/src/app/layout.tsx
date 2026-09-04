@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter, JetBrains_Mono, Fraunces, Space_Grotesk } from 'next/font/google';
 import './globals.css';
+import { PERFORMANCE_MEASURE_GUARD } from '@/lib/performance-measure-guard';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono', display: 'swap' });
@@ -15,6 +16,14 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr" suppressHydrationWarning className={`${inter.variable} ${jetbrainsMono.variable} ${fraunces.variable} ${spaceGrotesk.variable}`}>
+      <head>
+        {/* Neutralise un bug de l'instrumentation React Server Components qui
+            fait échouer performance.measure sous Firefox (end = -Infinity).
+            Injecté avant l'hydratation, et jamais en production. */}
+        {process.env.NODE_ENV !== 'production' && (
+          <script dangerouslySetInnerHTML={{ __html: PERFORMANCE_MEASURE_GUARD }} />
+        )}
+      </head>
       <body suppressHydrationWarning>{children}</body>
     </html>
   );

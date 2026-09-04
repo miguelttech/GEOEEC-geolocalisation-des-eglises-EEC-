@@ -43,11 +43,11 @@ export const EEC_DIRECTION = [
   {
     grade:  'PASTEUR',
     name:   'BILLA MBENGA Alexandre',
-    titre:  'Président du Synode Général',
+    titre:  'Président',
     image:  '/images/dir-president.webp',
   },
   {
-    grade:  'RÉVÉREND Dr',
+    grade:  'RÉVÉREND DOCTEUR',
     name:   'NJOUENWET KOPP Bernard',
     titre:  '1er Vice-Président',
     image:  '/images/dir-vice-president.webp',
@@ -59,7 +59,7 @@ export const EEC_DIRECTION = [
     image:  '/images/Bauni.jpeg',
   },
   {
-    grade:  "ANCIEN D'ÉGLISE Prof",
+    grade:  "ANCIEN D'ÉGLISE PROFESSEUR",
     name:   'TAMO TATIETSE',
     titre:  '3ème Vice-Président',
     image:  '/images/Tamo.jpeg',
