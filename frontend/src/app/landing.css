@@ -553,9 +553,17 @@
 }
 .eec-lp .hero { border-top: none; box-shadow: none; } /* Pas de ligne en haut du hero */
 .eec-lp .wrap { max-width: 1280px; margin: 0 auto; padding: 0 56px; }
+/* ── EN-TÊTE DE SECTION ───────────────────────────────────────
+   Était en « auto 1fr » : le <h2> prenait sa largeur max-content et
+   pouvait étrangler la colonne de droite jusqu'à un mot par ligne
+   dès que le titre s'allongeait.
+   Désormais le titre occupe l'espace flexible et se replie, tandis
+   que le texte de droite garde une largeur de lecture garantie.
+   · 2e minmax → largeur mini / maxi de la colonne de droite
+   ──────────────────────────────────────────────────────────── */
 .eec-lp .section-head {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
   align-items: end; gap: 60px; margin-bottom: 64px;
 }
 .eec-lp .section-head h2 {

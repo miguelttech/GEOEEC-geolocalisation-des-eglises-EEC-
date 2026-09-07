@@ -7,7 +7,7 @@ export default function About() {
         <div className="about-grid">
           <div>
             <div className="section-num">— 03 / Notre mission</div>
-            <h3>Une Église au service du <em>peuple camerounais</em> depuis 1957.</h3>
+            <h3>Une Église au service du <em>peuple de DIEU</em> depuis 1957.</h3>
             <p>
               Née de l&apos;œuvre missionnaire et profondément enracinée dans la culture
               africaine, l&apos;Église Évangélique du Cameroun rassemble des centaines
