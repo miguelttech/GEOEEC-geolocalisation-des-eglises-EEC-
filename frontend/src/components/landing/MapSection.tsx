@@ -47,7 +47,9 @@ export default function MapSection() {
           <div>
             <div className="section-num">— 02 / Cartographie</div>
             <h2 className="lp-serif">
-              Du <em>Logone</em> à <em>l&apos;Atlantique,</em><br />une seule communion.
+              Une église de service,<br />
+              <em>unie dans sa diversité,</em><br />
+              pour le développement de tout l&apos;homme
             </h2>
           </div>
           <div className="meta">
