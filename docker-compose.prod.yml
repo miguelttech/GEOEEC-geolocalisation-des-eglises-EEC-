@@ -162,6 +162,7 @@ services:
     volumes:
       # Logs Django avec rotation (INFRA-5) — persistés hors du conteneur.
       - ./logs/backend:/app/logs
+      - media_data_prod:/app/media
     # Pas de port publié — seul nginx y accède.
     depends_on:
       db:
@@ -207,6 +208,7 @@ services:
       - ./infra/nginx/empty.conf:/etc/nginx/conf.d/default.conf:ro
       - letsencrypt_certs:/etc/letsencrypt:ro
       - certbot_webroot:/var/www/certbot:ro
+      - media_data_prod:/app/media:ro
     ports:
       - "80:80"
       - "443:443"
@@ -236,6 +238,7 @@ volumes:
   redis_data_prod:
   letsencrypt_certs:
   certbot_webroot:
+  media_data_prod:
 
 networks:
   eecnet:

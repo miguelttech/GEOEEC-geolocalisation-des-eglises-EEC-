@@ -1,0 +1,194 @@
+# ---------------------------------------------------------------------------
+# Garde-fous de charge (zones partagées — contexte http, donc AVANT server{})
+# ---------------------------------------------------------------------------
+# Ces limites visent UN client pathologique (aspirateur de site, boucle de
+# script), pas la régulation fine du trafic normal.
+#
+# POURQUOI DES SEUILS AUSSI HAUTS ?
+#   Au Cameroun, une grande partie du trafic mobile sort derrière le NAT de
+#   l'opérateur (CGNAT) : des centaines d'utilisateurs légitimes peuvent
+#   partager UNE SEULE adresse IP publique. Un seuil calibré « par personne »
+#   (10 r/s) renverrait donc des 429 en masse à de vrais visiteurs dès qu'une
+#   paroisse consulte la carte en groupe. On calibre pour ne stopper que
+#   l'abus manifeste, en acceptant d'être permissif — le cache Redis rend de
+#   toute façon ces endpoints peu coûteux (~15 ms).
+#
+#   Corollaire : si un reverse proxy ou un CDN est ajouté un jour DEVANT ce
+#   nginx, $binary_remote_addr deviendra l'IP du proxy et ces zones
+#   limiteraient tout le trafic d'un coup. Il faudrait alors passer par
+#   real_ip_header / set_real_ip_from.
+#
+# L'authentification, elle, est déjà limitée finement côté Django
+# (login 5/min, register 30/h, password_reset 5/h — voir REST_FRAMEWORK
+# DEFAULT_THROTTLE_RATES). La zone "auth" ci-dessous est une seconde ligne :
+# elle arrête un bruteforce AVANT que Python ne soit sollicité.
+limit_req_zone  $binary_remote_addr  zone=api:10m   rate=100r/s;
+limit_req_zone  $binary_remote_addr  zone=auth:5m   rate=2r/s;
+limit_conn_zone $binary_remote_addr  zone=conn:10m;
+
+# 429 (Too Many Requests) plutôt que le 503 par défaut : c'est le code que
+# les clients HTTP savent interpréter, et il ne se confond pas avec une
+# indisponibilité réelle du service dans les journaux.
+limit_req_status  429;
+limit_conn_status 429;
+
+# Reverse proxy de production — GÉOEEC (INFRA-2).
+#
+# Fichier "template" : traité par l'image nginx officielle au démarrage
+# (envsubst automatique de ${DOMAIN} — fonctionnalité native de l'image,
+# voir /docker-entrypoint.d/20-envsubst-on-templates.sh). Ne PAS éditer le
+# fichier .conf généré directement, éditer ce template.
+#
+# Bootstrap requis avant le tout premier démarrage : voir
+# infra/scripts/init-letsencrypt.sh (le certificat doit exister avant que
+# nginx puisse même démarrer, à cause du bloc "listen 443 ssl" ci-dessous).
+
+# ---------------------------------------------------------------------------
+# Port 80 — défi ACME (renouvellement Let's Encrypt) + redirection HTTPS
+# ---------------------------------------------------------------------------
+server {
+    listen 80;
+    server_name ${DOMAIN};
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+# ---------------------------------------------------------------------------
+# Port 443 — TLS + reverse proxy vers les services internes
+# ---------------------------------------------------------------------------
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name ${DOMAIN};
+
+    ssl_certificate     /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers off;
+
+    # HSTS au niveau de la terminaison TLS (audit du 24/07/2026) — couvre
+    # aussi /geoserver/ et le frontend Next.js, qui ne le définissent pas
+    # eux-mêmes (contrairement à Django : SECURE_HSTS_SECONDS, settings/prod.py).
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+    client_max_body_size 15M;  # cohérent avec MAX_IMPORT_SIZE (backend, 10 Mo) + marge
+
+    # ── Compression HTTP ──────────────────────────────────────────────────
+    # Le serveur est à Gravelines (France), les utilisateurs au Cameroun :
+    # environ 150 ms de RTT via les câbles sous-marins. Sur un lien mobile
+    # camerounais (~2-4 Mbps effectifs), la charge utile de la carte passe de
+    # 1 103 Ko à 182 Ko une fois compressée (-84 %), soit 2 à 4 secondes
+    # gagnées à chaque ouverture — et davantage encore en pratique, le
+    # démarrage lent de TCP étant amplifié par la latence. Combiné au
+    # "http2 on" ci-dessus, c'est le principal levier de confort perçu.
+    #
+    # gzip_proxied any : sans ça, nginx ne compresse PAS les réponses issues
+    # d'un proxy_pass — c'est-à-dire exactement les réponses de l'API Django.
+    # gzip_min_length 1024 : en dessous, l'en-tête de compression coûte plus
+    # que ce qu'il économise.
+    gzip              on;
+    gzip_comp_level   5;
+    gzip_min_length   1024;
+    gzip_vary         on;
+    gzip_proxied      any;
+    gzip_types        application/json
+                      application/geo+json
+                      application/javascript
+                      application/x-javascript
+                      text/css
+                      text/javascript
+                      text/plain
+                      text/xml
+                      image/svg+xml;
+
+    # --- Backend Django (API, admin, statique, médias) ---------------------
+    # Connexion / inscription / réinitialisation : cible privilégiée du
+    # bruteforce, et aucune raison légitime d'enchaîner les tentatives.
+    # Doublon volontaire des throttles DRF — ici la requête est rejetée par
+    # nginx, sans réveiller gunicorn ni PostgreSQL.
+    # Routes réellement exposées (vérifiées dans eec_core/urls.py) :
+    #   /api/auth/login/            /api/auth/password-reset/[confirm/]
+    #   /api/auth/change-password/  /api/visitor/register/
+    # /api/auth/me/ et /api/auth/csrf/ sont volontairement EXCLUS : le
+    # frontend les appelle à chaque chargement de page, 2 r/s les casserait.
+    location ~ ^/api/(auth/(login|password-reset|change-password)|visitor/register)/ {
+        limit_req zone=auth burst=10 nodelay;
+        limit_conn conn 60;
+
+        proxy_pass http://backend:8000;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+    }
+
+    location /api/ {
+        # Anti-abus : 100 r/s en régime établi, rafale de 300 absorbée sans
+        # délai. Un chargement de carte = 6 requêtes : la rafale encaisse donc
+        # une cinquantaine d'ouvertures SIMULTANÉES derrière une même IP, ce
+        # qui couvre un large pool CGNAT d'opérateur mobile.
+        #
+        # Valeurs vérifiées en local : à 250 requêtes tirées d'un coup depuis
+        # une seule IP, un réglage à 60 r/s / rafale 120 renvoyait déjà 170
+        # réponses 429 — trop agressif pour du trafic CGNAT légitime.
+        limit_req  zone=api burst=300 nodelay;
+        limit_conn conn 100;
+
+        proxy_pass http://backend:8000;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+    }
+
+    location /django-admin/ {
+        proxy_pass http://backend:8000;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+    }
+
+    location /static/ {
+        proxy_pass http://backend:8000;
+        proxy_set_header Host $host;
+    }
+
+    location /media/ {
+        alias /app/media/;
+        add_header X-Content-Type-Options nosniff;
+    }
+
+    # --- GeoServer (INFRA-7 : console d'administration bloquée) -------------
+    # Ordre important : nginx retient le préfixe le PLUS SPÉCIFIQUE, donc ce
+    # bloc l'emporte sur /geoserver/ ci-dessous — pas besoin d'imbrication.
+    location /geoserver/web/ {
+        deny all;
+        return 403;
+    }
+
+    location /geoserver/ {
+        proxy_pass http://geoserver:8080/geoserver/;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+    }
+
+    # --- Frontend Next.js (tout le reste) -----------------------------------
+    location / {
+        proxy_pass http://frontend:3004;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header Upgrade           $http_upgrade;
+        proxy_set_header Connection        "upgrade";
+    }
+}

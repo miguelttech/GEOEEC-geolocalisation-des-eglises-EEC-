@@ -62,7 +62,7 @@ export default function LoginPage() {
         const next = params.get('next');
         // N'accepte qu'un chemin interne relatif (jamais une URL absolue ni
         // protocol-relative "//evil.com") pour éviter l'open redirect.
-        const safeNext = next && /^\/(?!\/)/.test(next) ? next : '/admin';
+        const safeNext = next && /^\/(?!\/)/.test(next) ? next : '/admin/dashboard';
         window.location.href = safeNext;
       }
     } catch {
