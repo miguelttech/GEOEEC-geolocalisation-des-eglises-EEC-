@@ -66,7 +66,7 @@ export const EEC_DIRECTION = [
   },
   {
     grade:  'PASTEURE',
-    name:   'MEMIAFOH SOBJIO Abestine',
+    name:   'MEMIAFO SOPJIO EPSE KEMOGNE Abestine',
     titre:  'Secrétaire Générale',
     image:  '/images/dir-secretaire.webp',
   },
