@@ -18,7 +18,7 @@ export default function Stats() {
           </div>
           <div className="meta">
             Les données sont mises à jour par les administrateurs régionaux
-            et synchronisées avec le Synode Général.
+            et synchronisées avec le Bureau national.
           </div>
         </div>
         <div className="stats-grid">
